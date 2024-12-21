@@ -40,6 +40,12 @@ async function initializeBrowserInfo() {
     }
 }
 
+// Show a specific tab programmatically
+window.showTab = function (tabId) {
+    const tab = new bootstrap.Tab(document.querySelector(`button[data-bs-target="#${tabId}"]`));
+    tab.show();
+};
+
 // Setup page on load
 document.addEventListener('DOMContentLoaded', async function () {
     await initializeBrowserInfo();
