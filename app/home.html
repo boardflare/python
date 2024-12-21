@@ -27,8 +27,12 @@
                     role="tab">Home</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="code-tab" data-bs-toggle="tab" data-bs-target="#code" type="button"
-                    role="tab">Code Editor</button>
+                <button class="nav-link" id="editor-tab" data-bs-toggle="tab" data-bs-target="#editor" type="button"
+                    role="tab">Editor</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="demo-tab" data-bs-toggle="tab" data-bs-target="#demo" type="button"
+                    role="tab">Demo🧪</button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="console-tab" data-bs-toggle="tab" data-bs-target="#console" type="button"
@@ -49,7 +53,15 @@
                 </div>
             </div>
 
-            <div class="tab-pane fade h-100" id="code" role="tabpanel">
+            <div class="tab-pane fade h-100" id="editor" role="tabpanel">
+                <div class="py-3">
+                    <div class="mb-3">
+                        Editor content goes here
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade h-100" id="demo" role="tabpanel">
                 <div id="gradioContainer"></div>
 
                 <div class="mt-3">
