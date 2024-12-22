@@ -1,5 +1,6 @@
 import { abortController } from "./utils/common.js";
 import { initGradioEditor } from './editor/gradio.js';
+import { initMonacoEditor } from './editor/monaco.js';
 
 window.appName = 'Python';
 
@@ -50,6 +51,10 @@ window.showTab = function (tabId) {
 document.addEventListener('DOMContentLoaded', async function () {
     await initializeBrowserInfo();
 
+    // Initialize editors sequentially
+    await initMonacoEditor();
+    initGradioEditor();
+
     // cancel button
     const cancelButton = document.getElementById('cancelButton');
     cancelButton.addEventListener('click', function () {
@@ -62,7 +67,4 @@ document.addEventListener('DOMContentLoaded', async function () {
             location.reload();
         }, 500);
     });
-
-    // Initialize Gradio editor when document is ready
-    initGradioEditor();
 });
