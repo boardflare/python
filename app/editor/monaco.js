@@ -1,4 +1,4 @@
-import { initFunctionDropdowns, addCodeUpdateHandler } from './shared.js';
+import { initFunctionDropdowns, addCodeUpdateHandler, saveFunction } from './shared.js';
 
 // Make editor accessible globally
 window.monacoEditor = null;
@@ -50,7 +50,7 @@ export function initMonacoEditor() {
             // Button handlers
             document.getElementById('saveBtn').addEventListener('click', async () => {
                 const code = window.monacoEditor?.getValue();
-                console.log('Saving:', { code });
+                await saveFunction(code, document.getElementById('editorNotification'));
             });
 
             document.getElementById('cancelBtn').addEventListener('click', () => {

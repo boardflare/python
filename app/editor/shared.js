@@ -1,3 +1,7 @@
+import { parsePython } from './codeparser.js';
+import { addToAzure } from './azuretable.js';
+import { updateNameManager } from './nameManager.js';
+
 export async function getRunpyFunctions() {
     try {
         await Office.onReady();
@@ -37,6 +41,49 @@ const codeUpdateHandlers = new Set();
 
 export function addCodeUpdateHandler(handler) {
     codeUpdateHandlers.add(handler);
+}
+
+function showTemporaryNotification(element, html, duration = 3000) {
+    if (element) {
+        element.innerHTML = html;
+        setTimeout(() => {
+            element.innerHTML = '';
+        }, duration);
+    }
+}
+
+export async function saveFunction(code, notificationElement) {
+    try {
+        if (!code) return false;
+
+        // Parse and save function
+        const parsedFunction = parsePython(code);
+        const saveResult = await addToAzure(parsedFunction);
+
+        if (saveResult) {
+            await updateNameManager(parsedFunction);
+            const refreshDropdowns = initFunctionDropdowns();
+            await refreshDropdowns();
+            showTemporaryNotification(
+                notificationElement,
+                '<div class="alert alert-success">Function saved successfully!</div>'
+            );
+            return true;
+        } else {
+            showTemporaryNotification(
+                notificationElement,
+                '<div class="alert alert-danger">Failed to save function.</div>'
+            );
+            return false;
+        }
+    } catch (error) {
+        console.error('Failed to save code:', error);
+        showTemporaryNotification(
+            notificationElement,
+            `<div class="alert alert-danger">Error: ${error.message}</div>`
+        );
+        return false;
+    }
 }
 
 export function initFunctionDropdowns() {

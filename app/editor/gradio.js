@@ -1,7 +1,4 @@
-import { parsePython } from './codeparser.js';
-import { addToAzure } from './azuretable.js';
-import { updateNameManager } from './nameManager.js';
-import { initFunctionDropdowns, addCodeUpdateHandler } from './shared.js';
+import { initFunctionDropdowns, addCodeUpdateHandler, saveFunction } from './shared.js';
 
 export function initGradioEditor() {
     let currentCode = '';
@@ -104,30 +101,8 @@ live=True,submit_btn=gr.Button("Submit", visible=False),clear_btn=gr.Button("Cle
     }
 
     async function saveGradioCode() {
-        try {
-            const code = extractGradioCode();
-            if (!code) return;
-
-            // Save will automatically split the code and demo sections
-            const parsedFunction = parsePython(code);
-            const saveResult = await addToAzure(parsedFunction);
-            if (saveResult) {
-                await updateNameManager(parsedFunction);
-                const refreshDropdowns = initFunctionDropdowns((code) => {
-                    insertCode(code);
-                });
-                await refreshDropdowns();
-                document.getElementById('saveNotification').innerHTML =
-                    '<div class="alert alert-success">Function saved successfully!</div>';
-            } else {
-                document.getElementById('saveNotification').innerHTML =
-                    '<div class="alert alert-danger">Failed to save function.</div>';
-            }
-        } catch (error) {
-            console.error('Failed to save code:', error);
-            document.getElementById('saveNotification').innerHTML =
-                '<div class="alert alert-danger">Error: ' + error.message + '</div>';
-        }
+        const code = extractGradioCode();
+        await saveFunction(code, document.getElementById('saveNotification'));
     }
 
     // Initialize Gradio editor
