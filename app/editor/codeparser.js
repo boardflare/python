@@ -29,6 +29,26 @@ export function parsePython(rawCode) {
         ? (docstringMatch[1] || docstringMatch[2]).trim().slice(0, 255)
         : 'No description available';
 
+    // Parse examples from code
+    const examplesMatch = activeCode.match(/examples\s*=\s*(\[[\s\S]*?\])/);
+    let examples = [];
+    if (examplesMatch) {
+        try {
+            // Convert Python list syntax to JSON
+            const jsonStr = examplesMatch[1]
+                .replace(/'/g, '"')
+                .replace(/\s+/g, ' ');  // normalize whitespace
+            examples = JSON.parse(jsonStr);
+            // Ensure examples is array of arrays
+            if (examples.length > 0 && !Array.isArray(examples[0])) {
+                // Single argument case - wrap each example in array
+                examples = examples.map(ex => [ex]);
+            }
+        } catch (e) {
+            console.warn('Failed to parse examples:', e);
+        }
+    }
+
     // Generate result string
     const argList = args.map((_, index) => `arg${index + 1}`).join(', ');
     const resultLine = `\n\nresult = ${name.toLowerCase()}(${argList})`;
@@ -55,6 +75,8 @@ export function parsePython(rawCode) {
         formula,
         timestamp,
         uid,
-        demo: demoCode ? demoCode.trim() : null
+        demo: demoCode ? demoCode.trim() : null,
+        args, // Add args array to returned object
+        examples // Add examples array to returned object
     };
 }

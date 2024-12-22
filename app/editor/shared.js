@@ -1,6 +1,7 @@
 import { parsePython } from './codeparser.js';
 import { addToAzure } from './azuretable.js';
 import { updateNameManager } from './nameManager.js';
+import { addDemo } from './demo.js';
 
 export async function getRunpyFunctions() {
     try {
@@ -62,6 +63,15 @@ export async function saveFunction(code, notificationElement) {
 
         if (saveResult) {
             await updateNameManager(parsedFunction);
+            // Add demo worksheet if function has exactly one argument
+            if (parsedFunction.args.length === 1) {
+                try {
+                    await addDemo(parsedFunction);
+                } catch (demoError) {
+                    console.warn('Failed to create demo sheet:', demoError);
+                    // Continue even if demo creation fails
+                }
+            }
             const refreshDropdowns = initFunctionDropdowns();
             await refreshDropdowns();
             showTemporaryNotification(

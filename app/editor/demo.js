@@ -16,47 +16,28 @@ export async function addDemo(parsedCode) {
             sheet = context.workbook.worksheets.add(sheetName);
             await context.sync();
 
-            // Set different column widths for Case and Result columns
-            sheet.getRangeByIndexes(0, 0, 1, 1).format.columnWidth = 50;  // Case column
-            sheet.getRangeByIndexes(0, 1, 1, 1).format.columnWidth = 300; // Result column
+            // Set column width for Results column
+            sheet.getRangeByIndexes(0, 0, 1, 1).format.columnWidth = 300; // Results column
 
-            // Set headers with new columns
-            const headerRange = sheet.getRangeByIndexes(0, 0, 1, 2);
-            headerRange.values = [["Case", "Result"]];
+            // Set header with single column
+            const headerRange = sheet.getRangeByIndexes(0, 0, 1, 1);
+            headerRange.values = [["Results"]];
 
             // Format headers like a table
             headerRange.format.fill.color = "#D9D9D9";
             headerRange.format.font.bold = true;
             headerRange.format.borders.getItem('EdgeBottom').style = 'Continuous';
 
-            // Parse test cases
-            let testCases = [];
-            try {
-                testCases = JSON.parse(parsedCode.testCases);
-            } catch (e) {
-                console.error('Failed to parse test cases:', e);
-                testCases = [];
-            }
-
-            // Add test cases
-            if (testCases.length > 0) {
-                const dataRange = sheet.getRangeByIndexes(1, 0, testCases.length, 2);
-                const values = testCases.map((args, index) => {
-                    // Generate dynamic formula based on number of arguments
-                    const rowIndex = index + 2; // +2 because 1-based and header row
-                    let formula = `=${parsedCode.name}(`;
-
-                    // Convert each argument to proper string format
+            // Use parsed examples instead of test cases
+            const examples = parsedCode.examples || [];
+            if (examples.length > 0) {
+                const dataRange = sheet.getRangeByIndexes(1, 0, examples.length, 1);
+                const values = examples.map((args, index) => {
                     const formattedArgs = args.map(arg =>
                         typeof arg === 'string' ? `"${arg}"` : arg
                     );
-
-                    formula += formattedArgs.join(', ') + ')';
-
-                    return [
-                        index + 1,    // Case number (1-based)
-                        formula       // Result formula
-                    ];
+                    const formula = `=${parsedCode.name}(${formattedArgs.join(', ')})`;
+                    return [formula];  // Only include the formula
                 });
 
                 dataRange.values = values;

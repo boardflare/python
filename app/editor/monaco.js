@@ -69,12 +69,12 @@ export function initMonacoEditor() {
             // Button handlers
             document.getElementById('saveBtn').addEventListener('click', async () => {
                 const code = window.monacoEditor?.getValue();
-                await saveFunction(code, document.getElementById('editorNotification'));
+                await saveFunction(code, document.getElementById('editorSaveNotification'));
             });
 
             document.getElementById('introSaveBtn').addEventListener('click', async () => {
                 const code = window.introMonacoEditor?.getValue();
-                await saveFunction(code, document.getElementById('introInfo'));
+                await saveFunction(code, document.getElementById('introSaveNotification'));
             });
 
             document.getElementById('cancelBtn').addEventListener('click', () => {
