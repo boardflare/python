@@ -21,9 +21,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs/loader.js"></script>
 </head>
 
-<body class="d-flex flex-column h-100">
-    <main class="flex-shrink-0">
-        <div class="container-fluid pb-3">
+<body class="d-flex flex-column vh-100">
+    <main class="flex-shrink-0 overflow-hidden" style="height: calc(100vh - 31px);">
+        <div class="container-fluid h-100 pb-3">
             <!-- Modified nav structure -->
             <ul class="nav nav-tabs d-flex flex-nowrap border-bottom small" id="mainTabs" role="tablist">
                 <li class="nav-item" role="presentation">
@@ -44,19 +44,19 @@
                 </li>
             </ul>
 
-            <div class="tab-content" id="mainTabsContent">
-                <div class="tab-pane fade show active" id="home" role="tabpanel">
+            <div class="tab-content h-100" id="mainTabsContent">
+                <div class="tab-pane fade show active h-100 overflow-auto" id="home" role="tabpanel">
                     <div class="py-1">
-                        <div id="introInfo" class="mb-1 small">
-                            Create custom functions using Python!  Watch the <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener">video</a>, read the <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener">documentation</a>, then create your function below.
+                        <div id="introInfo" class="mb-0 small">
+                            Create custom functions using Python!  See <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener">video</a>, and <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener">documentation</a>. TIP: Drag task pane open
                         </div>
-                        <div id="introMonaco" style="height: 600px;"></div>
-                        <button id="introSaveBtn" class="btn btn-primary btn-sm mt-2">Add Function to Workbook</button>
+                        <div id="introMonaco" style="height: 650px;"></div>
+                        <button id="introSaveBtn" class="btn btn-primary btn-sm mt-0">Add Function to Workbook</button>
                         <div id="introSaveNotification" class="mt-2"></div>
                     </div>
                 </div>
 
-                <div class="tab-pane fade" id="editor" role="tabpanel">
+                <div class="tab-pane fade h-100 overflow-auto" id="editor" role="tabpanel">
                     <div class="py-1">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <select id="functionDropdown" class="form-select w-auto small">
@@ -76,7 +76,7 @@
                     </div>
                 </div>
 
-                <div class="tab-pane fade h-100" id="demo" role="tabpanel">
+                <div class="tab-pane fade h-100 overflow-auto" id="demo" role="tabpanel">
                     <div class="mb-1">
                         <select id="functionSelect" class="form-select d-inline-block me-2 small" style="width: auto;">
                             <option value="">Select a function...</option>
@@ -87,7 +87,7 @@
                     <div id="gradioContainer"></div>
                 </div>
 
-                <div class="tab-pane fade" id="console" role="tabpanel">
+                <div class="tab-pane fade h-100 overflow-auto" id="console" role="tabpanel">
                     <div class="py-3">
                         <button id="cancelButton" class="btn btn-secondary btn-sm mb-2">Cancel</button>
                         <div id="progress" class="d-flex flex-column align-items-start"></div>
@@ -97,7 +97,7 @@
         </div>
     </main>
 
-    <footer class="footer mt-auto py-2 bg-white border-top">
+    <footer class="footer mt-auto py-0 bg-white border-top">
         <div class="container-fluid d-flex justify-content-between align-items-center">
             <span class="text-secondary py-1 small">
                 <img src="./images/favicon.svg" alt="Boardflare Icon" height="20" class="me-1">
