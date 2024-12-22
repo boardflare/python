@@ -17,6 +17,8 @@
     <!-- Styles -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <!-- Monaco Editor dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs/loader.js"></script>
 </head>
 
 <body class="p-1">
@@ -53,11 +55,18 @@
                 </div>
             </div>
 
-            <div class="tab-pane fade h-100" id="editor" role="tabpanel">
+            <div class="tab-pane fade" id="editor" role="tabpanel">
                 <div class="py-3">
-                    <div class="mb-3">
-                        Editor content goes here
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <select id="functionDropdown" class="form-select w-auto">
+                            <option value="">Select a function...</option>
+                        </select>
+                        <div>
+                            <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                            <button id="saveBtn" class="btn btn-primary ms-2">Save</button>
+                        </div>
                     </div>
+                    <div id="monaco-editor-container"></div>
                 </div>
             </div>
 
@@ -82,7 +91,8 @@
         </div>
     </div>
 
-    <footer class="position-fixed bottom-0 start-0 w-100 bg-white">
+    <!-- Change footer from position-fixed to static -->
+    <footer class="w-100 bg-white mt-auto">
         <div class="container-fluid py-2 d-flex justify-content-between align-items-center border-top">
             <span class="text-secondary">
                 <img src="./images/favicon.svg" alt="Boardflare Icon" height="20" class="me-1">
@@ -99,6 +109,8 @@
     <script src="main.js" type="module"></script>
     <script src="functions.js" type="module"></script>
     <script src="editor/gradio.js" type="module"></script>
+    <!-- Add editor initialization script -->
+    <script src="editor/monaco.js" type="module"></script>
 </body>
 
 </html>

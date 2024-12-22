@@ -9,6 +9,18 @@ body {
     align-items: flex-start;
 }
 
+/* Monaco Editor styles */
+#monaco-editor-container {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    height: 600px;
+    width: 100%;
+}
+
+.tab-pane {
+    position: relative; /* Contain the editor */
+}
+
 /* .cm-content {
     font-size: 14px;
 } */
