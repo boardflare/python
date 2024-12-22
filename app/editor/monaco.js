@@ -21,10 +21,9 @@ window.require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(document.getElementById('monaco-editor-container'), {
         value: DEFAULT_CODE,
         language: 'python',
-        theme: 'vs-dark',
+        theme: 'vs',
         minimap: { enabled: false },
         fontSize: 14,
-        lineHeight: 21,
         automaticLayout: true
     });
 });

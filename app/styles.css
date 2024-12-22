@@ -1,14 +1,3 @@
-body {
-    background-color: white;
-    font-size: 14px;
-}
-
-#progress {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
 /* Monaco Editor styles */
 #monaco-editor-container {
     border: 1px solid #dee2e6;
@@ -16,13 +5,5 @@ body {
     height: 600px;
     width: 100%;
 }
-
-.tab-pane {
-    position: relative; /* Contain the editor */
-}
-
-/* .cm-content {
-    font-size: 14px;
-} */
 
 /* Only add custom styles that aren't available in Bootstrap */
