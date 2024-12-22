@@ -23,21 +23,17 @@ export function initGradioEditor() {
             gradioLite.setAttribute('layout', 'vertical');
             gradioLite.setAttribute('playground', '');
 
-            const defaultCode = currentCode || `# Install requirements:
-import micropip
-await micropip.install(['pandas', 'matplotlib', 'textdistance==4.6.3'])
-
-# Function code: arg1, arg2, ... will be inserted by RUNPY
-import numpy
-import textdistance
-
-def greet(name):
-    test = textdistance.hamming('text', 'test')
-    return "Hello, " + name + str(test) + "!"
-
-# Demo code: This will NOT be used by RUNPY
-import gradio as gr
-gr.Interface(greet, "textbox", "textbox", examples=[["Bob"], ["Sally"]],
+            const defaultCode = currentCode || `# Creates custom function =HELLO(name)
+def hello(name):
+    """ Returns a greeting. """
+    greeting = f"Hello {name}!"
+    return greeting
+    
+# Example function arguments.
+examples = ["Nancy", "Ming", "Zara"]
+    
+# Demo code.
+import gradio as gr; gr.Interface(hello, "textbox", "textbox", examples=examples,
 live=True,submit_btn=gr.Button("Submit", visible=False),clear_btn=gr.Button("Clear", visible=False),flagging_mode="never").launch()`;
 
             gradioLite.appendChild(document.createTextNode(defaultCode));

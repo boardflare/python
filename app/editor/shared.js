@@ -29,7 +29,7 @@ export async function fetchFunctionCode(url) {
         if (!response.ok) throw new Error('Failed to fetch code');
         const data = await response.json();
         const codeWithoutResult = data.Code.replace(/\n\s*result\s*=\s*.*$/m, '');
-        return codeWithoutResult + (data.Demo ? '\n\n# Demo code: This will NOT be used by RUNPY\n' + data.Demo : '');
+        return codeWithoutResult + (data.Demo ? '\n\n# Demo code.\n' + data.Demo : '');
     } catch (error) {
         console.error('Failed to fetch function code:', error);
         return null;

@@ -5,7 +5,7 @@ export function parsePython(rawCode) {
     console.log('Parsing code:', rawCode);
 
     // Split code at the Demo comment line, knowing there's only one
-    const demoCommentPattern = /^\s*#\s*Demo.*$/m;
+    const demoCommentPattern = /^\s*#\s*Demo\s*code\.?\s*$/m;
     const [activeCode, demoCode] = rawCode.split(demoCommentPattern);
     if (!activeCode) {
         throw new Error("No valid code found before Demo comment");
