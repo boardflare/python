@@ -36,10 +36,13 @@ export async function addDemo(parsedCode) {
 
             // Use parsed examples instead of test cases, starting from row 3
             const examples = parsedCode.examples || [];
+            console.log('Parsed examples:', examples);
             if (examples.length > 0) {
                 context.workbook.application.suspendApiCalculationUntilNextSync();
                 const dataRange = sheet.getRangeByIndexes(2, 0, examples.length, 1);
-                const values = examples.map((args, index) => {
+                const values = examples.map(example => {
+                    // Handle both single arguments and arrays of arguments
+                    const args = Array.isArray(example) ? example : [example];
                     const formattedArgs = args.map(arg =>
                         typeof arg === 'string' ? `"${arg}"` : arg
                     );
