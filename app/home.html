@@ -46,12 +46,12 @@
 
             <div class="tab-content h-100" id="mainTabsContent">
                 <div class="tab-pane show active h-100 overflow-auto" id="home" role="tabpanel">
-                    <div class="py-1">
+                    <div class="py-1 d-flex flex-column h-100">
                         <div id="introInfo" class="mb-0 small">
                             Excel functions using Python!  See <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener">video</a> and <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener">docs</a>.
                         </div>
-                        <div id="introMonaco" style="height: 650px;"></div>
-                        <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div id="introMonaco" class="flex-grow-1 mb-1"></div>
+                        <div id="introControls" class="mt-1 d-flex justify-content-between align-items-center mb-1">
                             <select id="introFunctionDropdown" class="form-select w-auto small">
                                 <option value="">Select a function...</option>
                             </select>
@@ -60,7 +60,7 @@
                                 <button id="introSaveBtn" class="btn btn-primary btn-sm ms-2">Save</button>
                             </div>
                         </div>
-                        <div id="introSaveNotification" class="mt-2"></div>
+                        <div id="introSaveNotification" class="mt-2 mb-3"></div>
                     </div>
                 </div>
 
