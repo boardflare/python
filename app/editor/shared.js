@@ -98,7 +98,7 @@ export function initFunctionDropdowns() {
 
     async function updateDropdowns() {
         const functions = await getRunpyFunctions();
-        const options = '<option value="">Edit function...</option>' +
+        const options = '<option value="">Load function...</option>' +
             functions.map(f => `<option value="${f.url}">${f.name}</option>`).join('');
 
         dropdowns.forEach(id => {

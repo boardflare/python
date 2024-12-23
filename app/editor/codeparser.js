@@ -4,9 +4,13 @@ export function parsePython(rawCode) {
     }
     console.log('Parsing code:', rawCode);
 
+    // Remove comments starting with '# Instructions,' and everything after
+    const instructionsIndex = rawCode.indexOf('# Instructions,');
+    const codeWithoutInstructions = instructionsIndex !== -1 ? rawCode.substring(0, instructionsIndex) : rawCode;
+
     // Split code at the Demo comment line, knowing there's only one
     const demoCommentPattern = /^\s*#\s*Demo\s*code\.?\s*$/m;
-    const [activeCode, demoCode] = rawCode.split(demoCommentPattern);
+    const [activeCode, demoCode] = codeWithoutInstructions.split(demoCommentPattern);
     if (!activeCode) {
         throw new Error("No valid code found before Demo comment");
     }

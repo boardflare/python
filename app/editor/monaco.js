@@ -4,9 +4,7 @@ import { initFunctionDropdowns, addCodeUpdateHandler, saveFunction } from './sha
 window.monacoEditor = null;
 window.introMonacoEditor = null;
 
-const DEFAULT_CODE = `# Code below creates =HELLO(name)
-
-def hello(name):
+const DEFAULT_CODE = `def hello(name):
     """ Returns a greeting. """
     greeting = f"Hello {name}!"
     return greeting
@@ -14,14 +12,21 @@ def hello(name):
 # Example arguments.
 examples = ["Nancy", "Ming", "Zara"]
 
-# Steps to create a function:
+# Instructions, see Docs for details:
 
-# Drag task pane open to full width.
-# Update function name and code.
-# Update example arguments.
-# Click Save. Updates if same name.
+# Creates Excel named LAMBDA, =HELLO(name)
+# Uses BOARDFLARE.RUNPY inside LAMBDA.
+# Code is stored in public url for now.
+# def hello(name) becomes HELLO(name)
+# Examples list is used for testing.
+# No invocation needed, e.g. hello(arg1)
+# Save updates code if name unchanged.
+# Use "Load function..." to edit code.
 # Use in Excel, e.g. =HELLO("Judy").
 # Delete in Formulas > Name Manager.
+# Drag task pane open for more room!
+# Instruction comments deleted on save.
+# Just click Save to try it out!🚀
     `;
 
 export function initMonacoEditor() {
