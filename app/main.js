@@ -3,6 +3,7 @@ import { initGradioEditor } from './editor/gradio.js';
 import { initMonacoEditor } from './editor/monaco.js';
 
 window.appName = 'Python';
+window.enableAdvancedFeatures = false; // Feature flag
 
 // Google Analytics config
 window.appConfig = {
@@ -51,9 +52,24 @@ window.showTab = function (tabId) {
 document.addEventListener('DOMContentLoaded', async function () {
     await initializeBrowserInfo();
 
-    // Initialize editors sequentially
+    // Hide advanced tabs and containers if features disabled
+    if (!window.enableAdvancedFeatures) {
+        ['editor-tab', 'demo-tab'].forEach(id => {
+            const element = document.getElementById(id)?.closest('.nav-item');
+            if (element) element.style.display = 'none';
+        });
+        // Also hide the editor containers
+        ['monaco-editor-container', 'gradioContainer'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.style.display = 'none';
+        });
+    }
+
+    // Initialize only needed editors
     await initMonacoEditor();
-    initGradioEditor();
+    if (window.enableAdvancedFeatures) {
+        await initGradioEditor();
+    }
 
     // cancel button
     const cancelButton = document.getElementById('cancelButton');

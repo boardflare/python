@@ -97,11 +97,11 @@ export async function saveFunction(code, notificationElement) {
 }
 
 export function initFunctionDropdowns() {
-    const dropdowns = ['functionSelect', 'functionDropdown'];
+    const dropdowns = ['functionSelect', 'functionDropdown', 'introFunctionDropdown'];
 
     async function updateDropdowns() {
         const functions = await getRunpyFunctions();
-        const options = '<option value="">Select a function...</option>' +
+        const options = '<option value="">Edit function...</option>' +
             functions.map(f => `<option value="${f.url}">${f.name}</option>`).join('');
 
         dropdowns.forEach(id => {

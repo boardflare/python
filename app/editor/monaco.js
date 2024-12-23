@@ -4,14 +4,24 @@ import { initFunctionDropdowns, addCodeUpdateHandler, saveFunction } from './sha
 window.monacoEditor = null;
 window.introMonacoEditor = null;
 
-const DEFAULT_CODE = `# Creates custom function =HELLO(name)
+const DEFAULT_CODE = `# Code below creates =HELLO(name)
+
 def hello(name):
     """ Returns a greeting. """
     greeting = f"Hello {name}!"
     return greeting
     
-# Example function arguments.
+# Example arguments.
 examples = ["Nancy", "Ming", "Zara"]
+
+# Steps to create a function:
+
+# Drag task pane open to full width.
+# Update function name and code.
+# Update example arguments.
+# Click Save. Updates if same name.
+# Use in Excel, e.g. =HELLO("Judy").
+# Delete in Formulas > Name Manager.
     `;
 
 export function initMonacoEditor() {
@@ -23,17 +33,7 @@ export function initMonacoEditor() {
         });
 
         window.require(['vs/editor/editor.main'], function () {
-            // Create main editor
-            window.monacoEditor = monaco.editor.create(document.getElementById('monaco-editor-container'), {
-                value: DEFAULT_CODE,
-                language: 'python',
-                theme: 'vs',
-                minimap: { enabled: false },
-                fontSize: 14,
-                automaticLayout: true
-            });
-
-            // Create intro editor
+            // Always create intro editor
             window.introMonacoEditor = monaco.editor.create(document.getElementById('introMonaco'), {
                 value: DEFAULT_CODE,
                 language: 'python',
@@ -41,44 +41,66 @@ export function initMonacoEditor() {
                 minimap: { enabled: false },
                 fontSize: 14,
                 automaticLayout: true,
-                padding: { top: 8, bottom: 8, left: 0 },
+                padding: { top: 8, bottom: 8 },
                 lineNumbers: 'off',
                 folding: false,
                 glyphMargin: false,
                 lineDecorationsWidth: 0
             });
 
-            // Register code update handler for both editors
+            // Only initialize advanced editor container if feature is enabled
+            const editorContainer = document.getElementById('monaco-editor-container');
+            if (window.enableAdvancedFeatures && editorContainer) {
+                window.monacoEditor = monaco.editor.create(editorContainer, {
+                    value: DEFAULT_CODE,
+                    language: 'python',
+                    theme: 'vs',
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    automaticLayout: true
+                });
+            }
+
+            // Register code update handler
             addCodeUpdateHandler((code) => {
-                if (window.monacoEditor) window.monacoEditor.setValue(code);
                 if (window.introMonacoEditor) window.introMonacoEditor.setValue(code);
+                if (window.enableAdvancedFeatures && window.monacoEditor) {
+                    window.monacoEditor.setValue(code);
+                }
             });
 
-            // Initialize dropdowns
+            // Initialize dropdowns and event handlers
             initFunctionDropdowns();
 
-            // Layout handling
-            document.getElementById('editor-tab').addEventListener('shown.bs.tab', () => {
-                if (window.monacoEditor) window.monacoEditor.layout();
-            });
+            // Only add layout handlers for enabled features
+            if (window.enableAdvancedFeatures) {
+                document.getElementById('editor-tab')?.addEventListener('shown.bs.tab', () => {
+                    if (window.monacoEditor) window.monacoEditor.layout();
+                });
+            }
 
-            document.getElementById('home-tab').addEventListener('shown.bs.tab', () => {
+            document.getElementById('home-tab')?.addEventListener('shown.bs.tab', () => {
                 if (window.introMonacoEditor) window.introMonacoEditor.layout();
             });
 
-            // Button handlers
-            document.getElementById('saveBtn').addEventListener('click', async () => {
-                const code = window.monacoEditor?.getValue();
-                await saveFunction(code, document.getElementById('editorSaveNotification'));
-            });
+            // Only add advanced feature button handlers if enabled
+            if (window.enableAdvancedFeatures) {
+                document.getElementById('saveBtn')?.addEventListener('click', async () => {
+                    const code = window.monacoEditor?.getValue();
+                    await saveFunction(code, document.getElementById('editorSaveNotification'));
+                });
+            }
 
-            document.getElementById('introSaveBtn').addEventListener('click', async () => {
+            // Always add intro save and reset button handlers
+            document.getElementById('introSaveBtn')?.addEventListener('click', async () => {
                 const code = window.introMonacoEditor?.getValue();
                 await saveFunction(code, document.getElementById('introSaveNotification'));
             });
 
-            document.getElementById('cancelBtn').addEventListener('click', () => {
-                console.log('Cancel clicked');
+            document.getElementById('introResetBtn')?.addEventListener('click', () => {
+                if (window.introMonacoEditor) {
+                    window.introMonacoEditor.setValue(DEFAULT_CODE);
+                }
             });
 
             resolve();
