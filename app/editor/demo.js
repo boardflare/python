@@ -19,14 +19,15 @@ export async function addDemo(parsedCode) {
             // Set column width for Results column
             sheet.getRangeByIndexes(0, 0, 1, 1).format.columnWidth = 300; // Results column
 
-            // Set header with single column
-            const headerRange = sheet.getRangeByIndexes(0, 0, 1, 1);
-            headerRange.values = [["Results"]];
-
-            // Add explanation text
-            const explanationRange = sheet.getRangeByIndexes(1, 0, 1, 1);
-            explanationRange.values = [["This demo shows example outputs from your function. Each cell below contains a formula that calls your function with different test inputs."]];
+            // Add explanation text in A1
+            const explanationRange = sheet.getRangeByIndexes(0, 0, 1, 1);
+            explanationRange.values = [["Below are invocations with the example arguments you provided.  This sheet is overwritten each time the function is updated."]];
             explanationRange.format.wrapText = true;
+            explanationRange.format.fill.color = "#FFFFE0"; // Light yellow highlight
+
+            // Set header with single column in A2
+            const headerRange = sheet.getRangeByIndexes(1, 0, 1, 1);
+            headerRange.values = [["Example Results"]];
 
             // Format headers like a table
             headerRange.format.fill.color = "#D9D9D9";

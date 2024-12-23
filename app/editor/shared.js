@@ -63,14 +63,11 @@ export async function saveFunction(code, notificationElement) {
 
         if (saveResult) {
             await updateNameManager(parsedFunction);
-            // Add demo worksheet if function has exactly one argument
-            if (parsedFunction.args.length === 1) {
-                try {
-                    await addDemo(parsedFunction);
-                } catch (demoError) {
-                    console.warn('Failed to create demo sheet:', demoError);
-                    // Continue even if demo creation fails
-                }
+            try {
+                await addDemo(parsedFunction);
+            } catch (demoError) {
+                console.warn('Failed to create demo sheet:', demoError);
+                // Continue even if demo creation fails
             }
             const refreshDropdowns = initFunctionDropdowns();
             await refreshDropdowns();

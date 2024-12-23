@@ -29,21 +29,14 @@ export function parsePython(rawCode) {
         ? (docstringMatch[1] || docstringMatch[2]).trim().slice(0, 255)
         : 'No description available';
 
-    // Parse examples from code
-    const examplesMatch = activeCode.match(/examples\s*=\s*(\[[\s\S]*?\])/);
+    // Parse examples from code - modified to capture complete nested arrays
+    const examplesMatch = activeCode.match(/examples\s*=\s*(\[[\s\S]*\](?=\s|$))/);
     let examples = [];
     if (examplesMatch) {
+        const exampleStr = examplesMatch[1].trim();
+        console.log('Parsing examples:', exampleStr);
         try {
-            // Convert Python list syntax to JSON
-            const jsonStr = examplesMatch[1]
-                .replace(/'/g, '"')
-                .replace(/\s+/g, ' ');  // normalize whitespace
-            examples = JSON.parse(jsonStr);
-            // Ensure examples is array of arrays
-            if (examples.length > 0 && !Array.isArray(examples[0])) {
-                // Single argument case - wrap each example in array
-                examples = examples.map(ex => [ex]);
-            }
+            examples = JSON.parse(exampleStr.replace(/'/g, '"'));
         } catch (e) {
             console.warn('Failed to parse examples:', e);
         }
