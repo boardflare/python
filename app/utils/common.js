@@ -1,5 +1,7 @@
 import PQueue from 'https://cdn.jsdelivr.net/npm/p-queue@8.0.1/+esm';
 
+export const pyworker = new Worker(new URL('../runpy/pyodide-worker.js', import.meta.url));
+
 // Queue management
 export const queue = new PQueue({ concurrency: 1 });
 export const abortController = new AbortController();

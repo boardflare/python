@@ -23,21 +23,27 @@ export async function addDemo(parsedCode) {
             const headerRange = sheet.getRangeByIndexes(0, 0, 1, 1);
             headerRange.values = [["Results"]];
 
+            // Add explanation text
+            const explanationRange = sheet.getRangeByIndexes(1, 0, 1, 1);
+            explanationRange.values = [["This demo shows example outputs from your function. Each cell below contains a formula that calls your function with different test inputs."]];
+            explanationRange.format.wrapText = true;
+
             // Format headers like a table
             headerRange.format.fill.color = "#D9D9D9";
             headerRange.format.font.bold = true;
             headerRange.format.borders.getItem('EdgeBottom').style = 'Continuous';
 
-            // Use parsed examples instead of test cases
+            // Use parsed examples instead of test cases, starting from row 3
             const examples = parsedCode.examples || [];
             if (examples.length > 0) {
-                const dataRange = sheet.getRangeByIndexes(1, 0, examples.length, 1);
+                context.workbook.application.suspendApiCalculationUntilNextSync();
+                const dataRange = sheet.getRangeByIndexes(2, 0, examples.length, 1);
                 const values = examples.map((args, index) => {
                     const formattedArgs = args.map(arg =>
                         typeof arg === 'string' ? `"${arg}"` : arg
                     );
                     const formula = `=${parsedCode.name}(${formattedArgs.join(', ')})`;
-                    return [formula];  // Only include the formula
+                    return [formula];
                 });
 
                 dataRange.values = values;
@@ -46,6 +52,7 @@ export async function addDemo(parsedCode) {
 
             // Activate the sheet
             sheet.activate();
+            await context.sync();
             await context.sync();
 
         } catch (error) {

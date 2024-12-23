@@ -1,7 +1,5 @@
-import { queueTask } from '../utils/common.js';
+import { queueTask, pyworker } from '../utils/common.js';
 import { fetchCode } from '../utils/fetchcode.js';
-
-let pyworker = new Worker(new URL('./pyodide-worker.js', import.meta.url));
 
 async function messageWorker(worker, message) {
     return new Promise((resolve, reject) => {
