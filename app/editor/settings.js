@@ -4,7 +4,7 @@ export async function saveFunctionToSettings(functionData) {
         return await Excel.run(async (context) => {
             const settings = context.workbook.settings;
             const key = functionData.name;
-            const value = JSON.stringify({
+            const value = {
                 name: functionData.name,
                 code: functionData.code,
                 description: functionData.description,
@@ -12,7 +12,7 @@ export async function saveFunctionToSettings(functionData) {
                 formula: functionData.formula,
                 demo: functionData.demo || '',
                 timestamp: functionData.timestamp
-            });
+            };
 
             settings.add(key, value);
             await context.sync();
@@ -32,8 +32,8 @@ export async function getFunctionFromSettings(name) {
             const setting = settings.getItem(name);
             setting.load("value");
             await context.sync();
-            console.log('setting.value:', setting.value);
-            return JSON.parse(setting.value);
+            console.log('setting.value.code:', setting.value.code);
+            return setting.value;
         });
     } catch (error) {
         console.error('Failed to get from settings:', error);
