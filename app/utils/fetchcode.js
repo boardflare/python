@@ -1,6 +1,17 @@
+import { getFunctionFromSettings } from '../editor/settings.js';
+
 export async function fetchCode(source) {
     let code;
-    if (source.startsWith('https://')) {
+
+    if (source.startsWith('workbook-settings:')) {
+        const functionName = source.split(':')[1];
+        const functionData = await getFunctionFromSettings(functionName);
+        if (functionData) {
+            return functionData.code;
+        } else {
+            throw new Error(`Function "${functionName}" not found in workbook settings`);
+        }
+    } else if (source.startsWith('https://')) {
         try {
             const response = await fetch(source);
             if (!response.ok) {

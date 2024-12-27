@@ -2,6 +2,7 @@ import { parsePython } from './codeparser.js';
 import { addToAzure } from './azuretable.js';
 import { updateNameManager } from './nameManager.js';
 import { addDemo } from './demo.js';
+import { saveFunctionToSettings } from './settings.js';
 
 export async function getRunpyFunctions() {
     try {
@@ -53,13 +54,24 @@ function showTemporaryNotification(element, html, duration = 3000) {
     }
 }
 
-export async function saveFunction(code, notificationElement) {
+export async function saveFunction(code, notificationElement, saveLocal = true) {
     try {
         if (!code) return false;
 
         // Parse and save function
         const parsedFunction = parsePython(code);
-        const saveResult = await addToAzure(parsedFunction);
+
+        let saveResult;
+        if (saveLocal) {
+            // Use workbook-settings reference in formula
+            parsedFunction.formula = parsedFunction.formula.replace(
+                /(https:\/\/[^\s"']+)/,
+                `workbook-settings:${parsedFunction.name}`
+            );
+            saveResult = await saveFunctionToSettings(parsedFunction);
+        } else {
+            saveResult = await addToAzure(parsedFunction);
+        }
 
         if (saveResult) {
             await updateNameManager(parsedFunction);
