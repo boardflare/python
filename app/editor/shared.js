@@ -2,7 +2,7 @@ import { parsePython } from './codeparser.js';
 import { addToAzure } from './azuretable.js';
 import { updateNameManager } from './nameManager.js';
 import { addDemo } from './demo.js';
-import { saveFunctionToSettings } from './settings.js';
+import { saveFunctionToSettings, getFunctionCodeFromSettings } from './settings.js';
 
 export async function getRunpyFunctions() {
     try {
@@ -13,10 +13,14 @@ export async function getRunpyFunctions() {
 
             return names.items
                 .filter(name => name.formula.includes("RUNPY"))
-                .map(name => ({
-                    name: name.name,
-                    url: name.formula.match(/https:\/\/getcode\.boardflare\.workers\.dev[^"']*/)?.[0] || ''
-                }));
+                .map(name => {
+                    const cloudUrl = name.formula.match(/https:\/\/getcode\.boardflare\.workers\.dev[^"']*/)?.[0];
+                    const settingsRef = name.formula.match(/workbook-settings:([^"'\s]+)/)?.[1];
+                    return {
+                        name: name.name,
+                        url: settingsRef ? `workbook-settings:${settingsRef}` : (cloudUrl || '')
+                    };
+                });
         });
     } catch (error) {
         console.error('Failed to get RUNPY functions:', error);
@@ -26,6 +30,10 @@ export async function getRunpyFunctions() {
 
 export async function fetchFunctionCode(url) {
     try {
+        if (url.startsWith('workbook-settings:')) {
+            const functionName = url.replace('workbook-settings:', '');
+            return await getFunctionCodeFromSettings(functionName);
+        }
         const jsonUrl = url.replace('return=code', 'return=json');
         const response = await fetch(jsonUrl);
         if (!response.ok) throw new Error('Failed to fetch code');

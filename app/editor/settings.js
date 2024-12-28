@@ -40,3 +40,13 @@ export async function getFunctionFromSettings(name) {
         return null;
     }
 }
+
+export async function getFunctionCodeFromSettings(name) {
+    try {
+        const functionData = await getFunctionFromSettings(name);
+        return functionData?.code || null;
+    } catch (error) {
+        console.error('Failed to get function code from settings:', error);
+        return null;
+    }
+}
