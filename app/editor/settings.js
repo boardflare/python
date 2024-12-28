@@ -32,7 +32,7 @@ export async function getFunctionFromSettings(name) {
             const setting = settings.getItem(name);
             setting.load("value");
             await context.sync();
-            console.log('setting.value.code:', setting.value.code);
+            console.log('setting.value:', setting.value);
             return setting.value;
         });
     } catch (error) {

@@ -23,7 +23,7 @@ export function parsePython(rawCode) {
     const functionMatch = activeCode.match(/def\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([\s\S]*?)\)\s*:/);
     if (!functionMatch) throw new Error("No function definition found");
 
-    const name = functionMatch[1].toUpperCase();
+    const name = functionMatch[1].toLowerCase();
     const params = functionMatch[2].trim();
     const args = params.split(',').filter(arg => arg.trim());
 
