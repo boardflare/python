@@ -57,6 +57,8 @@ export function parsePython(rawCode) {
         runpyEnv = 'LOCAL.RUNPY';
     } else if (window.location.pathname.toLowerCase().includes('preview')) {
         runpyEnv = 'PREVIEW.RUNPY';
+    } else if (window.location.hostname === 'python-insider.boardflare.com') {
+        runpyEnv = 'BFINSIDER.RUNPY';
     }
 
     // Create lambda formula with dynamic runpy environment and sheet references
