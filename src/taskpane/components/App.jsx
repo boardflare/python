@@ -4,6 +4,7 @@ import { makeStyles, Tab, TabList } from "@fluentui/react-components";
 import EditorTab from "./EditorTab";
 import ConsoleTab from "./ConsoleTab";
 import HelpTab from "./HelpTab";
+import HomeTab from "./HomeTab";
 import { EventTypes } from "../utils/constants";
 
 const useStyles = makeStyles({
@@ -28,7 +29,7 @@ const useStyles = makeStyles({
 
 const App = ({ title }) => {
   const styles = useStyles();
-  const [selectedTab, setSelectedTab] = React.useState("editor");
+  const [selectedTab, setSelectedTab] = React.useState("home");
   const [logs, setLogs] = React.useState([]);
 
   React.useEffect(() => {
@@ -63,11 +64,13 @@ const App = ({ title }) => {
     <div className={styles.root}>
       <main className={styles.main}>
         <TabList selectedValue={selectedTab} onTabSelect={handleTabSelect}>
+          <Tab value="home">Home</Tab>
           <Tab value="editor">Editor</Tab>
           <Tab value="console">Console</Tab>
           <Tab value="help">Help</Tab>
         </TabList>
         <div className={styles.tabContent}>
+          {selectedTab === "home" && <HomeTab />}
           {selectedTab === "editor" && <EditorTab />}
           {selectedTab === "console" && <ConsoleTab logs={logs} onClear={handleClear} />}
           {selectedTab === "help" && <HelpTab />}
