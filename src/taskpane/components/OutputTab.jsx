@@ -1,5 +1,6 @@
 import * as React from "react";
 import { makeStyles, Text } from "@fluentui/react-components";
+import { abortController } from "../../functions/utils/common";
 
 const useStyles = makeStyles({
     root: {
@@ -22,7 +23,12 @@ const OutputTab = ({ logs, onClear, setLogs }) => {
     const styles = useStyles();
 
     const handleCancel = () => {
-        setLogs([...logs, "Cancel operation not implemented yet"]);
+        abortController.abort();
+        setLogs([...logs, "Operation cancelled"]);
+        // Reload the page after a brief delay
+        // setTimeout(() => {
+        //     window.location.reload();
+        // }, 500);
     };
 
     return (
