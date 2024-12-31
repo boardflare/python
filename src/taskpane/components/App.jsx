@@ -5,6 +5,8 @@ import EditorTab from "./EditorTab";
 import ConsoleTab from "./ConsoleTab";
 import HelpTab from "./HelpTab";
 import HomeTab from "./HomeTab";
+import DialogTab from "./DialogTab";
+import FunctionsTab from "./FunctionsTab";
 import { EventTypes } from "../utils/constants";
 
 const useStyles = makeStyles({
@@ -30,6 +32,7 @@ const useStyles = makeStyles({
 const App = ({ title }) => {
   const styles = useStyles();
   const [selectedTab, setSelectedTab] = React.useState("home");
+  const [selectedFunction, setSelectedFunction] = React.useState("");
   const [logs, setLogs] = React.useState([]);
 
   React.useEffect(() => {
@@ -60,6 +63,11 @@ const App = ({ title }) => {
     setSelectedTab(data.value);
   };
 
+  const handleFunctionEdit = (functionName) => {
+    setSelectedFunction(functionName);
+    setSelectedTab("editor");
+  };
+
   return (
     <div className={styles.root}>
       <main className={styles.main}>
@@ -68,12 +76,16 @@ const App = ({ title }) => {
           <Tab value="editor">Editor</Tab>
           <Tab value="console">Console</Tab>
           <Tab value="help">Help</Tab>
+          <Tab value="dialog">Dialog</Tab>
+          <Tab value="functions">Functions</Tab>
         </TabList>
         <div className={styles.tabContent}>
           {selectedTab === "home" && <HomeTab />}
-          {selectedTab === "editor" && <EditorTab />}
+          {selectedTab === "editor" && <EditorTab initialFunction={selectedFunction} />}
           {selectedTab === "console" && <ConsoleTab logs={logs} onClear={handleClear} />}
           {selectedTab === "help" && <HelpTab />}
+          {selectedTab === "dialog" && <DialogTab />}
+          {selectedTab === "functions" && <FunctionsTab onEdit={handleFunctionEdit} />}
         </div>
       </main>
     </div>

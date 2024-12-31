@@ -25,7 +25,7 @@ const useStyles = makeStyles({
     }
 });
 
-const EditorTab = () => {
+const EditorTab = ({ initialFunction }) => {
     const styles = useStyles();
     const [notification, setNotification] = React.useState("");
     const [isLoading, setIsLoading] = React.useState(false);
@@ -67,6 +67,16 @@ const EditorTab = () => {
         };
         loadFunctions();
     }, []);
+
+    React.useEffect(() => {
+        if (initialFunction && editorRef.current) {
+            const func = functions.find(f => f.name === initialFunction);
+            if (func) {
+                editorRef.current.setValue(func.code);
+                setSelectedFunction(initialFunction);
+            }
+        }
+    }, [initialFunction, functions]);
 
     const handleEditorDidMount = (editor, monaco) => {
         editorRef.current = editor;
