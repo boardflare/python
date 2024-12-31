@@ -18,11 +18,10 @@ import {
 const useStyles = makeStyles({
     cardContainer: {
         alignContent: "center",
-        borderRadius: tokens.borderRadiusLarge,
         height: "300px",
         textAlign: "left",
         position: "relative",
-        display: "flex",  // Add this
+        display: "flex",
     },
     textContainer: {
         display: "flex",
