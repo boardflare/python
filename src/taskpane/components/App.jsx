@@ -2,7 +2,7 @@ import * as React from "react";
 import PropTypes from "prop-types";
 import { makeStyles, Tab, TabList } from "@fluentui/react-components";
 import EditorTab from "./EditorTab";
-import ConsoleTab from "./ConsoleTab";
+import OutputTab from "./OutputTab";
 import HelpTab from "./HelpTab";
 import HomeTab from "./HomeTab";
 import DialogTab from "./DialogTab";
@@ -74,7 +74,7 @@ const App = ({ title }) => {
         <TabList selectedValue={selectedTab} onTabSelect={handleTabSelect}>
           <Tab value="home">Home</Tab>
           <Tab value="editor">Editor</Tab>
-          <Tab value="console">Console</Tab>
+          <Tab value="output">Output</Tab>
           <Tab value="help">Help</Tab>
           <Tab value="dialog">Dialog</Tab>
           <Tab value="functions">Functions</Tab>
@@ -82,7 +82,7 @@ const App = ({ title }) => {
         <div className={styles.tabContent}>
           {selectedTab === "home" && <HomeTab />}
           {selectedTab === "editor" && <EditorTab initialFunction={selectedFunction} />}
-          {selectedTab === "console" && <ConsoleTab logs={logs} onClear={handleClear} />}
+          {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} />}
           {selectedTab === "help" && <HelpTab />}
           {selectedTab === "dialog" && <DialogTab />}
           {selectedTab === "functions" && <FunctionsTab onEdit={handleFunctionEdit} />}
