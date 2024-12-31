@@ -21,10 +21,10 @@ const useStyles = makeStyles({
         padding: 0,
         border: "none",
         overflow: "hidden",
-        height: "95vh",
-        width: '95vw',
+        height: "100vh",
         display: "flex",
-        flexDirection: "column"
+        flexDirection: "column",
+        borderRadius: 0
     }
 });
 
@@ -36,6 +36,7 @@ const HomeTab = () => {
         <div className={styles.root}>
             <div className={styles.content}>
                 <Dialog
+                    modalType="alert"
                     open={open}
                     onOpenChange={(e, data) => setModalOpen(data.open)}
                 >
