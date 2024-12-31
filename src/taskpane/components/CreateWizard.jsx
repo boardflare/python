@@ -54,7 +54,7 @@ const IMAGES = [
     "https://fabricweb.azureedge.net/fabric-website/assets/images/swatch-picker/park-full-img.jpg",
 ];
 
-const HomeCarousel = () => {
+const CreateWizard = () => {
     const styles = useStyles();
     const [activeIndex, setActiveIndex] = React.useState(0);
     const totalPages = IMAGES.length;
@@ -120,4 +120,4 @@ const HomeCarousel = () => {
     );
 };
 
-export default HomeCarousel;
+export default CreateWizard;

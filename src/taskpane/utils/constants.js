@@ -1,5 +1,4 @@
-export const DEFAULT_CODE =
-    `# Some comment
+export const DEFAULT_CODE = `# Some comment
 def hello(name):
     """ Returns a greeting. """
     greeting = f"Hello {name}!"
