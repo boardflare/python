@@ -22,6 +22,7 @@ const useStyles = makeStyles({
         height: "300px",
         textAlign: "left",
         position: "relative",
+        display: "flex",  // Add this
     },
     cardContainer: {
         display: "flex",
@@ -36,11 +37,7 @@ const useStyles = makeStyles({
         width: "50%",
     },
     editorContainer: {
-        position: 'absolute',
-        top: '10%',
-        left: '10%',
-        width: '80%',
-        height: '80%',
+        flex: 1,
     },
     footer: {
         display: "flex",
