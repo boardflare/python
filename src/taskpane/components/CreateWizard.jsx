@@ -16,7 +16,7 @@ import {
 } from "@fluentui/react-components";
 
 const useStyles = makeStyles({
-    bannerCard: {
+    cardContainer: {
         alignContent: "center",
         borderRadius: tokens.borderRadiusLarge,
         height: "300px",
@@ -24,7 +24,7 @@ const useStyles = makeStyles({
         position: "relative",
         display: "flex",  // Add this
     },
-    cardContainer: {
+    textContainer: {
         display: "flex",
         flexDirection: "column",
         gap: "8px",
@@ -69,32 +69,36 @@ const CreateWizard = () => {
             <CarouselViewport>
                 <CarouselSlider>
                     <CarouselCard
-                        className={styles.bannerCard}
+                        className={styles.cardContainer}
                         aria-label={`1 of ${IMAGES.length}`}
                         id="feature-0"
                     >
                         <div className={styles.editorContainer}>
                             <MonacoEditor value={DEFAULT_CODE} />
                         </div>
-                    </CarouselCard>
-                    <CarouselCard
-                        className={styles.bannerCard}
-                        aria-label={`2 of ${IMAGES.length}`}
-                        id="feature-1"
-                    >
-                        <Image fit="cover" src={IMAGES[1]} role="presentation" />
-                        <div className={styles.cardContainer}>
+                        <div className={styles.textContainer}>
                             <h2>Execute in Excel</h2>
                             <p>Run your Python code directly in your spreadsheets</p>
                         </div>
                     </CarouselCard>
                     <CarouselCard
-                        className={styles.bannerCard}
+                        className={styles.cardContainer}
+                        aria-label={`2 of ${IMAGES.length}`}
+                        id="feature-1"
+                    >
+                        <Image fit="cover" src={IMAGES[1]} role="presentation" />
+                        <div className={styles.textContainer}>
+                            <h2>Execute in Excel</h2>
+                            <p>Run your Python code directly in your spreadsheets</p>
+                        </div>
+                    </CarouselCard>
+                    <CarouselCard
+                        className={styles.cardContainer}
                         aria-label={`3 of ${IMAGES.length}`}
                         id="feature-2"
                     >
                         <Image fit="cover" src={IMAGES[2]} role="presentation" />
-                        <div className={styles.cardContainer}>
+                        <div className={styles.textContainer}>
                             <h2>View Results</h2>
                             <p>Check execution output in the Console tab</p>
                         </div>
