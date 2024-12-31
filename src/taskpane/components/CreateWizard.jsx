@@ -16,12 +16,25 @@ import {
 } from "@fluentui/react-components";
 
 const useStyles = makeStyles({
+    carousel: {
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        minHeight: 0 // Important for flex child
+    },
+    viewport: {
+        flex: 1,
+        minHeight: 0 // Important for flex child
+    },
+    slider: {
+        height: '100%'
+    },
     cardContainer: {
         alignContent: "center",
-        height: "300px",
         textAlign: "left",
         position: "relative",
         display: "flex",
+        minHeight: 0 // Important for flex child
     },
     textContainer: {
         display: "flex",
@@ -37,6 +50,7 @@ const useStyles = makeStyles({
     },
     editorContainer: {
         flex: 1,
+        minHeight: 0 // Important for flex child
     },
     footer: {
         display: "flex",
@@ -60,13 +74,14 @@ const CreateWizard = () => {
 
     return (
         <Carousel
+            className={styles.carousel}
             groupSize={1}
             circular
             activeIndex={activeIndex}
             onActiveIndexChange={(e, data) => setActiveIndex(data.index)}
         >
-            <CarouselViewport>
-                <CarouselSlider>
+            <CarouselViewport className={styles.viewport}>
+                <CarouselSlider className={styles.slider}>
                     <CarouselCard
                         className={styles.cardContainer}
                         aria-label={`1 of ${IMAGES.length}`}

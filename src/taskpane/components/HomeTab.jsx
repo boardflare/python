@@ -21,6 +21,10 @@ const useStyles = makeStyles({
         padding: 0,
         border: "none",
         overflow: "hidden",
+        height: "95vh",
+        width: '95vw',
+        display: "flex",
+        flexDirection: "column"
     }
 });
 
@@ -31,7 +35,10 @@ const HomeTab = () => {
     return (
         <div className={styles.root}>
             <div className={styles.content}>
-                <Dialog open={open} onOpenChange={(e, data) => setModalOpen(data.open)}>
+                <Dialog
+                    open={open}
+                    onOpenChange={(e, data) => setModalOpen(data.open)}
+                >
                     <DialogTrigger>
                         <Button appearance="primary">Create New Function</Button>
                     </DialogTrigger>
