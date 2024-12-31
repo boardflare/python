@@ -32,21 +32,22 @@ const useStyles = makeStyles({
     cardContainer: {
         alignContent: "center",
         textAlign: "left",
-        position: "relative",
         display: "flex",
+        flexDirection: "column",
         minHeight: 0 // Important for flex child
     },
     textContainer: {
         display: "flex",
         flexDirection: "column",
-        gap: "8px",
-        position: "absolute",
-        left: "10%",
-        top: "25%",
-        background: tokens.colorNeutralBackground1,
-        padding: "18px",
-        maxWidth: "270px",
-        width: "50%",
+        padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalM}`,
+        "& h2": {
+            fontSize: tokens.fontSizeM,
+            margin: 0,
+            marginBottom: tokens.spacingVerticalS
+        },
+        "& p": {
+            margin: 0
+        }
     },
     editorContainer: {
         flex: 1,
@@ -84,37 +85,34 @@ const CreateWizard = () => {
                 <CarouselSlider className={styles.slider}>
                     <CarouselCard
                         className={styles.cardContainer}
-                        aria-label={`1 of ${IMAGES.length}`}
-                        id="feature-0"
+                        id="code-function"
                     >
+                        <div className={styles.textContainer}>
+                            <h2>Step 1: Code Function</h2>
+                            <p></p>
+                        </div>
                         <div className={styles.editorContainer}>
                             <MonacoEditor value={DEFAULT_CODE} />
                         </div>
-                        <div className={styles.textContainer}>
-                            <h2>Execute in Excel</h2>
-                            <p>Run your Python code directly in your spreadsheets</p>
-                        </div>
                     </CarouselCard>
                     <CarouselCard
                         className={styles.cardContainer}
-                        aria-label={`2 of ${IMAGES.length}`}
-                        id="feature-1"
+                        id="test-function"
                     >
                         <Image fit="cover" src={IMAGES[1]} role="presentation" />
                         <div className={styles.textContainer}>
-                            <h2>Execute in Excel</h2>
-                            <p>Run your Python code directly in your spreadsheets</p>
+                            <h2>Step 2: Test Function</h2>
+                            <p>Provide example arguments to use to test your function, then click Run to see the results.  Use Back button to return to code step and edit.  When you're happy with results, click Next.</p>
                         </div>
                     </CarouselCard>
                     <CarouselCard
                         className={styles.cardContainer}
-                        aria-label={`3 of ${IMAGES.length}`}
-                        id="feature-2"
+                        id="save-function"
                     >
                         <Image fit="cover" src={IMAGES[2]} role="presentation" />
                         <div className={styles.textContainer}>
-                            <h2>View Results</h2>
-                            <p>Check execution output in the Console tab</p>
+                            <h2>Step 3: Save Function</h2>
+                            <p>Click Save to store this function locally in your workbook.</p>
                         </div>
                     </CarouselCard>
                 </CarouselSlider>
