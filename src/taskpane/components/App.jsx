@@ -1,6 +1,7 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import { makeStyles, Tab, TabList } from "@fluentui/react-components";
+import { CodeTextEditRegular } from "@fluentui/react-icons";
 import EditorTab from "./EditorTab";
 import OutputTab from "./OutputTab";
 import HomeTab from "./HomeTab";
@@ -71,7 +72,7 @@ const App = ({ title }) => {
       <main className={styles.main}>
         <TabList selectedValue={selectedTab} onTabSelect={handleTabSelect}>
           <Tab value="home">Home</Tab>
-          <Tab value="editor">Editor</Tab>
+          <Tab value="editor"><CodeTextEditRegular /></Tab>
           <Tab value="output">Output</Tab>
           <Tab value="functions">Functions</Tab>
         </TabList>
