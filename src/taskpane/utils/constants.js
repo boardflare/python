@@ -1,17 +1,32 @@
-export const DEFAULT_CODE = `def hello(name):
-    """ Returns a greeting. """
+export const DEFAULT_CODE = `def hello(first: str, last: str) -> str:
+    """ Returns a greeting. 
+    Args:
+        first: first name of the person
+        last: last name of the person
+    """
     greeting = f"Hello {name}!"
     return greeting
     
-# Example arguments.
-examples = ["Nancy", "Ming", "Zara"]
+# Example Args:
+examples = [["Nancy", "Morgan"], ["Ming", "Lee"]]
 
-# Instructions, see docs link above for details:
-# Creates a named LAMBDA, e.g. def hello(name) becomes HELLO(name)
-# Examples list is used for test cases on demo sheet.
-# Save updates code if name is unchanged, delete in Formulas > Name Manager.
-# Use "Load function..." to edit existing functions.
-# Drag task pane open for more room!🚀
+# Quick overview in comments below, see docs for details:
+#
+# Naming:
+# Function names must be unique, otherwise overwrites existing function.
+# def hello(first, last) becomes =HELLO(first, last) in Excel.
+#
+# Docstrings:
+# First line in docstring is the function description in Excel.
+# Args with descriptions are required.
+#
+# Types:
+# Type hints are required on args and return.
+# Array arguments in Excel are converted to Pandas DataFrames.
+#
+# Examples:
+# examples variable holds test cases and is required.
+# Each nested list is a set of arguments for a test case.
 `;
 
 
@@ -25,5 +40,13 @@ export const EventTypes = {
 export const ConsoleEvents = {
     emit: (type, payload) => {
         window.dispatchEvent(new CustomEvent(type, { detail: payload }));
+    },
+    on: (type, callback) => {
+        const wrappedCallback = (event) => callback(event.detail);
+        window.addEventListener(type, wrappedCallback);
+        return () => window.removeEventListener(type, wrappedCallback);
+    },
+    off: (type, callback) => {
+        window.removeEventListener(type, callback);
     }
 };

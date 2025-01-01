@@ -1,6 +1,7 @@
 import * as React from "react";
 import { MonacoEditor } from "./MonacoEditor";
 import { DEFAULT_CODE } from "../utils/constants";
+import { TestFunction } from "./TestFunction";
 import {
     makeStyles,
     Image,
@@ -41,7 +42,6 @@ const useStyles = makeStyles({
         flexDirection: "column",
         padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalM}`,
         "& h2": {
-            fontSize: tokens.fontSizeM,
             margin: 0,
             marginBottom: tokens.spacingVerticalS
         },
@@ -71,13 +71,19 @@ const IMAGES = [
 const CreateWizard = () => {
     const styles = useStyles();
     const [activeIndex, setActiveIndex] = React.useState(0);
+    const [code, setCode] = React.useState(DEFAULT_CODE);
     const totalPages = IMAGES.length;
+
+    const handleEditorMount = (editor) => {
+        editor.onDidChangeModelContent(() => {
+            setCode(editor.getValue());
+        });
+    };
 
     return (
         <Carousel
             className={styles.carousel}
             groupSize={1}
-            circular
             activeIndex={activeIndex}
             onActiveIndexChange={(e, data) => setActiveIndex(data.index)}
         >
@@ -89,21 +95,21 @@ const CreateWizard = () => {
                     >
                         <div className={styles.textContainer}>
                             <h2>Step 1: Code Function</h2>
-                            <p></p>
+                            <p>Pro Tip: Drag your task pane wider for more room!</p>
                         </div>
                         <div className={styles.editorContainer}>
-                            <MonacoEditor value={DEFAULT_CODE} />
+                            <MonacoEditor value={DEFAULT_CODE} onMount={handleEditorMount} />
                         </div>
                     </CarouselCard>
                     <CarouselCard
                         className={styles.cardContainer}
                         id="test-function"
                     >
-                        <Image fit="cover" src={IMAGES[1]} role="presentation" />
                         <div className={styles.textContainer}>
                             <h2>Step 2: Test Function</h2>
                             <p>Provide example arguments to use to test your function, then click Run to see the results.  Use Back button to return to code step and edit.  When you're happy with results, click Next.</p>
                         </div>
+                        <TestFunction code={code} />
                     </CarouselCard>
                     <CarouselCard
                         className={styles.cardContainer}
