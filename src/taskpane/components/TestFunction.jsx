@@ -71,8 +71,12 @@ export const TestFunction = ({ code }) => {
         };
     }, []);
 
-    const formatExampleAsMatrix = (example) => {
-        return example.map(arg => [[arg]]);
+    const formatExampleAsExcelSyntax = (example) => {
+        if (!parsedData?.name) return '';
+        const args = example.map(arg =>
+            typeof arg === 'string' ? `"${arg}"` : arg
+        ).join(', ');
+        return `Running: =${parsedData.name.toUpperCase()}(${args})`;
     };
 
     const handleRun = async () => {
@@ -84,7 +88,10 @@ export const TestFunction = ({ code }) => {
             // Run each example
             for (let i = 0; i < parsedData.examples.length; i++) {
                 const example = parsedData.examples[i];
-                setOutput(prev => [...prev, { type: 'header', message: `Running Example ${i + 1}: ${JSON.stringify(example)}` }]);
+                setOutput(prev => [...prev, {
+                    type: 'header',
+                    message: formatExampleAsExcelSyntax(example)
+                }]);
                 const result = await runPy(parsedData.code, parsedData.examplesAsRunpyArgs[i]);
                 setOutput(prev => [...prev, { type: 'log', message: JSON.stringify(result) }]);
             }

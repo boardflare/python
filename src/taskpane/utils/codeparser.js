@@ -75,7 +75,7 @@ export function parsePython(rawCode) {
         runpyEnv = 'BFINSIDER.RUNPY';
     }
 
-    // Create lambda formula with bare parameter names
+    // Create Excel lambda formula with bare parameter names
     const signature = `${name}(${params})`;
     const codeRef = `"https://getcode.boardflare.workers.dev/?uid=${uid}&timestamp=${timestamp}&name=${name}&return=code"`;
     const formula = `=LAMBDA(${args.join(', ')}, ${runpyEnv}(${codeRef}, ${args.join(', ')}))`;
