@@ -56,6 +56,18 @@ const HomeTab = () => {
                     <li>Use the Console tab to see execution output</li>
                     <li>Check the Help tab for detailed instructions</li>
                 </ul>
+                Excel functions using Python! See{" "}
+                <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener">
+                    video
+                </a>{" "}
+                and{" "}
+                <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener">
+                    docs
+                </a>
+                .
+                🛟<a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener">
+                    Feedback Please!
+                </a>
             </div>
         </div>
     );

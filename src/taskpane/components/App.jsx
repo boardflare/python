@@ -3,9 +3,7 @@ import PropTypes from "prop-types";
 import { makeStyles, Tab, TabList } from "@fluentui/react-components";
 import EditorTab from "./EditorTab";
 import OutputTab from "./OutputTab";
-import HelpTab from "./HelpTab";
 import HomeTab from "./HomeTab";
-import DialogTab from "./DialogTab";
 import FunctionsTab from "./FunctionsTab";
 import { EventTypes } from "../utils/constants";
 
@@ -75,16 +73,12 @@ const App = ({ title }) => {
           <Tab value="home">Home</Tab>
           <Tab value="editor">Editor</Tab>
           <Tab value="output">Output</Tab>
-          <Tab value="help">Help</Tab>
-          <Tab value="dialog">Dialog</Tab>
           <Tab value="functions">Functions</Tab>
         </TabList>
         <div className={styles.tabContent}>
           {selectedTab === "home" && <HomeTab />}
           {selectedTab === "editor" && <EditorTab initialFunction={selectedFunction} />}
           {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} />}
-          {selectedTab === "help" && <HelpTab />}
-          {selectedTab === "dialog" && <DialogTab />}
           {selectedTab === "functions" && <FunctionsTab onEdit={handleFunctionEdit} />}
         </div>
       </main>
