@@ -1,8 +1,9 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { Input, Button, makeStyles, tokens } from "@fluentui/react-components";
+import { Button, makeStyles, tokens, Dropdown } from "@fluentui/react-components";
 import { runPy } from "../../functions/runpy/controller";
-import { ConsoleEvents, EventTypes } from "../utils/constants";
+import { EventTypes } from "../utils/constants";
+import { parsePython } from "../utils/codeparser";
 
 const useStyles = makeStyles({
     container: {
@@ -27,14 +28,27 @@ const useStyles = makeStyles({
     },
     error: {
         color: "red",
+    },
+    dropdown: {
+        minWidth: "200px"
     }
 });
 
 export const TestFunction = ({ code }) => {
     const styles = useStyles();
-    const [arg1, setArg1] = React.useState("");
+    const [selectedExample, setSelectedExample] = React.useState(null);
     const [output, setOutput] = React.useState([]);
     const [isRunning, setIsRunning] = React.useState(false);
+    const [parsedData, setParsedData] = React.useState(null);
+
+    React.useEffect(() => {
+        try {
+            const parsed = parsePython(code);
+            setParsedData(parsed);
+        } catch (error) {
+            console.error('Failed to parse code:', error);
+        }
+    }, [code]);
 
     React.useEffect(() => {
         const handleLog = (event) => {
@@ -55,10 +69,12 @@ export const TestFunction = ({ code }) => {
     }, []);
 
     const handleRun = async () => {
+        if (!selectedExample || !parsedData) return;
+
         setIsRunning(true);
         setOutput([]);
         try {
-            const result = await runPy(code, arg1);
+            const result = await runPy(parsedData.code, selectedExample);
             setOutput(prev => [...prev, { type: 'log', message: JSON.stringify(result) }]);
         } finally {
             setIsRunning(false);
@@ -68,15 +84,21 @@ export const TestFunction = ({ code }) => {
     return (
         <div className={styles.container}>
             <div className={styles.inputRow}>
-                <Input
-                    value={arg1}
-                    onChange={(e) => setArg1(e.target.value)}
-                    placeholder="Enter argument value"
-                    disabled={isRunning}
+                <Dropdown
+                    className={styles.dropdown}
+                    placeholder="Select an example"
+                    value={selectedExample}
+                    onOptionSelect={(e, data) => setSelectedExample(data.optionValue)}
+                    disabled={isRunning || !parsedData}
+                    options={(parsedData?.examples || []).map((example, index) => ({
+                        id: index.toString(),
+                        value: example,
+                        text: `Example ${index + 1}: ${JSON.stringify(example)}`
+                    }))}
                 />
                 <Button
                     onClick={handleRun}
-                    disabled={isRunning}
+                    disabled={isRunning || !selectedExample || !parsedData}
                 >
                     Run
                 </Button>

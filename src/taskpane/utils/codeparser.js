@@ -19,13 +19,21 @@ export function parsePython(rawCode) {
     const timestamp = new Date().toISOString();
     const uid = "ANON:" + crypto.randomUUID();
 
-    // Improved function pattern to better handle whitespace
-    const functionMatch = activeCode.match(/def\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([\s\S]*?)\)\s*:/);
+    // Updated function pattern to handle type hints
+    const functionMatch = activeCode.match(/def\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([\s\S]*?)\)(?:\s*->\s*[^:]+)?\s*:/);
     if (!functionMatch) throw new Error("No function definition found");
 
     const name = functionMatch[1].toLowerCase();
     const params = functionMatch[2].trim();
-    const args = params.split(',').filter(arg => arg.trim());
+
+    // Updated args parsing to handle type hints
+    const args = params.split(',')
+        .filter(arg => arg.trim())
+        .map(arg => {
+            // Extract parameter name without type hint
+            const paramMatch = arg.trim().match(/([a-zA-Z_][a-zA-Z0-9_]*)\s*(?::\s*[^=]+)?(?:\s*=.*)?$/);
+            return paramMatch ? paramMatch[1].trim() : arg.trim();
+        });
 
     // Extract docstring with consistent trimming
     const docstringMatch = activeCode.match(/^\s*(?:'''|""")([^]*?)(?:'''|""")|^\s*["'](.+?)["']/m);
@@ -61,10 +69,10 @@ export function parsePython(rawCode) {
         runpyEnv = 'BFINSIDER.RUNPY';
     }
 
-    // Create lambda formula with dynamic runpy environment and sheet references
+    // Create lambda formula with bare parameter names
     const signature = `${name}(${params})`;
     const codeRef = `"https://getcode.boardflare.workers.dev/?uid=${uid}&timestamp=${timestamp}&name=${name}&return=code"`;
-    const formula = `=LAMBDA(${params}, ${runpyEnv}(${codeRef}, ${params}))`;
+    const formula = `=LAMBDA(${args.join(', ')}, ${runpyEnv}(${codeRef}, ${args.join(', ')}))`;
 
     return {
         name,
