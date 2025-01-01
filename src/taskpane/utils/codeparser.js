@@ -41,14 +41,20 @@ export function parsePython(rawCode) {
         ? (docstringMatch[1] || docstringMatch[2]).trim().slice(0, 255)
         : 'No description available';
 
+    const formatExampleAsMatrix = (example) => {
+        return example.map(arg => [[arg]]);
+    };
+
     // Parse examples from code - modified to capture complete nested arrays
     const examplesMatch = activeCode.match(/examples\s*=\s*(\[[\s\S]*\](?=\s|$))/);
     let examples = [];
+    let examplesAsRunpyArgs = [];
     if (examplesMatch) {
         const exampleStr = examplesMatch[1].trim();
         console.log('Parsing examples:', exampleStr);
         try {
             examples = JSON.parse(exampleStr.replace(/'/g, '"'));
+            examplesAsRunpyArgs = examples.map(formatExampleAsMatrix);
         } catch (e) {
             console.warn('Failed to parse examples:', e);
         }
@@ -84,6 +90,7 @@ export function parsePython(rawCode) {
         uid,
         demo: demoCode ? demoCode.trim() : null,
         args, // Add args array to returned object
-        examples // Add examples array to returned object
+        examples, // Add examples array to returned object
+        examplesAsRunpyArgs // Add formatted examples array to returned object
     };
 }

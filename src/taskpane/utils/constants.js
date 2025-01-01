@@ -4,7 +4,7 @@ export const DEFAULT_CODE = `def hello(first: str, last: str) -> str:
         first: first name of the person
         last: last name of the person
     """
-    greeting = f"Hello {name}!"
+    greeting = f"Hello {first} {last}!"
     return greeting
     
 # Example Args:

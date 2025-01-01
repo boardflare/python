@@ -1,6 +1,6 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { Button, makeStyles, tokens, Dropdown } from "@fluentui/react-components";
+import { Button, makeStyles, tokens } from "@fluentui/react-components";
 import { runPy } from "../../functions/runpy/controller";
 import { EventTypes } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
@@ -25,18 +25,20 @@ const useStyles = makeStyles({
         borderRadius: "4px",
         flex: 1,
         overflowY: "auto",
+        whiteSpace: "pre-wrap"
     },
     error: {
         color: "red",
     },
-    dropdown: {
-        minWidth: "200px"
+    header: {
+        fontWeight: "bold",
+        marginTop: tokens.spacingVerticalM,
+        marginBottom: tokens.spacingVerticalS,
     }
 });
 
 export const TestFunction = ({ code }) => {
     const styles = useStyles();
-    const [selectedExample, setSelectedExample] = React.useState(null);
     const [output, setOutput] = React.useState([]);
     const [isRunning, setIsRunning] = React.useState(false);
     const [parsedData, setParsedData] = React.useState(null);
@@ -44,6 +46,7 @@ export const TestFunction = ({ code }) => {
     React.useEffect(() => {
         try {
             const parsed = parsePython(code);
+            console.log('Parsed data:', parsed); // Add this debug line
             setParsedData(parsed);
         } catch (error) {
             console.error('Failed to parse code:', error);
@@ -68,14 +71,25 @@ export const TestFunction = ({ code }) => {
         };
     }, []);
 
+    const formatExampleAsMatrix = (example) => {
+        return example.map(arg => [[arg]]);
+    };
+
     const handleRun = async () => {
-        if (!selectedExample || !parsedData) return;
+        if (!parsedData) return;
 
         setIsRunning(true);
         setOutput([]);
         try {
-            const result = await runPy(parsedData.code, selectedExample);
-            setOutput(prev => [...prev, { type: 'log', message: JSON.stringify(result) }]);
+            // Run each example
+            for (let i = 0; i < parsedData.examples.length; i++) {
+                const example = parsedData.examples[i];
+                setOutput(prev => [...prev, { type: 'header', message: `Running Example ${i + 1}: ${JSON.stringify(example)}` }]);
+                const result = await runPy(parsedData.code, parsedData.examplesAsRunpyArgs[i]);
+                setOutput(prev => [...prev, { type: 'log', message: JSON.stringify(result) }]);
+            }
+        } catch (error) {
+            setOutput(prev => [...prev, { type: 'error', message: error.toString() }]);
         } finally {
             setIsRunning(false);
         }
@@ -84,30 +98,22 @@ export const TestFunction = ({ code }) => {
     return (
         <div className={styles.container}>
             <div className={styles.inputRow}>
-                <Dropdown
-                    className={styles.dropdown}
-                    placeholder="Select an example"
-                    value={selectedExample}
-                    onOptionSelect={(e, data) => setSelectedExample(data.optionValue)}
-                    disabled={isRunning || !parsedData}
-                    options={(parsedData?.examples || []).map((example, index) => ({
-                        id: index.toString(),
-                        value: example,
-                        text: `Example ${index + 1}: ${JSON.stringify(example)}`
-                    }))}
-                />
                 <Button
                     onClick={handleRun}
-                    disabled={isRunning || !selectedExample || !parsedData}
+                    disabled={isRunning || !parsedData?.code}
                 >
-                    Run
+                    Run Code with Examples
                 </Button>
             </div>
             <div className={styles.console}>
                 {output.map((item, index) => (
                     <div
                         key={index}
-                        className={item.type === 'error' ? styles.error : undefined}
+                        className={
+                            item.type === 'error' ? styles.error :
+                                item.type === 'header' ? styles.header :
+                                    undefined
+                        }
                     >
                         {item.message}
                     </div>

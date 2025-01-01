@@ -107,7 +107,7 @@ const CreateWizard = () => {
                     >
                         <div className={styles.textContainer}>
                             <h2>Step 2: Test Function</h2>
-                            <p>Provide example arguments to use to test your function, then click Run to see the results.  Use Back button to return to code step and edit.  When you're happy with results, click Next.</p>
+                            <p>Click the button below to test your function using the examples you provided.</p>
                         </div>
                         <TestFunction code={code} />
                     </CarouselCard>
