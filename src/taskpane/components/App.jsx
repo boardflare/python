@@ -79,6 +79,9 @@ const App = ({ title }) => {
           <Tab value="output">Output</Tab>
           <Tab value="functions">Functions</Tab>
         </TabList>
+        <div className="text-center text-blue-600 my-4">
+          Welcome to the application! Select a tab to get started.
+        </div>
         <div className={styles.tabContent}>
           {selectedTab === "home" && <HomeTab />}
           {selectedTab === "editor" && <EditorTab initialFunction={selectedFunction} />}
