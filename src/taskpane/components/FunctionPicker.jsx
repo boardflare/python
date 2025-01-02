@@ -1,110 +1,86 @@
 import * as React from "react";
 import {
-    TagPicker,
-    TagPickerList,
-    TagPickerInput,
-    TagPickerControl,
-    TagPickerOption,
-    TagPickerGroup,
-    TagPickerOptionGroup,
-    Tag,
-    Avatar,
+    Dropdown,
+    Option,
+    OptionGroup,
     Field,
+    makeStyles,
 } from "@fluentui/react-components";
+import { getFunctionFromSettings } from "../utils/workbookSettings";
+import { exampleFunctions } from "../utils/examples";
 
-const builtInFunctions = ["SUM", "AVERAGE", "COUNT", "MAX", "MIN"];
-const customFunctions = ["CUSTOMSUM", "CUSTOMAVG", "CUSTOMCOUNT"];
+const useStyles = makeStyles({
+    root: {
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        maxWidth: '400px',
+    },
+    dropdownContainer: {
+        position: 'relative',
+        height: '32px',
+        marginBottom: '8px'
+    }
+});
 
-const FunctionPicker = () => {
-    const [selectedOptions, setSelectedOptions] = React.useState([]);
+const FunctionPicker = ({ onFunctionSelect }) => {
+    const [selectedValue, setSelectedValue] = React.useState("");
+    const [workbookFunctions, setWorkbookFunctions] = React.useState([]);
+    const styles = useStyles();
 
-    const onOptionSelect = (e, data) => {
-        if (data.value === "no-options") {
-            return;
+    React.useEffect(() => {
+        const loadWorkbookFunctions = async () => {
+            const functions = await getFunctionFromSettings();
+            setWorkbookFunctions(Array.isArray(functions) ? functions : []);
+        };
+        loadWorkbookFunctions();
+    }, []);
+
+    const onSelect = (e, data) => {
+        setSelectedValue(data.value);
+
+        const selectedFunction = exampleFunctions.find(f => f.name === data.value) ||
+            workbookFunctions.find(f => f.name === data.value);
+
+        console.log('Selected function:', selectedFunction); // Add debug logging
+
+        if (selectedFunction && selectedFunction.code) {
+            console.log('Function code:', selectedFunction.code); // Add debug logging
+            onFunctionSelect(selectedFunction);
         }
-        setSelectedOptions(data.selectedOptions);
     };
 
-    const unSelectedBuiltIn = builtInFunctions.filter(
-        (option) => !selectedOptions.includes(option)
-    );
-    const unSelectedCustom = customFunctions.filter(
-        (option) => !selectedOptions.includes(option)
-    );
-
     return (
-        <Field label="Select Functions" style={{ maxWidth: 400 }}>
-            <TagPicker
-                onOptionSelect={onOptionSelect}
-                selectedOptions={selectedOptions}
-            >
-                <TagPickerControl>
-                    <TagPickerGroup aria-label="Selected Functions">
-                        {selectedOptions.map((option) => (
-                            <Tag
-                                key={option}
-                                shape="rounded"
-                                media={<Avatar aria-hidden name={option} color="colorful" />}
-                                value={option}
-                            >
-                                {option}
-                            </Tag>
-                        ))}
-                    </TagPickerGroup>
-                    <TagPickerInput aria-label="Select Functions" />
-                </TagPickerControl>
-                <TagPickerList>
-                    {unSelectedBuiltIn.length === 0 && unSelectedCustom.length === 0 && (
-                        <TagPickerOption value="no-options">
-                            No options available
-                        </TagPickerOption>
-                    )}
+        <Field label="Select Function">
+            <div className={styles.root}>
+                <div className={styles.dropdownContainer}>
+                    <Dropdown
+                        value={selectedValue}
+                        onOptionSelect={onSelect}
+                        placeholder="Choose a function"
+                    >
+                        {exampleFunctions.length > 0 && (
+                            <OptionGroup label="Example Functions">
+                                {exampleFunctions.map((func) => (
+                                    <Option key={func.name} value={func.name}>
+                                        {func.name}
+                                    </Option>
+                                ))}
+                            </OptionGroup>
+                        )}
 
-                    {unSelectedBuiltIn.length > 0 && (
-                        <TagPickerOptionGroup label="Built-in Functions">
-                            {unSelectedBuiltIn.map((option) => (
-                                <TagPickerOption
-                                    secondaryContent="Excel Built-in"
-                                    media={
-                                        <Avatar
-                                            shape="square"
-                                            aria-hidden
-                                            name={option}
-                                            color="colorful"
-                                        />
-                                    }
-                                    value={option}
-                                    key={option}
-                                >
-                                    {option}
-                                </TagPickerOption>
-                            ))}
-                        </TagPickerOptionGroup>
-                    )}
-
-                    {unSelectedCustom.length > 0 && (
-                        <TagPickerOptionGroup label="Custom Functions">
-                            {unSelectedCustom.map((option) => (
-                                <TagPickerOption
-                                    secondaryContent="User Defined"
-                                    media={
-                                        <Avatar
-                                            shape="square"
-                                            aria-hidden
-                                            name={option}
-                                            color="colorful"
-                                        />
-                                    }
-                                    value={option}
-                                    key={option}
-                                >
-                                    {option}
-                                </TagPickerOption>
-                            ))}
-                        </TagPickerOptionGroup>
-                    )}
-                </TagPickerList>
-            </TagPicker>
+                        {workbookFunctions.length > 0 && (
+                            <OptionGroup label="Workbook Functions">
+                                {workbookFunctions.map((func) => (
+                                    <Option key={func.name} value={func.name}>
+                                        {func.name}
+                                    </Option>
+                                ))}
+                            </OptionGroup>
+                        )}
+                    </Dropdown>
+                </div>
+            </div>
         </Field>
     );
 };

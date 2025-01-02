@@ -5,7 +5,7 @@ import { FunctionsGrid } from "./FunctionsGrid";
 const useStyles = makeStyles({
     root: {
         height: "100%",
-        padding: "20px",
+        //padding: "20px",
     },
 });
 

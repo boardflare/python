@@ -2,7 +2,7 @@ import * as React from "react";
 import PropTypes from "prop-types";
 import Editor from "@monaco-editor/react";
 
-export const MonacoEditor = ({ value, onMount }) => {
+export const MonacoEditor = ({ value, onChange, onMount }) => {
     const editorRef = React.useRef(null);
 
     const handleEditorDidMount = (editor, monaco) => {
@@ -26,6 +26,7 @@ export const MonacoEditor = ({ value, onMount }) => {
                 folding: false,
                 lineNumbersMinChars: 2
             }}
+            onChange={onChange}
             onMount={handleEditorDidMount}
         />
     );
@@ -33,5 +34,6 @@ export const MonacoEditor = ({ value, onMount }) => {
 
 MonacoEditor.propTypes = {
     value: PropTypes.string.isRequired,
+    onChange: PropTypes.func,
     onMount: PropTypes.func
 };

@@ -4,11 +4,11 @@ import { abortController } from "../../functions/utils/common";
 
 const useStyles = makeStyles({
     root: {
-        padding: "1rem",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        gap: "1rem"
+        // padding: "1rem",
+        // height: "100%",
+        // display: "flex",
+        // flexDirection: "column",
+        // gap: "1rem"
     },
     console: {
         backgroundColor: "#f5f5f5",

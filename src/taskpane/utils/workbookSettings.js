@@ -18,15 +18,7 @@ export async function saveFunctionToSettings(functionData) {
             return await Excel.run(async (context) => {
                 const settings = context.workbook.settings;
                 const key = functionData.name;
-                const value = {
-                    name: functionData.name,
-                    code: functionData.code,
-                    description: functionData.description,
-                    signature: functionData.signature,
-                    formula: functionData.formula,
-                    demo: functionData.demo || '',
-                    timestamp: functionData.timestamp
-                };
+                const value = functionData;
 
                 settings.add(key, value);
                 await context.sync();

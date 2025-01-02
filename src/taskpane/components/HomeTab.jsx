@@ -9,14 +9,6 @@ import {
 import CreateWizard from "./CreateWizard";
 
 const useStyles = makeStyles({
-    root: {
-        padding: "1rem",
-        height: "100%"
-    },
-    content: {
-        maxWidth: "800px",
-        margin: "0 auto"
-    },
     surface: {
         padding: 0,
         border: "none",
@@ -25,6 +17,20 @@ const useStyles = makeStyles({
         display: "flex",
         flexDirection: "column",
         borderRadius: 0
+    },
+    headerContent: {
+        marginBottom: "20px",
+    },
+    linkButtons: {
+        display: "flex",
+        justifyContent: "center",
+        gap: "10px",
+        marginBottom: "20px"
+    },
+    createButton: {
+        display: "flex",
+        justifyContent: "center",
+        marginBottom: "20px"
     }
 });
 
@@ -33,41 +39,60 @@ const HomeTab = () => {
     const [open, setModalOpen] = React.useState(false);
 
     return (
-        <div className={styles.root}>
-            <div className={styles.content}>
+        <div>
+            <div className={styles.headerContent}>
+                <h2>Run Python functions in Excel🚀</h2>
+                <p>For example, a Python function</p>
+                <pre><code>{`def hello(name):
+    return f"Hello {name}!"`}</code></pre>
+                <p>becomes</p>
+                <pre><code>=HELLO(name)</code></pre>
+                <p>Get started by watching the tutorial video and reading the documentation first, then launch the Function Builder.</p>
+            </div>
+
+            <div className={styles.linkButtons}>
+                <Button
+                    appearance="secondary"
+                    as="a"
+                    href="https://www.boardflare.com/apps/excel/python"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    Tutorial
+                </Button>
+                <Button
+                    appearance="secondary"
+                    as="a"
+                    href="https://www.boardflare.com/apps/excel/python"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    Documentation
+                </Button>
+                <Button
+                    appearance="secondary"
+                    as="a"
+                    href="https://www.boardflare.com/company/support"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    Support
+                </Button>
+            </div>
+
+            <div className={styles.createButton}>
                 <Dialog
                     modalType="alert"
                     open={open}
                     onOpenChange={(e, data) => setModalOpen(data.open)}
                 >
                     <DialogTrigger>
-                        <Button appearance="primary">Create New Function</Button>
+                        <Button appearance="primary">Function Builder</Button>
                     </DialogTrigger>
                     <DialogSurface className={styles.surface}>
-                        <CreateWizard />
+                        <CreateWizard onClose={() => setModalOpen(false)} />
                     </DialogSurface>
                 </Dialog>
-
-                <h1>Welcome to Python Excel Add-in</h1>
-                <p>This add-in allows you to write and execute Python code directly in Excel.</p>
-                <p>Get started by:</p>
-                <ul>
-                    <li>Switch to the Editor tab to write Python functions</li>
-                    <li>Use the Console tab to see execution output</li>
-                    <li>Check the Help tab for detailed instructions</li>
-                </ul>
-                Excel functions using Python! See{" "}
-                <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener">
-                    video
-                </a>{" "}
-                and{" "}
-                <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener">
-                    docs
-                </a>
-                .
-                🛟<a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener">
-                    Feedback Please!
-                </a>
             </div>
         </div>
     );

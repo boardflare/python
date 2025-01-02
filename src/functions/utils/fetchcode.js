@@ -19,12 +19,19 @@ export async function fetchCode(source) {
     let code;
 
     if (source.startsWith('workbook-settings:')) {
-        const functionName = source.split(':')[1];
-        const functionData = await getFunctionFromSettings(functionName);
-        if (functionData) {
-            return functionData.code;
-        } else {
-            throw new Error(`Function "${functionName}" not found in workbook settings`);
+        try {
+            const name = source.replace('workbook-settings:', '').trim();
+            if (!name) {
+                throw new Error('Function name not found in settings reference');
+            }
+            const functionData = await getFunctionFromSettings(name);
+            if (functionData) {
+                return functionData.code + (functionData.resultLine || '');
+            } else {
+                throw new Error(`Function "${name}" not found in workbook settings`);
+            }
+        } catch (error) {
+            throw new Error(`Failed to parse settings reference: ${error.message}`);
         }
     } else if (source.startsWith('https://')) {
         try {
@@ -84,6 +91,17 @@ export async function fetchCode(source) {
     } else {
         // Use code string as is
         code = source;
+    }
+
+    // Add resultLine to code string if it's not from a URL or notebook
+    if (!source.startsWith('https://') && !source.endsWith('.ipynb') && !source.endsWith('.py')) {
+        // Use code string as is and append result line
+        const name = code.match(/def\s+([a-zA-Z_][a-zA-Z0-9_]*)/)?.[1]?.toLowerCase();
+        if (name) {
+            const args = code.match(/def\s+[a-zA-Z_][a-zA-Z0-9_]*\s*\((.*?)\)/)?.[1]?.split(',')?.length || 0;
+            const argList = Array.from({ length: args }, (_, i) => `arg${i + 1}`).join(', ');
+            code += `\n\nresult = ${name}(${argList})`;
+        }
     }
 
     return code;

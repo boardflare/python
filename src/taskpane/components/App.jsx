@@ -24,7 +24,10 @@ const useStyles = makeStyles({
   },
   tabContent: {
     flex: 1,
-    overflow: "hidden"
+    overflow: "hidden",
+    padding: "0.5rem",
+    maxWidth: "800px",
+    margin: "0 auto"
   }
 });
 
@@ -72,7 +75,7 @@ const App = ({ title }) => {
       <main className={styles.main}>
         <TabList selectedValue={selectedTab} onTabSelect={handleTabSelect}>
           <Tab value="home">Home</Tab>
-          <Tab value="editor"><CodeTextEditRegular /></Tab>
+          <Tab value="editor">Edit</Tab>
           <Tab value="output">Output</Tab>
           <Tab value="functions">Functions</Tab>
         </TabList>
