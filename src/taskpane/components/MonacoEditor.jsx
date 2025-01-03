@@ -1,5 +1,4 @@
 import * as React from "react";
-import PropTypes from "prop-types";
 import Editor from "@monaco-editor/react";
 
 export const MonacoEditor = ({ value, onChange, onMount }) => {
@@ -17,7 +16,6 @@ export const MonacoEditor = ({ value, onChange, onMount }) => {
             height="100%"
             language="python"
             value={value}
-            theme="vs"
             options={{
                 fontSize: 14,
                 automaticLayout: true,
@@ -30,10 +28,4 @@ export const MonacoEditor = ({ value, onChange, onMount }) => {
             onMount={handleEditorDidMount}
         />
     );
-};
-
-MonacoEditor.propTypes = {
-    value: PropTypes.string.isRequired,
-    onChange: PropTypes.func,
-    onMount: PropTypes.func
 };
