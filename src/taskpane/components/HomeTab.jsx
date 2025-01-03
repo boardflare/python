@@ -5,9 +5,9 @@ const HomeTab = () => {
     return (
         <div>
             <div className="mb-5">
-                <h2>Run Python functions in Excel🚀</h2>
+                <h2 className="text-center text-lg">Run Python functions in Excel🚀</h2>
                 <p>For example, a Python function</p>
-                <pre><code>{`def hello(name):
+                <pre><code className="language-python">{`def hello(name):
     return f"Hello {name}!"`}</code></pre>
                 <p>becomes</p>
                 <pre><code>=HELLO(name)</code></pre>

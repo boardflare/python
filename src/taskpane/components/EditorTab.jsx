@@ -136,10 +136,11 @@ const EditorTab = ({ initialFunction, onTest }) => {
                         <option key={f.name} value={f.name}>{f.name}</option>
                     ))}
                 </select>
-                <div>
-                    <button onClick={handleReset} className="px-4 py-2 bg-gray-200 rounded m-2">Reset</button>
-                    <button onClick={handleSave} className="px-4 py-2 bg-blue-500 text-white rounded">Save</button>
-                    <button onClick={handleTest} className="px-4 py-2 bg-green-500 text-white rounded">Test</button>
+                <div className="space-x-2">
+                    foo
+                    <button onClick={handleReset} className="px-3 py-1 bg-gray-200 rounded">Reset</button>
+                    <button onClick={handleTest} className="px-3 py-1 bg-green-500 text-white rounded">Test</button>
+                    <button onClick={handleSave} className="px-3 py-1 bg-blue-500 text-white rounded">Save</button>
                 </div>
             </div>
             {notification && <div className="mt-2 text-green-600">{notification}</div>}

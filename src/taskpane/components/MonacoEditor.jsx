@@ -14,6 +14,7 @@ export const MonacoEditor = ({ value, onChange, onMount }) => {
     return (
         <Editor
             height="100%"
+            width="100%"
             language="python"
             value={value}
             options={{

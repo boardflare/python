@@ -56,7 +56,7 @@ const App = ({ title }) => {
           <button className={`px-4 py-2 ${selectedTab === "output" ? "bg-blue-500 text-white" : "bg-gray-200"}`} value="output" onClick={handleTabSelect}>Output</button>
           <button className={`px-4 py-2 ${selectedTab === "functions" ? "bg-blue-500 text-white" : "bg-gray-200"}`} value="functions" onClick={handleTabSelect}>Functions</button>
         </div>
-        <div className="flex-1 overflow-hidden p-2 max-w-3xl mx-auto">
+        <div className="flex-1 overflow-hidden p-2">
           {selectedTab === "home" && <HomeTab />}
           {selectedTab === "editor" && <EditorTab initialFunction={selectedFunction} onTest={handleTest} />}
           {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} />}
