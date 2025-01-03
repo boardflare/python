@@ -108,7 +108,7 @@ module.exports = async (env, options) => {
     devServer: {
       hot: true,
       liveReload: true,
-      watchFiles: ["src/**/*"], // Add this line
+      watchFiles: ["./src/**/*"], // Add this line
       headers: {
         "Access-Control-Allow-Origin": "*",
       },

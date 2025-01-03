@@ -15,11 +15,11 @@ const EditorTab = ({ initialFunction, onTest }) => {
     const notificationTimeoutRef = React.useRef();
     const editorRef = React.useRef(null);
 
-    const showNotification = (message) => {
+    const showNotification = (message, type = "success") => {
         if (notificationTimeoutRef.current) {
             clearTimeout(notificationTimeoutRef.current);
         }
-        setNotification(message);
+        setNotification({ message, type });
         notificationTimeoutRef.current = setTimeout(() => {
             setNotification("");
         }, 3000);
@@ -121,6 +121,12 @@ const EditorTab = ({ initialFunction, onTest }) => {
                     onMount={handleEditorDidMount}
                 />
             </div>
+            {notification && (
+                <div className={`mt-2 p-2 rounded ${notification.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+                    {notification.message}
+                </div>
+            )}
+            {error && <div className="mt-2 p-2 bg-red-100 text-red-800 rounded">{error}</div>}
             <div className="flex justify-between items-center py-2">
                 <select
                     value={selectedFunction}
@@ -137,14 +143,11 @@ const EditorTab = ({ initialFunction, onTest }) => {
                     ))}
                 </select>
                 <div className="space-x-2">
-                    foo
                     <button onClick={handleReset} className="px-3 py-1 bg-gray-200 rounded">Reset</button>
                     <button onClick={handleTest} className="px-3 py-1 bg-green-500 text-white rounded">Test</button>
                     <button onClick={handleSave} className="px-3 py-1 bg-blue-500 text-white rounded">Save</button>
                 </div>
             </div>
-            {notification && <div className="mt-2 text-green-600">{notification}</div>}
-            {error && <div className="mt-2 text-red-600">{error}</div>}
         </div>
     );
 };
