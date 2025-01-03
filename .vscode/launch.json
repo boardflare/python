@@ -9,7 +9,8 @@
       "timeout": 600000,
       "webRoot": "${workspaceRoot}",
       "preLaunchTask": "Debug: Excel Desktop",
-      "postDebugTask": "Stop Debug"
+      "postDebugTask": "Stop Debug",
+      "internalConsoleOptions": "neverOpen"
     }
   ]
 }

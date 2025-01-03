@@ -9,7 +9,7 @@ const HomeTab = () => {
                 <p>For example, a Python function</p>
                 <pre><code className="language-python">{`def hello(name):
     return f"Hello {name}!"`}</code></pre>
-                <p>becomes</p>
+                <p>becomes something cool again fast</p>
                 <pre><code>=HELLO(name)</code></pre>
                 <p>Get started by watching the tutorial video and reading the documentation first, then launch the Function Builder.</p>
             </div>

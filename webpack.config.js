@@ -19,10 +19,8 @@ module.exports = async (env, options) => {
   const config = {
     devtool: "source-map",
     entry: {
-      polyfill: ["core-js/stable", "regenerator-runtime/runtime"],
-      vendor: ["react", "react-dom", "core-js", "@fluentui/react-components", "@fluentui/react-icons"],
+      vendor: ["react", "react-dom"],
       taskpane: ["./src/taskpane/index.jsx", "./src/taskpane/home.html"],
-      commands: "./src/commands/commands.js",
       functions: "./src/functions/functions.js",
     },
     output: {
@@ -75,7 +73,7 @@ module.exports = async (env, options) => {
       new HtmlWebpackPlugin({
         filename: "home.html",
         template: "./src/taskpane/home.html",
-        chunks: ["polyfill", "vendor", "functions", "taskpane"],
+        chunks: ["vendor", "functions", "taskpane"],
       }),
       new CopyWebpackPlugin({
         patterns: [
@@ -95,11 +93,6 @@ module.exports = async (env, options) => {
             },
           },
         ],
-      }),
-      new HtmlWebpackPlugin({
-        filename: "commands.html",
-        template: "./src/commands/commands.html",
-        chunks: ["polyfill", "commands"],
       }),
       new webpack.ProvidePlugin({
         Promise: ["es6-promise", "Promise"],
