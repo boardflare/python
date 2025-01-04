@@ -3,11 +3,11 @@ import { useState, useEffect } from "react";
 import { codeToHtml } from 'shiki';
 
 const exCode = `def hello(name):
-    """ Returns a greeting message. """
+    """ Says hello. """
     message = f"Hello {name}!"
     return message`;
 
-const HomeTab = () => {
+const HomeTab = ({ onEditorClick }) => {
     const [exCodeHtml, setExCodeHtml] = useState("");
 
     useEffect(() => {
@@ -22,45 +22,25 @@ const HomeTab = () => {
     }, []);
 
     return (
-        <div>
+        <>
             <div className="mb-5">
-                <h2 className="text-center text-lg">Use Python functions in Excel🚀</h2>
-                <p className="py-1"><span className="font-bold bg-gray-200">Step 1:</span> Write a Python function.</p>
-                <div className="py-2" dangerouslySetInnerHTML={{ __html: exCodeHtml }} />
-                <p className="py-1"><span className="font-bold bg-gray-200">Step 2:</span> Use it in Excel as a named LAMBDA.</p>
-                <pre className="py-2"><code>=HELLO(name)</code></pre>
-                💻 Code is stored and run locally.<br />
-                🆓 100% free for unlimited use.<br />
-                <p className="py-1">We highly recommend watching the tutorial video and reading the documentation.  Then get started creating your first function using the Editor.</p>
+                <h2 className="text-center text-lg font-semibold mb-2">Use Python functions in Excel</h2>
+                <div className="py-1 bg-gray-200 shadow-md rounded-lg p-3 mb-4">
+                    <p><span className="font-bold">Step 1:</span> Write a Python function.</p>
+                    <div className="py-2" dangerouslySetInnerHTML={{ __html: exCodeHtml }} />
+                </div>
+                <div className="py-1 bg-gray-200 shadow-md rounded-lg p-4 mb-4">
+                    <p><span className="font-bold">Step 2:</span> Use it as a named LAMBDA function.</p>
+                    <div className="p-1 mt-1 bg-white"><code>=HELLO("Annie")</code> <br /><code>Hello Annie</code></div>
+                </div>
+                <p className="mb-1">Check out the <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">tutorial video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>, then use the <span className="text-blue-500 underline cursor-pointer" onClick={onEditorClick}>editor</span> to create/edit functions.</p>
+                <p className="mb-1">  Uses <code>BOARDFLARE.RUNPY</code> function under the hood, which can still be used directly.</p>
+                <p className="mb-1">  We'd really appreciate it if you'd <a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener" className="text-blue-500 underline">email us</a> if you find any bugs or have suggestions.🙂</p>
             </div>
-
-            <div className="flex justify-center gap-2.5 mb-5">
-                <a
-                    className="btn-secondary"
-                    href="https://www.boardflare.com/apps/excel/python"
-                    target="_blank"
-                    rel="noopener"
-                >
-                    Tutorial
-                </a>
-                <a
-                    className="btn-secondary"
-                    href="https://www.boardflare.com/apps/excel/python"
-                    target="_blank"
-                    rel="noopener"
-                >
-                    Documentation
-                </a>
-                <a
-                    className="btn-secondary"
-                    href="https://www.boardflare.com/company/support"
-                    target="_blank"
-                    rel="noopener"
-                >
-                    Support
-                </a>
+            <div className="fixed bottom-0 left-0 right-0 bg-gray-100 text-left py-2">
+                ⬅️ PRO Tip: Drag your task pane open for room.
             </div>
-        </div>
+        </>
     );
 };
 

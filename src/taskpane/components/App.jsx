@@ -47,17 +47,21 @@ const App = ({ title }) => {
     setSelectedTab("output");
   };
 
+  const handleEditorClick = () => {
+    setSelectedTab("editor");
+  };
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <main className="flex-1 flex flex-col overflow-hidden min-h-0">
-        <div className="flex space-x-2 p-2 border-b">
-          <button className={`px-4 py-2 ${selectedTab === "home" ? "bg-blue-500 text-white" : "bg-gray-200"}`} value="home" onClick={handleTabSelect}>Home</button>
-          <button className={`px-4 py-2 ${selectedTab === "editor" ? "bg-blue-500 text-white" : "bg-gray-200"}`} value="editor" onClick={handleTabSelect}>Edit</button>
-          <button className={`px-4 py-2 ${selectedTab === "output" ? "bg-blue-500 text-white" : "bg-gray-200"}`} value="output" onClick={handleTabSelect}>Output</button>
-          <button className={`px-4 py-2 ${selectedTab === "functions" ? "bg-blue-500 text-white" : "bg-gray-200"}`} value="functions" onClick={handleTabSelect}>Functions</button>
+        <div className="flex space p-0 border-b">
+          <button className={`flex-grow px-2 py-2 ${selectedTab === "home" ? "border-b-2 border-blue-500" : ""}`} value="home" onClick={handleTabSelect}>Home</button>
+          <button className={`flex-grow px-2 py-2 ${selectedTab === "editor" ? "border-b-2 border-blue-500" : ""}`} value="editor" onClick={handleTabSelect}>Editor</button>
+          <button className={`flex-grow px-2 py-2 ${selectedTab === "functions" ? "border-b-2 border-blue-500" : ""}`} value="functions" onClick={handleTabSelect}>Functions</button>
+          <button className={`flex-grow px-2 py-2 mr-2 ${selectedTab === "output" ? "border-b-2 border-blue-500" : ""}`} value="output" onClick={handleTabSelect}>Logs</button>
         </div>
         <div className="flex-1 overflow-hidden p-2">
-          {selectedTab === "home" && <HomeTab />}
+          {selectedTab === "home" && <HomeTab onEditorClick={handleEditorClick} />}
           {selectedTab === "editor" && <EditorTab initialFunction={selectedFunction} onTest={handleTest} />}
           {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} />}
           {selectedTab === "functions" && <FunctionsTab onEdit={handleFunctionEdit} />}
