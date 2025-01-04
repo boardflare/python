@@ -23,7 +23,7 @@ const HomeTab = ({ onEditorClick }) => {
 
     return (
         <>
-            <div className="mb-5">
+            <div className="p-2 mb-5">
                 <h2 className="text-center text-lg font-semibold mb-2">Use Python functions in Excel</h2>
                 <div className="py-1 bg-gray-200 shadow-md rounded-lg p-3 mb-4">
                     <p><span className="font-bold">Step 1:</span> Write a Python function.</p>

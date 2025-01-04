@@ -130,6 +130,19 @@ const EditorTab = ({ initialFunction, onTest }) => {
                 </div>
             )}
             {error && <div className="mt-2 p-2 bg-red-100 text-red-800 rounded">{error}</div>}
+            {selectedFunction === "" && (
+                <div className="mt-2 p-2 bg-yellow-100 rounded">
+                    <h2 className="font-semibold mb-1">
+                        💡Quick Tips: <span className="font-normal">see also <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>.</span>
+                    </h2>
+                    <ul className="text-yellow-800 list-disc pl-5">
+                        <li><span className="font-semibold">Naming:</span> Excel function names and arguments will be the same as Python.</li>
+                        <li><span className="font-semibold">Docstrings:</span> First line in docstring becomes the function description in Excel.</li>
+                        <li><span className="font-semibold">Arguments:</span> Scalar arguments in Excel are converted to Python scalars. Array arguments become Pandas DataFrames.</li>
+                        <li><span className="font-semibold">Test Cases:</span> The test_cases variable holds an array of test cases which will be run when you click the test button.</li>
+                    </ul>
+                </div>
+            )}
             <div className="flex justify-between items-center py-2">
                 <select
                     value={selectedFunction}

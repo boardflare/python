@@ -60,7 +60,7 @@ const App = ({ title }) => {
           <button className={`flex-grow px-2 py-2 ${selectedTab === "functions" ? "border-b-2 border-blue-500" : ""}`} value="functions" onClick={handleTabSelect}>Functions</button>
           <button className={`flex-grow px-2 py-2 mr-2 ${selectedTab === "output" ? "border-b-2 border-blue-500" : ""}`} value="output" onClick={handleTabSelect}>Logs</button>
         </div>
-        <div className="flex-1 overflow-hidden px-1">
+        <div className="flex-1 overflow-hidden">
           {selectedTab === "home" && <HomeTab onEditorClick={handleEditorClick} />}
           {selectedTab === "editor" && <EditorTab initialFunction={selectedFunction} onTest={handleTest} />}
           {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} />}
