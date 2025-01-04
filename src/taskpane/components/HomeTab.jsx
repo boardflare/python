@@ -37,9 +37,6 @@ const HomeTab = ({ onEditorClick }) => {
                 <p className="mb-1">  Uses <code>BOARDFLARE.RUNPY</code> function under the hood, which can still be used directly.</p>
                 <p className="mb-1">  We'd really appreciate it if you'd <a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener" className="text-blue-500 underline">email us</a> if you find any bugs or have suggestions.🙂</p>
             </div>
-            <div className="fixed bottom-0 left-0 right-0 bg-gray-100 text-left py-2">
-                ⬅️ PRO Tip: Drag your task pane open for room.
-            </div>
         </>
     );
 };

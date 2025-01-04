@@ -115,6 +115,9 @@ const EditorTab = ({ initialFunction, onTest }) => {
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
+            <div className="text-left">
+                ⬅️ PRO Tip: Drag your task pane open for more space.
+            </div>
             <div className="flex-1 overflow-hidden mt-2">
                 <MonacoEditor
                     value={DEFAULT_CODE}
@@ -143,9 +146,9 @@ const EditorTab = ({ initialFunction, onTest }) => {
                     ))}
                 </select>
                 <div className="space-x-2">
-                    <button onClick={handleReset} className="px-3 py-1 bg-gray-200 rounded">Reset</button>
-                    <button onClick={handleTest} className="px-3 py-1 bg-green-500 text-white rounded">Test</button>
-                    <button onClick={handleSave} className="px-3 py-1 bg-blue-500 text-white rounded">Save</button>
+                    <button onClick={handleReset} className="px-2 py-1 bg-gray-200 rounded">Reset</button>
+                    <button onClick={handleTest} className="px-2 py-1 bg-green-500 text-white rounded">Test</button>
+                    <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
                 </div>
             </div>
         </div>
