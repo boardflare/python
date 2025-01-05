@@ -5,6 +5,8 @@ import { DEFAULT_CODE } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
 import { runPy } from "../../functions/runpy/controller";
 import { EventTypes } from "../utils/constants";
+import { updateNameManager } from "../utils/nameManager";
+import { addDemo } from "../utils/demo";
 
 const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
     const [notification, setNotification] = React.useState("");
@@ -75,6 +77,8 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
             setSelectedFunction({ name: parsedFunction.name, code }); // Update parent state
             const result = await saveFunctionToSettings(parsedFunction);
             if (result) {
+                await updateNameManager(parsedFunction);
+                await addDemo(parsedFunction);
                 showNotification("Function saved successfully!");
                 const updatedFunctions = await getFunctionFromSettings();
                 setFunctions(updatedFunctions);
