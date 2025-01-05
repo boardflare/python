@@ -31,7 +31,7 @@ const HomeTab = ({ onEditorClick }) => {
                 </div>
                 <div className="py-1 bg-gray-200 shadow-md rounded-lg p-4 mb-4">
                     <p><span className="font-bold">Step 2:</span> Use it as a named LAMBDA function.</p>
-                    <div className="p-1 mt-1 bg-white"><code>=HELLO("Annie")</code> <br /><code>Hello Annie</code></div>
+                    <div className="p-1 mt-1 bg-white"><code>=HELLO("Annie")</code> <br /><code>Hello Annie!</code></div>
                 </div>
                 <p className="mb-1">Check out the <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">tutorial video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>, then use the <span className="text-blue-500 underline cursor-pointer" onClick={onEditorClick}>editor</span> to create/edit functions.</p>
                 <p className="mb-1">  The <code>BOARDFLARE.RUNPY</code> function can be used directly if you don't want a named LAMBDA.</p>
