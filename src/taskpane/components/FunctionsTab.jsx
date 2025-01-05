@@ -1,15 +1,7 @@
 import * as React from "react";
 import { getFunctionFromSettings } from "../utils/workbookSettings";
 
-const EmptyState = () => (
-    <div className="flex flex-col items-center justify-center h-full p-5 text-center text-gray-600">
-        <div className="text-4xl mb-4">📝</div>
-        <div className="text-base mb-2">No functions found</div>
-        <div>Create new functions using the Editor tab</div>
-    </div>
-);
-
-const FunctionsGrid = ({ onEdit }) => {
+const FunctionsTab = ({ onEdit }) => {
     const [functions, setFunctions] = React.useState([]);
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState(null);
@@ -52,15 +44,21 @@ const FunctionsGrid = ({ onEdit }) => {
     }
 
     if (!functions.length) {
-        return <EmptyState />;
+        return (
+            <div className="flex flex-col items-center justify-center h-full p-5 text-center text-gray-600">
+                <div className="text-4xl mb-4">📝</div>
+                <div className="text-base mb-2">No functions found</div>
+                <div>Create new functions using the Editor tab</div>
+            </div>
+        );
     }
 
     return (
-        <div className="overflow-x-auto">
+        <div className="h-full overflow-x-auto">
             <table className="min-w-full bg-white">
                 <thead>
                     <tr>
-                        <th className="py-2 px-4 border-b">Function Name</th>
+                        <th className="py-2 px-4 border-b">Name</th>
                         <th className="py-2 px-4 border-b">Description</th>
                         <th className="py-2 px-4 border-b">Actions</th>
                     </tr>
@@ -82,14 +80,6 @@ const FunctionsGrid = ({ onEdit }) => {
                     ))}
                 </tbody>
             </table>
-        </div>
-    );
-};
-
-export const FunctionsTab = ({ onEdit }) => {
-    return (
-        <div className="h-full">
-            <FunctionsGrid onEdit={onEdit} />
         </div>
     );
 };

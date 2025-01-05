@@ -7,10 +7,8 @@ export const DEFAULT_CODE = `def hello(first, last):
     greeting = f"Hello {first} {last}!"
     return greeting
     
-# Test Cases: [[arg1, arg2], [arg1, arg2]]
-test_cases = [["Nancy", "Morgan"], ["Ming", "Lee"]]
-`;
-
+# Example arguments:
+examples = [["Nancy", "Morgan"], ["Ming", "Lee"]]`;
 
 export const EventTypes = {
     LOG: 'console:log',

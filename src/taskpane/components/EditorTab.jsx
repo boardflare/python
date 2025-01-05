@@ -116,7 +116,7 @@ const EditorTab = ({ initialFunction, onTest }) => {
     return (
         <div className="flex flex-col h-full overflow-hidden">
             <div className="text-left">
-                ⬅️ PRO Tip: Drag your task pane open for more space.
+                ⬅️ Drag task pane open for more space.
             </div>
             <div className="flex-1 overflow-hidden mt-2">
                 <MonacoEditor
@@ -136,10 +136,10 @@ const EditorTab = ({ initialFunction, onTest }) => {
                         💡Quick Tips: <span className="font-normal">see also <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>.</span>
                     </h2>
                     <ul className="text-yellow-800 list-disc pl-5">
-                        <li><span className="font-semibold">Naming:</span> Excel function names and arguments will be the same as Python.</li>
+                        <li><span className="font-semibold">Naming:</span> Excel function names and arguments will be the same as the Python function.</li>
                         <li><span className="font-semibold">Docstrings:</span> First line in docstring becomes the function description in Excel.</li>
-                        <li><span className="font-semibold">Arguments:</span> Scalar arguments in Excel are converted to Python scalars. Array arguments become Pandas DataFrames.</li>
-                        <li><span className="font-semibold">Test Cases:</span> The test_cases variable holds an array of test cases which will be run when you click the test button.</li>
+                        <li><span className="font-semibold">Arguments:</span> Array arguments in Excel are converted to Pandas DataFrames.</li>
+                        <li><span className="font-semibold">Examples:</span> Examples will be used when you click the Run button.</li>
                     </ul>
                 </div>
             )}
@@ -160,7 +160,7 @@ const EditorTab = ({ initialFunction, onTest }) => {
                 </select>
                 <div className="space-x-2">
                     <button onClick={handleReset} className="px-2 py-1 bg-gray-200 rounded">Reset</button>
-                    <button onClick={handleTest} className="px-2 py-1 bg-green-500 text-white rounded">Test</button>
+                    <button onClick={handleTest} className="px-2 py-1 bg-green-500 text-white rounded">Run</button>
                     <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
                 </div>
             </div>
