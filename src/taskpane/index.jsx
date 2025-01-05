@@ -1,7 +1,6 @@
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./components/App";
-import { FluentProvider, webLightTheme } from "@fluentui/react-components";
 import './index.css';  // Add this import
 
 // Global window properties
@@ -51,9 +50,7 @@ if (rootElement) {
     await initializeBrowserInfo();
 
     root.render(
-      <FluentProvider theme={webLightTheme}>
-        <App title={window.appName} />
-      </FluentProvider>
+      <App title={window.appName} />
     );
   });
 
@@ -61,9 +58,7 @@ if (rootElement) {
     module.hot.accept("./components/App", () => {
       const NextApp = require("./components/App").default;
       root.render(
-        <FluentProvider theme={webLightTheme}>
-          <NextApp title={window.appName} />
-        </FluentProvider>
+        <NextApp title={window.appName} />
       );
     });
   }
