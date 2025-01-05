@@ -22,14 +22,18 @@ export async function addDemo(parsedCode) {
 
             // Add explanation text in first column then merge
             const explanationRange = sheet.getRangeByIndexes(0, 0, 1, 1);
-            explanationRange.values = [[`Example invocations of the ${parsedCode.name.toUpperCase()} function based on the examples array. This sheet is overwritten on each save.`]];
-            // explanationRange.format.wrapText = true;
+            explanationRange.values = [[`Example invocations of the ${parsedCode.name.toUpperCase()} function based on the examples array are shown below. If an example returns an array more than two columns wide, use it as your last example, otherwise you will get a #SPILL! error.  This sheet is overwritten on each save. `]];
             explanationRange.format.fill.color = "#FFFFE0";
 
-            // Merge after setting the value
+            // Merge cells first
             if (totalColumns > 1) {
                 sheet.getRangeByIndexes(0, 0, 1, totalColumns).merge();
             }
+
+            // Set wrap text adjust row height
+            explanationRange.format.wrapText = true;
+            explanationRange.format.rowHeight = 50;
+            explanationRange.format.verticalAlignment = 'Top';
 
             // Create header row with proper dimensions
             const headerValues = [];
@@ -74,7 +78,6 @@ export async function addDemo(parsedCode) {
 
             // Activate the sheet
             sheet.activate();
-            await context.sync();
             await context.sync();
 
         } catch (error) {
