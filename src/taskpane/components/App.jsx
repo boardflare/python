@@ -7,7 +7,7 @@ import { EventTypes } from "../utils/constants";
 
 const App = ({ title }) => {
   const [selectedTab, setSelectedTab] = React.useState("home");
-  const [selectedFunction, setSelectedFunction] = React.useState("");
+  const [selectedFunction, setSelectedFunction] = React.useState({ name: "", code: "" });
   const [logs, setLogs] = React.useState([]);
 
   React.useEffect(() => {
@@ -39,7 +39,7 @@ const App = ({ title }) => {
   };
 
   const handleFunctionEdit = (functionName) => {
-    setSelectedFunction(functionName);
+    setSelectedFunction({ name: functionName, code: "" }); // code will be set by EditorTab when loaded
     setSelectedTab("editor");
   };
 
@@ -62,7 +62,13 @@ const App = ({ title }) => {
         </div>
         <div className="flex-1 overflow-hidden">
           {selectedTab === "home" && <HomeTab onEditorClick={handleEditorClick} />}
-          {selectedTab === "editor" && <EditorTab initialFunction={selectedFunction} onTest={handleTest} />}
+          {selectedTab === "editor" && (
+            <EditorTab
+              selectedFunction={selectedFunction}
+              setSelectedFunction={setSelectedFunction}
+              onTest={handleTest}
+            />
+          )}
           {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} />}
           {selectedTab === "functions" && <FunctionsTab onEdit={handleFunctionEdit} />}
         </div>

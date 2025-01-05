@@ -6,12 +6,11 @@ import { parsePython } from "../utils/codeparser";
 import { runPy } from "../../functions/runpy/controller";
 import { EventTypes } from "../utils/constants";
 
-const EditorTab = ({ initialFunction, onTest }) => {
+const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
     const [notification, setNotification] = React.useState("");
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState(null);
     const [functions, setFunctions] = React.useState([]);
-    const [selectedFunction, setSelectedFunction] = React.useState("");
     const notificationTimeoutRef = React.useRef();
     const editorRef = React.useRef(null);
 
@@ -49,17 +48,22 @@ const EditorTab = ({ initialFunction, onTest }) => {
     }, []);
 
     React.useEffect(() => {
-        if (initialFunction && editorRef.current) {
-            const func = functions.find(f => f.name === initialFunction);
+        if (selectedFunction.name && editorRef.current) {
+            const func = functions.find(f => f.name === selectedFunction.name);
             if (func) {
                 editorRef.current.setValue(func.code);
-                setSelectedFunction(initialFunction);
+                setSelectedFunction(func);
             }
         }
-    }, [initialFunction, functions]);
+    }, [selectedFunction.name, functions]);
 
     const handleEditorDidMount = (editor, monaco) => {
         editorRef.current = editor;
+        if (selectedFunction.code) {
+            editor.setValue(selectedFunction.code);
+        } else {
+            editor.setValue(DEFAULT_CODE);
+        }
     };
 
     const handleSave = async () => {
@@ -68,12 +72,13 @@ const EditorTab = ({ initialFunction, onTest }) => {
             setError(null);
             const code = editorRef.current.getValue();
             const parsedFunction = parsePython(code);
+            setSelectedFunction({ name: parsedFunction.name, code }); // Update parent state
             const result = await saveFunctionToSettings(parsedFunction);
             if (result) {
                 showNotification("Function saved successfully!");
                 const updatedFunctions = await getFunctionFromSettings();
                 setFunctions(updatedFunctions);
-                setSelectedFunction(parsedFunction.name);
+                setSelectedFunction(parsedFunction);
                 // No need to setValue here as the editor already has the correct code
             } else {
                 showNotification("Failed to save function", "error");
@@ -89,7 +94,7 @@ const EditorTab = ({ initialFunction, onTest }) => {
     const handleReset = () => {
         if (editorRef.current) {
             editorRef.current.setValue(DEFAULT_CODE);
-            setSelectedFunction("");
+            setSelectedFunction({ name: "", code: DEFAULT_CODE });
             setError(null);
             setNotification("");
         }
@@ -119,13 +124,14 @@ const EditorTab = ({ initialFunction, onTest }) => {
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
-            <div className="text-left">
+            <div className="text-left bg-yellow-100">
                 ⬅️ Drag task pane open for more space.
             </div>
             <div className="flex-1 overflow-hidden mt-2">
                 <MonacoEditor
-                    value={DEFAULT_CODE}
+                    value={selectedFunction.code || DEFAULT_CODE}
                     onMount={handleEditorDidMount}
+                    onChange={(value) => setSelectedFunction(prev => ({ ...prev, code: value }))}
                 />
             </div>
             {notification && (
@@ -134,7 +140,7 @@ const EditorTab = ({ initialFunction, onTest }) => {
                 </div>
             )}
             {error && <div className="mt-2 p-2 bg-red-100 text-red-800 rounded">{error}</div>}
-            {selectedFunction === "" && (
+            {selectedFunction.name === "" && (
                 <div className="mt-2 p-2 bg-yellow-100 rounded">
                     <h2 className="font-semibold mb-1">
                         💡Quick Tips: <span className="font-normal">see also <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>.</span>
@@ -149,11 +155,12 @@ const EditorTab = ({ initialFunction, onTest }) => {
             )}
             <div className="flex justify-between items-center py-2">
                 <select
-                    value={selectedFunction}
+                    value={selectedFunction.name}
                     onChange={(e) => {
-                        const selectedCode = functions.find(f => f.name === e.target.value)?.code || DEFAULT_CODE;
-                        editorRef.current.setValue(selectedCode);
-                        setSelectedFunction(e.target.value);
+                        const func = functions.find(f => f.name === e.target.value);
+                        const newCode = func?.code || DEFAULT_CODE;
+                        editorRef.current.setValue(newCode);
+                        setSelectedFunction({ name: e.target.value, code: newCode });
                     }}
                     className="px-2 py-1 border rounded"
                 >
