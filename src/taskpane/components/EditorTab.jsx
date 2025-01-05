@@ -71,14 +71,16 @@ const EditorTab = ({ initialFunction, onTest }) => {
             const result = await saveFunctionToSettings(parsedFunction);
             if (result) {
                 showNotification("Function saved successfully!");
-                setFunctions(await getFunctionFromSettings());
-                setSelectedFunction(parsedFunction.name); // Use parsedFunction directly
+                const updatedFunctions = await getFunctionFromSettings();
+                setFunctions(updatedFunctions);
+                setSelectedFunction(parsedFunction.name);
+                // No need to setValue here as the editor already has the correct code
             } else {
-                showNotification("Failed to save function");
+                showNotification("Failed to save function", "error");
             }
         } catch (err) {
             setError(err.message);
-            showNotification("Error saving function");
+            showNotification(err.message, "error");
         } finally {
             setIsLoading(false);
         }
@@ -88,6 +90,8 @@ const EditorTab = ({ initialFunction, onTest }) => {
         if (editorRef.current) {
             editorRef.current.setValue(DEFAULT_CODE);
             setSelectedFunction("");
+            setError(null);
+            setNotification("");
         }
     };
 
