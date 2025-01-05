@@ -146,12 +146,13 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
                     <h2 className="font-semibold mb-1">
                         💡Quick Tips: <span className="font-normal">see also <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>.</span>
                     </h2>
-                    <h2 className="font-semibold"> ⬅️ Drag task pane open for more space!</h2>
+                    <h2 className="font-semibold"> ⬅️ Drag task pane open for more room.</h2>
+                    <h2 className="font-semibold"> 🚀 For a quick demo of HELLO, just click Save.</h2>
                     <ul className="list-disc pl-5">
-                        <li>Function names must be unique.</li>
-                        <li>Docstring becomes the function description in Excel.</li>
-                        <li>Array arguments are converted to Pandas DataFrames.</li>
-                        <li>Examples will be used when you click the Run button.</li>
+                        <li>Saving a function with the same name as an existing function will update the code.</li>
+                        <li>The first line of the docstring becomes the function description in Excel.</li>
+                        <li>Array arguments in Excel are converted to Pandas DataFrames.</li>
+                        <li>Examples will be used to test your function when you click the Run button, and to create a demo sheet on Save.</li>
                     </ul>
                 </div>
             )}
