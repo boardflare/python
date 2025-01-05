@@ -96,6 +96,7 @@ const EditorTab = ({ initialFunction, onTest }) => {
     };
 
     const handleTest = async () => {
+        onTest(); // Call this first to switch tabs immediately
         try {
             setIsLoading(true);
             setError(null);
@@ -108,7 +109,6 @@ const EditorTab = ({ initialFunction, onTest }) => {
                 const result = await runPy(parsedFunction.code, parsedFunction.examplesAsRunpyArgs[i]);
                 window.dispatchEvent(new CustomEvent(EventTypes.LOG, { detail: JSON.stringify(result) }));
             }
-            onTest();
         } catch (err) {
             setError(err.message);
             window.dispatchEvent(new CustomEvent(EventTypes.ERROR, { detail: err.message }));
