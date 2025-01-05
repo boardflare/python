@@ -142,12 +142,12 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
                     <h2 className="font-semibold mb-1">
                         💡Quick Tips: <span className="font-normal">see also <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>.</span>
                     </h2>
-                    ⬅️ Drag task pane open for more space.
-                    <ul className="text-yellow-800 list-disc pl-5">
-                        <li><span className="font-semibold">Naming:</span> Excel function names and arguments will be the same as the Python function.</li>
-                        <li><span className="font-semibold">Docstrings:</span> First line in docstring becomes the function description in Excel.</li>
-                        <li><span className="font-semibold">Arguments:</span> Array arguments in Excel are converted to Pandas DataFrames.</li>
-                        <li><span className="font-semibold">Examples:</span> Examples will be used when you click the Run button.</li>
+                    <h2 className="font-semibold"> ⬅️ Drag task pane open for more space!</h2>
+                    <ul className="list-disc pl-5">
+                        <li>Function names must be unique.</li>
+                        <li>Docstring becomes the function description in Excel.</li>
+                        <li>Array arguments are converted to Pandas DataFrames.</li>
+                        <li>Examples will be used when you click the Run button.</li>
                     </ul>
                 </div>
             )}
