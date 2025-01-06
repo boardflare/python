@@ -60,7 +60,7 @@ module.exports = async (env, options) => {
           test: /\.(png|jpg|jpeg|ttf|woff|woff2|gif|ico)$/,
           type: "asset/resource",
           generator: {
-            filename: "assets/[name][ext][query]",
+            filename: "images/[name][ext][query]",
           },
         },
       ],
@@ -78,8 +78,8 @@ module.exports = async (env, options) => {
       new CopyWebpackPlugin({
         patterns: [
           {
-            from: "assets/*",
-            to: "assets/[name][ext][query]",
+            from: "images/*",
+            to: "images/[name][ext][query]",
           },
           {
             from: "manifest*.xml",
