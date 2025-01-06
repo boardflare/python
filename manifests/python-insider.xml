@@ -21,9 +21,9 @@
   <DisplayName DefaultValue="Python for Excel" />
   <Description DefaultValue="Run Python locally in Excel." />
   <!-- Icon for your add-in. Used on installation screens and the add-ins dialog. -->
-  <IconUrl DefaultValue="https://python-insider.boardflare.com/assets/icon-32.png" />
+  <IconUrl DefaultValue="https://python-insider.boardflare.com/images/icon-32.png" />
   <HighResolutionIconUrl
-    DefaultValue="https://python-insider.boardflare.com/assets/icon-64.png" />
+    DefaultValue="https://python-insider.boardflare.com/images/icon-64.png" />
   <SupportUrl DefaultValue="https://www.boardflare.com/company/support" />
 
   <!-- Domains here can be navigated to within task pane. -->
@@ -157,11 +157,11 @@
     <Resources>
       <bt:Images>
         <bt:Image id="BF.tpicon_16x16"
-          DefaultValue="https://python-insider.boardflare.com/assets/icon-16.png" />
+          DefaultValue="https://python-insider.boardflare.com/images/icon-16.png" />
         <bt:Image id="BF.tpicon_32x32"
-          DefaultValue="https://python-insider.boardflare.com/assets/icon-32.png" />
+          DefaultValue="https://python-insider.boardflare.com/images/icon-32.png" />
         <bt:Image id="BF.tpicon_80x80"
-          DefaultValue="https://python-insider.boardflare.com/assets/icon-80.png" />
+          DefaultValue="https://python-insider.boardflare.com/images/icon-80.png" />
       </bt:Images>
       <bt:Urls>
         <bt:Url id="BF.CustomFunctions.Script"
