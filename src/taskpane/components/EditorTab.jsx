@@ -112,10 +112,10 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
             const code = editorRef.current.getValue();
             const parsedFunction = parsePython(code);
             window.dispatchEvent(new CustomEvent(EventTypes.CLEAR));
-            for (let i = 0; i < parsedFunction.examples.length; i++) {
-                const example = parsedFunction.examples[i];
-                window.dispatchEvent(new CustomEvent(EventTypes.LOG, { detail: `Running: =${parsedFunction.name.toUpperCase()}(${example.join(', ')})` }));
-                const result = await runPy(parsedFunction.code, parsedFunction.examplesAsRunpyArgs[i]);
+            for (let i = 0; i < parsedFunction.test_cases.length; i++) {
+                const test_case = parsedFunction.test_cases[i];
+                window.dispatchEvent(new CustomEvent(EventTypes.LOG, { detail: `Running: =${parsedFunction.name.toUpperCase()}(${test_case.join(', ')})` }));
+                const result = await runPy(parsedFunction.code, parsedFunction.test_casesAsRunpyArgs[i]);
                 window.dispatchEvent(new CustomEvent(EventTypes.LOG, { detail: JSON.stringify(result) }));
             }
         } catch (err) {
@@ -152,7 +152,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
                         <li>Saving a function with the same name as an existing function will update the code.</li>
                         <li>The first line of the docstring becomes the function description in Excel.</li>
                         <li>Array arguments in Excel are converted to Pandas DataFrames.</li>
-                        <li>Examples will be used to test your function when you click the Run button, and to create a demo sheet on Save.</li>
+                        <li>Test cases will be used to test your function when you click the Run button, and to create a demo sheet on Save.</li>
                     </ul>
                 </div>
             )}

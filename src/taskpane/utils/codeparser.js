@@ -25,22 +25,22 @@ export function parsePython(rawCode) {
         ? docstringMatch[1].split('\n')[0].trim().slice(0, 255)
         : 'No description available';
 
-    const formatExampleAsMatrix = (example) => {
-        return example.map(arg => [[arg]]);
+    const formatExampleAsMatrix = (test_case) => {
+        return test_case.map(arg => [[arg]]);
     };
 
-    // Parse examples directly from rawCode
-    const examplesMatch = rawCode.match(/examples\s*=\s*(\[[\s\S]*\](?=\s|$))/);
-    let examples = [];
-    let examplesAsRunpyArgs = [];
-    if (examplesMatch) {
-        const exampleStr = examplesMatch[1].trim();
-        console.log('Parsing examples:', exampleStr);
+    // Parse test_cases directly from rawCode
+    const test_casesMatch = rawCode.match(/test_cases\s*=\s*(\[[\s\S]*\](?=\s|$))/);
+    let test_cases = [];
+    let test_casesAsRunpyArgs = [];
+    if (test_casesMatch) {
+        const test_caseStr = test_casesMatch[1].trim();
+        console.log('Parsing test_cases:', test_caseStr);
         try {
-            examples = JSON.parse(exampleStr.replace(/'/g, '"'));
-            examplesAsRunpyArgs = examples.map(formatExampleAsMatrix);
+            test_cases = JSON.parse(test_caseStr.replace(/'/g, '"'));
+            test_casesAsRunpyArgs = test_cases.map(formatExampleAsMatrix);
         } catch (e) {
-            console.warn('Failed to parse examples:', e);
+            console.warn('Failed to parse test_cases:', e);
         }
     }
 
@@ -83,7 +83,7 @@ export function parsePython(rawCode) {
         formula,
         timestamp,
         uid,
-        examples,
-        examplesAsRunpyArgs
+        test_cases,
+        test_casesAsRunpyArgs
     };
 }

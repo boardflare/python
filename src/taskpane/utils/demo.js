@@ -16,13 +16,13 @@ export async function addDemo(parsedCode) {
             sheet = context.workbook.worksheets.add(sheetName);
             await context.sync();
 
-            // Calculate total columns needed (3 columns per example: 1 for data, 2 for gap)
-            const examples = parsedCode.examples || [];
-            const totalColumns = Math.max(examples.length * 3, 1); // Ensure at least 1 column
+            // Calculate total columns needed (3 columns per test case: 1 for data, 2 for gap)
+            const test_cases = parsedCode.test_cases || [];
+            const totalColumns = Math.max(test_cases.length * 3, 1); // Ensure at least 1 column
 
             // Add explanation text in first column then merge
             const explanationRange = sheet.getRangeByIndexes(0, 0, 1, 1);
-            explanationRange.values = [[`Example invocations of the ${parsedCode.name.toUpperCase()} function based on the examples array are shown below. If an example returns an array more than two columns wide, use it as your last example, otherwise you will get a #SPILL! error.  This sheet is overwritten on each save. `]];
+            explanationRange.values = [[`Example invocations of the ${parsedCode.name.toUpperCase()} function based on the test_cases array are shown below. If a test case returns an array more than two columns wide, use it as your last test case, otherwise you will get a #SPILL! error.  This sheet is overwritten on each save. `]];
             explanationRange.format.fill.color = "#FFFFE0";
 
             // Merge cells first
@@ -44,9 +44,9 @@ export async function addDemo(parsedCode) {
             headerRange.values = [headerValues];
 
             // Format headers and set column widths
-            examples.forEach((_, index) => {
+            test_cases.forEach((_, index) => {
                 const columnIndex = index * 3;
-                // Set width for example column using proper Excel API method
+                // Set width for test case column using proper Excel API method
                 const columnRange = sheet.getRangeByIndexes(0, columnIndex, 1, 1);
                 columnRange.format.columnWidth = 200;
 
@@ -56,12 +56,12 @@ export async function addDemo(parsedCode) {
                 exampleHeaderRange.format.borders.getItem('EdgeBottom').style = 'Continuous';
             });
 
-            if (examples.length > 0) {
+            if (test_cases.length > 0) {
                 context.workbook.application.suspendApiCalculationUntilNextSync();
 
-                examples.forEach((example, index) => {
+                test_cases.forEach((test_case, index) => {
                     const columnIndex = index * 3;
-                    const args = Array.isArray(example) ? example : [example];
+                    const args = Array.isArray(test_case) ? test_case : [test_case];
                     const formattedArgs = args.map(arg => {
                         if (typeof arg === 'string') return `"${arg}"`;
                         if (Array.isArray(arg)) return `{${arg.join(';')}}`;

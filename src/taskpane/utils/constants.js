@@ -8,7 +8,7 @@ export const DEFAULT_CODE = `def hello(first, last):
     return greeting
     
 # Example arguments:
-examples = [["Nancy", "Morgan"], ["Ming", "Lee"]]`;
+test_cases = [["Nancy", "Morgan"], ["Ming", "Lee"]]`;
 
 export const EventTypes = {
     LOG: 'console:log',
@@ -45,5 +45,5 @@ const comments = `# Quick overview in comments below, see docs for details:
 # Array arguments in Excel are converted to Pandas DataFrames.
 #
 # Examples:
-# examples variable holds test cases and is required.
+# test_cases variable holds test cases and is required.
 # Each nested list is a set of arguments for a test case.`
