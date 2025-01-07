@@ -25,20 +25,14 @@ export function parsePython(rawCode) {
         ? docstringMatch[1].split('\n')[0].trim().slice(0, 255)
         : 'No description available';
 
-    const formatExampleAsMatrix = (test_case) => {
-        return test_case.map(arg => [[arg]]);
-    };
-
     // Parse test_cases directly from rawCode
     const test_casesMatch = rawCode.match(/test_cases\s*=\s*(\[[\s\S]*\](?=\s|$))/);
     let test_cases = [];
-    let test_casesAsRunpyArgs = [];
     if (test_casesMatch) {
         const test_caseStr = test_casesMatch[1].trim();
         console.log('Parsing test_cases:', test_caseStr);
         try {
             test_cases = JSON.parse(test_caseStr.replace(/'/g, '"'));
-            test_casesAsRunpyArgs = test_cases.map(formatExampleAsMatrix);
         } catch (e) {
             console.warn('Failed to parse test_cases:', e);
         }
@@ -83,7 +77,6 @@ export function parsePython(rawCode) {
         formula,
         timestamp,
         uid,
-        test_cases,
-        test_casesAsRunpyArgs
+        test_cases
     };
 }

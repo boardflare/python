@@ -114,8 +114,9 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
             window.dispatchEvent(new CustomEvent(EventTypes.CLEAR));
             for (let i = 0; i < parsedFunction.test_cases.length; i++) {
                 const test_case = parsedFunction.test_cases[i];
+                const formattedArgs = test_case.map(arg => [[arg]]);
                 window.dispatchEvent(new CustomEvent(EventTypes.LOG, { detail: `Running: =${parsedFunction.name.toUpperCase()}(${test_case.join(', ')})` }));
-                const result = await runPy(parsedFunction.code, parsedFunction.test_casesAsRunpyArgs[i]);
+                const result = await runPy(parsedFunction.code, formattedArgs);
                 window.dispatchEvent(new CustomEvent(EventTypes.LOG, { detail: JSON.stringify(result) }));
             }
         } catch (err) {
