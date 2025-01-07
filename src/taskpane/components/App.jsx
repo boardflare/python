@@ -53,7 +53,7 @@ const App = ({ title }) => {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <main className="flex-1 flex flex-col overflow-hidden min-h-0 text-sm">
+      <main className="flex-1 flex flex-col overflow-hidden min-h-0 text-sm bg-white">
         <div className="flex space p-0 border-b">
           <button className={`flex-grow px-2 py-2 ${selectedTab === "home" ? "border-b-2 border-blue-500" : ""}`} value="home" onClick={handleTabSelect}>Home</button>
           <button className={`flex-grow px-2 py-2 ${selectedTab === "editor" ? "border-b-2 border-blue-500" : ""}`} value="editor" onClick={handleTabSelect}>Editor</button>
