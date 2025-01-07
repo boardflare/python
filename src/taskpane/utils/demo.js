@@ -64,7 +64,14 @@ export async function addDemo(parsedCode) {
                     const args = Array.isArray(test_case) ? test_case : [test_case];
                     const formattedArgs = args.map(arg => {
                         if (typeof arg === 'string') return `"${arg}"`;
-                        if (Array.isArray(arg)) return `{${arg.join(';')}}`;
+                        if (Array.isArray(arg)) {
+                            if (Array.isArray(arg[0])) {
+                                // Handle 2D arrays using Excel array constant syntax
+                                return `{${arg.map(row => row.join(',')).join(';')}}`;
+                            }
+                            // Handle 1D arrays
+                            return `{${arg.join(',')}}`;
+                        }
                         return arg;
                     });
                     // Ensure formula is in 2D array format

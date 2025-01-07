@@ -105,19 +105,49 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
     };
 
     const handleTest = async () => {
-        onTest(); // Call this first to switch tabs immediately
+        onTest();
         try {
             setIsLoading(true);
             setError(null);
             const code = editorRef.current.getValue();
             const parsedFunction = parsePython(code);
             window.dispatchEvent(new CustomEvent(EventTypes.CLEAR));
-            for (let i = 0; i < parsedFunction.test_cases.length; i++) {
-                const test_case = parsedFunction.test_cases[i];
-                const formattedArgs = test_case.map(arg => [[arg]]);
-                window.dispatchEvent(new CustomEvent(EventTypes.LOG, { detail: `Running: =${parsedFunction.name.toUpperCase()}(${test_case.join(', ')})` }));
-                const result = await runPy(parsedFunction.code, formattedArgs);
-                window.dispatchEvent(new CustomEvent(EventTypes.LOG, { detail: JSON.stringify(result) }));
+
+            for (const test_case of parsedFunction.test_cases) {
+                // Format test case for display
+                const displayArgs = test_case.map(arg => {
+                    if (Array.isArray(arg)) {
+                        if (Array.isArray(arg[0])) {
+                            return `{${arg.map(row => row.join(',')).join(';')}}`;
+                        }
+                        return `{${arg.join(',')}}`;
+                    }
+                    return typeof arg === 'string' ? `"${arg}"` : arg;
+                });
+
+                window.dispatchEvent(new CustomEvent(EventTypes.LOG, {
+                    detail: `Running: =${parsedFunction.name.toUpperCase()}(${displayArgs.join(', ')})`
+                }));
+
+                // Format arguments for runPy
+                const runPyArgs = test_case.map(arg => {
+                    if (Array.isArray(arg)) {
+                        // Ensure each array element is wrapped in an array
+                        if (Array.isArray(arg[0])) {
+                            // 2D array - each row must be in its own array
+                            return arg.map(row => Array.isArray(row) ? row : [row]);
+                        }
+                        // 1D array - wrap in outer array
+                        return [arg];
+                    }
+                    // Single value - wrap in double array
+                    return [[arg]];
+                });
+
+                const result = await runPy(parsedFunction.code, runPyArgs);
+                window.dispatchEvent(new CustomEvent(EventTypes.LOG, {
+                    detail: JSON.stringify(result)
+                }));
             }
         } catch (err) {
             setError(err.message);

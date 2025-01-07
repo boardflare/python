@@ -30,9 +30,22 @@ export function parsePython(rawCode) {
     let test_cases = [];
     if (test_casesMatch) {
         const test_caseStr = test_casesMatch[1].trim();
-        console.log('Parsing test_cases:', test_caseStr);
         try {
-            test_cases = JSON.parse(test_caseStr.replace(/'/g, '"'));
+            // Handle Excel array constants in the format {1,2;3,4}
+            const processedStr = test_caseStr
+                .replace(/\{([^}]+)\}/g, (match, content) => {
+                    // Convert Excel array format to 2D array string
+                    const rows = content.split(';').map(row =>
+                        `[${row.split(',').map(val => {
+                            const trimmed = val.trim();
+                            // Keep numbers as numbers, not strings
+                            return isNaN(trimmed) ? `"${trimmed}"` : trimmed;
+                        }).join(',')}]`
+                    );
+                    return `[${rows.join(',')}]`;
+                })
+                .replace(/'/g, '"');
+            test_cases = JSON.parse(processedStr);
         } catch (e) {
             console.warn('Failed to parse test_cases:', e);
         }

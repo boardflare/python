@@ -29,21 +29,3 @@ export const ConsoleEvents = {
         window.removeEventListener(type, callback);
     }
 };
-
-const comments = `# Quick overview in comments below, see docs for details:
-#
-# Naming:
-# Function names must be unique, otherwise overwrites existing function.
-# def hello(first, last) becomes =HELLO(first, last) in Excel.
-#
-# Docstrings:
-# First line in docstring is the function description in Excel.
-# Args with descriptions are required.
-#
-# Types:
-# Type hints are required on args and return.
-# Array arguments in Excel are converted to Pandas DataFrames.
-#
-# Examples:
-# test_cases variable holds test cases and is required.
-# Each nested list is a set of arguments for a test case.`
