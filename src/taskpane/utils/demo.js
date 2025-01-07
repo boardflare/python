@@ -32,7 +32,7 @@ export async function addDemo(parsedCode) {
 
             // Set wrap text adjust row height
             explanationRange.format.wrapText = true;
-            explanationRange.format.rowHeight = 50;
+            explanationRange.format.rowHeight = 40;
             explanationRange.format.verticalAlignment = 'Top';
 
             // Create header row with proper dimensions

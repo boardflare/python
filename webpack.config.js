@@ -18,6 +18,7 @@ module.exports = async (env, options) => {
   const dev = options.mode === "development";
   const config = {
     devtool: "source-map",
+    target: 'web', // Add this line for HMR
     entry: {
       vendor: ["react", "react-dom"],
       taskpane: ["./src/taskpane/index.jsx", "./src/taskpane/home.html"],
@@ -45,10 +46,16 @@ module.exports = async (env, options) => {
             {
               loader: 'css-loader',
               options: {
+                sourceMap: true,
                 importLoaders: 1
               }
             },
-            'postcss-loader'
+            {
+              loader: 'postcss-loader',
+              options: {
+                sourceMap: true
+              }
+            }
           ]
         },
         {
