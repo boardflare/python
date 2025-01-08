@@ -7,6 +7,7 @@ import { runPy } from "../../functions/runpy/controller";
 import { EventTypes } from "../utils/constants";
 import { updateNameManager } from "../utils/nameManager";
 import { addDemo } from "../utils/demo";
+import { testPy } from "../../functions/testpy/controller";
 
 const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
     const [notification, setNotification] = React.useState("");
@@ -23,7 +24,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
         setNotification({ message, type });
         notificationTimeoutRef.current = setTimeout(() => {
             setNotification("");
-        }, 3000);
+        }, 5000);
     };
 
     React.useEffect(() => {
@@ -78,8 +79,8 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
             const result = await saveFunctionToSettings(parsedFunction);
             if (result) {
                 await updateNameManager(parsedFunction);
-                await addDemo(parsedFunction);
-                showNotification("Function saved successfully!");
+                // await addDemo(parsedFunction);
+                showNotification(`Function saved! Type =${parsedFunction.name.toUpperCase()} in a cell to use it.`, "success");
                 const updatedFunctions = await getFunctionFromSettings();
                 setFunctions(updatedFunctions);
                 setSelectedFunction(parsedFunction);
@@ -113,42 +114,19 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
             const parsedFunction = parsePython(code);
             window.dispatchEvent(new CustomEvent(EventTypes.CLEAR));
 
-            for (const test_case of parsedFunction.test_cases) {
-                // Format test case for display
-                const displayArgs = test_case.map(arg => {
-                    if (Array.isArray(arg)) {
-                        if (Array.isArray(arg[0])) {
-                            return `{${arg.map(row => row.join(',')).join(';')}}`;
-                        }
-                        return `{${arg.join(',')}}`;
-                    }
-                    return typeof arg === 'string' ? `"${arg}"` : arg;
-                });
+            // Create test execution code
+            const testCode = `
+${code}
 
-                window.dispatchEvent(new CustomEvent(EventTypes.LOG, {
-                    detail: `Running: =${parsedFunction.name.toUpperCase()}(${displayArgs.join(', ')})`
-                }));
+for args in test_cases:
+    result = ${parsedFunction.name}(*args)
+    print(f"${parsedFunction.name}{tuple(args)} → {result}")
+            `.trim();
 
-                // Format arguments for runPy
-                const runPyArgs = test_case.map(arg => {
-                    if (Array.isArray(arg)) {
-                        // Ensure each array element is wrapped in an array
-                        if (Array.isArray(arg[0])) {
-                            // 2D array - each row must be in its own array
-                            return arg.map(row => Array.isArray(row) ? row : [row]);
-                        }
-                        // 1D array - wrap in outer array
-                        return [arg];
-                    }
-                    // Single value - wrap in double array
-                    return [[arg]];
-                });
+            const result = await testPy(testCode);
 
-                const result = await runPy(parsedFunction.code, runPyArgs);
-                window.dispatchEvent(new CustomEvent(EventTypes.LOG, {
-                    detail: JSON.stringify(result)
-                }));
-            }
+            // Results will be in stdout which is automatically logged by testPy
+
         } catch (err) {
             setError(err.message);
             window.dispatchEvent(new CustomEvent(EventTypes.ERROR, { detail: err.message }));
@@ -167,7 +145,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
                 />
             </div>
             {notification && (
-                <div className={`mt-2 p-2 rounded ${notification.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+                <div className={`mt-2 p-2 rounded ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"}`}>
                     {notification.message}
                 </div>
             )}
@@ -178,12 +156,9 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
                         💡Quick Tips: <span className="font-normal">see also <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>.</span>
                     </h2>
                     <h2 className="font-semibold"> ⬅️ Drag task pane open for more room.</h2>
-                    <h2 className="font-semibold"> 🚀 For a quick demo of HELLO, just click Save.</h2>
                     <ul className="list-disc pl-5">
-                        <li>Saving a function with the same name as an existing function will update the code.</li>
-                        <li>The first line of the docstring becomes the function description in Excel.</li>
-                        <li>Array arguments in Excel are converted to Pandas DataFrames.</li>
-                        <li>Test cases will be used to test your function when you click the Run button, and to create a demo sheet on Save.</li>
+                        <li>Save will update code if function already exists.</li>
+                        <li>Click Run to see output of function using test_cases.</li>
                     </ul>
                 </div>
             )}

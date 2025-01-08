@@ -18,7 +18,7 @@ const OutputTab = ({ logs, onClear, setLogs }) => {
             </div>
             <div className="bg-gray-100 p-2 font-mono flex-grow overflow-auto">
                 {logs.map((log, index) => (
-                    <div key={index}>{log}</div>
+                    <div key={index} className="whitespace-pre">{log}</div>
                 ))}
             </div>
         </div>

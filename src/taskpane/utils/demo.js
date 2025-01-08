@@ -62,19 +62,9 @@ export async function addDemo(parsedCode) {
                 test_cases.forEach((test_case, index) => {
                     const columnIndex = index * 3;
                     const args = Array.isArray(test_case) ? test_case : [test_case];
-                    const formattedArgs = args.map(arg => {
-                        if (typeof arg === 'string') return `"${arg}"`;
-                        if (Array.isArray(arg)) {
-                            if (Array.isArray(arg[0])) {
-                                // Handle 2D arrays using Excel array constant syntax
-                                return `{${arg.map(row => row.join(',')).join(';')}}`;
-                            }
-                            // Handle 1D arrays
-                            return `{${arg.join(',')}}`;
-                        }
-                        return arg;
-                    });
-                    // Ensure formula is in 2D array format
+                    const formattedArgs = args.map(arg =>
+                        typeof arg === 'string' ? `"${arg}"` : arg
+                    );
                     const formula = [[`=${parsedCode.name.toUpperCase()}(${formattedArgs.join(', ')})`]];
 
                     const dataRange = sheet.getRangeByIndexes(2, columnIndex, 1, 1);

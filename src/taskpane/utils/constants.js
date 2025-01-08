@@ -7,7 +7,7 @@ export const DEFAULT_CODE = `def hello(first, last):
     greeting = f"Hello {first} {last}!"
     return greeting
     
-# Example arguments:
+# Used to test the function
 test_cases = [["Nancy", "Morgan"], ["Ming", "Lee"]]`;
 
 export const EventTypes = {
