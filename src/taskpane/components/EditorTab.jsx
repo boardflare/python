@@ -180,7 +180,7 @@ for args in test_cases:
                 </select>
                 <div className="space-x-2">
                     <button onClick={handleReset} className="px-2 py-1 bg-gray-200 rounded">Reset</button>
-                    <button onClick={handleTest} className="px-2 py-1 bg-green-500 text-white rounded">Run</button>
+                    <button onClick={handleTest} className="px-2 py-1 bg-green-500 text-white rounded">Test</button>
                     <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
                 </div>
             </div>

@@ -1,13 +1,8 @@
 export const DEFAULT_CODE = `def hello(first, last):
-    """ Returns a greeting. 
-    Args:
-        first: first name of the person
-        last: last name of the person
-    """
-    greeting = f"Hello {first} {last}!"
-    return greeting
+    """ Returns a greeting. """
+    return f"Hello {first} {last}!"
     
-# Used to test the function
+# Used to test the function when you click the 'Test' button
 test_cases = [["Nancy", "Morgan"], ["Ming", "Lee"]]`;
 
 export const EventTypes = {
