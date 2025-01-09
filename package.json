@@ -14,7 +14,7 @@
   "scripts": {
     "build": "webpack --mode production",
     "build:dev": "webpack --mode development",
-    "dev-server": "webpack serve --mode development",
+    "dev-server": "webpack serve --mode development --progress",
     "lint": "office-addin-lint check",
     "lint:fix": "office-addin-lint fix",
     "prettier": "office-addin-lint prettier",
@@ -28,13 +28,10 @@
     "watch": "webpack --mode development --watch"
   },
   "dependencies": {
-    "@monaco-editor/react": "^4.6.0",
-    "core-js": "^3.36.0",
-    "es6-promise": "^4.2.8",
+    "monaco-editor": "^0.52.2",
     "p-queue": "^8.0.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "regenerator-runtime": "^0.14.1"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
@@ -63,6 +60,7 @@
     "html-webpack-plugin": "^5.6.0",
     "less": "^4.2.0",
     "less-loader": "^12.2.0",
+    "monaco-editor-webpack-plugin": "^7.1.0",
     "office-addin-cli": "^1.6.5",
     "office-addin-debugging": "^5.1.6",
     "office-addin-dev-certs": "^1.13.5",

@@ -5,6 +5,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const CustomFunctionsMetadataPlugin = require("custom-functions-metadata-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
 const urlDev = "https://localhost:3000/";
 const urlProd = "https://www.contoso.com/"; // Used to update the manifest with the production URL.
@@ -73,6 +74,9 @@ module.exports = async (env, options) => {
       ],
     },
     plugins: [
+      new MonacoWebpackPlugin({
+        languages: ['python']
+      }),
       new CustomFunctionsMetadataPlugin({
         output: "functions.json",
         input: "./src/functions/functions.js",
@@ -100,9 +104,6 @@ module.exports = async (env, options) => {
             },
           },
         ],
-      }),
-      new webpack.ProvidePlugin({
-        Promise: ["es6-promise", "Promise"],
       }),
     ],
     devServer: {

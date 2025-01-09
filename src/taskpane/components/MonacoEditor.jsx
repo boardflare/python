@@ -1,32 +1,44 @@
 import * as React from "react";
-import Editor from "@monaco-editor/react";
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 export const MonacoEditor = ({ value, onChange, onMount }) => {
+    const containerRef = React.useRef(null);
     const editorRef = React.useRef(null);
 
-    const handleEditorDidMount = (editor, monaco) => {
+    React.useEffect(() => {
+        if (!containerRef.current) return;
+
+        const editor = monaco.editor.create(containerRef.current, {
+            value: value,
+            language: 'python',
+            fontSize: 14,
+            automaticLayout: true,
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            folding: false,
+            lineNumbersMinChars: 2
+        });
+
+        editor.onDidChangeModelContent(() => {
+            const newValue = editor.getValue();
+            onChange?.(newValue);
+        });
+
         editorRef.current = editor;
         if (onMount) {
             onMount(editor, monaco);
         }
-    };
 
-    return (
-        <Editor
-            height="100%"
-            width="100%"
-            language="python"
-            value={value}
-            options={{
-                fontSize: 14,
-                automaticLayout: true,
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                folding: false,
-                lineNumbersMinChars: 2
-            }}
-            onChange={onChange}
-            onMount={handleEditorDidMount}
-        />
-    );
+        return () => {
+            editor.dispose();
+        };
+    }, []);
+
+    React.useEffect(() => {
+        if (editorRef.current && value !== editorRef.current.getValue()) {
+            editorRef.current.setValue(value);
+        }
+    }, [value]);
+
+    return <div ref={containerRef} className="h-full w-full" />;
 };
