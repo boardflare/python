@@ -10,7 +10,7 @@ const OutputTab = ({ logs, onClear, setLogs }) => {
     return (
         <div className="p-4 h-full flex flex-col gap-4">
             <p>
-                Displays any STDOUT and STDERR messages as well as any other runtime errors. Use the Clear button to remove all messages or Cancel to stop the current operation.
+                Displays STDOUT and STDERR messages. Clear removes all messages and Cancel stops the current operation.
             </p>
             <div>
                 <button onClick={handleCancel} className="mr-2 px-2 py-1 bg-gray-500 text-white rounded">Cancel</button>
