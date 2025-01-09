@@ -157,8 +157,10 @@ for args in test_cases:
                     </h2>
                     <h2 className="font-semibold"> ⬅️ Drag task pane open for more room.</h2>
                     <ul className="list-disc pl-5">
-                        <li>Save will update code if function already exists.</li>
-                        <li>Click Run to see output of function using test_cases.</li>
+                        <li><span className="font-bold">Reset:</span> returns editor to example function.</li>
+                        <li><span className="font-bold">Test:</span> executes function using test_cases.</li>
+                        <li><span className="font-bold">Save:</span> updates code if function name already exists.</li>
+
                     </ul>
                 </div>
             )}

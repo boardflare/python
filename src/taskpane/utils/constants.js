@@ -1,9 +1,9 @@
-export const DEFAULT_CODE = `def hello(first, last):
+export const DEFAULT_CODE = `def hello(name):
     """ Returns a greeting. """
-    return f"Hello {first} {last}!"
+    return f"Hello {name}!"
     
-# Used to test the function when you click the 'Test' button
-test_cases = [["Nancy", "Morgan"], ["Ming", "Lee"]]`;
+# Example arguments to test the function.
+test_cases = ["Nancy","Ming"]`;
 
 export const EventTypes = {
     LOG: 'console:log',

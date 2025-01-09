@@ -3,9 +3,8 @@ import { useState, useEffect } from "react";
 import { codeToHtml } from 'shiki';
 
 const exCode = `def hello(name):
-    """ Says hello. """
-    message = f"Hello {name}!"
-    return message`;
+    """ Returns a greeting. """
+    return f"Hello {name}!"`;
 
 const HomeTab = ({ onEditorClick }) => {
     const [exCodeHtml, setExCodeHtml] = useState("");
@@ -30,7 +29,7 @@ const HomeTab = ({ onEditorClick }) => {
                     <div className="py-2" dangerouslySetInnerHTML={{ __html: exCodeHtml }} />
                 </div>
                 <div className="py-1 bg-gray-200 shadow-md rounded-lg p-4 mb-4">
-                    <p><span className="font-bold">Step 2:</span> Use it as a named LAMBDA function.</p>
+                    <p><span className="font-bold">Step 2:</span> Use it in a LAMBDA function.</p>
                     <div className="p-1 mt-1 bg-white"><code>=HELLO("Annie")</code> <br /><code>Hello Annie!</code></div>
                 </div>
                 <p className="mb-1">Check out the <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">tutorial video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>, then use the <span className="text-blue-500 underline cursor-pointer" onClick={onEditorClick}>editor</span> to create/edit functions.</p>
