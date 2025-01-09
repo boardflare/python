@@ -141,14 +141,12 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
             {error && <div className="mt-2 p-2 bg-red-100 text-red-800 rounded">{error}</div>}
             {selectedFunction.name === "" && (
                 <div className="mt-2 p-2 bg-yellow-100 rounded">
-                    <h2 className="font-semibold mb-1">
-                        💡Quick Tips: <span className="font-normal">see also <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>.</span>
-                    </h2>
-                    <h2 className="font-semibold"> ⬅️ Drag task pane open for more room.</h2>
+                    <h2 className="font-bold"> ⬅️ Drag task pane open for more room!</h2>
                     <ul className="list-disc pl-5">
                         <li><span className="font-bold">Reset:</span> returns editor to example function.</li>
                         <li><span className="font-bold">Test:</span> executes function using test_cases.</li>
-                        <li><span className="font-bold">Save:</span> updates code if function name already exists.</li>
+                        <li><span className="font-bold">Save:</span> updates code if function already exists.</li>
+                        <li>See <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a> for details.</li>
 
                     </ul>
                 </div>
