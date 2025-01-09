@@ -25,4 +25,4 @@ jobs:
       uses: azure/CLI@v1
       with:
         inlineScript: |
-            az storage blob upload-batch --account-name 'boardflareaddins' -c 'python/preview' -s './dist' --overwrite --sas-token '${{ secrets.CONTAINER_SAS_TOKEN }}'
+            az storage blob upload-batch --account-name 'boardflareaddins' -d 'python/preview' -s './dist' --overwrite --sas-token '${{ secrets.CONTAINER_SAS_TOKEN }}'
