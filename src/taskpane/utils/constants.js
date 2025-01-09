@@ -2,8 +2,11 @@ export const DEFAULT_CODE = `def hello(name):
     """ Returns a greeting. """
     return f"Hello {name}!"
     
-# Example arguments to test the function.
-test_cases = ["Nancy","Ming"]`;
+# Arguments to test the function.
+test_cases = [
+    ["Nancy"],
+    ["Ming"]
+]`;
 
 export const EventTypes = {
     LOG: 'console:log',

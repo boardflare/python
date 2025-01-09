@@ -119,14 +119,21 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
 ${code}
 
 for args in test_cases:
-    result = ${parsedFunction.name}(*args)
-    print(f"${parsedFunction.name}{tuple(args)} → {result}")
+    try:
+        if isinstance(args, (list, tuple)):
+            result = ${parsedFunction.name}(*args)
+            # Format args as comma-separated values without brackets
+            args_str = ", ".join(repr(arg) for arg in args)
+            print(f"${parsedFunction.name}({args_str}) → {result}")
+        else:
+            result = ${parsedFunction.name}(args)
+            print(f"${parsedFunction.name}({repr(args)}) → {result}")
+    except Exception as e:
+        print(f"Error: {str(e)}")
             `.trim();
 
             const result = await testPy(testCode);
-
             // Results will be in stdout which is automatically logged by testPy
-
         } catch (err) {
             setError(err.message);
             window.dispatchEvent(new CustomEvent(EventTypes.ERROR, { detail: err.message }));
