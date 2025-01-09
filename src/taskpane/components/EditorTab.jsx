@@ -8,6 +8,7 @@ import { EventTypes } from "../utils/constants";
 import { updateNameManager } from "../utils/nameManager";
 import { addDemo } from "../utils/demo";
 import { testPy } from "../../functions/testpy/controller";
+import { runTests } from "../utils/runTests";
 
 const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
     const [notification, setNotification] = React.useState("");
@@ -114,26 +115,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
             const parsedFunction = parsePython(code);
             window.dispatchEvent(new CustomEvent(EventTypes.CLEAR));
 
-            // Create test execution code
-            const testCode = `
-${code}
-
-for args in test_cases:
-    try:
-        if isinstance(args, (list, tuple)):
-            result = ${parsedFunction.name}(*args)
-            # Format args as comma-separated values without brackets
-            args_str = ", ".join(repr(arg) for arg in args)
-            print(f"${parsedFunction.name}({args_str}) → {result}")
-        else:
-            result = ${parsedFunction.name}(args)
-            print(f"${parsedFunction.name}({repr(args)}) → {result}")
-    except Exception as e:
-        print(f"Error: {str(e)}")
-            `.trim();
-
-            const result = await testPy(testCode);
-            // Results will be in stdout which is automatically logged by testPy
+            await runTests(code, parsedFunction.name);
         } catch (err) {
             setError(err.message);
             window.dispatchEvent(new CustomEvent(EventTypes.ERROR, { detail: err.message }));
