@@ -1,9 +1,12 @@
-import { testPy } from "../../functions/testpy/controller";
+import { runPy } from "../../functions/runpy/controller";
 import { EventTypes } from "./constants";
 
 export async function runTests(code, functionName) {
     const testCode = `
 ${code}
+
+result = "Finished tests"
+print(result)
 
 for args in test_cases:
     try:
@@ -19,10 +22,8 @@ for args in test_cases:
             print(result)
     except Exception as e:
         print(f"Error: {str(e)}")
-    print()  # Add a newline after each test case
+    print()  # Add a newline after each test cases
     `.trim();
 
-    return await testPy(testCode);
+    return await runPy(testCode, null);
 }
-
-// Assign args to global use runpy type conversion to get args for demo.

@@ -3,11 +3,9 @@ import { MonacoEditor } from "./MonacoEditor";
 import { saveFunctionToSettings, getFunctionFromSettings } from "../utils/workbookSettings";
 import { DEFAULT_CODE } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
-import { runPy } from "../../functions/runpy/controller";
 import { EventTypes } from "../utils/constants";
 import { updateNameManager } from "../utils/nameManager";
 import { addDemo } from "../utils/demo";
-import { testPy } from "../../functions/testpy/controller";
 import { runTests } from "../utils/runTests";
 
 const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
