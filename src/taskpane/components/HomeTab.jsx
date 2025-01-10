@@ -86,9 +86,9 @@ const HomeTab = ({ onEditorClick }) => {
                 <button
                     onClick={handleImportDemos}
                     disabled={isLoading}
-                    className="text-sm mt-4 px-3 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 disabled:bg-gray-300 mx-auto block"
+                    className="text-sm mt-4 px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 mx-auto block"
                 >
-                    {isLoading ? "Importing..." : "Add Demo"}
+                    {isLoading ? "Importing..." : "Add Demo Functions"}
                 </button>
                 {notification && (
                     <div className={`mt-2 text-center p-2 rounded ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"}`}>
@@ -108,7 +108,7 @@ const HomeTab = ({ onEditorClick }) => {
                     ></textarea>
                     <button
                         type="submit"
-                        className="mt-2 px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                        className="mt-2 px-3 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
                     >
                         Submit Feedback
                     </button>

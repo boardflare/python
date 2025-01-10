@@ -26,7 +26,7 @@ export function parsePython(rawCode) {
         : 'No description available';
 
     // Generate resultLine
-    const argList = args.map((_, index) => `arg${index + 1}`).join(', ');
+    const argList = args.length > 0 ? args.map((_, index) => `arg${index + 1}`).join(', ') : '';
     const resultLine = `\n\nresult = ${name.toLowerCase()}(${argList})`;
     const code = rawCode.trim();
 
