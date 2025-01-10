@@ -34,10 +34,6 @@ export function parsePython(rawCode) {
     let runpyEnv = 'BOARDFLARE.RUNPY';
     if (window.location.hostname === 'localhost') {
         runpyEnv = 'LOCAL.RUNPY';
-    } else if (window.location.pathname.toLowerCase().includes('preview')) {
-        runpyEnv = 'PREVIEW.RUNPY';
-    } else if (window.location.hostname === 'python-insider.boardflare.com') {
-        runpyEnv = 'BFINSIDER.RUNPY';
     }
 
     // Excel named lambda signature
