@@ -6,11 +6,13 @@ import { parsePython } from "../utils/codeparser";
 import { saveFunctionToSettings } from "../utils/workbookSettings";
 import { updateNameManager } from "../utils/nameManager";
 import { multiDemo } from "../utils/demo";
+import { feedback } from "../utils/logs"; // Add this import
 
 const HomeTab = ({ onEditorClick }) => {
     const [isLoading, setIsLoading] = React.useState(false);
     const [notification, setNotification] = React.useState("");
     const notificationTimeoutRef = React.useRef();
+    const [feedbackText, setFeedbackText] = React.useState("");
 
     const showNotification = (message, type = "success") => {
         if (notificationTimeoutRef.current) {
@@ -49,9 +51,21 @@ const HomeTab = ({ onEditorClick }) => {
         setIsLoading(false);
     };
 
+    const handleFeedbackSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await feedback({ text: feedbackText });
+            showNotification("Feedback submitted successfully. Thanks!", "success");
+            setFeedbackText("");
+        } catch (error) {
+            console.error("Error submitting feedback:", error);
+            showNotification("Error submitting feedback", "error");
+        }
+    };
+
     return (
         <>
-            <div className="p-2 mb-5">
+            <div className="p-2 mb-24">
                 <h2 className="text-center text-lg font-semibold mb-2">Python functions in Excel</h2>
                 <div className="py-1 bg-gray-200 shadow-md rounded-lg p-3 mb-4">
                     <p><span className="font-bold">Step 1:</span> Write a Python function in the <span className="text-blue-500 underline cursor-pointer" onClick={onEditorClick}>editor</span>.</p>
@@ -68,20 +82,37 @@ const HomeTab = ({ onEditorClick }) => {
                     <p><span className="font-bold">Step 2:</span> Save it to create a LAMBDA function.</p>
                     <div className="p-1 mt-1 bg-white"><code>=HELLO("Annie")</code> <br /><code>Hello Annie!</code></div>
                 </div>
-                <p className="mb-1">Check out the <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">tutorial video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>. Use the <span className="text-blue-500 underline cursor-pointer" onClick={onEditorClick}>code editor</span> to create and edit functions.</p>
-                <p className="mb-1">  We'd appreciate your <a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener" className="text-blue-500 underline">feedback</a> if you find any bugs or have suggestions.🙂</p>
+                <p className="mb-1">Check out the <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">tutorial video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>. Use the <span className="text-blue-500 underline cursor-pointer" onClick={onEditorClick}>code editor</span> to create and edit functions.  Use button below to load demo functions.</p>
                 <button
                     onClick={handleImportDemos}
                     disabled={isLoading}
                     className="text-sm mt-4 px-3 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 disabled:bg-gray-300 mx-auto block"
                 >
-                    {isLoading ? "Importing..." : "Add Demo Functions"}
+                    {isLoading ? "Importing..." : "Add Demo"}
                 </button>
                 {notification && (
                     <div className={`mt-2 text-center p-2 rounded ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"}`}>
                         {notification.message}
                     </div>
                 )}
+                <form onSubmit={handleFeedbackSubmit} className="fixed bottom-0 left-0 right-0 m-2 p-2 bg-gray-200 shadow-md rounded-t-lg">
+                    <label htmlFor="feedback" className="block text-sm font-medium text-gray-700 mb-2">Feedback? Use form below or <a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener" className="text-blue-500 underline">email us</a>.</label>
+                    <textarea
+                        id="feedback"
+                        value={feedbackText}
+                        placeholder="Bug? Suggestion? Rant? All are welcome. Thanks for your help!🙂"
+                        onChange={(e) => setFeedbackText(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md"
+                        rows="4"
+                        required
+                    ></textarea>
+                    <button
+                        type="submit"
+                        className="mt-2 px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                    >
+                        Submit Feedback
+                    </button>
+                </form>
             </div>
         </>
     );
