@@ -1,4 +1,4 @@
-import { exampleFunctions } from "./examples";
+import { remoteFunctions } from "./examples";
 
 export async function singleDemo(parsedCode) {
     return Excel.run(async (context) => {
@@ -114,7 +114,7 @@ export async function multiDemo(parsedFunctions) {
                 const functionRange = sheet.getRange(`A${rowIndex + 1}`);
                 const exampleRange = sheet.getRange(`B${rowIndex + 1}`);
                 functionRange.values = [[parsedFunction.signature]];
-                exampleRange.values = [[exampleFunctions[index].excel_example]];
+                exampleRange.values = [[parsedFunction.excel_example]];
                 exampleRange.format.horizontalAlignment = 'Left';
             });
 

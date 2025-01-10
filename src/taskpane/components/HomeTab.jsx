@@ -1,7 +1,7 @@
 import * as React from "react";
 import { MonacoEditor } from "./MonacoEditor";
 import { DISPLAY_CODE } from "../utils/constants";
-import { exampleFunctions } from "../utils/examples";
+import { remoteFunctions } from "../utils/examples"; // Update import
 import { parsePython } from "../utils/codeparser";
 import { saveFunctionToSettings } from "../utils/workbookSettings";
 import { updateNameManager } from "../utils/nameManager";
@@ -36,8 +36,10 @@ const HomeTab = ({ onEditorClick }) => {
         setIsLoading(true);
         try {
             const parsedFunctions = [];
-            for (const example of exampleFunctions) {
+            const examples = await remoteFunctions(); // Fetch remote functions
+            for (const example of examples) {
                 const parsedFunction = parsePython(example.code);
+                parsedFunction.excel_example = example.excel_example; // Add excel_example to parsed function
                 await saveFunctionToSettings(parsedFunction);
                 await updateNameManager(parsedFunction);
                 parsedFunctions.push(parsedFunction);

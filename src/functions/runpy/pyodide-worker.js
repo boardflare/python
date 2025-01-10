@@ -18,6 +18,15 @@ self.onmessage = async (event) => {
     // Clear the global state at the beginning
     self.pyodide.globals.clear();
 
+    // Add test runner function
+    self.pyodide.runPython(`
+def run_tests(func, test_cases):
+    for i, args in enumerate(test_cases):
+        result = func(*args)
+        excel_formula = f"={func.__name__.upper()}({', '.join(map(str, args))})"
+        print(f"Case {i+1}: {args} -> {result} | Excel: {excel_formula}")
+    `);
+
     let stdout = "";
 
     // Reinitialize stdout and stderr handlers
