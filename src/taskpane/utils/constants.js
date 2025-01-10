@@ -1,3 +1,7 @@
+export const DISPLAY_CODE = `def hello(name):
+    """ Returns a greeting. """
+    return f"Hello {name}!"`;
+
 export const DEFAULT_CODE = `def hello(name):
     """ Returns a greeting. """
     return f"Hello {name}!"

@@ -93,16 +93,5 @@ export async function fetchCode(source) {
         code = source;
     }
 
-    // Add resultLine to code string if it's not from a URL or notebook
-    if (!source.startsWith('https://') && !source.endsWith('.ipynb') && !source.endsWith('.py')) {
-        // Use code string as is and append result line
-        const name = code.match(/def\s+([a-zA-Z_][a-zA-Z0-9_]*)/)?.[1]?.toLowerCase();
-        if (name) {
-            const args = code.match(/def\s+[a-zA-Z_][a-zA-Z0-9_]*\s*\((.*?)\)/)?.[1]?.split(',')?.length || 0;
-            const argList = Array.from({ length: args }, (_, i) => `arg${i + 1}`).join(', ');
-            code += `\n\nresult = ${name}(${argList})`;
-        }
-    }
-
     return code;
 }

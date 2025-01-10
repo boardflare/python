@@ -1,6 +1,8 @@
-import { queueTask, pyworker } from '../utils/common.js';
-import { fetchCode } from '../utils/fetchcode.js';
+import { queueTask } from './queue.js';
+import { fetchCode } from './fetchcode.js';
 import { ConsoleEvents, EventTypes } from '../../taskpane/utils/constants.js';
+
+const pyworker = new Worker(new URL('./pyodide-worker.js', import.meta.url));
 
 async function messageWorker(worker, message) {
     return new Promise((resolve, reject) => {

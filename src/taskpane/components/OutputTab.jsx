@@ -1,5 +1,5 @@
 import * as React from "react";
-import { abortController } from "../../functions/utils/common";
+import { abortController } from "../../functions/runpy/queue";
 
 const OutputTab = ({ logs, onClear, setLogs }) => {
     const handleCancel = () => {
@@ -18,7 +18,7 @@ const OutputTab = ({ logs, onClear, setLogs }) => {
             </div>
             <div className="bg-gray-100 p-2 font-mono flex-grow overflow-auto">
                 {logs.map((log, index) => (
-                    <div key={index} className="whitespace-pre">{log}</div>
+                    <div key={index} className="break-words">{log}</div>
                 ))}
             </div>
         </div>

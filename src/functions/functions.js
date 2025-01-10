@@ -1,5 +1,5 @@
 ﻿/* global clearInterval, console, setInterval */
-import { queueTask } from './utils/common.js';
+import { queueTask } from './runpy/queue.js';
 import { runPython } from './runpy/controller.js';
 
 /**
