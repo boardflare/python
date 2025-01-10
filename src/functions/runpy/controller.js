@@ -55,7 +55,7 @@ export async function runPython({ code, arg1 }) {
         // if (isChromiumOrEdge) {
         //     window.gtag('event', 'py_err', { error: errorMessage });
         // }
-        return [[`Error, see console for details.`]];
+        return [[`Error, see Output tab for details.`]];
     }
 }
 
