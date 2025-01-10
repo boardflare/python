@@ -79,7 +79,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
             if (result) {
                 await updateNameManager(parsedFunction);
                 // await addDemo(parsedFunction);
-                showNotification(`Function saved! Type =${parsedFunction.name.toUpperCase()} in a cell to use it.`, "success");
+                showNotification(`Function =${parsedFunction.name.toUpperCase()} saved!`, "success");
                 const updatedFunctions = await getFunctionFromSettings();
                 setFunctions(updatedFunctions);
                 setSelectedFunction(parsedFunction);
@@ -139,11 +139,11 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
             {error && <div className="mt-2 p-2 bg-red-100 text-red-800 rounded">{error}</div>}
             {selectedFunction.name === "" && (
                 <div className="mt-2 p-2 bg-yellow-100 rounded">
-                    <h2 className="font-bold"> ⬅️ Drag task pane open for more room!</h2>
+                    <h2 className="font-semibold"> ⬅️ Drag task pane open for more room!</h2>
                     <ul className="list-disc pl-5">
-                        <li><span className="font-bold">Reset:</span> returns editor to example function.</li>
-                        <li><span className="font-bold">Test:</span> executes function using test_cases.</li>
-                        <li><span className="font-bold">Save:</span> updates code if function already exists.</li>
+                        <li><span className="font-semibold">Reset:</span> returns editor to example function.</li>
+                        <li><span className="font-semibold">Test:</span> executes function using test_cases.</li>
+                        <li><span className="font-semibold">Save:</span> updates code if function already exists.</li>
                         <li>See <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a> for details.</li>
 
                     </ul>

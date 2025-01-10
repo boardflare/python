@@ -8,8 +8,8 @@ const HomeTab = ({ onEditorClick }) => {
             <div className="p-2 mb-5">
                 <h2 className="text-center text-lg font-semibold mb-2">Python functions in Excel</h2>
                 <div className="py-1 bg-gray-200 shadow-md rounded-lg p-3 mb-4">
-                    <p><span className="font-bold">Step 1:</span> Write a Python function in the <span className="text-blue-500 underline cursor-pointer" onClick={onEditorClick}>code editor</span>.</p>
-                    <div className="py-2 h-[120px]">
+                    <p><span className="font-bold">Step 1:</span> Write a Python function in the <span className="text-blue-500 underline cursor-pointer" onClick={onEditorClick}>editor</span>.</p>
+                    <div className="py-2 h-[100px]">
                         <MonacoEditor
                             value={DISPLAY_CODE}
                             onMount={(editor) => {

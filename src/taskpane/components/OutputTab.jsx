@@ -18,7 +18,11 @@ const OutputTab = ({ logs, onClear, setLogs }) => {
             </div>
             <div className="bg-gray-100 p-2 font-mono flex-grow overflow-auto">
                 {logs.map((log, index) => (
-                    <div key={index} className="break-words">{log}</div>
+                    <React.Fragment key={index}>
+                        {log.split('\n').map((line, lineIndex) => (
+                            <div key={`${index}-${lineIndex}`} className="break-words">{line}</div>
+                        ))}
+                    </React.Fragment>
                 ))}
             </div>
         </div>

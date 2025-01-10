@@ -16,19 +16,17 @@ except NameError:
 if has_test_cases:
     for args in test_cases:
         try:
+            # Simplified argument handling
             if isinstance(args, (list, tuple)):
-                # Format args as comma-separated values without brackets
                 args_str = ", ".join(repr(arg) for arg in args)
-                print(f"Running ${functionName}({args_str}):")
-                result = ${functionName}(*args)
-                print(result)
+                test_result = ${functionName}(*args)
             else:
-                print(f"Running ${functionName}({repr(args)}):")
-                result = ${functionName}(args)
-                print(result)
+                args_str = repr(args)
+                test_result = ${functionName}(args)
+            print(f"${functionName}({args_str}) --> {test_result}")
         except Exception as e:
             print(f"Error: {str(e)}")
-        print()  # Add a newline after each test cases
+        print()  # Add a newline after each test case
     `.trim();
 
     return await runPy(testCode, null);
