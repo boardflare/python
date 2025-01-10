@@ -79,7 +79,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
             if (result) {
                 await updateNameManager(parsedFunction);
                 // await addDemo(parsedFunction);
-                showNotification(`Function =${parsedFunction.name.toUpperCase()} saved!`, "success");
+                showNotification(`${parsedFunction.signature} saved!`, "success");
                 const updatedFunctions = await getFunctionFromSettings();
                 setFunctions(updatedFunctions);
                 setSelectedFunction(parsedFunction);
