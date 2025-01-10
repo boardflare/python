@@ -5,6 +5,7 @@ import { exampleFunctions } from "../utils/examples";
 import { parsePython } from "../utils/codeparser";
 import { saveFunctionToSettings } from "../utils/workbookSettings";
 import { updateNameManager } from "../utils/nameManager";
+import { multiDemo } from "../utils/demo";
 
 const HomeTab = ({ onEditorClick }) => {
     const [isLoading, setIsLoading] = React.useState(false);
@@ -32,11 +33,14 @@ const HomeTab = ({ onEditorClick }) => {
     const handleImportDemos = async () => {
         setIsLoading(true);
         try {
-            for (const code of exampleFunctions) {
-                const parsedFunction = parsePython(code);
+            const parsedFunctions = [];
+            for (const example of exampleFunctions) {
+                const parsedFunction = parsePython(example.code);
                 await saveFunctionToSettings(parsedFunction);
                 await updateNameManager(parsedFunction);
+                parsedFunctions.push(parsedFunction);
             }
+            await multiDemo(parsedFunctions);
             showNotification("Demo functions added successfully!", "success");
         } catch (error) {
             console.error("Error importing demo functions:", error);

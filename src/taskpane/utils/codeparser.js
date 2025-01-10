@@ -37,7 +37,7 @@ export function parsePython(rawCode) {
     }
 
     // Excel named lambda signature
-    const signature = `=${name.toUpperCase()}(${params})`;
+    const signature = `${name.toUpperCase()}(${params})`;
 
     // Excel named lambda formula
     const timestamp = new Date().toISOString();

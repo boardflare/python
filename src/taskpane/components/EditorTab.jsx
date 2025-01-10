@@ -5,7 +5,7 @@ import { DEFAULT_CODE } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
 import { EventTypes } from "../utils/constants";
 import { updateNameManager } from "../utils/nameManager";
-import { addDemo } from "../utils/demo";
+import { singleDemo } from "../utils/demo";
 import { runTests } from "../utils/testing";
 
 const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
@@ -78,7 +78,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
             const result = await saveFunctionToSettings(parsedFunction);
             if (result) {
                 await updateNameManager(parsedFunction);
-                // await addDemo(parsedFunction);
+                // await singleDemo(parsedFunction);
                 showNotification(`${parsedFunction.signature} saved!`, "success");
                 const updatedFunctions = await getFunctionFromSettings();
                 setFunctions(updatedFunctions);

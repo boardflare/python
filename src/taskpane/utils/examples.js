@@ -1,5 +1,6 @@
 export const exampleFunctions = [
-    `def calculate_area(length, width):
+    {
+        code: `def calculate_area(length, width):
     """Calculate area of rectangle.
     Args:
         length (float): Length of rectangle
@@ -16,8 +17,10 @@ test_cases = [
     [1, 1],      # -> 1
     [0.5, 2]     # -> 1
 ]`,
-
-    `def join_strings(first_str, second_str, separator):
+        excel_example: '=CALCULATE_AREA(5, 3)'
+    },
+    {
+        code: `def join_strings(first_str, second_str, separator):
     """Join two strings with a separator.
     Args:
         first_str (str): First string
@@ -35,8 +38,10 @@ test_cases = [
     ["python", "code", "::"],     # -> "python::code"
     ["x", "y", ""]               # -> "xy"
 ]`,
-
-    `def in_range(number, min_val, max_val):
+        excel_example: '=JOIN_STRINGS("hello", "world", " ")'
+    },
+    {
+        code: `def in_range(number, min_val, max_val):
     """Check if number is in range [min_val, max_val].
     Args:
         number (float): Number to check
@@ -54,8 +59,10 @@ test_cases = [
     [25, 0, 20],      # -> False
     [3.14, 3, 4]      # -> True
 ]`,
-
-    `def power(base, exponent, round_to=2):
+        excel_example: '=IN_RANGE(5, 0, 10)'
+    },
+    {
+        code: `def to_power(base, exponent, round_to):
     """Calculate power with rounding.
     Args:
         base (float): Base number
@@ -73,23 +80,6 @@ test_cases = [
     [10, -1, 3],      # -> 0.100
     [2.5, 2, 2]       # -> 6.25
 ]`,
-
-    `def slice_list(items, start, end):
-    """Slice a list from start to end index.
-    Args:
-        items (list): List to slice
-        start (int): Start index
-        end (int): End index
-    Returns:
-        list: Sliced list
-    """
-    return items[start:end]
-
-test_cases = [
-    [[1,2,3,4,5], 1, 3],         # -> [2,3]
-    [["a","b","c"], 0, 2],       # -> ["a","b"]
-    [[1,2,3], 0, 3],             # -> [1,2,3]
-    [[5,4,3,2,1], 2, 4],         # -> [3,2]
-    [["x","y","z"], 1, 1]        # -> []
-]`
+        excel_example: '=TO_POWER(2, 3, 0)'
+    }
 ];

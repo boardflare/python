@@ -1,4 +1,6 @@
-export async function addDemo(parsedCode) {
+import { exampleFunctions } from "./examples";
+
+export async function singleDemo(parsedCode) {
     return Excel.run(async (context) => {
         try {
             // Create sheet name based on function name
@@ -83,6 +85,52 @@ export async function addDemo(parsedCode) {
         }
     }).catch(error => {
         console.error("Failed to update demo sheet:", error);
+        throw error;
+    });
+}
+
+export async function multiDemo(parsedFunctions) {
+    return Excel.run(async (context) => {
+        try {
+            const sheetName = "Demo_Functions";
+            let sheet = context.workbook.worksheets.getItemOrNullObject(sheetName);
+            await context.sync();
+
+            if (!sheet.isNullObject) {
+                sheet.delete();
+                await context.sync();
+            }
+
+            sheet = context.workbook.worksheets.add(sheetName);
+            await context.sync();
+
+            const headerRange = sheet.getRange("A1:B1");
+            headerRange.values = [["Function", "Example Use"]];
+            headerRange.format.fill.color = "#D9D9D9";
+            headerRange.format.font.bold = true;
+
+            parsedFunctions.forEach((parsedFunction, index) => {
+                const rowIndex = index + 1;
+                const functionRange = sheet.getRange(`A${rowIndex + 1}`);
+                const exampleRange = sheet.getRange(`B${rowIndex + 1}`);
+                functionRange.values = [[parsedFunction.signature]];
+                exampleRange.values = [[exampleFunctions[index].excel_example]];
+                exampleRange.format.horizontalAlignment = 'Left';
+            });
+
+            // Set column widths
+            sheet.getRange("A:A").format.columnWidth = 250;
+            sheet.getRange("B:B").format.columnWidth = 150;
+
+            sheet.activate();
+            await context.sync();
+
+        } catch (error) {
+            console.error("Excel API Error:", error);
+            throw error;
+        }
+    }).catch(error => {
+        console.error("Failed to create demo sheet:", error);
         throw error;
     });
 }
