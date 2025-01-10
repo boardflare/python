@@ -67,7 +67,7 @@ const HomeTab = ({ onEditorClick }) => {
         <>
             <div className="p-2 mb-24">
                 <h2 className="text-center text-lg font-semibold mb-2">Python functions in Excel</h2>
-                <div className="py-1 bg-gray-200 shadow-md rounded-lg p-3 mb-4">
+                <div className="py-1 border border-gray-300 rounded-lg p-3 mb-4">
                     <p><span className="font-bold">Step 1:</span> Write a Python function in the <span className="text-blue-500 underline cursor-pointer" onClick={onEditorClick}>editor</span>.</p>
                     <div className="py-2 h-[100px]">
                         <MonacoEditor
@@ -78,9 +78,9 @@ const HomeTab = ({ onEditorClick }) => {
                         />
                     </div>
                 </div>
-                <div className="py-1 bg-gray-200 shadow-md rounded-lg p-4 mb-4">
+                <div className="py-1 border border-gray-300 rounded-lg p-4 mb-4">
                     <p><span className="font-bold">Step 2:</span> Save it to create a LAMBDA function.</p>
-                    <div className="p-1 mt-1 bg-white"><code>=HELLO("Annie")</code> <br /><code>Hello Annie!</code></div>
+                    <div className="p-1 mt-1"><code>=HELLO("Annie")</code> <br /><code>Hello Annie!</code></div>
                 </div>
                 <p className="mb-1">Check out the <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">tutorial video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>. Use the <span className="text-blue-500 underline cursor-pointer" onClick={onEditorClick}>code editor</span> to create and edit functions.  Use button below to load demo functions.</p>
                 <button
@@ -95,23 +95,25 @@ const HomeTab = ({ onEditorClick }) => {
                         {notification.message}
                     </div>
                 )}
-                <form onSubmit={handleFeedbackSubmit} className="fixed bottom-0 left-0 right-0 m-2 p-2 bg-gray-200 shadow-md rounded-t-lg">
-                    <label htmlFor="feedback" className="block text-sm font-medium text-gray-700 mb-2">Feedback? Use form below or <a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener" className="text-blue-500 underline">email us</a>.</label>
+                <form onSubmit={handleFeedbackSubmit} className="fixed bottom-0 left-0 right-0 m-2 p-2 rounded-t-lg">
                     <textarea
                         id="feedback"
                         value={feedbackText}
-                        placeholder="Bug? Suggestion? Rant? All are welcome. Thanks for your help!🙂"
+                        placeholder="Bug? Suggestion? Rant? All feedback is welcome. Thanks!🙂"
                         onChange={(e) => setFeedbackText(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md"
                         rows="4"
                         required
                     ></textarea>
-                    <button
-                        type="submit"
-                        className="mt-2 px-3 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-                    >
-                        Submit Feedback
-                    </button>
+                    <div className="flex justify-between items-center mt-2">
+                        <button
+                            type="submit"
+                            className="px-3 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                        >
+                            Submit Feedback
+                        </button>
+                        <a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener" className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">Email Support🛟</a>
+                    </div>
                 </form>
             </div>
         </>
