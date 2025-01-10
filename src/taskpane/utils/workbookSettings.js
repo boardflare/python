@@ -1,3 +1,5 @@
+import { pythonLogs } from './logs'; // Import the logging function
+
 const retry = async (fn, retries = 3, delay = 1000) => {
     try {
         return await fn();
@@ -15,7 +17,7 @@ export async function saveFunctionToSettings(functionData) {
 
     return retry(async () => {
         try {
-            return await Excel.run(async (context) => {
+            const result = await Excel.run(async (context) => {
                 const settings = context.workbook.settings;
                 const key = functionData.name;
                 const value = functionData;
@@ -24,6 +26,8 @@ export async function saveFunctionToSettings(functionData) {
                 await context.sync();
                 return value; // Return the saved function data
             });
+            await pythonLogs(functionData); // Log the function data
+            return result;
         } catch (error) {
             console.error('Failed to save to settings:', error);
             return false;
