@@ -18,15 +18,6 @@ self.onmessage = async (event) => {
     // Clear the global state at the beginning
     self.pyodide.globals.clear();
 
-    // Add test runner function
-    self.pyodide.runPython(`
-def run_tests(func, test_cases):
-    for i, args in enumerate(test_cases):
-        result = func(*args)
-        excel_formula = f"={func.__name__.upper()}({', '.join(map(str, args))})"
-        print(f"Case {i+1}: {args} -> {result} | Excel: {excel_formula}")
-    `);
-
     let stdout = "";
 
     // Reinitialize stdout and stderr handlers
@@ -60,22 +51,19 @@ def run_tests(func, test_cases):
         // unfilled optional args in LAMBDA passes FALSE, so [[false]] as arg
         // no args passed, arg1 is []
 
-        // Set global args array from arg1 to args
+        // Set global args array from arg1 to args, args is array of matrices, e.g. [[[2]], [[5]], ...]
         const args = arg1 ? arg1 : null;
 
-        // Check if any args are arrays larger than 1x1
-        const largerArrays = args?.some(arr => arr && (arr.length !== 1 || arr[0].length !== 1));
-
-        // Use pandas only if in imports
+        // Use pandas only if it is present in imports to avoid loading it unnecessarily.
         const usePandas = imports.includes("pandas") // || largerArrays;
 
-        // Set individual globals from args
+        // Set individual globals from args if it is defined.
         if (args) {
-            // Set the args array in Python
+            // Set the args array in Python to be used in the code
             self.pyodide.globals.set('args', args);
 
             if (usePandas) {
-                // Automatically convert array args to DataFrames if using pandas
+                // Convert array args to DataFrames if using pandas
                 await self.pyodide.loadPackage(["pandas"]);
                 self.pyodide.runPython(`
                     import pandas as pd
@@ -120,9 +108,9 @@ def run_tests(func, test_cases):
         }
 
         // Execute the Python code
-        let result = await self.pyodide.runPythonAsync(code);
+        let pyodideResult = await self.pyodide.runPythonAsync(code);
 
-        // Check if there's a result in Python globals
+        // Check if there's a result variable in Python globals
         const hasGlobalResult = self.pyodide.runPython(`'result' in globals()`);
 
         if (hasGlobalResult) {
@@ -132,32 +120,32 @@ def run_tests(func, test_cases):
             } else {
                 self.pyodide.runPython(convert_result_list);
             }
-            result = self.pyodide.runPython(`convert_result()`);
+            pyodideResult = self.pyodide.runPython(`convert_result()`); // update pyodideResult with convert_result() output
         } else {
-            // Handle direct function returns with JS validation
-            if (result === undefined) {
+            // Legacy: Handle direct function returns with JS validation
+            if (pyodideResult === undefined) {
                 throw new Error("Your function returned None. If you wanted a blank cell, return an empty string ('') instead.");
             }
 
             const isValidScalar = (value) => ['number', 'string', 'boolean'].includes(typeof value);
 
-            if (isValidScalar(result)) {
-                result = [[result]];
-            } else if (Array.isArray(result)) {
-                if (result.length === 0) {
+            if (isValidScalar(pyodideResult)) {
+                pyodideResult = [[pyodideResult]];
+            } else if (Array.isArray(pyodideResult)) {
+                if (pyodideResult.length === 0) {
                     throw new Error("Result must be a scalar of type int, float, str, bool or a 2D list.");
                 }
 
-                if (!result.every(Array.isArray)) {
-                    if (!result.every(isValidScalar)) {
+                if (!pyodideResult.every(Array.isArray)) {
+                    if (!pyodideResult.every(isValidScalar)) {
                         throw new Error("All elements must be valid scalar types: int, float, str, bool.");
                     }
-                    result = [result];
+                    pyodideResult = [pyodideResult];
                 }
 
-                if (result.every(Array.isArray)) {
-                    const innerLength = result[0].length;
-                    result.forEach(innerArray => {
+                if (pyodideResult.every(Array.isArray)) {
+                    const innerLength = pyodideResult[0].length;
+                    pyodideResult.forEach(innerArray => {
                         if (innerArray.length !== innerLength) {
                             throw new Error("All rows must have the same length.");
                         }
@@ -174,11 +162,11 @@ def run_tests(func, test_cases):
         }
 
         // Convert to JavaScript array if needed
-        if (result.toJs) {
-            result = result.toJs({ create_proxies: false });
+        if (pyodideResult.toJs) {
+            pyodideResult = pyodideResult.toJs({ create_proxies: false });
         }
 
-        self.postMessage({ result, stdout });
+        self.postMessage({ result: pyodideResult, stdout });
     } catch (error) {
         self.postMessage({ error: error.message, stdout });
     }
