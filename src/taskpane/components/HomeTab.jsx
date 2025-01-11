@@ -67,11 +67,11 @@ const HomeTab = ({ onEditorClick }) => {
 
     return (
         <>
-            <div className="p-2 mb-24">
+            <div className="p-1 mb-24">
                 <h2 className="text-center text-lg font-semibold mb-2">Python functions in Excel</h2>
-                <div className="py-1 border border-gray-300 rounded-lg p-3 mb-4">
+                <div className="py-1 border-gray-300 rounded-lg p-2 mb-2">
                     <p><span className="font-bold">Step 1:</span> Write a Python function in the <span className="text-blue-500 underline cursor-pointer" onClick={onEditorClick}>editor</span>.</p>
-                    <div className="py-2 h-[100px]">
+                    <div className="py-2 h-[75px]">
                         <MonacoEditor
                             value={DISPLAY_CODE}
                             onMount={(editor) => {
@@ -80,15 +80,15 @@ const HomeTab = ({ onEditorClick }) => {
                         />
                     </div>
                 </div>
-                <div className="py-1 border border-gray-300 rounded-lg p-4 mb-4">
+                <div className="py-1 border-gray-300 rounded-lg p-2 mb-2">
                     <p><span className="font-bold">Step 2:</span> Save it to create a LAMBDA function.</p>
-                    <div className="p-1 mt-1"><code>=HELLO("Annie")</code> <br /><code>Hello Annie!</code></div>
+                    <div className="p-1 mt-1 bg-white"><code>=HELLO("Annie")</code> <br /><code>Hello Annie!</code></div>
                 </div>
                 <p className="mb-1">Check out the <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">tutorial video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>. Use the <span className="text-blue-500 underline cursor-pointer" onClick={onEditorClick}>code editor</span> to create and edit functions.  Use button below to load demo functions.</p>
                 <button
                     onClick={handleImportDemos}
                     disabled={isLoading}
-                    className="text-sm mt-4 px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 mx-auto block"
+                    className="text-sm mt-4 px-3 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 disabled:bg-gray-300 mx-auto block"
                 >
                     {isLoading ? "Importing..." : "Add Demo Functions"}
                 </button>

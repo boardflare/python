@@ -1,5 +1,3 @@
-import { remoteFunctions } from "./examples";
-
 export async function singleDemo(parsedCode) {
     return Excel.run(async (context) => {
         try {
