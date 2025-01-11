@@ -87,7 +87,42 @@ const FunctionsTab = ({ onEdit }) => {
 
     return (
         <div className="h-full flex flex-col">
-            <form onSubmit={handleUrlSubmit} className="p-4 border-b">
+            {/* Table of functions */}
+            <div className="flex-1 overflow-x-auto">
+                <table className="min-w-full bg-white">
+                    <thead>
+                        <tr>
+                            <th className="py-2 px-4 border-b">Name</th>
+                            <th className="py-2 px-4 border-b">Description</th>
+                            <th className="py-2 px-4 border-b">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {functions.map((func) => (
+                            <tr key={func.id}>
+                                <td className="py-2 px-4 border-b">{func.name}</td>
+                                <td className="py-2 px-4 border-b">{func.description}</td>
+                                <td className="py-2 px-4 border-b">
+                                    <button
+                                        className="text-blue-500 hover:underline"
+                                        onClick={() => onEdit(func.name)}
+                                    >
+                                        Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Example text */}
+            <div className="p-2 text-gray-600 text-sm">
+                Change the URL below to load your own example functions from a Juypter notebook file (*.ipynb) in <a href={DEFAULT_FUNCTIONS_URL} className="text-blue-500 hover:underline">this format</a>.
+            </div>
+
+            {/* Form to input URL */}
+            <form onSubmit={handleUrlSubmit} className="p-4 border-t">
                 <div className="flex gap-2 items-center">
                     <input
                         type="url"
@@ -117,34 +152,6 @@ const FunctionsTab = ({ onEdit }) => {
                     </div>
                 )}
             </form>
-
-            <div className="flex-1 overflow-x-auto">
-                <table className="min-w-full bg-white">
-                    <thead>
-                        <tr>
-                            <th className="py-2 px-4 border-b">Name</th>
-                            <th className="py-2 px-4 border-b">Description</th>
-                            <th className="py-2 px-4 border-b">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {functions.map((func) => (
-                            <tr key={func.id}>
-                                <td className="py-2 px-4 border-b">{func.name}</td>
-                                <td className="py-2 px-4 border-b">{func.description}</td>
-                                <td className="py-2 px-4 border-b">
-                                    <button
-                                        className="text-blue-500 hover:underline"
-                                        onClick={() => onEdit(func.name)}
-                                    >
-                                        Edit
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
         </div>
     );
 };
