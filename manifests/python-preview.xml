@@ -12,14 +12,14 @@
 
   <!--Version.
   Updates from the store only get triggered if there is a version change. -->
-  <Version>1.0.0.1</Version>
+  <Version>1.0.0.2</Version>
   <ProviderName>Boardflare</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
 
   <!-- The display name of your add-in. Used on the store and various places of the Office UI such
   as the add-ins dialog. -->
   <DisplayName DefaultValue="Python for Excel" />
-  <Description DefaultValue="Run Python code locally in Excel for free." />
+  <Description DefaultValue="PREVIEW" />
   <!-- Icon for your add-in. Used on installation screens and the add-ins dialog. -->
   <IconUrl DefaultValue="https://addins.boardflare.com/python/preview/images/icon-32.png" />
   <HighResolutionIconUrl
@@ -177,7 +177,7 @@
         <bt:String id="BF.TaskpaneButton.Label" DefaultValue="Python" />
         <bt:String id="BF.Group1Label" DefaultValue="PREVIEW" />
         <bt:String id="BF.GetStarted.Title" DefaultValue="Python for Excel" />
-        <bt:String id="BF.CustomFunctions.NameSpace" DefaultValue="BOARDFLARE" />
+        <bt:String id="BF.CustomFunctions.NameSpace" DefaultValue="PREVIEW" />
       </bt:ShortStrings>
       <!-- LongStrings max characters==250. -->
       <bt:LongStrings>
