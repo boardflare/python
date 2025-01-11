@@ -118,7 +118,7 @@ const FunctionsTab = ({ onEdit }) => {
 
             {/* Example text */}
             <div className="p-2 text-gray-600 text-sm">
-                Change the URL below to load your own example functions from a Juypter notebook file (*.ipynb) in <a href={DEFAULT_FUNCTIONS_URL} className="text-blue-500 hover:underline">this format</a>.
+                Change the URL below to load your own demo functions from a notebook file (*.ipynb) in <a href={DEFAULT_FUNCTIONS_URL} className="text-blue-500 hover:underline">this format</a>.
             </div>
 
             {/* Form to input URL */}
