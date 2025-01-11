@@ -52,7 +52,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
     React.useEffect(() => {
         if (selectedFunction.name && editorRef.current) {
             const func = functions.find(f => f.name === selectedFunction.name);
-            if (func) {
+            if (func && !selectedFunction.code) {  // Only update if code is not already set
                 editorRef.current.setValue(func.code);
                 setSelectedFunction(func);
             }
@@ -63,6 +63,11 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
         editorRef.current = editor;
         if (selectedFunction.code) {
             editor.setValue(selectedFunction.code);
+        } else if (selectedFunction.name) {
+            const func = functions.find(f => f.name === selectedFunction.name);
+            if (func) {
+                editor.setValue(func.code);
+            }
         } else {
             editor.setValue(DEFAULT_CODE);
         }

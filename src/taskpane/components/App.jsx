@@ -35,7 +35,12 @@ const App = ({ title }) => {
   };
 
   const handleTabSelect = (event) => {
-    setSelectedTab(event.target.value);
+    // Preserve editor content when switching tabs
+    if (event.target.value === "editor" && selectedFunction.code) {
+      setSelectedTab("editor");
+    } else {
+      setSelectedTab(event.target.value);
+    }
   };
 
   const handleFunctionEdit = (functionName) => {
