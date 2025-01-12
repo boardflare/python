@@ -60,8 +60,20 @@ export const setStoredUrl = async (url) => {
 
 export const remoteFunctions = async () => {
     const url = await getStoredUrl();
-    const response = await fetch(url);
-    const notebook = await response.json();
+    let notebook;
+
+    if (url.includes('gist.github.com')) {
+        const gistId = url.split('/').pop();
+        const gistApiUrl = `https://api.github.com/gists/${gistId}`;
+        const response = await fetch(gistApiUrl);
+        const gistData = await response.json();
+        const fileName = Object.keys(gistData.files)[0];
+        notebook = JSON.parse(gistData.files[fileName].content);
+    } else {
+        const response = await fetch(url);
+        notebook = await response.json();
+    }
+
     const codeCells = notebook.cells.filter(cell => cell.cell_type === 'code').slice(1);
 
     const allFunctions = codeCells.map(cell => {

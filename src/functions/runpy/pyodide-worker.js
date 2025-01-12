@@ -29,7 +29,7 @@ self.onmessage = async (event) => {
 
     self.pyodide.setStderr({
         batched: (msg) => {
-            stdout += "STDERR: " + msg + "\n";
+            stdout += msg + "\n";
         }
     });
 
@@ -64,11 +64,13 @@ self.onmessage = async (event) => {
 
             if (usePandas) {
                 // Convert array args to DataFrames if using pandas
-                await self.pyodide.loadPackage(["pandas"]);
-                self.pyodide.runPython(`
+                await self.pyodide.runPythonAsync(`
+                    import micropip
+                    await micropip.install(["pandas", "pyodide_http"])
                     import pandas as pd
                     import numpy as np
-                    import micropip
+                    import pyodide_http
+                    pyodide_http.patch_all()
                     
                     for index, value in enumerate(args):
                         if value is None:
@@ -90,9 +92,12 @@ self.onmessage = async (event) => {
                 `);
             } else {
                 // Use lists for all other cases.
-                self.pyodide.runPython(`
+                await self.pyodide.runPythonAsync(`
                     import micropip
-                    
+                    await micropip.install(["pyodide_http"])
+                    import pyodide_http
+                    pyodide_http.patch_all()
+
                     for index, value in enumerate(args):
                         if value is None:
                             globals()[f'arg{index + 1}'] = None

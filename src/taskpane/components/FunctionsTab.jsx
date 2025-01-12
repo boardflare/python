@@ -75,48 +75,46 @@ const FunctionsTab = ({ onEdit }) => {
         );
     }
 
-    if (!functions.length) {
-        return (
-            <div className="flex flex-col items-center justify-center h-full p-5 text-center text-gray-600">
-                <div className="text-4xl mb-4">📝</div>
-                <div className="text-base mb-2">No functions found</div>
-                <div>Create new functions using the Editor tab</div>
-            </div>
-        );
-    }
-
     return (
         <div className="h-full flex flex-col">
             {/* Table of functions */}
-            <div className="flex-1 overflow-x-auto">
-                <table className="min-w-full bg-white">
-                    <thead>
-                        <tr>
-                            <th className="py-2 px-4 border-b">Name</th>
-                            <th className="py-2 px-4 border-b">Description</th>
-                            <th className="py-2 px-4 border-b">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {functions.map((func) => (
-                            <tr key={func.id}>
-                                <td className="py-2 px-4 border-b">{func.name}</td>
-                                <td className="py-2 px-4 border-b">{func.description}</td>
-                                <td className="py-2 px-4 border-b">
-                                    <button
-                                        className="text-blue-500 hover:underline"
-                                        onClick={() => onEdit(func.name)}
-                                    >
-                                        Edit
-                                    </button>
-                                </td>
+            {functions.length ? (
+                <div className="flex-1 overflow-x-auto">
+                    <table className="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th className="py-2 px-4 border-b">Name</th>
+                                <th className="py-2 px-4 border-b">Description</th>
+                                <th className="py-2 px-4 border-b">Actions</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {functions.map((func) => (
+                                <tr key={func.id}>
+                                    <td className="py-2 px-4 border-b">{func.name}</td>
+                                    <td className="py-2 px-4 border-b">{func.description}</td>
+                                    <td className="py-2 px-4 border-b">
+                                        <button
+                                            className="text-blue-500 hover:underline"
+                                            onClick={() => onEdit(func.name)}
+                                        >
+                                            Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
+                <div className="flex flex-col items-center justify-center h-full p-5 text-center text-gray-600">
+                    <div className="text-4xl mb-4">📝</div>
+                    <div className="text-base mb-2">No functions found</div>
+                    <div>Create new functions using the Editor tab</div>
+                </div>
+            )}
 
-            {/* Example text */}
+            {/* Form text */}
             <div className="p-2 text-gray-600 text-sm">
                 Change the URL below to load your own demo functions from a notebook file (*.ipynb) in <a href={DEFAULT_FUNCTIONS_URL} className="text-blue-500 hover:underline">this format</a>.
             </div>
