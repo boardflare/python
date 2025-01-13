@@ -55,3 +55,28 @@ export async function getFunctionFromSettings(name = null) {
         return name ? null : [];
     }
 }
+
+export async function deleteFunctionFromSettings(name) {
+    try {
+        return await Excel.run(async (context) => {
+            const settings = context.workbook.settings;
+            const setting = settings.getItem(name);
+            setting.delete();
+
+            // Also delete from name manager
+            const namedItem = context.workbook.names.getItemOrNullObject(name.toUpperCase());
+            namedItem.load('isNullObject');
+            await context.sync();
+
+            if (!namedItem.isNullObject) {
+                namedItem.delete();
+            }
+
+            await context.sync();
+            return true;
+        });
+    } catch (error) {
+        console.error('Failed to delete from settings:', error);
+        return false;
+    }
+}

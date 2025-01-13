@@ -1,5 +1,5 @@
 import * as React from "react";
-import { getFunctionFromSettings } from "../utils/workbookSettings";
+import { getFunctionFromSettings, deleteFunctionFromSettings } from "../utils/workbookSettings";
 import { DEFAULT_NOTEBOOK, getStoredNotebooks, addNotebook, removeNotebook, demoNotebooks, fetchNotebookUrl } from "../utils/notebooks";
 import { parsePython } from "../utils/codeparser";
 import { saveFunctionToSettings } from "../utils/workbookSettings";
@@ -21,6 +21,7 @@ const FunctionsTab = ({ onEdit }) => {
     const [saveSuccess, setSaveSuccess] = React.useState(false);
     const [selectedNotebook, setSelectedNotebook] = React.useState(DEFAULT_NOTEBOOK);
     const [isImporting, setIsImporting] = React.useState(false);
+    const [deleteConfirm, setDeleteConfirm] = React.useState(null);
 
     const loadFunctions = async () => {
         setIsLoading(true);
@@ -116,11 +117,21 @@ const FunctionsTab = ({ onEdit }) => {
         }
     };
 
+    const handleDelete = async (functionName) => {
+        try {
+            await deleteFunctionFromSettings(functionName);
+            await loadFunctions(); // Reload the functions list
+            setDeleteConfirm(null);
+        } catch (error) {
+            console.error('Error deleting function:', error);
+            setError('Failed to delete function. Please try again.');
+        }
+    };
+
     return (
         <div className="h-full flex flex-col overflow-y-auto">
-            {/* Original Functions Table */}
+            {/* Functions Table */}
             <div className="mb-4">
-                {/* <h2 className="text-lg font-semibold mb-2 px-4">Functions</h2> */}
                 {isLoading ? (
                     <div className="flex justify-center items-center p-4">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -143,12 +154,24 @@ const FunctionsTab = ({ onEdit }) => {
                                         <td className="py-1 px-2 border-b">{func.name}</td>
                                         <td className="py-1 px-2 border-b">{func.description}</td>
                                         <td className="py-1 px-2 border-b">
-                                            <button
-                                                className="text-blue-500 hover:underline"
-                                                onClick={() => onEdit(func.name)}
-                                            >
-                                                Edit
-                                            </button>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    className="text-blue-500 hover:text-blue-700"
+                                                    onClick={() => onEdit(func.name)}
+                                                    title="Edit function"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    className="text-red-500 hover:text-red-700 text-lg"
+                                                    onClick={() => setDeleteConfirm(func.name)}
+                                                    title="Delete function"
+                                                >
+                                                    ❌
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -268,6 +291,30 @@ const FunctionsTab = ({ onEdit }) => {
                     </>
                 )}
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            {deleteConfirm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                    <div className="bg-white p-6 rounded-lg max-w-sm w-full">
+                        <h3 className="text-lg font-semibold mb-4">Delete Function</h3>
+                        <p className="mb-4">Are you sure you want to delete "{deleteConfirm}"?</p>
+                        <div className="flex justify-end gap-2">
+                            <button
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                                onClick={() => setDeleteConfirm(null)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                onClick={() => handleDelete(deleteConfirm)}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
