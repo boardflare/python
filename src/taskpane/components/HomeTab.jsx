@@ -1,28 +1,12 @@
 import * as React from "react";
 import { MonacoEditor } from "./MonacoEditor";
 import { DISPLAY_CODE } from "../utils/constants";
-import { remoteFunctions } from "../utils/examples"; // Update import
-import { parsePython } from "../utils/codeparser";
-import { saveFunctionToSettings } from "../utils/workbookSettings";
-import { updateNameManager } from "../utils/nameManager";
-import { multiDemo } from "../utils/demo";
-import { feedback } from "../utils/logs"; // Add this import
+import { feedback } from "../utils/logs";
 
-const HomeTab = ({ onEditorClick }) => {
-    const [isLoading, setIsLoading] = React.useState(false);
+const HomeTab = ({ onTabClick }) => {
     const [notification, setNotification] = React.useState("");
-    const notificationTimeoutRef = React.useRef();
     const [feedbackText, setFeedbackText] = React.useState("");
-
-    const showNotification = (message, type = "success") => {
-        if (notificationTimeoutRef.current) {
-            clearTimeout(notificationTimeoutRef.current);
-        }
-        setNotification({ message, type });
-        notificationTimeoutRef.current = setTimeout(() => {
-            setNotification("");
-        }, 5000);
-    };
+    const notificationTimeoutRef = React.useRef();
 
     React.useEffect(() => {
         return () => {
@@ -32,25 +16,14 @@ const HomeTab = ({ onEditorClick }) => {
         };
     }, []);
 
-    const handleImportDemos = async () => {
-        setIsLoading(true);
-        try {
-            const parsedFunctions = [];
-            const examples = await remoteFunctions(); // Fetch remote functions
-            for (const example of examples) {
-                const parsedFunction = parsePython(example.code);
-                parsedFunction.excel_example = example.excel_example; // Add excel_example to parsed function
-                await saveFunctionToSettings(parsedFunction);
-                await updateNameManager(parsedFunction);
-                parsedFunctions.push(parsedFunction);
-            }
-            await multiDemo(parsedFunctions);
-            showNotification("Demo functions added successfully!", "success");
-        } catch (error) {
-            console.error("Error importing demo functions:", error);
-            showNotification("Error importing demo functions", "error");
+    const showNotification = (message, type = "success") => {
+        if (notificationTimeoutRef.current) {
+            clearTimeout(notificationTimeoutRef.current);
         }
-        setIsLoading(false);
+        setNotification({ message, type });
+        notificationTimeoutRef.current = setTimeout(() => {
+            setNotification("");
+        }, 5000);
     };
 
     const handleFeedbackSubmit = async (e) => {
@@ -70,7 +43,7 @@ const HomeTab = ({ onEditorClick }) => {
             <div className="p-1 mb-24">
                 <h2 className="text-center text-lg font-semibold mb-2">Python functions in Excel</h2>
                 <div className="py-1 border-gray-300 rounded-lg p-2 mb-2">
-                    <p><span className="font-bold">Step 1:</span> Write a Python function in the <span className="text-blue-500 underline cursor-pointer" onClick={onEditorClick}>editor</span>.</p>
+                    <p><span className="font-bold">Step 1:</span> Write a Python function in the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('editor')}>editor</span>.</p>
                     <div className="py-2 h-[75px]">
                         <MonacoEditor
                             value={DISPLAY_CODE}
@@ -84,14 +57,7 @@ const HomeTab = ({ onEditorClick }) => {
                     <p><span className="font-bold">Step 2:</span> Save it to create a LAMBDA function.</p>
                     <div className="p-1 mt-1 bg-white"><code>=HELLO("Annie")</code> <br /><code>Hello Annie!</code></div>
                 </div>
-                <p className="mb-1">Check out the <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">tutorial video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>. Use the <span className="text-blue-500 underline cursor-pointer" onClick={onEditorClick}>code editor</span> to create and edit functions.  Use button below to load demo functions.</p>
-                <button
-                    onClick={handleImportDemos}
-                    disabled={isLoading}
-                    className="text-sm mt-4 px-3 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 disabled:bg-gray-300 mx-auto block"
-                >
-                    {isLoading ? "Importing..." : "Add Demo Functions"}
-                </button>
+                <p className="mb-1">Check out the <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">tutorial video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>. Use the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('editor')}>code editor</span> to create and edit functions. You can also import pre-built functions from a Jupyter notebook on the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('functions')}>Functions</span> tab.</p>
                 {notification && (
                     <div className={`mt-2 text-center p-2 rounded ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"}`}>
                         {notification.message}

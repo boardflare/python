@@ -52,8 +52,8 @@ const App = ({ title }) => {
     setSelectedTab("output");
   };
 
-  const handleEditorClick = () => {
-    setSelectedTab("editor");
+  const handleTabClick = (tab) => {
+    setSelectedTab(tab);
   };
 
   return (
@@ -66,7 +66,7 @@ const App = ({ title }) => {
           <button className={`flex-grow px-2 py-2 mr-2 ${selectedTab === "output" ? "border-b-2 border-blue-500" : ""}`} value="output" onClick={handleTabSelect}>Output</button>
         </div>
         <div className="flex-1 overflow-hidden">
-          {selectedTab === "home" && <HomeTab onEditorClick={handleEditorClick} />}
+          {selectedTab === "home" && <HomeTab onTabClick={(tab) => handleTabClick(tab)} />}
           {selectedTab === "editor" && (
             <EditorTab
               selectedFunction={selectedFunction}

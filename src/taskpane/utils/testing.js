@@ -2,6 +2,11 @@ import { runPy } from "../../functions/runpy/controller";
 
 export async function runTests(code, functionName) {
     const testCode = `
+import micropip
+await micropip.install(["pyodide_http"])
+import pyodide_http
+pyodide_http.patch_all()
+
 ${code}
 
 result = "No result"

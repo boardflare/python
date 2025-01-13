@@ -87,10 +87,9 @@ export async function singleDemo(parsedCode) {
     });
 }
 
-export async function multiDemo(parsedFunctions) {
+export async function multiDemo(parsedFunctions, sheetName = "Demo_Functions") {
     return Excel.run(async (context) => {
         try {
-            const sheetName = "Demo_Functions";
             let sheet = context.workbook.worksheets.getItemOrNullObject(sheetName);
             await context.sync();
 
