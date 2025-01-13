@@ -138,8 +138,8 @@ export const fetchNotebookUrl = async (url = DEFAULT_NOTEBOOK) => {
 
     const allFunctions = codeCells.map(cell => {
         const code = cell.source.filter(line => !line.startsWith('run_tests')).join('');
-        const output = cell.outputs?.[0]?.text || [];
-        const excelExample = output.find(line => line.includes('Excel:')).split('Excel: ')[1].trim();
+        const excelExampleLine = cell.source.find(line => line.startsWith('# Excel demo:'));
+        const excelExample = excelExampleLine ? excelExampleLine.split('# Excel demo: ')[1].trim() : "No Excel demo comment found in code, e.g. # Excel demo: =TO_POWER(3,4)";
 
         return { code, excel_example: excelExample };
     });
