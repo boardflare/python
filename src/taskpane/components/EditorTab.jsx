@@ -10,7 +10,6 @@ import { runTests } from "../utils/testRunner";
 
 const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
     const [notification, setNotification] = React.useState("");
-    const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState(null);
     const [functions, setFunctions] = React.useState([]);
     const notificationTimeoutRef = React.useRef();
@@ -37,13 +36,10 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
     React.useEffect(() => {
         const loadFunctions = async () => {
             try {
-                setIsLoading(true);
                 const funcs = await getFunctionFromSettings();
                 setFunctions(funcs);
             } catch (err) {
                 setError(err.message);
-            } finally {
-                setIsLoading(false);
             }
         };
         loadFunctions();
@@ -75,28 +71,18 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
 
     const handleSave = async () => {
         try {
-            setIsLoading(true);
             setError(null);
             const code = editorRef.current.getValue();
             const parsedFunction = parsePython(code);
-            setSelectedFunction({ name: parsedFunction.name, code }); // Update parent state
-            const result = await saveFunctionToSettings(parsedFunction);
-            if (result) {
-                await updateNameManager(parsedFunction);
-                // await singleDemo(parsedFunction);
-                showNotification(`${parsedFunction.signature} saved!`, "success");
-                const updatedFunctions = await getFunctionFromSettings();
-                setFunctions(updatedFunctions);
-                setSelectedFunction(parsedFunction);
-                // No need to setValue here as the editor already has the correct code
-            } else {
-                showNotification("Failed to save function", "error");
-            }
+            await saveFunctionToSettings(parsedFunction);
+            await updateNameManager(parsedFunction);
+            showNotification(`${parsedFunction.signature} saved!`, "success");
+            const updatedFunctions = await getFunctionFromSettings();
+            setFunctions(updatedFunctions);
+            setSelectedFunction(parsedFunction);
         } catch (err) {
             setError(err.message);
             showNotification(err.message, "error");
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -112,18 +98,14 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
     const handleTest = async () => {
         onTest();
         try {
-            setIsLoading(true);
             setError(null);
             const code = editorRef.current.getValue();
             const parsedFunction = parsePython(code);
             window.dispatchEvent(new CustomEvent(EventTypes.CLEAR));
-
-            await runTests(code, parsedFunction.name);
+            await runTests(parsedFunction);
         } catch (err) {
             setError(err.message);
             window.dispatchEvent(new CustomEvent(EventTypes.ERROR, { detail: err.message }));
-        } finally {
-            setIsLoading(false);
         }
     };
 
