@@ -1,3 +1,7 @@
+import { parsePython } from './codeparser';
+import { pythonLogs } from './logs';
+let logRef;
+
 export const demoNotebooks = {
     'https://functions.boardflare.com/notebooks/demo/simple.ipynb': {
         title: 'Simple',
@@ -71,6 +75,7 @@ export const addNotebook = async (url) => {
         const metadata = await fetchNotebookMetadata(url);
         const notebooks = await getStoredNotebooks();
         notebooks[url] = metadata;
+        await pythonLogs({ url, metadata }, logRef = "add notebook url");
 
         return new Promise((resolve, reject) => {
             const request = indexedDB.open(dbName, 1);
@@ -134,15 +139,24 @@ export const fetchNotebookUrl = async (url = DEFAULT_NOTEBOOK) => {
         notebook = await response.json();
     }
 
+
+
     const codeCells = notebook.cells.filter(cell => cell.cell_type === 'code').slice(1);
 
-    const allFunctions = codeCells.map(cell => {
-        const code = cell.source.filter(line => !line.startsWith('run_tests')).join('');
-        const excelExampleLine = cell.source.find(line => line.startsWith('# Excel demo:'));
-        const excelExample = excelExampleLine ? excelExampleLine.split('# Excel demo: ')[1].trim() : "No Excel demo comment found in code, e.g. # Excel demo: =TO_POWER(3,4)";
+    const allFunctions = codeCells.reduce((validFunctions, cell) => {
+        try {
+            const code = cell.source.filter(line => !line.startsWith('run_tests')).join('');
+            validFunctions.push(parsePython(code));
+        } catch (error) {
+            console.warn('Skipping invalid code cell:', {
+                error: error.message,
+                code: cell.source.join(''),
+            });
+        }
+        return validFunctions;
+    }, []);
 
-        return { code, excel_example: excelExample };
-    });
+    await pythonLogs({ url, notebook, allFunctions }, logRef = "notebook fetched");
 
     return allFunctions;
 };

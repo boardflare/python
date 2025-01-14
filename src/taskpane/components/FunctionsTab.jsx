@@ -90,24 +90,19 @@ const FunctionsTab = ({ onEdit }) => {
     const handleImportFunctions = async () => {
         setIsImporting(true);
         try {
-            const examples = await fetchNotebookUrl(selectedNotebook);
-            const parsedFunctions = [];
+            const parsedFunctions = await fetchNotebookUrl(selectedNotebook);
 
-            for (const example of examples) {
-                const parsedFunction = parsePython(example.code);
-                parsedFunction.excel_example = example.excel_example;
-                await saveFunctionToSettings(parsedFunction);
-                await updateNameManager(parsedFunction);
-                parsedFunctions.push(parsedFunction);
+            for (const func of parsedFunctions) {
+                await saveFunctionToSettings(func);
+                await updateNameManager(func);
             }
 
-            // Create demo sheet with notebook title
             const notebookTitle = selectedNotebook in demoNotebooks
                 ? demoNotebooks[selectedNotebook].title
                 : myNotebooks[selectedNotebook]?.title || 'Custom Notebook';
 
             await multiDemo(parsedFunctions, `Demo_${notebookTitle}`);
-            await loadFunctions(); // Reload functions list
+            await loadFunctions();
             setError(null);
         } catch (error) {
             console.error("Error importing functions:", error);
@@ -190,6 +185,9 @@ const FunctionsTab = ({ onEdit }) => {
             {/* Notebooks Section */}
             <div className="border-t pt-2">
                 <h2 className="text-lg font-semibold mb-2 px-4">Notebooks</h2>
+                <p className="text-sm text-gray-600 px-4 mb-2">
+                    Import functions from a Jupyter notebook. Select a demo notebook or add your own notebook URL.  See <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a> for details.
+                </p>
                 <div className="px-4 mb-4">
                     <select
                         value={selectedNotebook}

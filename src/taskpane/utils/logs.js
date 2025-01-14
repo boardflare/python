@@ -57,13 +57,14 @@ const browserData = {
 
 const uid = await getUserId(); // Get the unique user ID
 
-export async function pythonLogs(data) {
+export async function pythonLogs(data, ref) {
 
     const logEntity = {
         PartitionKey: new Date().toISOString(),
         RowKey: uid,
         BrowserData: JSON.stringify(browserData),
-        ...data
+        data: JSON.stringify(data),
+        ref
     };
 
     const body = JSON.stringify(logEntity);

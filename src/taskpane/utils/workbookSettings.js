@@ -26,7 +26,8 @@ export async function saveFunctionToSettings(functionData) {
                 await context.sync();
                 return value; // Return the saved function data
             });
-            await pythonLogs(functionData); // Log the function data
+            const ref = "function saved to workbook settings";
+            await pythonLogs(functionData, ref); // Log the function data
             return result;
         } catch (error) {
             console.error('Failed to save to settings:', error);

@@ -111,7 +111,7 @@ export async function multiDemo(parsedFunctions, sheetName = "Demo_Functions") {
                 const functionRange = sheet.getRange(`A${rowIndex + 1}`);
                 const exampleRange = sheet.getRange(`B${rowIndex + 1}`);
                 functionRange.values = [[parsedFunction.signature]];
-                exampleRange.values = [[parsedFunction.excel_example]];
+                exampleRange.values = [[parsedFunction.excelExample]];
                 exampleRange.format.horizontalAlignment = 'Left';
             });
 

@@ -40,7 +40,7 @@ const HomeTab = ({ onTabClick }) => {
 
     return (
         <>
-            <div className="p-1 mb-24">
+            <div className="p-1 mb-32">
                 <h2 className="text-center text-lg font-semibold mb-2">Python functions in Excel</h2>
                 <div className="py-1 border-gray-300 rounded-lg p-2 mb-2">
                     <p><span className="font-bold">Step 1:</span> Write a Python function in the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('editor')}>editor</span>.</p>
@@ -57,17 +57,19 @@ const HomeTab = ({ onTabClick }) => {
                     <p><span className="font-bold">Step 2:</span> Save it to create a LAMBDA function.</p>
                     <div className="p-1 mt-1 bg-white"><code>=HELLO("Annie")</code> <br /><code>Hello Annie!</code></div>
                 </div>
-                <p className="mb-1">Check out the <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">tutorial video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>. Use the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('editor')}>code editor</span> to create and edit functions. You can also import pre-built functions from a Jupyter notebook on the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('functions')}>Functions</span> tab.</p>
+                <p className="mb-1">Check out the <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">tutorial video</a> and <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>. Use the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('editor')}>code editor</span> to create and edit functions. You can also import pre-built functions from a Jupyter notebook on the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('functions')}>Functions</span> tab.</p>
+            </div>
+            <div className="fixed bottom-0 left-0 right-0">
                 {notification && (
-                    <div className={`mt-2 text-center p-2 rounded ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"}`}>
+                    <div className={`p-2 text-center ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"}`}>
                         {notification.message}
                     </div>
                 )}
-                <form onSubmit={handleFeedbackSubmit} className="fixed bottom-0 left-0 right-0 m-2 p-2 rounded-t-lg">
+                <form onSubmit={handleFeedbackSubmit} className="mb-2 p-2">
                     <textarea
                         id="feedback"
                         value={feedbackText}
-                        placeholder="Bug? Suggestion? Rant? All feedback is welcome. Thanks!🙂"
+                        placeholder="Bug? Suggestion? Your feedback is critical to making this add-in more useful for everyone. If you'd like a response, please email us.  Thanks!🙂"
                         onChange={(e) => setFeedbackText(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md"
                         rows="4"
