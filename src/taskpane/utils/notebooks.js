@@ -2,14 +2,19 @@ import { parsePython } from './codeparser';
 import { pythonLogs } from './logs';
 let logRef;
 
-export const demoNotebooks = {
-    'https://functions.boardflare.com/notebooks/demo/simple.ipynb': {
-        title: 'Simple',
-        description: 'Simple functions not using arrays or libraries.',
-    },
-}
-
+let demoNotebooks = {};
 export const DEFAULT_NOTEBOOK = 'https://functions.boardflare.com/notebooks/demo/simple.ipynb';
+
+export const fetchDemoNotebooks = async () => {
+    try {
+        const response = await fetch('https://functions.boardflare.com/discovery/app-nb.json');
+        demoNotebooks = await response.json();
+        return demoNotebooks;
+    } catch (error) {
+        console.error('Failed to fetch demo notebooks:', error);
+        return {};
+    }
+};
 
 const fetchGistContent = async (url) => {
     const gistId = url.split('/').pop();

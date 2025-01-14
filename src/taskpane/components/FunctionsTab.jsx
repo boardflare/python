@@ -1,6 +1,6 @@
 import * as React from "react";
 import { getFunctionFromSettings, deleteFunctionFromSettings } from "../utils/workbookSettings";
-import { DEFAULT_NOTEBOOK, getStoredNotebooks, addNotebook, removeNotebook, demoNotebooks, fetchNotebookUrl } from "../utils/notebooks";
+import { DEFAULT_NOTEBOOK, getStoredNotebooks, addNotebook, removeNotebook, fetchDemoNotebooks, fetchNotebookUrl } from "../utils/notebooks";
 import { saveFunctionToSettings } from "../utils/workbookSettings";
 import { updateNameManager } from "../utils/nameManager";
 import { multiDemo } from "../utils/demo";
@@ -18,6 +18,7 @@ const FunctionsTab = ({ onEdit }) => {
     const [selectedNotebook, setSelectedNotebook] = React.useState(DEFAULT_NOTEBOOK);
     const [isImporting, setIsImporting] = React.useState(false);
     const [deleteConfirm, setDeleteConfirm] = React.useState(null);
+    const [demoNotebooks, setDemoNotebooks] = React.useState({});
 
     const loadFunctions = async () => {
         try {
@@ -41,8 +42,20 @@ const FunctionsTab = ({ onEdit }) => {
 
     // Combined loading effect
     React.useEffect(() => {
-        loadFunctions();
-        loadNotebooks();
+        const loadData = async () => {
+            try {
+                await Promise.all([
+                    loadFunctions(),
+                    loadNotebooks(),
+                    fetchDemoNotebooks().then(setDemoNotebooks)
+                ]);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                setError('Failed to load data. Please try again.');
+            }
+        };
+
+        loadData();
     }, []);
 
     const handleUrlSubmit = async (e) => {
@@ -185,11 +198,13 @@ const FunctionsTab = ({ onEdit }) => {
                                 ))}
                             </optgroup>
                         )}
-                        <optgroup label="Demo Notebooks">
-                            {Object.entries(demoNotebooks).map(([url, { title }]) => (
-                                <option key={url} value={url}>{title}</option>
-                            ))}
-                        </optgroup>
+                        {Object.entries(demoNotebooks).map(([category, notebooks]) => (
+                            <optgroup key={category} label={category}>
+                                {notebooks.map(({ url, title }) => (
+                                    <option key={url} value={url}>{title}</option>
+                                ))}
+                            </optgroup>
+                        ))}
                     </select>
                     <button
                         onClick={handleImportFunctions}
