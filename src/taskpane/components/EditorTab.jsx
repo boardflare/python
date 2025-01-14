@@ -6,7 +6,7 @@ import { parsePython } from "../utils/codeparser";
 import { EventTypes } from "../utils/constants";
 import { updateNameManager } from "../utils/nameManager";
 import { singleDemo } from "../utils/demo";
-import { runTests } from "../utils/testing";
+import { runTests } from "../utils/testRunner";
 
 const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
     const [notification, setNotification] = React.useState("");
