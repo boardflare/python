@@ -183,7 +183,7 @@ const FunctionsTab = ({ onEdit }) => {
             {/* Notebooks Section */}
             <div className="border-t pt-2">
                 <p className="text-sm text-gray-600 px-4 mb-2">
-                    Select a notebook below to import example functions.  See <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a> for how to import a custom notebook by url.
+                    Select a notebook to import example functions:
                 </p>
                 <div className="px-4 mb-4">
                     <select
@@ -191,6 +191,7 @@ const FunctionsTab = ({ onEdit }) => {
                         onChange={(e) => setSelectedNotebook(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-lg text-sm mb-2"
                     >
+                        <option value="">Select a notebook...</option>
                         {Object.keys(myNotebooks).length > 0 && (
                             <optgroup label="Your Notebooks">
                                 {Object.entries(myNotebooks).map(([url, { title }]) => (
@@ -208,7 +209,7 @@ const FunctionsTab = ({ onEdit }) => {
                     </select>
                     <button
                         onClick={handleImportFunctions}
-                        disabled={isImporting}
+                        disabled={isImporting || !selectedNotebook}
                         className="w-full px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300"
                     >
                         {isImporting ? "Importing Functions..." : "Import Notebook Functions"}
@@ -223,12 +224,12 @@ const FunctionsTab = ({ onEdit }) => {
                                 value={url}
                                 onChange={(e) => setUrl(e.target.value)}
                                 className="flex-1 px-2 py-1 border rounded"
-                                placeholder="Enter notebook URL"
+                                placeholder="Enter notebook URL (advanced)"
                             />
                             <button
                                 type="submit"
-                                disabled={isUrlSaving}
-                                className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+                                disabled={isUrlSaving || !url.trim()}
+                                className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-700 disabled:opacity-50"
                             >
                                 {isUrlSaving ? 'Adding...' : 'Add'}
                             </button>
@@ -307,3 +308,4 @@ const FunctionsTab = ({ onEdit }) => {
 };
 
 export default FunctionsTab;
+

@@ -3,7 +3,7 @@ import { pythonLogs } from './logs';
 let logRef;
 
 let demoNotebooks = {};
-export const DEFAULT_NOTEBOOK = 'https://functions.boardflare.com/notebooks/demo/simple.ipynb';
+export const DEFAULT_NOTEBOOK = '';
 
 export const fetchDemoNotebooks = async () => {
     try {
