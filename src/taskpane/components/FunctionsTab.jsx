@@ -175,16 +175,13 @@ const FunctionsTab = ({ onEdit }) => {
                     <div className="flex flex-col items-center justify-center p-5 text-center text-gray-600">
                         <div className="text-4xl mb-4">📝</div>
                         <div className="text-base mb-2">No functions found</div>
-                        <div>Create new functions using the Editor tab</div>
+                        <div>Create a function using the <button onClick={() => onEdit("")} className="text-blue-500 hover:text-blue-700 hover:underline">Editor</button>, or select a notebook below to import example functions.  Check out the <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">tutorial video</a> and <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>.</div>
                     </div>
                 )}
             </div>
 
             {/* Notebooks Section */}
             <div className="border-t pt-2">
-                <p className="text-sm text-gray-600 px-4 mb-2">
-                    Select a notebook to import example functions:
-                </p>
                 <div className="px-4 mb-4">
                     <select
                         value={selectedNotebook}
