@@ -1,7 +1,6 @@
 import * as React from "react";
 import { getFunctionFromSettings, deleteFunctionFromSettings } from "../utils/workbookSettings";
 import { DEFAULT_NOTEBOOK, getStoredNotebooks, addNotebook, removeNotebook, demoNotebooks, fetchNotebookUrl } from "../utils/notebooks";
-import { parsePython } from "../utils/codeparser";
 import { saveFunctionToSettings } from "../utils/workbookSettings";
 import { updateNameManager } from "../utils/nameManager";
 import { multiDemo } from "../utils/demo";
@@ -9,13 +8,10 @@ import { multiDemo } from "../utils/demo";
 const FunctionsTab = ({ onEdit }) => {
     // Original state for functions
     const [functions, setFunctions] = React.useState([]);
-    const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState(null);
 
     // New state for notebooks
     const [myNotebooks, setMyNotebooks] = React.useState({});
-    const [isNotebooksLoading, setIsNotebooksLoading] = React.useState(false);
-    const [notebooksError, setNotebooksError] = React.useState(null);
     const [url, setUrl] = React.useState('');
     const [isUrlSaving, setIsUrlSaving] = React.useState(false);
     const [saveSuccess, setSaveSuccess] = React.useState(false);
@@ -24,34 +20,22 @@ const FunctionsTab = ({ onEdit }) => {
     const [deleteConfirm, setDeleteConfirm] = React.useState(null);
 
     const loadFunctions = async () => {
-        setIsLoading(true);
-        setError(null);
         try {
             const functionsData = await getFunctionFromSettings();
-            const functionsWithIds = (functionsData || []).map((func, index) => ({
-                ...func,
-                id: index + 1
-            }));
-            setFunctions(functionsWithIds);
+            setFunctions(functionsData || []);
         } catch (error) {
             console.error('Error loading functions:', error);
             setError('Failed to load functions. Please try again.');
-        } finally {
-            setIsLoading(false);
         }
     };
 
     const loadNotebooks = async () => {
-        setIsNotebooksLoading(true);
-        setNotebooksError(null);
         try {
             const storedNotebooks = await getStoredNotebooks();
             setMyNotebooks(storedNotebooks);
         } catch (error) {
             console.error('Error loading notebooks:', error);
-            setNotebooksError('Failed to load notebooks. Please try again.');
-        } finally {
-            setIsNotebooksLoading(false);
+            setError('Failed to load notebooks. Please try again.');
         }
     };
 
@@ -125,15 +109,16 @@ const FunctionsTab = ({ onEdit }) => {
 
     return (
         <div className="h-full flex flex-col overflow-y-auto">
+            {/* Consolidated Error Display */}
+            {error && (
+                <div className="p-4 text-red-600 bg-red-50 mb-4">
+                    {error}
+                </div>
+            )}
+
             {/* Functions Table */}
-            <div className="mb-4">
-                {isLoading ? (
-                    <div className="flex justify-center items-center p-4">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                    </div>
-                ) : error ? (
-                    <div className="p-4 text-red-600">{error}</div>
-                ) : functions.length > 0 ? (
+            <div className="mt-2">
+                {functions.length > 0 ? (
                     <div className="overflow-x-auto">
                         <table className="min-w-full bg-white">
                             <thead>
@@ -184,9 +169,8 @@ const FunctionsTab = ({ onEdit }) => {
 
             {/* Notebooks Section */}
             <div className="border-t pt-2">
-                <h2 className="text-lg font-semibold mb-2 px-4">Notebooks</h2>
                 <p className="text-sm text-gray-600 px-4 mb-2">
-                    Import functions from a Jupyter notebook. Select a demo notebook or add your own notebook URL.  See <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a> for details.
+                    Select a notebook below to import example functions.  See <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a> for how to import a custom notebook by url.
                 </p>
                 <div className="px-4 mb-4">
                     <select
@@ -215,78 +199,68 @@ const FunctionsTab = ({ onEdit }) => {
                         {isImporting ? "Importing Functions..." : "Import Notebook Functions"}
                     </button>
                 </div>
-                {isNotebooksLoading ? (
-                    <div className="flex justify-center items-center p-4">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                    </div>
-                ) : (
-                    <>
-                        {Object.keys(myNotebooks).length > 0 && (
-                            <div className="overflow-x-auto mb-4">
-                                <table className="min-w-full bg-white">
-                                    <thead>
-                                        <tr>
-                                            <th className="py-2 px-4 border-b">Title</th>
-                                            <th className="py-2 px-4 border-b">Description</th>
-                                            <th className="py-2 px-4 border-b">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {Object.entries(myNotebooks).map(([url, notebook]) => (
-                                            <tr key={url}>
-                                                <td className="py-2 px-4 border-b">
-                                                    <a href={url} target="_blank" rel="noopener noreferrer"
-                                                        className="text-blue-500 hover:underline">
-                                                        {notebook.title || notebook.fileName || 'Untitled'}
-                                                    </a>
-                                                </td>
-                                                <td className="py-2 px-4 border-b">
-                                                    {notebook.description || 'No description'}
-                                                </td>
-                                                <td className="py-2 px-4 border-b">
-                                                    <button
-                                                        className="text-red-500 hover:underline"
-                                                        onClick={() => handleRemove(url)}
-                                                    >
-                                                        Remove
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+
+                <div className="px-4 mb-2">
+                    <form onSubmit={handleUrlSubmit} className="mb-2">
+                        <div className="flex gap-2 items-center">
+                            <input
+                                type="url"
+                                value={url}
+                                onChange={(e) => setUrl(e.target.value)}
+                                className="flex-1 px-2 py-1 border rounded"
+                                placeholder="Enter notebook URL"
+                            />
+                            <button
+                                type="submit"
+                                disabled={isUrlSaving}
+                                className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+                            >
+                                {isUrlSaving ? 'Adding...' : 'Add'}
+                            </button>
+                        </div>
+                        {saveSuccess && (
+                            <div className="mt-2 text-green-600 text-sm">
+                                Notebook added successfully!
                             </div>
                         )}
+                    </form>
+                </div>
 
-                        <form onSubmit={handleUrlSubmit} className="p-4 border-t">
-                            <div className="flex gap-2 items-center">
-                                <input
-                                    type="url"
-                                    value={url}
-                                    onChange={(e) => setUrl(e.target.value)}
-                                    className="flex-1 px-2 py-1 border rounded"
-                                    placeholder="Enter notebook URL"
-                                />
-                                <button
-                                    type="submit"
-                                    disabled={isUrlSaving}
-                                    className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-                                >
-                                    {isUrlSaving ? 'Adding...' : 'Add'}
-                                </button>
-                            </div>
-                            {saveSuccess && (
-                                <div className="mt-2 text-green-600 text-sm">
-                                    Notebook added successfully!
-                                </div>
-                            )}
-                            {notebooksError && (
-                                <div className="mt-2 text-red-600 text-sm">
-                                    {notebooksError}
-                                </div>
-                            )}
-                        </form>
-                    </>
+                {Object.keys(myNotebooks).length > 0 && (
+                    <div className="overflow-x-auto mb-2">
+                        <table className="min-w-full bg-white">
+                            <thead>
+                                <tr>
+                                    <th className="py-2 px-4 border-b">Title</th>
+                                    <th className="py-2 px-4 border-b">Description</th>
+                                    <th className="py-2 px-4 border-b">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {Object.entries(myNotebooks).map(([url, notebook]) => (
+                                    <tr key={url}>
+                                        <td className="py-2 px-4 border-b">
+                                            <a href={url} target="_blank" rel="noopener noreferrer"
+                                                className="text-blue-500 hover:underline">
+                                                {notebook.title || notebook.fileName || 'Untitled'}
+                                            </a>
+                                        </td>
+                                        <td className="py-2 px-4 border-b">
+                                            {notebook.description || 'No description'}
+                                        </td>
+                                        <td className="py-2 px-4 border-b">
+                                            <button
+                                                className="text-red-500 hover:underline"
+                                                onClick={() => handleRemove(url)}
+                                            >
+                                                Remove
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
             </div>
 

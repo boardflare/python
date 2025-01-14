@@ -77,10 +77,10 @@ export function parsePython(rawCode) {
     const formula = `=LAMBDA(${args.join(', ')}, ${runpyEnv}(${codeRef}, ${args.join(', ')}))`;
 
     // Extract Excel demo
-    const excelDemoMatch = rawCode.match(/^# Excel demo:\s*(.+?)$/m);
+    const excelDemoMatch = rawCode.match(/^# Excel usage:\s*(.+?)$/m);
     const excelExample = excelDemoMatch
         ? excelDemoMatch[1].trim()
-        : "No Excel demo comment found in code, e.g. # Excel demo: =TO_POWER(3,4)";
+        : "No Excel usage comment found in code, e.g. # Excel usage: =TO_POWER(3,4)";
 
     return {
         name,
