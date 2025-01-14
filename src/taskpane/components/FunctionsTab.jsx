@@ -178,11 +178,6 @@ const FunctionsTab = ({ onEdit }) => {
                         onChange={(e) => setSelectedNotebook(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-lg text-sm mb-2"
                     >
-                        <optgroup label="Demo Notebooks">
-                            {Object.entries(demoNotebooks).map(([url, { title }]) => (
-                                <option key={url} value={url}>{title}</option>
-                            ))}
-                        </optgroup>
                         {Object.keys(myNotebooks).length > 0 && (
                             <optgroup label="Your Notebooks">
                                 {Object.entries(myNotebooks).map(([url, { title }]) => (
@@ -190,6 +185,11 @@ const FunctionsTab = ({ onEdit }) => {
                                 ))}
                             </optgroup>
                         )}
+                        <optgroup label="Demo Notebooks">
+                            {Object.entries(demoNotebooks).map(([url, { title }]) => (
+                                <option key={url} value={url}>{title}</option>
+                            ))}
+                        </optgroup>
                     </select>
                     <button
                         onClick={handleImportFunctions}
