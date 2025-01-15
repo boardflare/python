@@ -135,16 +135,16 @@ export const removeNotebook = async (url) => {
 };
 
 export const fetchNotebookUrl = async (url = DEFAULT_NOTEBOOK) => {
-    let notebook;
+    let notebook, metadata;
     if (url.includes('gist.github.com')) {
         const { content } = await fetchGistContent(url);
         notebook = content;
+        metadata = notebook.metadata?.boardflare;
     } else {
         const response = await fetch(url);
         notebook = await response.json();
+        metadata = notebook.metadata?.boardflare;
     }
-
-
 
     const codeCells = notebook.cells.filter(cell => cell.cell_type === 'code').slice(1);
 
@@ -163,5 +163,5 @@ export const fetchNotebookUrl = async (url = DEFAULT_NOTEBOOK) => {
 
     await pythonLogs({ url, notebook, allFunctions }, logRef = "notebook fetched");
 
-    return allFunctions;
+    return { functions: allFunctions, metadata };
 };

@@ -87,16 +87,14 @@ const FunctionsTab = ({ onEdit }) => {
     const handleImportFunctions = async () => {
         setIsImporting(true);
         try {
-            const parsedFunctions = await fetchNotebookUrl(selectedNotebook);
+            const { functions: parsedFunctions, metadata } = await fetchNotebookUrl(selectedNotebook);
 
             for (const func of parsedFunctions) {
                 await saveFunctionToSettings(func);
                 await updateNameManager(func);
             }
 
-            const notebookTitle = selectedNotebook in demoNotebooks
-                ? demoNotebooks[selectedNotebook].title
-                : myNotebooks[selectedNotebook]?.title || 'Custom Notebook';
+            const notebookTitle = metadata?.title || 'Custom Notebook';
 
             await multiDemo(parsedFunctions, `Demo_${notebookTitle}`);
             await loadFunctions();
