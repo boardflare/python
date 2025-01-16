@@ -29,17 +29,14 @@ const fetchGistContent = async (url) => {
 };
 
 const fetchNotebookMetadata = async (url) => {
-    let notebook, fileName;
+    let fileName;
     if (url.includes('gist.github.com')) {
-        const { content, fileName: gistFileName } = await fetchGistContent(url);
-        notebook = content;
+        const { fileName: gistFileName } = await fetchGistContent(url);
         fileName = gistFileName;
     } else {
-        const response = await fetch(url);
-        notebook = await response.json();
         fileName = url.split('/').pop();
     }
-    return { fileName, ...notebook.metadata?.boardflare };
+    return { fileName };
 };
 
 export const getStoredNotebooks = async () => {
@@ -135,15 +132,13 @@ export const removeNotebook = async (url) => {
 };
 
 export const fetchNotebookUrl = async (url = DEFAULT_NOTEBOOK) => {
-    let notebook, metadata;
+    let notebook;
     if (url.includes('gist.github.com')) {
         const { content } = await fetchGistContent(url);
         notebook = content;
-        metadata = notebook.metadata?.boardflare;
     } else {
         const response = await fetch(url);
         notebook = await response.json();
-        metadata = notebook.metadata?.boardflare;
     }
 
     const codeCells = notebook.cells.filter(cell => cell.cell_type === 'code').slice(1);
@@ -163,5 +158,5 @@ export const fetchNotebookUrl = async (url = DEFAULT_NOTEBOOK) => {
 
     await pythonLogs({ url, notebook, allFunctions }, logRef = "notebook fetched");
 
-    return { functions: allFunctions, metadata };
+    return { functions: allFunctions };
 };

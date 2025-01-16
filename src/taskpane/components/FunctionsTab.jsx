@@ -3,7 +3,6 @@ import { getFunctionFromSettings, deleteFunctionFromSettings } from "../utils/wo
 import { DEFAULT_NOTEBOOK, getStoredNotebooks, addNotebook, removeNotebook, fetchDemoNotebooks, fetchNotebookUrl } from "../utils/notebooks";
 import { saveFunctionToSettings } from "../utils/workbookSettings";
 import { updateNameManager } from "../utils/nameManager";
-import { multiDemo } from "../utils/demo";
 import { runTests } from "../utils/testRunner";
 
 const FunctionsTab = ({ onEdit, onTest }) => {
@@ -88,16 +87,13 @@ const FunctionsTab = ({ onEdit, onTest }) => {
     const handleImportFunctions = async () => {
         setIsImporting(true);
         try {
-            const { functions: parsedFunctions, metadata } = await fetchNotebookUrl(selectedNotebook);
+            const { functions: parsedFunctions } = await fetchNotebookUrl(selectedNotebook);
 
             for (const func of parsedFunctions) {
                 await saveFunctionToSettings(func);
                 await updateNameManager(func);
             }
 
-            const notebookTitle = metadata?.title || 'Custom Notebook';
-
-            // await multiDemo(parsedFunctions, `Demo_${notebookTitle}`);
             await loadFunctions();
             setError(null);
         } catch (error) {
@@ -143,20 +139,14 @@ const FunctionsTab = ({ onEdit, onTest }) => {
                 {functions.length > 0 ? (
                     <div className="overflow-x-auto">
                         <table className="min-w-full bg-white">
-                            <thead>
-                                <tr>
-                                    <th className="py-1 px-2 border-b text-left">Function</th>
-                                    <th className="py-1 px-2 border-b text-left">Actions</th>
-                                </tr>
-                            </thead>
                             <tbody>
                                 {functions.map((func) => (
                                     <tr key={func.id}>
-                                        <td className="py-1 px-2 border-b">
-                                            <code className="font-mono text-sm">{func.signature || func.name}</code>
+                                        <td className="py-2 px-2 border-b">
+                                            <code className="font-mono text-sm">{func.name.toUpperCase()}</code>
                                         </td>
-                                        <td className="py-1 px-2 border-b">
-                                            <div className="flex gap-2">
+                                        <td className="py-2 px-2 border-b w-fit">
+                                            <div className="flex gap-2 justify-end">
                                                 <button
                                                     className="text-green-500 hover:text-green-700"
                                                     onClick={() => handleTest(func)}
@@ -204,11 +194,11 @@ const FunctionsTab = ({ onEdit, onTest }) => {
                         onChange={(e) => setSelectedNotebook(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-lg text-sm mb-2"
                     >
-                        <option value="">Select a notebook...</option>
+                        <option value="">Select a notebook with example functions...</option>
                         {Object.keys(myNotebooks).length > 0 && (
-                            <optgroup label="Your Notebooks">
-                                {Object.entries(myNotebooks).map(([url, { title }]) => (
-                                    <option key={url} value={url}>{title || url}</option>
+                            <optgroup label="Custom Notebooks">
+                                {Object.entries(myNotebooks).map(([url, { fileName }]) => (
+                                    <option key={url} value={url}>{fileName || url}</option>
                                 ))}
                             </optgroup>
                         )}
@@ -260,9 +250,8 @@ const FunctionsTab = ({ onEdit, onTest }) => {
                         <table className="min-w-full bg-white">
                             <thead>
                                 <tr>
-                                    <th className="py-2 px-4 border-b text-left">Title</th>
-                                    <th className="py-2 px-4 border-b text-left">Description</th>
-                                    <th className="py-2 px-4 border-b text-left">Actions</th>
+                                    <th className="py-2 px-4 border-b text-left">Custom Notebooks</th>
+                                    <th className="py-2 px-4 border-b"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -271,13 +260,10 @@ const FunctionsTab = ({ onEdit, onTest }) => {
                                         <td className="py-2 px-4 border-b">
                                             <a href={url} target="_blank" rel="noopener noreferrer"
                                                 className="text-blue-500 hover:underline">
-                                                {notebook.title || notebook.fileName || 'Untitled'}
+                                                {notebook.fileName || 'Untitled'}
                                             </a>
                                         </td>
-                                        <td className="py-2 px-4 border-b">
-                                            {notebook.description || 'No description'}
-                                        </td>
-                                        <td className="py-2 px-4 border-b">
+                                        <td className="py-2 px-4 border-b w-fit text-right">
                                             <button
                                                 className="text-red-500 hover:underline"
                                                 onClick={() => handleRemove(url)}
