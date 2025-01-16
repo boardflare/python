@@ -80,7 +80,7 @@ export function parsePython(rawCode) {
     const excelDemoMatch = rawCode.match(/^# Excel usage:\s*(.+?)$/m);
     const excelExample = excelDemoMatch
         ? excelDemoMatch[1].trim()
-        : "No Excel usage comment found in code, e.g. # Excel usage: =TO_POWER(3,4)";
+        : null;
 
     return {
         name,

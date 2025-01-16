@@ -4,8 +4,9 @@ import { DEFAULT_NOTEBOOK, getStoredNotebooks, addNotebook, removeNotebook, fetc
 import { saveFunctionToSettings } from "../utils/workbookSettings";
 import { updateNameManager } from "../utils/nameManager";
 import { multiDemo } from "../utils/demo";
+import { runTests } from "../utils/testRunner";
 
-const FunctionsTab = ({ onEdit }) => {
+const FunctionsTab = ({ onEdit, onTest }) => {
     // Original state for functions
     const [functions, setFunctions] = React.useState([]);
     const [error, setError] = React.useState(null);
@@ -96,7 +97,7 @@ const FunctionsTab = ({ onEdit }) => {
 
             const notebookTitle = metadata?.title || 'Custom Notebook';
 
-            await multiDemo(parsedFunctions, `Demo_${notebookTitle}`);
+            // await multiDemo(parsedFunctions, `Demo_${notebookTitle}`);
             await loadFunctions();
             setError(null);
         } catch (error) {
@@ -118,6 +119,16 @@ const FunctionsTab = ({ onEdit }) => {
         }
     };
 
+    const handleTest = async (func) => {
+        onTest(); // Switch to output tab
+        try {
+            await runTests(func);
+        } catch (error) {
+            console.error('Error running tests:', error);
+            setError('Failed to run tests. Please try again.');
+        }
+    };
+
     return (
         <div className="h-full flex flex-col overflow-y-auto">
             {/* Consolidated Error Display */}
@@ -134,18 +145,25 @@ const FunctionsTab = ({ onEdit }) => {
                         <table className="min-w-full bg-white">
                             <thead>
                                 <tr>
-                                    <th className="py-1 px-2 border-b">Name</th>
-                                    <th className="py-1 px-2 border-b">Description</th>
-                                    <th className="py-1 px-2 border-b">Actions</th>
+                                    <th className="py-1 px-2 border-b text-left">Function</th>
+                                    <th className="py-1 px-2 border-b text-left">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {functions.map((func) => (
                                     <tr key={func.id}>
-                                        <td className="py-1 px-2 border-b">{func.name}</td>
-                                        <td className="py-1 px-2 border-b">{func.description}</td>
+                                        <td className="py-1 px-2 border-b">
+                                            <code className="font-mono text-sm">{func.signature || func.name}</code>
+                                        </td>
                                         <td className="py-1 px-2 border-b">
                                             <div className="flex gap-2">
+                                                <button
+                                                    className="text-green-500 hover:text-green-700"
+                                                    onClick={() => handleTest(func)}
+                                                    title="Run tests"
+                                                >
+                                                    ▶️
+                                                </button>
                                                 <button
                                                     className="text-blue-500 hover:text-blue-700"
                                                     onClick={() => onEdit(func.name)}
@@ -242,9 +260,9 @@ const FunctionsTab = ({ onEdit }) => {
                         <table className="min-w-full bg-white">
                             <thead>
                                 <tr>
-                                    <th className="py-2 px-4 border-b">Title</th>
-                                    <th className="py-2 px-4 border-b">Description</th>
-                                    <th className="py-2 px-4 border-b">Actions</th>
+                                    <th className="py-2 px-4 border-b text-left">Title</th>
+                                    <th className="py-2 px-4 border-b text-left">Description</th>
+                                    <th className="py-2 px-4 border-b text-left">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>

@@ -1,4 +1,5 @@
 import { runPy } from "../../functions/runpy/controller";
+import { singleDemo } from "./demo";
 
 export async function runTests(parsedFunction) {
     const testCode = `
@@ -34,5 +35,23 @@ if has_test_cases:
         print()  # Add a newline after each test case
     `.trim();
 
-    return await runPy(testCode, null);
+    let pyResult;
+    try {
+        pyResult = await runPy(testCode, null);
+    } catch (error) {
+        console.error("Python test error:", error);
+        pyResult = `Error running Python tests: ${error.message}`;
+    }
+
+    // Run Excel demo independently if it exists
+    if (parsedFunction.excelExample) {
+        try {
+            await singleDemo(parsedFunction);
+        } catch (error) {
+            console.error("Excel demo error:", error);
+            // Continue execution - don't let Excel error affect Python result
+        }
+    }
+
+    return pyResult;
 }

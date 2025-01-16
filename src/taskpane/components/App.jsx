@@ -75,7 +75,7 @@ const App = ({ title }) => {
             />
           )}
           {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} />}
-          {selectedTab === "functions" && <FunctionsTab onEdit={handleFunctionEdit} />}
+          {selectedTab === "functions" && <FunctionsTab onEdit={handleFunctionEdit} onTest={handleTest} />}
         </div>
       </main>
     </div>
