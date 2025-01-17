@@ -71,6 +71,10 @@ module.exports = async (env, options) => {
             filename: "images/[name][ext][query]",
           },
         },
+        {
+          test: /\.py$/,
+          type: 'asset/source'
+        }
       ],
     },
     plugins: [

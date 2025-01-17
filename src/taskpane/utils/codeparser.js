@@ -55,14 +55,14 @@ export function parsePython(rawCode) {
     const resultLine = `\n\nresult = ${name.toLowerCase()}(${argList})`;
     const code = rawCode.trim();
 
-    // Determine which runpy environment to use
-    let runpyEnv = 'BOARDFLARE.RUNPY';
+    // Determine which EXEC environment to use
+    let execEnv = 'BOARDFLARE.EXEC';
     if (window.location.hostname === 'localhost') {
-        runpyEnv = 'LOCAL.RUNPY';
+        execEnv = 'LOCAL.EXEC';
     } else if (window.location.pathname.toLowerCase().includes('preview')) {
-        runpyEnv = 'PREVIEW.RUNPY';
+        execEnv = 'PREVIEW.EXEC';
     } else if (window.location.hostname === 'python-insider.boardflare.com') {
-        runpyEnv = 'BFINSIDER.RUNPY';
+        execEnv = 'BFINSIDER.EXEC';
     }
 
     // Excel named lambda signature
@@ -74,7 +74,7 @@ export function parsePython(rawCode) {
     const tableRef = `"https://getcode.boardflare.workers.dev/?uid=${uid}&timestamp=${timestamp}&name=${name}&return=code"`;
     const settingsRef = `"workbook-settings:${name}"`;
     const codeRef = settingsRef;
-    const formula = `=LAMBDA(${args.join(', ')}, ${runpyEnv}(${codeRef}, ${args.join(', ')}))`;
+    const formula = `=LAMBDA(${args.join(', ')}, ${execEnv}(${codeRef}, ${args.join(', ')}))`;
 
     // Extract Excel demo
     const excelDemoMatch = rawCode.match(/^# Excel usage:\s*(.+?)$/m);

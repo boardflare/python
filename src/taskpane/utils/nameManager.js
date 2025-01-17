@@ -1,21 +1,7 @@
 export async function updateNameManager(parsedCode) {
-    const platform = Office?.context?.platform || 'Unknown';
-    const maxFormulaLength = platform === 'OfficeOnline' ? 255 : 8190;
 
     // Convert name to uppercase for Excel
     const excelName = parsedCode.name.toUpperCase();
-
-    if (parsedCode.formula.length > maxFormulaLength) {
-        const message = platform === 'OfficeOnline'
-            ? "Excel on Web named formulas are limited to 255 characters. Function saved to worksheet only - use BOARDFLARE.RUNPY as shown."
-            : "Excel desktop named formulas are limited to 8190 characters. Function saved to worksheet only - use BOARDFLARE.RUNPY as shown.";
-        progress.textContent = message;
-        progress.style.color = "orange";
-        return;
-    }
-
-    // Create link to workbook
-    const url = Office.context.document.url;
     console.log("Name manager props:", excelName, parsedCode.formula);
 
     return Excel.run(async (context) => {

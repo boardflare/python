@@ -1,5 +1,5 @@
 import * as React from "react";
-import { abortController } from "../../functions/runpy/queue";
+import { abortController } from "../../functions/utils/queue";
 
 const OutputTab = ({ logs, onClear, setLogs }) => {
     const handleCancel = () => {

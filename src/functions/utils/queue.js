@@ -33,17 +33,3 @@ export async function queueTask(args, task) {
     }
 }
 
-// Excel range (matrix) to object
-export function matrixToObject(matrix) {
-    if (!Array.isArray(matrix) || matrix.some(row => !Array.isArray(row) || row.length !== 2)) {
-        return null;
-    }
-
-    const result = {};
-    matrix.forEach(row => {
-        const [key, value] = row;
-        result[key] = value;
-    });
-    return result;
-}
-

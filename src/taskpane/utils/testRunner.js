@@ -1,4 +1,4 @@
-import { runPy } from "../../functions/runpy/controller";
+import { exec } from "../../functions/functions";
 import { singleDemo } from "./demo";
 
 export async function runTests(parsedFunction) {
@@ -37,7 +37,7 @@ if has_test_cases:
 
     let pyResult;
     try {
-        pyResult = await runPy(testCode, null);
+        pyResult = await exec(testCode, null);
     } catch (error) {
         console.error("Python test error:", error);
         pyResult = `Error running Python tests: ${error.message}`;

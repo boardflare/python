@@ -1,11 +1,8 @@
-// Web worker that executes Python code using Pyodide.
-
 importScripts("https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js");
-import { convert_result_pandas, convert_result_list } from "./convert_result.js";
 
 async function loadPyodideAndPackages() {
     self.pyodide = await loadPyodide();
-    await self.pyodide.loadPackage(["micropip"]);
+    await self.pyodide.loadPackage(["micropip", "pandas"]);
     self.micropip = pyodide.pyimport("micropip");
 }
 
@@ -29,7 +26,7 @@ self.onmessage = async (event) => {
 
     self.pyodide.setStderr({
         batched: (msg) => {
-            stdout += msg + "\n";
+            stdout += "STDERR: " + msg + "\n";
         }
     });
 
@@ -51,128 +48,99 @@ self.onmessage = async (event) => {
         // unfilled optional args in LAMBDA passes FALSE, so [[false]] as arg
         // no args passed, arg1 is []
 
-        // Set global args array from arg1 to args, args is array of matrices, e.g. [[[2]], [[5]], ...]
+        // Set global args array from arg1 to args
         const args = arg1 ? arg1 : null;
-
-        // Use pandas only if it is present in imports to avoid loading it unnecessarily.
-        const usePandas = imports.includes("pandas") // || largerArrays;
-
-        // Set individual globals from args if it is defined.
+        // Set individual globals from args
         if (args) {
-            // Set the args array in Python to be used in the code
+            // Set the args array in Python
             self.pyodide.globals.set('args', args);
-
-            if (usePandas) {
-                // Convert array args to DataFrames if using pandas
-                await self.pyodide.runPythonAsync(`
-                    import micropip
-                    await micropip.install(["pandas", "pyodide_http"])
-                    import pandas as pd
-                    import numpy as np
-                    import pyodide_http
-                    pyodide_http.patch_all()
+            // Run script to create arg1, arg2, globals from args
+            self.pyodide.runPython(`
+                import pandas as pd
+                import micropip
+                
+                for index, value in enumerate(args):
+                    # Check if None due to skipped repeating arg
+                    if value is None:
+                        globals()[f'arg{index + 1}'] = None
+                        continue
                     
-                    for index, value in enumerate(args):
-                        if value is None:
-                            globals()[f'arg{index + 1}'] = None
-                            continue
-                        
-                        df = pd.DataFrame(value)
-                        
-                        if df.size == 1:
-                            single_value = df.iloc[0, 0]
-                            if isinstance(single_value, (type(None), str, bool)):
-                                value = single_value
-                            else:
-                                value = single_value.item()
+                    # Convert to pandas DataFrame, handles [[None]]
+                    df = pd.DataFrame(value)
+                    
+                    # If only one element, convert to scalar
+                    if df.size == 1:
+                        single_value = df.iloc[0, 0]
+                        # Check if the single value is None, string, or boolean
+                        if isinstance(single_value, (type(None), str, bool)):
+                            value = single_value
                         else:
-                            value = df
-                        
-                        globals()[f'arg{index + 1}'] = value
-                `);
-            } else {
-                // Use lists for all other cases.
-                await self.pyodide.runPythonAsync(`
-                    import micropip
-                    await micropip.install(["pyodide_http"])
-                    import pyodide_http
-                    pyodide_http.patch_all()
-
-                    for index, value in enumerate(args):
-                        if value is None:
-                            globals()[f'arg{index + 1}'] = None
-                            continue
-                        
-                        if len(value) == 1 and len(value[0]) == 1:
-                            single_value = value[0][0]
-                            globals()[f'arg{index + 1}'] = single_value
-                        else:
-                            globals()[f'arg{index + 1}'] = value
-                `);
-            }
+                            value = single_value.item()
+                    else:
+                        value = df
+                    
+                    globals()[f'arg{index + 1}'] = value
+            `);
         }
 
         // Execute the Python code
-        let pyodideResult = await self.pyodide.runPythonAsync(code);
+        let result = await self.pyodide.runPythonAsync(code);
 
-        // Check if there's a result variable in Python globals
-        const hasGlobalResult = self.pyodide.runPython(`'result' in globals()`);
+        if (result === undefined) {
+            throw new Error("Your function returned None. If you wanted a blank cell, return an empty string ('') instead.");
+        }
 
-        if (hasGlobalResult) {
-            // Use Python convert_result() for all type checking and conversion
-            if (usePandas) {
-                self.pyodide.runPython(convert_result_pandas);
-            } else {
-                self.pyodide.runPython(convert_result_list);
+        // if result is a list, convert it to a JavaScript array
+        if (result.toJs) {
+            result = result.toJs({ create_proxies: false });
+        }
+
+        // Define the isValidScalar function
+        const isValidScalar = (value) => ['number', 'string', 'boolean'].includes(typeof value);
+
+        // Check the type of the result
+        if (isValidScalar(result)) {
+            // If result is a scalar, convert it to a 2D matrix
+            result = [[result]];
+        } else if (Array.isArray(result)) {
+            // Check if result is an empty array
+            if (result.length === 0) {
+                throw new Error("Result must be a scalar of type int, float, str, bool or a 2D list.  All other types including Numpy arrays, Pandas DataFrames, dicts, etc. are not supported.");
             }
-            pyodideResult = self.pyodide.runPython(`convert_result()`); // update pyodideResult with convert_result() output
-        } else {
-            // Legacy: Handle direct function returns with JS validation
-            if (pyodideResult === undefined) {
-                throw new Error("Your function returned None. If you wanted a blank cell, return an empty string ('') instead.");
-            }
 
-            const isValidScalar = (value) => ['number', 'string', 'boolean'].includes(typeof value);
-
-            if (isValidScalar(pyodideResult)) {
-                pyodideResult = [[pyodideResult]];
-            } else if (Array.isArray(pyodideResult)) {
-                if (pyodideResult.length === 0) {
-                    throw new Error("Result must be a scalar of type int, float, str, bool or a 2D list.");
+            // If result is a simple array, convert it to a 2D matrix
+            if (!result.every(Array.isArray)) {
+                if (!result.every(isValidScalar)) {
+                    throw new Error("All elements of the result list must be valid scalar types: int, float, str, bool.");
                 }
+                result = [result];
+            }
 
-                if (!pyodideResult.every(Array.isArray)) {
-                    if (!pyodideResult.every(isValidScalar)) {
-                        throw new Error("All elements must be valid scalar types: int, float, str, bool.");
+            // Check if result is a nested list (2D array)
+            if (result.every(Array.isArray)) {
+                const innerLength = result[0].length;
+
+                result.forEach(innerArray => {
+                    if (innerArray.length !== innerLength) {
+                        throw new Error("Nested row lengths are not equal.");
                     }
-                    pyodideResult = [pyodideResult];
-                }
-
-                if (pyodideResult.every(Array.isArray)) {
-                    const innerLength = pyodideResult[0].length;
-                    pyodideResult.forEach(innerArray => {
-                        if (innerArray.length !== innerLength) {
-                            throw new Error("All rows must have the same length.");
-                        }
-                        if (!innerArray.every(isValidScalar)) {
-                            throw new Error("All elements must be valid scalar types: int, float, str, bool.");
-                        }
-                    });
-                } else {
-                    throw new Error("Result must be a valid 2D list.");
-                }
+                    if (!innerArray.every(isValidScalar)) {
+                        throw new Error("All elements of the result list must be valid scalar types: int, float, str, bool.");
+                    }
+                });
             } else {
-                throw new Error("Result must be a scalar or 2D list.");
+                throw new Error("Result is not a valid 2D list.");
             }
+        } else {
+            throw new Error("Result must be a scalar of type int, float, str, bool or a 2D list.  All other types including Numpy arrays, Pandas DataFrames, dicts, etc. are not supported.");
         }
 
-        // Convert to JavaScript array if needed
-        if (pyodideResult.toJs) {
-            pyodideResult = pyodideResult.toJs({ create_proxies: false });
-        }
+        // Result is now either a valid JS scalar or a JS 2D array
 
-        self.postMessage({ result: pyodideResult, stdout });
+        // Return the result along with stdout
+        self.postMessage({ result, stdout });
     } catch (error) {
+        // Return the error along with stdout
         self.postMessage({ error: error.message, stdout });
     }
 };
