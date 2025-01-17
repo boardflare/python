@@ -7,7 +7,11 @@ import resultCode from './result.py';
 async function loadPyodideAndPackages() {
     self.pyodide = await loadPyodide();
     await self.pyodide.loadPackage(["micropip", "pyodide_http"]);
-    self.micropip = pyodide.pyimport("micropip");
+    self.micropip = self.pyodide.pyimport("micropip");
+
+    // Import and patch pyodide_http
+    const pyodide_http = self.pyodide.pyimport("pyodide_http");
+    pyodide_http.patch_all();
 }
 
 let pyodideReadyPromise = loadPyodideAndPackages();

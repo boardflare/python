@@ -1,6 +1,3 @@
-import pyodide_http
-pyodide_http.patch_all()
-
 # Set up individual args from the args array
 if 'args' in globals():
     for index, value in enumerate(globals()['args']):
