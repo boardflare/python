@@ -1,6 +1,6 @@
 # Set up individual args from the args array
-if 'args' in globals():
-    for index, value in enumerate(globals()['args']):
+if 'global_args' in globals():
+    for index, value in enumerate(globals()['global_args']):
         if value is None:
             globals()[f'arg{index + 1}'] = None
             continue

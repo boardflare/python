@@ -39,7 +39,7 @@ self.onmessage = async (event) => {
 
         // Set global args array from arg1 to args
         if (arg1) {
-            self.pyodide.globals.set('args', arg1);
+            self.pyodide.globals.set('global_args', arg1);
         }
 
         // Run setup code

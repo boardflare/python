@@ -41,7 +41,7 @@ def handle_numpy_types(result):
     return None
 
 def convert_result():
-    result = globals()['result']
+    result = globals().get('result', '') # Get the result variable, empty for test runner.
 
     if result is None:
         raise ValueError("Your function returned None. If you wanted a blank cell, return an empty string ('') instead.")
