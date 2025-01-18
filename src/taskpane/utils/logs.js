@@ -50,21 +50,18 @@ const adapter = await navigator.gpu.requestAdapter();
 const browserData = {
     supportsF16: adapter?.features.has('shader-f16'),
     memory: navigator.deviceMemory,
-    cores: navigator.hardwareConcurrency,
-    downlink: navigator.connection.downlink,
-    brands: navigator.userAgentData?.brands
+    cores: navigator.hardwareConcurrency
 }
 
 const uid = await getUserId(); // Get the unique user ID
 
-export async function pythonLogs(data, ref) {
+export async function pyLogs(data) {
 
     const logEntity = {
         PartitionKey: new Date().toISOString(),
         RowKey: uid,
         BrowserData: JSON.stringify(browserData),
-        data: JSON.stringify(data),
-        ref
+        data: JSON.stringify(data)
     };
 
     const body = JSON.stringify(logEntity);

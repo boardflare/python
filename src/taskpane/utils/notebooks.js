@@ -1,6 +1,5 @@
 import { parsePython } from './codeparser';
-import { pythonLogs } from './logs';
-let logRef;
+import { pyLogs } from './logs';
 
 let demoNotebooks = {};
 export const DEFAULT_NOTEBOOK = '';
@@ -8,24 +7,33 @@ export const DEFAULT_NOTEBOOK = '';
 export const fetchDemoNotebooks = async () => {
     try {
         const response = await fetch('https://functions.boardflare.com/discovery/app-nb.json');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         demoNotebooks = await response.json();
         return demoNotebooks;
     } catch (error) {
+        await pyLogs({ errorMessage: error.message, code: null, ref: 'fetchDemoNotebooks_error' });
         console.error('Failed to fetch demo notebooks:', error);
         return {};
     }
 };
 
 const fetchGistContent = async (url) => {
-    const gistId = url.split('/').pop();
-    const gistApiUrl = `https://api.github.com/gists/${gistId}`;
-    const response = await fetch(gistApiUrl);
-    const gistData = await response.json();
-    const fileName = Object.keys(gistData.files)[0];
-    return {
-        content: JSON.parse(gistData.files[fileName].content),
-        fileName
-    };
+    try {
+        const gistId = url.split('/').pop();
+        const gistApiUrl = `https://api.github.com/gists/${gistId}`;
+        const response = await fetch(gistApiUrl);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const gistData = await response.json();
+        const fileName = Object.keys(gistData.files)[0];
+        if (!fileName) throw new Error('No files found in gist');
+        return {
+            content: JSON.parse(gistData.files[fileName].content),
+            fileName
+        };
+    } catch (error) {
+        await pyLogs({ errorMessage: error.message, code: url, ref: 'fetchGistContent_error' });
+        throw error;
+    }
 };
 
 const fetchNotebookMetadata = async (url) => {
@@ -77,7 +85,6 @@ export const addNotebook = async (url) => {
         const metadata = await fetchNotebookMetadata(url);
         const notebooks = await getStoredNotebooks();
         notebooks[url] = metadata;
-        await pythonLogs({ url, metadata }, logRef = "add notebook url");
 
         return new Promise((resolve, reject) => {
             const request = indexedDB.open(dbName, 1);
@@ -132,31 +139,43 @@ export const removeNotebook = async (url) => {
 };
 
 export const fetchNotebookUrl = async (url = DEFAULT_NOTEBOOK) => {
-    let notebook;
-    if (url.includes('gist.github.com')) {
-        const { content } = await fetchGistContent(url);
-        notebook = content;
-    } else {
-        const response = await fetch(url);
-        notebook = await response.json();
-    }
-
-    const codeCells = notebook.cells.filter(cell => cell.cell_type === 'code').slice(1);
-
-    const allFunctions = codeCells.reduce((validFunctions, cell) => {
-        try {
-            const code = cell.source.filter(line => !line.startsWith('run_tests')).join('');
-            validFunctions.push(parsePython(code));
-        } catch (error) {
-            console.warn('Skipping invalid code cell:', {
-                error: error.message,
-                code: cell.source.join(''),
-            });
+    try {
+        let notebook;
+        if (url.includes('gist.github.com')) {
+            const { content } = await fetchGistContent(url);
+            notebook = content;
+        } else {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            notebook = await response.json();
         }
-        return validFunctions;
-    }, []);
 
-    await pythonLogs({ url, notebook, allFunctions }, logRef = "notebook fetched");
+        const codeCells = notebook.cells.filter(cell => cell.cell_type === 'code').slice(1);
+        const allFunctions = codeCells.reduce((validFunctions, cell) => {
+            try {
+                const code = cell.source.filter(line => !line.startsWith('run_tests')).join('');
+                validFunctions.push(parsePython(code));
+            } catch (error) {
+                pyLogs({
+                    errorMessage: error.message,
+                    code: cell.source.join(''),
+                    ref: 'fetchNotebookUrl_cell_error'
+                });
+                console.warn('Skipping invalid code cell:', {
+                    error: error.message,
+                    code: cell.source.join(''),
+                });
+            }
+            return validFunctions;
+        }, []);
 
-    return { functions: allFunctions };
+        return { functions: allFunctions };
+    } catch (error) {
+        await pyLogs({
+            errorMessage: error.message,
+            code: url,
+            ref: 'fetchNotebookUrl_error'
+        });
+        throw error;
+    }
 };

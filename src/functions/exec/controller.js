@@ -1,5 +1,6 @@
 import { getFunction } from './getfunction.js';
 import { ConsoleEvents, EventTypes } from '../../taskpane/utils/constants.js';
+import { pyLogs } from '../../taskpane/utils/logs.js';
 
 const execPyWorker = new Worker(new URL('./execpy-worker.js', import.meta.url));
 
@@ -24,6 +25,7 @@ export async function execPython({ code, arg1 }) {
     try {
         code = await getFunction(code);
         const { result, stdout } = await messageWorker(execPyWorker, { code, arg1 });
+        pyLogs({ code, ref: "execPython" });
         if (stdout.trim()) {
             ConsoleEvents.emit(EventTypes.LOG, stdout.trim());
         }
@@ -32,6 +34,7 @@ export async function execPython({ code, arg1 }) {
     } catch (error) {
         const errorMessage = error.error || error.message;
         const stdout = error.stdout || '';
+        pyLogs({ errorMessage, stdout, code, ref: "execPythonError" });
         console.error('Error in execPython:', errorMessage);
         // Log any stdout before error message
         if (stdout.trim()) {

@@ -1,5 +1,6 @@
 import { fetchCode } from './fetchcode.js';
 import { ConsoleEvents, EventTypes } from '../../taskpane/utils/constants.js';
+import { pyLogs } from '../../taskpane/utils/logs.js';
 
 const pyworker = new Worker(new URL('./pyodide-worker.js', import.meta.url));
 
@@ -30,7 +31,7 @@ export async function runPython({ code, arg1 }) {
     try {
         code = await fetchCode(code);
         const { result, stdout } = await messageWorker(pyworker, { code, arg1 });
-
+        pyLogs({ code, ref: "runPython" });
         if (stdout.trim()) {
             ConsoleEvents.emit(EventTypes.LOG, stdout.trim());
         }
@@ -45,7 +46,7 @@ export async function runPython({ code, arg1 }) {
         const errorMessage = error.error || error.message;
         const stdout = error.stdout || '';
         console.error('Error in runPython:', errorMessage);
-
+        pyLogs({ errorMessage, stdout, code, ref: "execPythonError" });
         if (stdout.trim()) {
             ConsoleEvents.emit(EventTypes.LOG, stdout.trim());
         }

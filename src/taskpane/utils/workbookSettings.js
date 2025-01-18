@@ -1,4 +1,4 @@
-import { pythonLogs } from './logs'; // Import the logging function
+import { pyLogs } from './logs';
 
 const retry = async (fn, retries = 3, delay = 1000) => {
     try {
@@ -25,11 +25,10 @@ export async function saveFunctionToSettings(functionData) {
                 settings.add(key, value);
                 await context.sync();
             });
-            const ref = "function saved to workbook settings";
-            await pythonLogs(functionData, ref);
             return result;
         } catch (error) {
             console.error('Failed to save to settings:', error);
+            pyLogs({ errorMessage: error.message, code: functionData?.name || null, ref: "saveFunctionToSettingsError" });
             throw error;
         }
     });
@@ -52,6 +51,11 @@ export async function getFunctionFromSettings(name = null) {
         });
     } catch (error) {
         console.error('Failed to get from settings:', error);
+        pyLogs({
+            errorMessage: error.message,
+            code: name || null,
+            ref: "getFunctionFromSettingsError"
+        });
         return name ? null : [];
     }
 }
@@ -77,6 +81,11 @@ export async function deleteFunctionFromSettings(name) {
         });
     } catch (error) {
         console.error('Failed to delete from settings:', error);
+        pyLogs({
+            errorMessage: error.message,
+            code: name,
+            ref: "deleteFunctionFromSettingsError"
+        });
         return false;
     }
 }

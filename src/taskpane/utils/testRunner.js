@@ -1,5 +1,6 @@
 import { exec } from "../../functions/functions";
 import { singleDemo } from "./demo";
+import { pyLogs } from "./logs";
 
 export async function runTests(parsedFunction) {
     const testCode = `
@@ -41,6 +42,11 @@ run_tests(${parsedFunction.name}, test_cases)
         pyResult = await exec(testCode, null);
     } catch (error) {
         console.error("Python test error:", error);
+        await pyLogs({
+            errorMessage: error.message,
+            code: testCode,
+            ref: 'test_run_error'
+        });
         pyResult = `Error running Python tests: ${error.message}`;
     }
 
@@ -50,6 +56,11 @@ run_tests(${parsedFunction.name}, test_cases)
             await singleDemo(parsedFunction);
         } catch (error) {
             console.error("Excel demo error:", error);
+            await pyLogs({
+                errorMessage: error.message,
+                code: parsedFunction,
+                ref: 'excel_demo_error'
+            });
             // Continue execution - don't let Excel error affect Python result
         }
     }
