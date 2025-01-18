@@ -10,6 +10,9 @@ ${parsedFunction.code}
 
 # Same test runner used in notebooks
 def run_tests(func, test_cases):
+    """
+    Function to run test cases
+    """
     if not test_cases:
         raise ValueError("No test cases provided.")
     
@@ -24,12 +27,14 @@ def run_tests(func, test_cases):
         if not test_case:
             raise ValueError(f"Test case {i+1} is empty.")
         
-        if isinstance(test_case[0], list):
-            result = func(test_case)
-            test_case_str = str(test_case)
+        # Special handling for 2D list inputs (like text_distance with nested needles)
+        if isinstance(test_case[0], list) and len(test_case) == 3:  # 2D list case
+            result = func(test_case[0], *test_case[1:])
         else:
+            # Normal argument unpacking for functions like calculate_area
             result = func(*test_case)
-            test_case_str = str(test_case)
+        
+        test_case_str = str(test_case)
         
         print(f"Case {i+1}: {test_case_str} -> {result}")
 
