@@ -131,7 +131,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
                         <li><span className="font-semibold">Reset:</span> returns editor to example function.</li>
                         <li><span className="font-semibold">Test:</span> executes function using test_cases.</li>
                         <li><span className="font-semibold">Save:</span> updates code if function already exists.</li>
-                        <li>See <a href="https://www.boardflare.com/apps/excel/python/tutorial" target="_blank" rel="noopener" className="text-blue-500 underline">video</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a> for details.</li>
+                        <li>See <a href="https://whistlernetworks.sharepoint.com/:p:/s/Boardflare/EavKXzTcSmJArk1FadRoH40BaFTd1xrff2cw3bGSRs3AFg?rtime=Mhp28Ns33Ug" target="_blank" rel="noopener" className="text-blue-500 underline">slideshow</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a> for details.</li>
 
                     </ul>
                 </div>
