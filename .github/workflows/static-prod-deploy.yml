@@ -1,8 +1,8 @@
-name: Static preview deploy
+name: Static prod deploy
 
 on:
     push:
-        branches: [ preview ]
+        branches: [ main ]
 
 jobs:
   deploy:
