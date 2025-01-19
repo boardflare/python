@@ -62,9 +62,8 @@ export async function pyLogs(data) {
         RowKey: uid,
         BrowserData: JSON.stringify(browserData),
         Office: Office?.context ? JSON.stringify({
-            diagnostics: Office.context.diagnostics,
-            displayLanguage: Office.context.displayLanguage,
-            isDarkTheme: Office.context.officeTheme.isDarkTheme
+            diagnostics: Office.context?.diagnostics,
+            displayLanguage: Office.context?.displayLanguage
         }) : 'not available',
         Data: JSON.stringify(data)
     };
