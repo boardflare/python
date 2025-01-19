@@ -1,4 +1,4 @@
-import { exec } from "../../functions/functions";
+import { execPython } from "../../functions/exec/controller";
 import { singleDemo } from "./demo";
 import { pyLogs } from "./logs";
 
@@ -43,7 +43,7 @@ run_tests(${parsedFunction.name}, test_cases)
 
     let pyResult;
     try {
-        pyResult = await exec(testCode, null);
+        pyResult = await execPython({ code: testCode, arg1: null });
     } catch (error) {
         console.error("Python test error:", error);
         await pyLogs({
