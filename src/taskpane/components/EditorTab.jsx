@@ -10,7 +10,6 @@ import { runTests } from "../utils/testRunner";
 
 const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
     const [notification, setNotification] = React.useState("");
-    const [error, setError] = React.useState(null);
     const [functions, setFunctions] = React.useState([]);
     const notificationTimeoutRef = React.useRef();
     const editorRef = React.useRef(null);
@@ -22,7 +21,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
         setNotification({ message, type });
         notificationTimeoutRef.current = setTimeout(() => {
             setNotification("");
-        }, 5000);
+        }, 10000);
     };
 
     React.useEffect(() => {
@@ -39,7 +38,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
                 const funcs = await getFunctionFromSettings();
                 setFunctions(funcs);
             } catch (err) {
-                setError(err.message);
+                showNotification(err.message, "error");  // Use notification instead of error
             }
         };
         loadFunctions();
@@ -71,7 +70,6 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
 
     const handleSave = async () => {
         try {
-            setError(null);
             const code = editorRef.current.getValue();
             const parsedFunction = parsePython(code);
             await saveFunctionToSettings(parsedFunction);
@@ -81,7 +79,6 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
             setFunctions(updatedFunctions);
             setSelectedFunction(parsedFunction);
         } catch (err) {
-            setError(err.message);
             showNotification(err.message, "error");
         }
     };
@@ -90,21 +87,20 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
         if (editorRef.current) {
             editorRef.current.setValue(DEFAULT_CODE);
             setSelectedFunction({ name: "", code: DEFAULT_CODE });
-            setError(null);
-            setNotification("");
+            setNotification(""); // Only clear notification
         }
     };
 
     const handleTest = async () => {
         onTest();
         try {
-            setError(null);
             const code = editorRef.current.getValue();
             const parsedFunction = parsePython(code);
             window.dispatchEvent(new CustomEvent(EventTypes.CLEAR));
             await runTests(parsedFunction);
+            showNotification("Tests completed successfully!", "success");
         } catch (err) {
-            setError(err.message);
+            showNotification(err.message, "error");
             window.dispatchEvent(new CustomEvent(EventTypes.ERROR, { detail: err.message }));
         }
     };
@@ -123,7 +119,6 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
                     {notification.message}
                 </div>
             )}
-            {error && <div className="mt-2 p-2 bg-red-100 text-red-800 rounded">{error}</div>}
             {selectedFunction.name === "" && (
                 <div className="mt-2 p-2 bg-yellow-100 rounded">
                     <h2 className="font-semibold"> ⬅️ Drag task pane open for more room!</h2>

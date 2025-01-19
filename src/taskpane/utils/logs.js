@@ -61,7 +61,12 @@ export async function pyLogs(data) {
         PartitionKey: new Date().toISOString(),
         RowKey: uid,
         BrowserData: JSON.stringify(browserData),
-        data: JSON.stringify(data)
+        Office: Office?.context ? JSON.stringify({
+            diagnostics: Office.context.diagnostics,
+            displayLanguage: Office.context.displayLanguage,
+            isDarkTheme: Office.context.officeTheme.isDarkTheme
+        }) : 'not available',
+        Data: JSON.stringify(data)
     };
 
     const body = JSON.stringify(logEntity);
