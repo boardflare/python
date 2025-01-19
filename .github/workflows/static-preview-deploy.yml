@@ -10,8 +10,19 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build
+      run: npm run build
+
     - name: Sync with blob storage
       uses: azure/CLI@v1
       with:
         inlineScript: |
-            az storage blob sync --account-name 'boardflareaddins' -c 'python/preview' -s './app' --delete-destination true --sas-token '${{ secrets.CONTAINER_SAS_TOKEN }}'
+            az storage blob upload-batch --account-name 'boardflareaddins' -d 'python/preview' -s './dist' --overwrite --sas-token '${{ secrets.CONTAINER_SAS_TOKEN }}'

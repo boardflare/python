@@ -1,3 +1,7 @@
-node_modules
-local
+node_modules/
+local/
+.env
+.wrangler/
 .dev.vars
+venv/
+dist/

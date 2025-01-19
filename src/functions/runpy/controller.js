@@ -1,7 +1,8 @@
-import { queueTask } from '../utils/common.js';
-import { fetchCode } from '../utils/fetchcode.js';
+import { fetchCode } from './fetchcode.js';
+import { ConsoleEvents, EventTypes } from '../../taskpane/utils/constants.js';
+import { pyLogs } from '../../taskpane/utils/logs.js';
 
-let pyworker = new Worker(new URL('./pyodide-worker.js', import.meta.url));
+const pyworker = new Worker(new URL('./pyodide-worker.js', import.meta.url));
 
 async function messageWorker(worker, message) {
     return new Promise((resolve, reject) => {
@@ -22,19 +23,20 @@ async function messageWorker(worker, message) {
     });
 }
 
-async function runPython({ code, arg1 }) {
+export async function runPython({ code, arg1 }) {
     if (!code) {
         throw new Error('Code is not defined.');
     }
 
-    const progressDiv = document.getElementById('progress');
     try {
         code = await fetchCode(code);
         const { result, stdout } = await messageWorker(pyworker, { code, arg1 });
+        pyLogs({ code, ref: "runPython" });
+        if (stdout.trim()) {
+            ConsoleEvents.emit(EventTypes.LOG, stdout.trim());
+        }
 
-        progressDiv.innerText += `\n${stdout.trim()}`;
-
-        if (isChromiumOrEdge) {
+        if (window.isChromiumOrEdge) {
             window.gtag('event', 'py', { code_length: code.length });
         }
 
@@ -44,12 +46,16 @@ async function runPython({ code, arg1 }) {
         const errorMessage = error.error || error.message;
         const stdout = error.stdout || '';
         console.error('Error in runPython:', errorMessage);
-        progressDiv.innerText += `\n${stdout.trim()}\n${errorMessage}`;
-
-        if (isChromiumOrEdge) {
-            window.gtag('event', 'py_err', { error: errorMessage });
+        pyLogs({ errorMessage, stdout, code, ref: "execPythonError" });
+        if (stdout.trim()) {
+            ConsoleEvents.emit(EventTypes.LOG, stdout.trim());
         }
-        return [[`Error, see console for details.`]];
+        ConsoleEvents.emit(EventTypes.ERROR, errorMessage);
+
+        // if (isChromiumOrEdge) {
+        //     window.gtag('event', 'py_err', { error: errorMessage });
+        // }
+        return [[`Error, see Output tab for details.`]];
     }
 }
 

@@ -1,15 +1,22 @@
 importScripts("https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js");
 
+let pyodideReadyPromise = null;
+
 async function loadPyodideAndPackages() {
-    self.pyodide = await loadPyodide();
-    await self.pyodide.loadPackage(["micropip", "pandas"]);
-    self.micropip = pyodide.pyimport("micropip");
+    if (!pyodideReadyPromise) {
+        pyodideReadyPromise = (async () => {
+            self.pyodide = await loadPyodide();
+            await self.pyodide.loadPackage(["micropip", "pandas"]);
+            self.micropip = pyodide.pyimport("micropip");
+        })();
+    }
+    return pyodideReadyPromise;
 }
 
-let pyodideReadyPromise = loadPyodideAndPackages();
-
 self.onmessage = async (event) => {
-    await pyodideReadyPromise;
+    // Initialize Pyodide on first message
+    await loadPyodideAndPackages();
+
     const { code, arg1 } = event.data;
 
     // Clear the global state at the beginning
@@ -46,7 +53,7 @@ self.onmessage = async (event) => {
         // empty cell passes [[null]] as arg
         // skipping args with commas passes null as arg
         // unfilled optional args in LAMBDA passes FALSE, so [[false]] as arg
-        // no args passed, arg1 is []
+        // no args passed, arg1 is [] 
 
         // Set global args array from arg1 to args
         const args = arg1 ? arg1 : null;
