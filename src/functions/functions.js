@@ -5,7 +5,7 @@ import { execPython } from './exec/controller.js';
 
 /**
  * Runs Python code locally in Excel.
- * @customfunction
+ * @customfunction RUNPY
  * @param {string} code Python code to run.
  * @param {any[][][]} [arg1] Optional arguments to pass.
  * @returns {any[][]} Result of the Python code.
@@ -18,7 +18,7 @@ export async function runPy(code, arg1) {
 
 /**
  * Loads and runs code in a wrapper.  INTERNAL - DO NOT USE.
- * @customfunction
+ * @customfunction EXEC
  * @param {string} code Code or reference.
  * @param {any[][][]} [arg1] Optional params set as globals.
  * @returns {any[][]} Result of execution.
