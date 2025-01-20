@@ -141,7 +141,7 @@ const FunctionsTab = ({ onEdit, onTest }) => {
                         <table className="min-w-full bg-white">
                             <tbody>
                                 {functions.map((func) => (
-                                    <tr key={func.id}>
+                                    <tr key={func.name}>
                                         <td className="py-2 px-2 border-b">
                                             <code className="font-mono text-sm">{func.name.toUpperCase()}</code>
                                         </td>

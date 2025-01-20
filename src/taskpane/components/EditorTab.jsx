@@ -121,13 +121,17 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
             )}
             {selectedFunction.name === "" && (
                 <div className="mt-2 p-2 bg-yellow-100 rounded">
-                    <h2 className="font-semibold"> ⬅️ Drag task pane open for more room!</h2>
+                    <h2 className="font-semibold"> ⬅️ Drag task pane open for more room.</h2>
                     <ul className="list-disc pl-5">
-                        <li><span className="font-semibold">Reset:</span> returns editor to example function.</li>
-                        <li><span className="font-semibold">Test:</span> executes function using test_cases.</li>
-                        <li><span className="font-semibold">Save:</span> updates code if function already exists.</li>
+                        <li>Your code ⚠️MUST BE A FUNCTION!⚠️</li>
+                        <li>Function name must be lowercase and unique.</li>
+                        <li>NO variable (e.g. *args) and optional (e.g. arg=4) args.</li>
+                        <li>Functions cannot return images (e.g. no matplotlib).</li>
+                        <li>NO AUTO-SAVE, make sure to save your work.</li>
+                        <li>Save: updates code if function already exists.</li>
+                        <li>Reset: returns editor to example function.</li>
+                        <li>Test: executes function using test_cases.</li>
                         <li>See <a href="https://whistlernetworks.sharepoint.com/:p:/s/Boardflare/EavKXzTcSmJArk1FadRoH40BaFTd1xrff2cw3bGSRs3AFg?rtime=Mhp28Ns33Ug" target="_blank" rel="noopener" className="text-blue-500 underline">slideshow</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a> for details.</li>
-
                     </ul>
                 </div>
             )}
