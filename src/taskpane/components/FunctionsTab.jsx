@@ -69,7 +69,7 @@ const FunctionsTab = ({ onEdit, onTest }) => {
             setSaveSuccess(true);
             setTimeout(() => setSaveSuccess(false), 3000);
         } catch (error) {
-            setError('Failed to add notebook');
+            setError(`Failed to add notebook: ${error.message}`);
         } finally {
             setIsUrlSaving(false);
         }

@@ -69,7 +69,7 @@ const HomeTab = ({ onTabClick }) => {
                     <textarea
                         id="feedback"
                         value={feedbackText}
-                        placeholder="Bug? Suggestion? Your feedback is critical to making this add-in more useful for everyone. If you'd like a response, please email us.  Thanks!🙂"
+                        placeholder="Bug? Suggestion? Your feedback is critical to making this add-in more useful for everyone. If you'd like a response, please email us.  Thanks! 🙂"
                         onChange={(e) => setFeedbackText(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md"
                         rows="4"
