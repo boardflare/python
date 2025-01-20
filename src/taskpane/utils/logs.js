@@ -1,6 +1,18 @@
 const pythonlogs_url = "https://boardflare.table.core.windows.net/PythonLogs?sv=2019-02-02&st=2025-01-10T13%3A22%3A09Z&se=2035-01-11T13%3A22%3A00Z&sp=a&sig=wI1bR8fclUbVW36qtYTzLzi80B0LtYA49ECUlIsLl7M%3D&tn=PythonLogs";
-
 const feedback_url = "https://boardflare.table.core.windows.net/Feedback?sv=2019-02-02&st=2025-01-10T13%3A55%3A06Z&se=2035-01-11T13%3A55%3A00Z&sp=a&sig=u%2F%2BYYEe17NGq1MhnWJYfk3P2wwxTwSY4Xsps9HsHUxA%3D&tn=Feedback"
+
+let browserData = null;
+let uid = null;
+
+export async function initialize() {
+    const adapter = await navigator.gpu.requestAdapter();
+    browserData = {
+        supportsF16: adapter?.features.has('shader-f16'),
+        memory: navigator.deviceMemory,
+        cores: navigator.hardwareConcurrency
+    };
+    uid = await getUserId();
+}
 
 const getUserId = async () => {
     try {
@@ -46,16 +58,8 @@ const getUserId = async () => {
     }
 }
 
-const adapter = await navigator.gpu.requestAdapter();
-const browserData = {
-    supportsF16: adapter?.features.has('shader-f16'),
-    memory: navigator.deviceMemory,
-    cores: navigator.hardwareConcurrency
-}
-
-const uid = await getUserId(); // Get the unique user ID
-
 export async function pyLogs(data) {
+    if (!browserData || !uid) await initialize();
 
     const logEntity = {
         PartitionKey: new Date().toISOString(),
@@ -93,6 +97,7 @@ export async function pyLogs(data) {
 }
 
 export async function feedback(data) {
+    if (!browserData || !uid) await initialize();
 
     const feedbackEntity = {
         PartitionKey: new Date().toISOString(),
