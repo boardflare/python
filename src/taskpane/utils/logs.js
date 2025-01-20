@@ -58,40 +58,69 @@ const getUserId = async () => {
     }
 }
 
-export async function pyLogs(data) {
-    if (!browserData || !uid) await initialize();
+let logQueue = [];
+let processingTimer = null;
 
-    const logEntity = {
-        PartitionKey: new Date().toISOString(),
-        RowKey: uid,
-        BrowserData: JSON.stringify(browserData),
-        Office: Office?.context ? JSON.stringify({
-            diagnostics: Office.context?.diagnostics,
-            displayLanguage: Office.context?.displayLanguage
-        }) : 'not available',
-        Data: JSON.stringify(data)
-    };
+async function processQueue() {
+    if (logQueue.length === 0) {
+        processingTimer = null;
+        return;
+    }
 
-    const body = JSON.stringify(logEntity);
+    // Take first 20 items and clear them from queue
+    const itemsToProcess = logQueue.slice(0, 20);
+    logQueue = logQueue.slice(20);
 
     const headers = {
         'Accept': 'application/json;odata=nometadata',
         'Content-Type': 'application/json',
-        'Content-Length': body.length.toString(),
         'x-ms-date': new Date().toUTCString(),
         'x-ms-version': '2024-05-04',
         'Prefer': 'return-no-content'
     };
 
+    for (const logEntity of itemsToProcess) {
+        const body = JSON.stringify(logEntity);
+        headers['Content-Length'] = body.length.toString();
+
+        try {
+            await fetch(pythonlogs_url, {
+                method: 'POST',
+                headers,
+                body
+            });
+        } catch (error) {
+            console.error('Error processing log:', error);
+        }
+    }
+}
+
+function scheduleQueueProcessing() {
+    if (processingTimer === null) {
+        processingTimer = setTimeout(processQueue, 5000);
+    }
+}
+
+export async function pyLogs(data) {
     try {
-        const response = await fetch(pythonlogs_url, {
-            method: 'POST',
-            headers,
-            body
-        });
-        return response.ok;
+        if (!browserData || !uid) await initialize();
+
+        const logEntity = {
+            PartitionKey: new Date().toISOString(),
+            RowKey: uid,
+            BrowserData: JSON.stringify(browserData),
+            Office: Office?.context ? JSON.stringify({
+                diagnostics: Office.context?.diagnostics,
+                displayLanguage: Office.context?.displayLanguage
+            }) : 'not available',
+            Data: JSON.stringify(data)
+        };
+
+        logQueue.push(logEntity);
+        scheduleQueueProcessing();
+        return true;
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error in pyLogs:', error);
         return false;
     }
 }

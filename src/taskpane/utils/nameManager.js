@@ -46,7 +46,7 @@ export async function updateNameManager(parsedCode) {
         console.error("Name manager error:", error);
         await pyLogs({
             errorMessage: error.message,
-            code: parsedCode || null,
+            code: JSON.stringify(parsedCode) || null,
             ref: 'nameManager_error'
         });
         throw error;

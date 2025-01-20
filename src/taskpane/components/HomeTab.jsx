@@ -41,7 +41,7 @@ const HomeTab = ({ onTabClick }) => {
     return (
         <>
             <div className="p-1 mb-32">
-                <h2 className="text-center text-lg font-semibold mb-2">Python functions in Excel</h2>
+                <h2 className="text-center text-lg font-semibold mb-2">Python functions in Excel 🧪</h2>
                 <div className="py-1 border-gray-300 rounded-lg p-2 mb-2">
                     <p><span className="font-bold">Step 1:</span> Write a Python function in the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('editor')}>editor</span>.</p>
                     <div className="py-2 h-[75px]">
@@ -69,7 +69,7 @@ const HomeTab = ({ onTabClick }) => {
                     <textarea
                         id="feedback"
                         value={feedbackText}
-                        placeholder="Bug? Suggestion? Your feedback is critical to making this add-in more useful for everyone. If you'd like a response, please email us.  Thanks!🙂"
+                        placeholder="Bug? Suggestion? Your feedback is critical to making this add-in more useful for everyone. If you'd like a response, please email us.  Thanks! 🙂"
                         onChange={(e) => setFeedbackText(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md"
                         rows="4"

@@ -69,7 +69,7 @@ const FunctionsTab = ({ onEdit, onTest }) => {
             setSaveSuccess(true);
             setTimeout(() => setSaveSuccess(false), 3000);
         } catch (error) {
-            setError('Failed to add notebook');
+            setError(`Failed to add notebook: ${error.message}`);
         } finally {
             setIsUrlSaving(false);
         }
@@ -141,7 +141,7 @@ const FunctionsTab = ({ onEdit, onTest }) => {
                         <table className="min-w-full bg-white">
                             <tbody>
                                 {functions.map((func) => (
-                                    <tr key={func.id}>
+                                    <tr key={func.name}>
                                         <td className="py-2 px-2 border-b">
                                             <code className="font-mono text-sm">{func.name.toUpperCase()}</code>
                                         </td>
