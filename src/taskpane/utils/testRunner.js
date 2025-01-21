@@ -37,8 +37,13 @@ def run_tests(func, test_cases):
         except Exception as e:
             print(f"Case {i+1} failed: {str(e)}")
 
-# Run tests
-run_tests(${parsedFunction.name}, test_cases)
+# Run tests if test_cases exists, otherwise print message
+try:
+    test_cases
+except NameError:
+    print("No test cases defined. Skipping tests.")
+else:
+    run_tests(${parsedFunction.name}, test_cases)
     `.trim();
 
     let pyResult;
