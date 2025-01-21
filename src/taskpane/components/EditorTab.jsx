@@ -1,5 +1,6 @@
 import * as React from "react";
 import { MonacoEditor } from "./MonacoEditor";
+import LLM from "./LLM"; // Import LLM component
 import { saveFunctionToSettings, getFunctionFromSettings } from "../utils/workbookSettings";
 import { DEFAULT_CODE } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
@@ -8,9 +9,14 @@ import { updateNameManager } from "../utils/nameManager";
 import { singleDemo } from "../utils/demo";
 import { runTests } from "../utils/testRunner";
 
+const LLM_URL = process.env.NODE_ENV === 'development'
+    ? 'http://127.0.0.1:8787'
+    : 'https://codepy.boardflare.workers.dev';
+
 const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
     const [notification, setNotification] = React.useState("");
     const [functions, setFunctions] = React.useState([]);
+    const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const notificationTimeoutRef = React.useRef();
     const editorRef = React.useRef(null);
 
@@ -105,6 +111,26 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
         }
     };
 
+    const handleLLMSubmit = async (userInput) => {
+        try {
+            const response = await fetch(LLM_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ prompt: userInput }),
+            });
+            const data = await response.json();
+            const generatedCode = data.message;
+            editorRef.current.setValue(generatedCode);
+            setSelectedFunction({ name: selectedFunction.name, code: generatedCode });
+            setIsLLMOpen(false);
+            showNotification("Function generated successfully!", "success");
+        } catch (err) {
+            showNotification(err.message, "error");
+        }
+    };
+
     return (
         <div className="flex flex-col h-full overflow-hidden">
             <div className="flex-1 overflow-hidden mt-2">
@@ -155,8 +181,14 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
                     <button onClick={handleReset} className="px-2 py-1 bg-gray-200 rounded">Reset</button>
                     <button onClick={handleTest} className="px-2 py-1 bg-green-500 text-white rounded">Test</button>
                     <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
+                    <button onClick={() => setIsLLMOpen(true)} className="px-2 py-1 bg-purple-500 text-white rounded">AI✨</button>
                 </div>
             </div>
+            <LLM
+                isOpen={isLLMOpen}
+                onClose={() => setIsLLMOpen(false)}
+                onSubmit={handleLLMSubmit}
+            />
         </div>
     );
 };
