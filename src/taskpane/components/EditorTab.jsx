@@ -13,7 +13,7 @@ const LLM_URL = process.env.NODE_ENV === 'development'
     ? 'http://127.0.0.1:8787'
     : 'https://codepy.boardflare.workers.dev';
 
-const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
+const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCode, setGeneratedCode }) => {
     const [notification, setNotification] = React.useState("");
     const [functions, setFunctions] = React.useState([]);
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
@@ -59,6 +59,14 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
             }
         }
     }, [selectedFunction.name, functions]);
+
+    React.useEffect(() => {
+        if (generatedCode && editorRef.current) {
+            editorRef.current.setValue(generatedCode);
+            setSelectedFunction({ name: "", code: generatedCode });
+            setGeneratedCode(null); // Clear the generated code after using it
+        }
+    }, [generatedCode, setGeneratedCode]);
 
     const handleEditorDidMount = (editor, monaco) => {
         editorRef.current = editor;
@@ -111,24 +119,10 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
         }
     };
 
-    const handleLLMSubmit = async (userInput) => {
-        try {
-            const response = await fetch(LLM_URL, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ prompt: userInput }),
-            });
-            const data = await response.json();
-            const generatedCode = data.message;
-            editorRef.current.setValue(generatedCode);
-            setSelectedFunction({ name: selectedFunction.name, code: generatedCode });
-            setIsLLMOpen(false);
-            showNotification("Function generated successfully!", "success");
-        } catch (err) {
-            showNotification(err.message, "error");
-        }
+    const handleLLMSuccess = (generatedCode) => {
+        editorRef.current.setValue(generatedCode);
+        setSelectedFunction({ name: selectedFunction.name, code: generatedCode });
+        showNotification("Function generated successfully!", "success");
     };
 
     return (
@@ -150,9 +144,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
                     <h2 className="font-semibold"> ⬅️ Drag task pane open for more room.</h2>
                     <ul className="list-disc pl-5">
                         <li>Your code ⚠️MUST BE A FUNCTION!⚠️</li>
-                        <li>Function name must be lowercase and unique.</li>
                         <li>NO variable (e.g. *args) and optional (e.g. arg=4) args.</li>
-                        <li>Functions cannot return images (e.g. no matplotlib).</li>
                         <li>NO AUTO-SAVE, make sure to save your work.</li>
                         <li>Save: updates code if function already exists.</li>
                         <li>Reset: returns editor to example function.</li>
@@ -187,7 +179,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
             <LLM
                 isOpen={isLLMOpen}
                 onClose={() => setIsLLMOpen(false)}
-                onSubmit={handleLLMSubmit}
+                onSuccess={handleLLMSuccess}
             />
         </div>
     );

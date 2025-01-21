@@ -15,18 +15,7 @@ export default {
 		}
 
 		try {
-			const { prompt } = await request.json();
-
-			const genText = {
-				model: 'mistral-large-2411',
-				messages: [
-					{ role: 'system', content: "Create a Python function to implement the user's requested functionality.  Functions must return either a standard Python scalar (int, float, str, bool) or a nested list of scalars." },
-					{ role: 'user', content: prompt },
-				],
-				max_tokens: 1500,
-				temperature: 0.1
-			};
-			console.log("genText", genText);
+			const { genText } = await request.json();
 
 			const response = await fetch('https://gateway.ai.cloudflare.com/v1/92d55664b831823cc914de02c9a0d0ae/codepy/mistral/v1/chat/completions', {
 				method: 'POST',
@@ -46,7 +35,7 @@ export default {
 
 			return Response.json({
 				success: true,
-				message: content
+				content
 			}, { headers });
 		} catch (error) {
 			return Response.json({
