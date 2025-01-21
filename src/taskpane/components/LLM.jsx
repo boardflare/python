@@ -10,6 +10,14 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
+    const examplePrompts = [
+        { value: "", label: "Select an example prompt..." },
+        { value: "Add two numbers and return the sum", label: "Add two numbers" },
+        { value: "Convert a string to uppercase", label: "Convert to uppercase" },
+        { value: "Calculate the average of a list of numbers", label: "Calculate average" },
+        { value: "Find all prime numbers up to n", label: "Find prime numbers" },
+    ];
+
     if (!isOpen) return null;
 
     const handleClear = () => {
@@ -24,7 +32,7 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
         const genText = {
             model: 'mistral-large-2411',
             messages: [
-                { role: 'system', content: "Create a single Python function without any explanation or example usage that fulfills the user's request. The function must return either a standard Python scalar (int, float, str, bool) or a 2D nested list of scalars. Do not include any print statements." },
+                { role: 'system', content: "Create a single Python function with type hints and a docstring that fulfills the user's request. The function can only accept and return standard Python scalars (int, float, str, bool) or 2D nested lists of scalars. Do not include any print statements, example usage, or explanations." },
                 { role: 'user', content: input },
             ],
             max_tokens: 1500,
@@ -76,11 +84,23 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
                         {error}
                     </div>
                 )}
+                <select
+                    className="w-full p-2 border rounded mb-2"
+                    onChange={(e) => setInput(e.target.value)}
+                    value={input}
+                    disabled={isLoading}
+                >
+                    {examplePrompts.map((prompt, index) => (
+                        <option key={index} value={prompt.value}>
+                            {prompt.label}
+                        </option>
+                    ))}
+                </select>
                 <textarea
                     className="w-full h-32 p-2 border rounded mb-2"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Describe the function you need.  e.g. 'Adds two numbers.'"
+                    placeholder="Describe the function you need.  Or select an example prompt above."
                     disabled={isLoading}
                 />
                 <div className="flex justify-end space-x-2">
