@@ -9,7 +9,6 @@ const HomeTab = ({ onTabClick, setGeneratedCode }) => {
     const [feedbackText, setFeedbackText] = React.useState("");
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const notificationTimeoutRef = React.useRef();
-    const [isLLMLoading, setIsLLMLoading] = React.useState(false);
 
     React.useEffect(() => {
         return () => {
@@ -106,7 +105,6 @@ const HomeTab = ({ onTabClick, setGeneratedCode }) => {
                 isOpen={isLLMOpen}
                 onClose={() => setIsLLMOpen(false)}
                 onSuccess={handleLLMSuccess}
-                isLoading={isLLMLoading}
             />
         </>
     );
