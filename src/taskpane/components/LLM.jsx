@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { pyLogs } from "../utils/logs";  // Add this import
 
 const LLM_URL = process.env.NODE_ENV === 'development'
     ? 'http://127.0.0.1:8787'
@@ -48,6 +49,14 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
             if (codeMatch) {
                 generatedCode = codeMatch[1].trim();
             }
+
+            // Add logging
+            await pyLogs({
+                LLM: {
+                    prompt: input,
+                    content: generatedCode
+                }
+            });
 
             onSuccess(generatedCode);
             onClose();
