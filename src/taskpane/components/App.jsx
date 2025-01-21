@@ -9,6 +9,7 @@ const App = ({ title }) => {
   const [selectedTab, setSelectedTab] = React.useState("home");
   const [selectedFunction, setSelectedFunction] = React.useState({ name: "", code: "" });
   const [logs, setLogs] = React.useState([]);
+  const [generatedCode, setGeneratedCode] = React.useState(null);
 
   React.useEffect(() => {
     const handleLog = (event) => {
@@ -66,12 +67,19 @@ const App = ({ title }) => {
           <button className={`flex-grow px-2 py-2 mr-2 ${selectedTab === "output" ? "border-b-2 border-blue-500" : ""}`} value="output" onClick={handleTabSelect}>Output</button>
         </div>
         <div className="flex-1 overflow-hidden">
-          {selectedTab === "home" && <HomeTab onTabClick={(tab) => handleTabClick(tab)} />}
+          {selectedTab === "home" && (
+            <HomeTab
+              onTabClick={handleTabClick}
+              setGeneratedCode={setGeneratedCode}
+            />
+          )}
           {selectedTab === "editor" && (
             <EditorTab
               selectedFunction={selectedFunction}
               setSelectedFunction={setSelectedFunction}
               onTest={handleTest}
+              generatedCode={generatedCode}
+              setGeneratedCode={setGeneratedCode}
             />
           )}
           {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} />}

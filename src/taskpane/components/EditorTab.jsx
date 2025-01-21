@@ -1,5 +1,6 @@
 import * as React from "react";
 import { MonacoEditor } from "./MonacoEditor";
+import LLM from "./LLM"; // Import LLM component
 import { saveFunctionToSettings, getFunctionFromSettings } from "../utils/workbookSettings";
 import { DEFAULT_CODE } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
@@ -8,9 +9,14 @@ import { updateNameManager } from "../utils/nameManager";
 import { singleDemo } from "../utils/demo";
 import { runTests } from "../utils/testRunner";
 
-const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
+const LLM_URL = process.env.NODE_ENV === 'development'
+    ? 'http://127.0.0.1:8787'
+    : 'https://codepy.boardflare.workers.dev';
+
+const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCode, setGeneratedCode }) => {
     const [notification, setNotification] = React.useState("");
     const [functions, setFunctions] = React.useState([]);
+    const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const notificationTimeoutRef = React.useRef();
     const editorRef = React.useRef(null);
 
@@ -53,6 +59,14 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
             }
         }
     }, [selectedFunction.name, functions]);
+
+    React.useEffect(() => {
+        if (generatedCode && editorRef.current) {
+            editorRef.current.setValue(generatedCode);
+            setSelectedFunction({ name: "", code: generatedCode });
+            setGeneratedCode(null); // Clear the generated code after using it
+        }
+    }, [generatedCode, setGeneratedCode]);
 
     const handleEditorDidMount = (editor, monaco) => {
         editorRef.current = editor;
@@ -105,6 +119,12 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
         }
     };
 
+    const handleLLMSuccess = (generatedCode) => {
+        editorRef.current.setValue(generatedCode);
+        setSelectedFunction({ name: selectedFunction.name, code: generatedCode });
+        showNotification("Function generated successfully!", "success");
+    };
+
     return (
         <div className="flex flex-col h-full overflow-hidden">
             <div className="flex-1 overflow-hidden mt-2">
@@ -124,9 +144,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
                     <h2 className="font-semibold"> ⬅️ Drag task pane open for more room.</h2>
                     <ul className="list-disc pl-5">
                         <li>Your code ⚠️MUST BE A FUNCTION!⚠️</li>
-                        <li>Function name must be lowercase and unique.</li>
                         <li>NO variable (e.g. *args) and optional (e.g. arg=4) args.</li>
-                        <li>Functions cannot return images (e.g. no matplotlib).</li>
                         <li>NO AUTO-SAVE, make sure to save your work.</li>
                         <li>Save: updates code if function already exists.</li>
                         <li>Reset: returns editor to example function.</li>
@@ -155,8 +173,14 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest }) => {
                     <button onClick={handleReset} className="px-2 py-1 bg-gray-200 rounded">Reset</button>
                     <button onClick={handleTest} className="px-2 py-1 bg-green-500 text-white rounded">Test</button>
                     <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
+                    <button onClick={() => setIsLLMOpen(true)} className="px-2 py-1 bg-purple-500 text-white rounded">AI✨</button>
                 </div>
             </div>
+            <LLM
+                isOpen={isLLMOpen}
+                onClose={() => setIsLLMOpen(false)}
+                onSuccess={handleLLMSuccess}
+            />
         </div>
     );
 };
