@@ -12,10 +12,19 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
 
     const examplePrompts = [
         { value: "", label: "Select an example prompt..." },
-        { value: "Add two numbers and return the sum", label: "Add two numbers" },
-        { value: "Convert a string to uppercase", label: "Convert to uppercase" },
-        { value: "Calculate the average of a list of numbers", label: "Calculate average" },
+        { value: "Add two numbers and return their sum.", label: "Add two numbers" },
+        { value: "Convert a single string, or 2D list of strings, to uppercase.", label: "Convert to uppercase" },
+        { value: "Calculate the average of a 2D list of numbers", label: "Calculate average" },
         { value: "Find all prime numbers up to n", label: "Find prime numbers" },
+        { value: "Implement a function that performs matrix multiplication on two 2D lists.", label: "Matrix multiplication" },
+        { value: "Create a function that finds the longest common subsequence of two strings.", label: "Longest common subsequence" },
+        { value: "Implement a function that performs binary search on a sorted 2D list.", label: "Binary search 2D" },
+        { value: "Create a function that validates if a string represents a valid email address.", label: "Email validation" },
+        { value: "Build a function that finds all anagrams in a 2D list of strings.", label: "Find anagrams" },
+        { value: "Implement a function that performs flood fill on a 2D grid.", label: "Flood fill" },
+        { value: "Create a function that calculates the edit distance between two strings.", label: "Edit distance" },
+        { value: "Build a function that performs depth-first search on a 2D grid maze.", label: "DFS maze solver" },
+        { value: "Implement a function that finds all palindromic substrings in a string.", label: "Palindromic substrings" }
     ];
 
     if (!isOpen) return null;
@@ -29,13 +38,16 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
         setIsLoading(true);
         setError("");
 
+        // Use default prompt if input is empty
+        const promptText = input.trim() || "Add two numbers and return their sum.";
+
         const genText = {
             model: 'mistral-large-2411',
             messages: [
-                { role: 'system', content: "Create a single Python function with type hints and a docstring that fulfills the user's request. The function can only accept and return standard Python scalars (int, float, str, bool) or 2D nested lists of scalars. Do not include any print statements, example usage, or explanations." },
-                { role: 'user', content: input },
+                { role: 'system', content: `Create a single Python function with docstring that fulfills the user's request. The function args must be Python types float, str, bool, None or a 2D list of those types. Parameter names cannot contain numbers. Variable length arguments (e.g. *args or **kwargs) are not allowed. Do not include any print statements, example usage, type hints, or explanations.  Define a test_cases variable that is a list with nested lists of example args.  e.g. test_cases = [["hello"],[[["hello", "world"]]]] includes a case with a str arg, and a case with a 2D list arg.` },
+                { role: 'user', content: promptText },
             ],
-            max_tokens: 1500,
+            max_tokens: 1000,
             temperature: 0.1
         };
 
@@ -97,10 +109,10 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
                     ))}
                 </select>
                 <textarea
-                    className="w-full h-32 p-2 border rounded mb-2"
+                    className="w-full h-60 p-2 border rounded mb-2"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Describe the function you need.  Or select an example prompt above."
+                    placeholder="Describe what the function should do, similar to what you would put in a docstring.  You can try an example prompt using the dropdown above."
                     disabled={isLoading}
                 />
                 <div className="flex justify-end space-x-2">
