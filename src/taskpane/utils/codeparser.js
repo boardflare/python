@@ -1,54 +1,32 @@
+import { execPython } from "../../functions/exec/controller";
 import { pyLogs } from './logs';
+import astParserCode from './astParser.py';
 
-export function parsePython(rawCode) {
+export async function parsePython(rawCode) {
     try {
-        // Extract function definition
-        const functionMatch = rawCode.match(/def\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([\s\S]*?)\)(?:\s*->\s*[^:]+)?\s*:/);
-        if (!functionMatch) {
-            throw new Error("No function definition found. Your code must be wrapped in a function, e.g. def my_function(first, second):");
+        // First use Python AST parser
+        const parseCode = `
+${astParserCode}
+
+# Parse the function
+result = parse_python_code('''
+${rawCode}
+''')
+`;
+
+        const rawResult = await execPython({ code: parseCode, arg1: null });
+        const pyResult = JSON.parse(rawResult);
+
+        if (!pyResult || pyResult.error) {
+            throw new Error(pyResult.error || "Failed to parse Python code");
         }
 
-        const name = functionMatch[1].toLowerCase();
-        const params = functionMatch[2].trim();
-
-        // Enhanced args parsing with validation
-        const args = params.split(',')
-            .filter(arg => arg.trim())
-            .map(arg => {
-                const trimmedArg = arg.trim();
-
-                if (trimmedArg.startsWith('*')) {
-                    throw new Error("Variable arguments (*args/**kwargs) are not supported");
-                }
-
-                const paramMatch = trimmedArg.match(/([a-zA-Z_][a-zA-Z0-9_]*)\s*(?::\s*[^=]+)?(?:\s*=\s*(.+))?$/);
-
-                if (!paramMatch) {
-                    throw new Error(`Invalid parameter format: ${trimmedArg}`);
-                }
-
-                const paramName = paramMatch[1];
-                const defaultValue = paramMatch[2];
-
-                if (/\d/.test(paramName)) {
-                    throw new Error(`Parameter names cannot contain numbers.  Issue causing error: ${paramName}`);
-                }
-
-                if (defaultValue) {
-                    throw new Error(`Default values are not supported for function parameters at this time.  Issue causing error: ${paramName}=${defaultValue}`);
-                }
-
-                return paramName;
-            });
-
-        // Extract first line of docstring to use as description.
-        const docstringMatch = rawCode.match(/def.*?:\s*(?:'''|""")(.*?)(?:\n|'''|""")/s);
-        const description = docstringMatch
-            ? docstringMatch[1].trim().slice(0, 255)
-            : 'No description available';
+        const name = pyResult.name.toLowerCase();
+        const parameters = pyResult.parameters.map(param => param.name);
+        const description = pyResult.description;
 
         // Generate resultLine to call function with arg1, arg2, etc.
-        const argList = args.length > 0 ? args.map((_, index) => `arg${index + 1}`).join(', ') : '';
+        const argList = parameters.length > 0 ? parameters.map((_, index) => `arg${index + 1}`).join(', ') : '';
         const resultLine = `\n\nresult = ${name.toLowerCase()}(${argList})`;
         const code = rawCode.trim();
 
@@ -63,7 +41,9 @@ export function parsePython(rawCode) {
         }
 
         // Excel named lambda signature
-        const signature = `${name.toUpperCase()}(${params})`;
+        const signature = parameters.length > 0
+            ? `${name.toUpperCase()}(${parameters.join(', ')})`
+            : `${name.toUpperCase()}()`;
 
         // Excel named lambda formula
         const timestamp = new Date().toISOString();
@@ -71,7 +51,9 @@ export function parsePython(rawCode) {
         const tableRef = `"https://getcode.boardflare.workers.dev/?uid=${uid}&timestamp=${timestamp}&name=${name}&return=code"`;
         const settingsRef = `"workbook-settings:${name}"`;
         const codeRef = settingsRef;
-        const formula = `=LAMBDA(${args.join(', ')}, ${execEnv}(${codeRef}, ${args.join(', ')}))`;
+        const formula = parameters.length > 0
+            ? `=LAMBDA(${parameters.join(', ')}, ${execEnv}(${codeRef}, ${parameters.join(', ')}))`
+            : `=LAMBDA(${execEnv}(${codeRef}))`;
 
         // Extract Excel demo
         const excelDemoMatch = rawCode.match(/^# Excel usage:\s*(.+?)$/m);
@@ -98,6 +80,6 @@ export function parsePython(rawCode) {
             code: rawCode,
             ref: 'codeparser_error'
         })
-        throw error;  // Re-throw to maintain existing error handling behavior
+        throw error;
     }
 }

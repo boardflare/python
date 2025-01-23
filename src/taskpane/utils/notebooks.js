@@ -151,10 +151,11 @@ export const fetchNotebookUrl = async (url = DEFAULT_NOTEBOOK) => {
         }
 
         const codeCells = notebook.cells.filter(cell => cell.cell_type === 'code').slice(1);
-        const allFunctions = codeCells.reduce((validFunctions, cell) => {
+        const allFunctions = codeCells.reduce(async (validFunctionsPromise, cell) => {
+            const validFunctions = await validFunctionsPromise;
             try {
                 const code = cell.source.filter(line => !line.startsWith('run_tests')).join('');
-                validFunctions.push(parsePython(code));
+                validFunctions.push(await parsePython(code));
             } catch (error) {
                 pyLogs({
                     errorMessage: error.message,
@@ -167,9 +168,9 @@ export const fetchNotebookUrl = async (url = DEFAULT_NOTEBOOK) => {
                 });
             }
             return validFunctions;
-        }, []);
+        }, Promise.resolve([]));
 
-        return { functions: allFunctions };
+        return { functions: await allFunctions };
     } catch (error) {
         await pyLogs({
             errorMessage: error.message,

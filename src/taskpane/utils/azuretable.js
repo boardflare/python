@@ -1,5 +1,3 @@
-import { parsePython } from './codeparser.js';
-
 const url = "https://boardflarewest.table.core.windows.net/CodeByTimestamp";
 const sas = "?sv=2019-02-02&st=2024-12-19T22%3A12%3A48Z&se=2034-12-20T22%3A12%3A00Z&sp=a&sig=KWho482PTywCGota3Ccvdz50t0RHNoicFqm61Rp8go0%3D&tn=CodeByTimestamp";
 

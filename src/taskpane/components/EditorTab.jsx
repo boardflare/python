@@ -85,7 +85,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
     const handleSave = async () => {
         try {
             const code = editorRef.current.getValue();
-            const parsedFunction = parsePython(code);
+            const parsedFunction = await parsePython(code);
             await saveFunctionToSettings(parsedFunction);
             await updateNameManager(parsedFunction);
             showNotification(`${parsedFunction.signature} saved!`, "success");
@@ -109,8 +109,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
         onTest();
         try {
             const code = editorRef.current.getValue();
-            const parsedFunction = parsePython(code);
-            window.dispatchEvent(new CustomEvent(EventTypes.CLEAR));
+            const parsedFunction = await parsePython(code);
             await runTests(parsedFunction);
             showNotification("Tests completed successfully!", "success");
         } catch (err) {

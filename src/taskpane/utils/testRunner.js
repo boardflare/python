@@ -1,8 +1,12 @@
 import { execPython } from "../../functions/exec/controller";
 import { singleDemo } from "./demo";
 import { pyLogs } from "./logs";
+import { EventTypes } from "./constants";
 
 export async function runTests(parsedFunction) {
+    // Clear logs before running tests
+    window.dispatchEvent(new CustomEvent(EventTypes.CLEAR));
+
     const testCode = `
 
 # Function code
@@ -28,10 +32,10 @@ def run_tests(func, test_cases):
 
     for i, case in enumerate(test_cases):
         if not isinstance(case, list):
-            raise TypeError(f"Case {i+1} should be a list, even if it only has one argument, e.g. [3]")
+            raise TypeError(f"Case {i+1} should be a list of args, or empty list if no args, e.g. [[]]")
             
         try:
-            # Simply pass all inputs directly to the function
+            # For functions with no parameters, case should be an empty list
             result = func(*case)
             print(f"Case {i+1}: {case} -> {result}")
         except Exception as e:
