@@ -86,7 +86,7 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
             //     }
             // });
 
-            onSuccess("Worksheet created successfully");
+            onSuccess(generatedCode);
             onClose();
         } catch (err) {
             setError(err.message);

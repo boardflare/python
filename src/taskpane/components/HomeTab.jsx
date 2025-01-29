@@ -47,10 +47,6 @@ const HomeTab = ({ onTabClick, setGeneratedCode }) => {
         onTabClick('editor');
     };
 
-    const handleSheetSuccess = (message) => {
-        showNotification(message, "success");
-    };
-
     return (
         <>
             <div className="p-1 mb-32">
@@ -122,7 +118,7 @@ const HomeTab = ({ onTabClick, setGeneratedCode }) => {
             <SheetLLM
                 isOpen={isSheetLLMOpen}
                 onClose={() => setIsSheetLLMOpen(false)}
-                onSuccess={handleSheetSuccess}
+                onSuccess={handleLLMSuccess}
             />
         </>
     );
