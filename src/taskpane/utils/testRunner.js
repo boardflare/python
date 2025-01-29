@@ -7,10 +7,7 @@ export async function runTests(parsedFunction) {
     // Clear logs before running tests
     window.dispatchEvent(new CustomEvent(EventTypes.CLEAR));
 
-    const testCode = `
-
-# Function code
-${parsedFunction.code}
+    const testCode = `${parsedFunction.code}
 
 # Same test runner used in notebooks
 def run_tests(func, test_cases):
@@ -39,7 +36,11 @@ def run_tests(func, test_cases):
             result = func(*case)
             print(f"Case {i+1}: {case} -> {result}")
         except Exception as e:
-            print(f"Case {i+1} failed: {str(e)}")
+            import traceback
+            tb = traceback.extract_tb(e.__traceback__)
+            error_line = tb[-1].lineno
+            print(f"Case {i+1} failed at line {error_line} : {str(e)}")
+            print(f"  Input: {case}")
 
 # Run tests if test_cases exists, otherwise print message
 try:
