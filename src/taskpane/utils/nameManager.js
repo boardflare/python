@@ -16,7 +16,14 @@ export async function updateNameManager(parsedCode) {
                     newNamedItem = context.workbook.names.add(excelName, parsedCode.formula);
                     await context.sync();
                 } catch (createError) {
-                    throw new Error(`Failed to create name '${excelName}': ${createError.message}`);
+                    // Try again with semicolons instead of commas
+                    try {
+                        const modifiedFormula = parsedCode.formula.replace(/,/g, ';');
+                        newNamedItem = context.workbook.names.add(excelName, modifiedFormula);
+                        await context.sync();
+                    } catch (retryError) {
+                        throw new Error(`Failed to create name '${excelName}': ${createError.message}`);
+                    }
                 }
 
                 try {
