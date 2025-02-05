@@ -75,12 +75,12 @@ const HomeTab = ({ onTabClick, setGeneratedCode }) => {
                         Create Function with AI ✨
                     </button>
                     <br />
-                    <button
+                    {/* <button
                         onClick={() => setIsSheetLLMOpen(true)}
                         className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                     >
                         Generate Sheet using AI 📊
-                    </button>
+                    </button> */}
                 </div>
             </div>
             <div className="fixed bottom-0 left-0 right-0">
@@ -115,11 +115,11 @@ const HomeTab = ({ onTabClick, setGeneratedCode }) => {
                 onClose={() => setIsLLMOpen(false)}
                 onSuccess={handleLLMSuccess}
             />
-            <SheetLLM
+            {/* <SheetLLM
                 isOpen={isSheetLLMOpen}
                 onClose={() => setIsSheetLLMOpen(false)}
                 onSuccess={handleLLMSuccess}
-            />
+            /> */}
         </>
     );
 };
