@@ -83,7 +83,7 @@ const HomeTab = ({ onTabClick, setGeneratedCode }) => {
                     </button> */}
                 </div>
             </div>
-            <div className="fixed bottom-0 left-0 right-0">
+            {/* <div className="fixed bottom-0 left-0 right-0">
                 {notification && (
                     <div className={`p-2 text-center ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"}`}>
                         {notification.message}
@@ -109,7 +109,7 @@ const HomeTab = ({ onTabClick, setGeneratedCode }) => {
                         <a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener" className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">Email Support🛟</a>
                     </div>
                 </form>
-            </div>
+            </div> */}
             <LLM
                 isOpen={isLLMOpen}
                 onClose={() => setIsLLMOpen(false)}
