@@ -1,14 +1,16 @@
 import React, { useState } from "react";
-import { pyLogs } from "../utils/logs";  // Add this import
+import { pyLogs } from "../utils/logs";
+import { runTests } from "../utils/testRunner";  // Add this import
 
 const LLM_URL = process.env.NODE_ENV === 'development'
-    ? 'https://codepy.boardflare.workers.dev' //'http://127.0.0.1:8787'
+    ? 'https://codepy.boardflare.workers.dev'
     : 'https://codepy.boardflare.workers.dev';
 
 const LLM = ({ isOpen, onClose, onSuccess }) => {
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [status, setStatus] = useState("");  // Add status for feedback
 
     const examplePrompts = [
         { value: "", label: "Select an example prompt..." },
@@ -37,30 +39,34 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
     const handleSubmit = async () => {
         setIsLoading(true);
         setError("");
+        setStatus("");
 
-        // Use default prompt if input is empty
         const promptText = input.trim() || "Add two numbers and return their sum.";
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
 
-        const genText = {
-            model: 'mistral-large-2411',
-            messages: [
-                { role: 'system', content: `Create a single Python function with docstring that fulfills the user's request. The function args must be Python types float, str, bool, None or a 2D list of those types. Parameter names cannot contain numbers. Variable length arguments (e.g. *args or **kwargs) are not allowed. Do not include any print statements, example usage, type hints, or explanations.  Define a test_cases variable that is a list with nested lists of example args.  e.g. test_cases = [["hello"],[[["hello", "world"]]]] includes a case with a str arg, and a case with a 2D list arg.` },
-                { role: 'user', content: promptText },
-            ],
-            max_tokens: 1000,
-            temperature: 0.1
-        };
+        const generateAndTest = async (prompt, errorContext = "") => {
+            const systemPrompt = errorContext ?
+                `Fix the following Python function. Error: ${errorContext}. The function must have a docstring and test_cases variable.` :
+                `Create a single Python function with docstring that fulfills the user's request. The function args must be Python types float, str, bool, None or a 2D list of those types. Parameter names cannot contain numbers. Variable length arguments (e.g. *args or **kwargs) are not allowed. Do not include any print statements, example usage, type hints, or explanations. Define a test_cases variable that is a list with nested lists of example args. e.g. test_cases = [["hello"],[[["hello", "world"]]]] includes a case with a str arg, and a case with a 2D list arg.`;
 
-        try {
+            const genText = {
+                model: 'mistral-large-2411',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: prompt },
+                ],
+                max_tokens: 1000,
+                temperature: 0.1
+            };
+
             const response = await fetch(LLM_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ genText }),
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to generate code');
-            }
+            if (!response.ok) throw new Error('Failed to generate code');
 
             const data = await response.json();
             let generatedCode = data.content;
@@ -70,20 +76,56 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
                 generatedCode = codeMatch[1].trim();
             }
 
-            // Add logging
+            return generatedCode;
+        };
+
+        try {
+            let finalCode;
+            while (retryCount < MAX_RETRIES) {
+                setStatus(`Generating code${retryCount > 0 ? ` (attempt ${retryCount + 1})` : ''}...`);
+                const code = await generateAndTest(promptText);
+
+                setStatus("Testing generated code...");
+                try {
+                    const pyResult = await runTests({ code, name: "" });
+                    if (pyResult.error) {
+                        if (retryCount === MAX_RETRIES - 1) {
+                            throw new Error(`Failed to generate working code after ${MAX_RETRIES} attempts`);
+                        }
+                        retryCount++;
+                        // Use stdout and error from pyResult for context
+                        const errorContext = [pyResult.stdout, pyResult.error]
+                            .filter(Boolean)
+                            .join('\n');
+                        promptText = `${promptText}\nPrevious attempt failed: ${errorContext}`;
+                        continue;
+                    }
+                    finalCode = code;
+                    break;
+                } catch (testError) {
+                    if (retryCount === MAX_RETRIES - 1) {
+                        throw testError;
+                    }
+                    retryCount++;
+                    continue;
+                }
+            }
+
             await pyLogs({
                 LLM: {
                     prompt: input,
-                    content: generatedCode
+                    content: finalCode,
+                    attempts: retryCount + 1
                 }
             });
 
-            onSuccess(generatedCode);
+            onSuccess(finalCode);
             onClose();
         } catch (err) {
             setError(err.message);
         } finally {
             setIsLoading(false);
+            setStatus("");
         }
     };
 
@@ -94,6 +136,11 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
                 {error && (
                     <div className="mb-4 p-2 bg-red-100 text-red-800 rounded">
                         {error}
+                    </div>
+                )}
+                {status && (
+                    <div className="mb-4 p-2 bg-blue-100 text-blue-800 rounded">
+                        {status}
                     </div>
                 )}
                 <select

@@ -26,5 +26,6 @@ export async function runPy(code, arg1) {
 
 export async function exec(code, arg1) {
   const args = { code, arg1 };
-  return await queueTask(args, execPython);
+  const response = await queueTask(args, execPython);
+  return response.result; // Controller provides the correct format
 }

@@ -15,7 +15,7 @@ ${rawCode}
 `;
 
         const rawResult = await execPython({ code: parseCode, arg1: null });
-        const pyResult = JSON.parse(rawResult);
+        const pyResult = JSON.parse(rawResult.result);
 
         if (!pyResult || pyResult.error) {
             throw new Error(pyResult.error || "Failed to parse Python code");

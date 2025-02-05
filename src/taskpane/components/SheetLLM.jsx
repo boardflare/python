@@ -75,7 +75,7 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
             });
 
             // Insert the worksheet from base64
-            await insertWorksheetFromBase64(base64Result[0][0]);
+            await insertWorksheetFromBase64(base64Result.result[0][0]);
 
             // Log the operation
             // await pyLogs({

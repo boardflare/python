@@ -1,6 +1,6 @@
 // Web worker that executes Python code using Pyodide.
 
-importScripts("https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js");
+importScripts("https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js");
 import setupCode from './setup.py';
 import resultCode from './result.py';
 

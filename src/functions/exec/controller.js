@@ -29,18 +29,29 @@ export async function execPython({ code, arg1 }) {
         if (stdout.trim()) {
             ConsoleEvents.emit(EventTypes.LOG, stdout.trim());
         }
-        return result;
+        return { result, stdout };
 
     } catch (error) {
         const errorMessage = error.error || error.message;
         const stdout = error.stdout || '';
-        pyLogs({ errorMessage, stdout, code, ref: "execPythonError" });
+        
+        pyLogs({ 
+            errorMessage, 
+            stdout, 
+            code, 
+            ref: "execPythonError" 
+        });
+
         console.error('Error in execPython:', errorMessage);
-        // Log any stdout before error message
         if (stdout.trim()) {
             ConsoleEvents.emit(EventTypes.LOG, stdout.trim());
         }
         ConsoleEvents.emit(EventTypes.ERROR, errorMessage);
-        return [[`Error, see Output tab for details.`]];
+
+        return {
+            error: errorMessage,
+            stdout,
+            result: [[`Error, see Output tab for details.`]]  // Keep Excel-compatible error format
+        };
     }
 }
