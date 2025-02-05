@@ -3,11 +3,13 @@ import { MonacoEditor } from "./MonacoEditor";
 import { DISPLAY_CODE } from "../utils/constants";
 import { feedback } from "../utils/logs";
 import LLM from "./LLM";
+import SheetLLM from "./SheetLLM";
 
 const HomeTab = ({ onTabClick, setGeneratedCode }) => {
     const [notification, setNotification] = React.useState("");
     const [feedbackText, setFeedbackText] = React.useState("");
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
+    const [isSheetLLMOpen, setIsSheetLLMOpen] = React.useState(false);
     const notificationTimeoutRef = React.useRef();
 
     React.useEffect(() => {
@@ -65,16 +67,23 @@ const HomeTab = ({ onTabClick, setGeneratedCode }) => {
                     <div className="p-1 mt-1 bg-white"><code>=HELLO("Annie")</code> <br /><code>Hello Annie!</code></div>
                 </div>
                 <p className="m-2">Check out the <a href="https://whistlernetworks.sharepoint.com/:p:/s/Boardflare/EavKXzTcSmJArk1FadRoH40BaFTd1xrff2cw3bGSRs3AFg?rtime=Mhp28Ns33Ug" target="_blank" rel="noopener" className="text-blue-500 underline">slideshow</a> and <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>. Use the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('editor')}>code editor</span> to create and edit functions. Import example functions on the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('functions')}>functions</span> tab.</p>
-                <div className="text-center mt-4">
+                <div className="text-center mt-4 space-y-2">
                     <button
                         onClick={() => setIsLLMOpen(true)}
                         className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
                     >
                         Create Function with AI ✨
                     </button>
+                    <br />
+                    {/* <button
+                        onClick={() => setIsSheetLLMOpen(true)}
+                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                    >
+                        Generate Sheet using AI 📊
+                    </button> */}
                 </div>
             </div>
-            <div className="fixed bottom-0 left-0 right-0">
+            {/* <div className="fixed bottom-0 left-0 right-0">
                 {notification && (
                     <div className={`p-2 text-center ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"}`}>
                         {notification.message}
@@ -100,12 +109,17 @@ const HomeTab = ({ onTabClick, setGeneratedCode }) => {
                         <a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener" className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">Email Support🛟</a>
                     </div>
                 </form>
-            </div>
+            </div> */}
             <LLM
                 isOpen={isLLMOpen}
                 onClose={() => setIsLLMOpen(false)}
                 onSuccess={handleLLMSuccess}
             />
+            {/* <SheetLLM
+                isOpen={isSheetLLMOpen}
+                onClose={() => setIsSheetLLMOpen(false)}
+                onSuccess={handleLLMSuccess}
+            /> */}
         </>
     );
 };

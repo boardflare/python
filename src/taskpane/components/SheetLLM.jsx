@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { pyLogs } from "../utils/logs";  // Add this import
+import { execPython } from "../../functions/exec/controller";
+import { insertWorksheetFromBase64 } from "../utils/demo";
+import sheetTemplateCode from '../utils/xlsxwriter.py';
 
 const LLM_URL = process.env.NODE_ENV === 'development'
     ? 'https://codepy.boardflare.workers.dev' //'http://127.0.0.1:8787'
@@ -12,19 +14,11 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
 
     const examplePrompts = [
         { value: "", label: "Select an example prompt..." },
-        { value: "Add two numbers and return their sum.", label: "Add two numbers" },
-        { value: "Convert a single string, or 2D list of strings, to uppercase.", label: "Convert to uppercase" },
-        { value: "Calculate the average of a 2D list of numbers", label: "Calculate average" },
-        { value: "Find all prime numbers up to n", label: "Find prime numbers" },
-        { value: "Implement a function that performs matrix multiplication on two 2D lists.", label: "Matrix multiplication" },
-        { value: "Create a function that finds the longest common subsequence of two strings.", label: "Longest common subsequence" },
-        { value: "Implement a function that performs binary search on a sorted 2D list.", label: "Binary search 2D" },
-        { value: "Create a function that validates if a string represents a valid email address.", label: "Email validation" },
-        { value: "Build a function that finds all anagrams in a 2D list of strings.", label: "Find anagrams" },
-        { value: "Implement a function that performs flood fill on a 2D grid.", label: "Flood fill" },
-        { value: "Create a function that calculates the edit distance between two strings.", label: "Edit distance" },
-        { value: "Build a function that performs depth-first search on a 2D grid maze.", label: "DFS maze solver" },
-        { value: "Implement a function that finds all palindromic substrings in a string.", label: "Palindromic substrings" }
+        { value: "Modify worksheet to create a mortgage payment calculator with inputs for principal, rate, and term.", label: "Mortgage Calculator" },
+        { value: "Generate a sales forecast template using moving averages.", label: "Sales Forecast" },
+        { value: "Build a project timeline tracker with start dates, end dates, and progress.", label: "Project Timeline" },
+        { value: "Create an inventory management worksheet with formulas for reorder points.", label: "Inventory Management" },
+        { value: "Make a personal budget worksheet with income and expense categories.", label: "Budget Template" }
     ];
 
     if (!isOpen) return null;
@@ -38,16 +32,20 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
         setIsLoading(true);
         setError("");
 
-        // Use default prompt if input is empty
-        const promptText = input.trim() || "Add two numbers and return their sum.";
+        const promptText = input.trim() || examplePrompts[1].value;
 
         const genText = {
             model: 'mistral-large-2411',
             messages: [
-                { role: 'system', content: `Create a single Python function with docstring that fulfills the user's request. The function args must be Python types float, str, bool, None or a 2D list of those types. Parameter names cannot contain numbers. Variable length arguments (e.g. *args or **kwargs) are not allowed. Do not include any print statements, example usage, type hints, or explanations.  Define a test_cases variable that is a list with nested lists of example args.  e.g. test_cases = [["hello"],[[["hello", "world"]]]] includes a case with a str arg, and a case with a 2D list arg.` },
+                {
+                    role: 'system',
+                    content: `Update the following Python function to generate an Excel worksheet based on the user's request.  Only change the code as where outlined in the comments, and do not add any other code. Template function: 
+                    
+                    ${sheetTemplateCode}`
+                },
                 { role: 'user', content: promptText },
             ],
-            max_tokens: 1000,
+            max_tokens: 2000,
             temperature: 0.1
         };
 
@@ -70,13 +68,23 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
                 generatedCode = codeMatch[1].trim();
             }
 
-            // Add logging
-            await pyLogs({
-                LLM: {
-                    prompt: input,
-                    content: generatedCode
-                }
+            // Execute the generated Python code to get base64 string
+            let base64Result = await execPython({
+                code: generatedCode,
+                arg1: null
             });
+
+            // Insert the worksheet from base64
+            await insertWorksheetFromBase64(base64Result[0][0]);
+
+            // Log the operation
+            // await pyLogs({
+            //     LLM: {
+            //         prompt: input,
+            //         content: generatedCode,
+            //         result: "Worksheet inserted successfully"
+            //     }
+            // });
 
             onSuccess(generatedCode);
             onClose();
@@ -90,7 +98,7 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center px-2">
             <div className="bg-white rounded-lg p-3 w-full">
-                <h2 className="text-xl mb-2">Create Function with AI</h2>
+                <h2 className="text-xl mb-2">Generate Excel Worksheet</h2>
                 {error && (
                     <div className="mb-4 p-2 bg-red-100 text-red-800 rounded">
                         {error}
@@ -112,7 +120,7 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
                     className="w-full h-60 p-2 border rounded mb-2"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Describe what the function should do, similar to what you would put in a docstring.  You can try an example prompt using the dropdown above."
+                    placeholder="Describe the Excel worksheet you want to create, including any calculations, formatting, or special features needed."
                     disabled={isLoading}
                 />
                 <div className="flex justify-end space-x-2">

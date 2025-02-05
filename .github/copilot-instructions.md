@@ -1,1 +1,0 @@
-Always use Tailwind CSS classes to style components.

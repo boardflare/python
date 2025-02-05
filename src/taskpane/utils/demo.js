@@ -25,6 +25,23 @@ export function sanitizeSheetName(name) {
     return sanitized;
 }
 
+export async function insertWorksheetFromBase64(base64String) {
+    try {
+        await Excel.run(async (context) => {
+            const workbook = context.workbook;
+            await workbook.insertWorksheetsFromBase64(base64String, {
+                formatCell: true,
+                includeFormulas: true
+            });
+            await context.sync();
+        });
+        return true;
+    } catch (error) {
+        console.error("Error inserting worksheet:", error);
+        throw error;
+    }
+}
+
 export async function singleDemo(parsedCode) {
     return Excel.run(async (context) => {
         let sheet;
