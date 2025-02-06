@@ -11,7 +11,7 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
     const [error, setError] = useState("");
 
     const examplePrompts = [
-        { value: "", label: "Select an example prompt..." },
+        { value: "", label: "Select an example ..." },
         { value: "Add two numbers and return their sum.", label: "Add two numbers" },
         { value: "Convert a single string, or 2D list of strings, to uppercase.", label: "Convert to uppercase" },
         { value: "Calculate the average of a 2D list of numbers", label: "Calculate average" },
@@ -109,10 +109,10 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
                     ))}
                 </select>
                 <textarea
-                    className="w-full h-60 p-2 border rounded mb-2"
+                    className="w-full h-60 p-2 border rounded mb-2 placeholder-gray-600"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Describe what the function should do, similar to what you would put in a docstring.  You can try an example prompt using the dropdown above."
+                    placeholder="What should the function do?."
                     disabled={isLoading}
                 />
                 <div className="flex justify-end space-x-2">

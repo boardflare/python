@@ -34,7 +34,7 @@ const HomeTab = ({ onTabClick, setGeneratedCode }) => {
         e.preventDefault();
         try {
             await feedback({ text: feedbackText });
-            showNotification("Feedback submitted successfully. Thanks!", "success");
+            showNotification("Thanks for the suggestion, we'll consider adding it!", "success");
             setFeedbackText("");
         } catch (error) {
             console.error("Error submitting feedback:", error);
@@ -83,33 +83,34 @@ const HomeTab = ({ onTabClick, setGeneratedCode }) => {
                     </button> */}
                 </div>
             </div>
-            {/* <div className="fixed bottom-0 left-0 right-0">
+            <div className="fixed bottom-0 left-0 right-0">
                 {notification && (
                     <div className={`p-2 text-center ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"}`}>
                         {notification.message}
                     </div>
                 )}
+                <h2 className="text-center text-lg font-semibold">What do you want a function to do?</h2>
                 <form onSubmit={handleFeedbackSubmit} className="mb-2 p-2">
                     <textarea
                         id="feedback"
                         value={feedbackText}
-                        placeholder="Bug? Suggestion? Your feedback is critical to making this add-in more useful for everyone. If you'd like a response, please email us.  Thanks! 🙂"
+                        placeholder="e.g. extract numbers from a string and return their sum"
                         onChange={(e) => setFeedbackText(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                        rows="4"
+                        className="w-full p-2 border border-gray-300 rounded-md placeholder-gray-500"
+                        rows="8"
                         required
                     ></textarea>
                     <div className="flex justify-between items-center mt-2">
+                        <a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener" className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">Email Us!🛟</a>
                         <button
                             type="submit"
-                            className="px-3 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700"
                         >
-                            Submit Feedback
+                            Submit
                         </button>
-                        <a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener" className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">Email Support🛟</a>
                     </div>
                 </form>
-            </div> */}
+            </div>
             <LLM
                 isOpen={isLLMOpen}
                 onClose={() => setIsLLMOpen(false)}
