@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Authentication</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <script type="module">
+        import { PublicClientApplication } from "https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.17.0/+esm";
+
+        Office.onReady(async () => {
+            const pca = new PublicClientApplication({
+                auth: {
+                    clientId: '0c94fdd5-ec39-4167-84ea-06ea727149b1',
+                    authority: "https://login.microsoftonline.com/common",
+                    redirectUri: window.location.origin + "/auth.html"
+                },
+                cache: {
+                    cacheLocation: 'localStorage'
+                }
+            });
+
+            await pca.initialize();
+
+            try {
+                const response = await pca.handleRedirectPromise();
+                if (response) {
+                    Office.context.ui.messageParent(JSON.stringify({ status: 'success', msalResponse: response }));
+                } else {
+                    await pca.loginRedirect();
+                }
+            } catch (error) {
+                const errorData = {
+                    errorMessage: error.errorCode,
+                    message: error.errorMessage,
+                    errorCode: error.stack
+                };
+                Office.context.ui.messageParent(JSON.stringify({ status: 'error', errorData: errorData }));
+            }
+        });
+    </script>
+</head>
+<body>
+    <p>Authentication in progress...</p>
+</body>
+</html>

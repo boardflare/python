@@ -4,12 +4,14 @@ import { DISPLAY_CODE } from "../utils/constants";
 import { feedback } from "../utils/logs";
 import LLM from "./LLM";
 import SheetLLM from "./SheetLLM";
+import { signIn, getStoredToken } from "../utils/auth";
 
 const HomeTab = ({ onTabClick, setGeneratedCode }) => {
     const [notification, setNotification] = React.useState("");
     const [feedbackText, setFeedbackText] = React.useState("");
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const [isSheetLLMOpen, setIsSheetLLMOpen] = React.useState(false);
+    const [isSignedIn, setIsSignedIn] = React.useState(false);
     const notificationTimeoutRef = React.useRef();
 
     React.useEffect(() => {
@@ -20,6 +22,19 @@ const HomeTab = ({ onTabClick, setGeneratedCode }) => {
         };
     }, []);
 
+    React.useEffect(() => {
+        checkAuthStatus();
+    }, []);
+
+    const checkAuthStatus = async () => {
+        try {
+            const token = await getStoredToken();
+            setIsSignedIn(!!token);
+        } catch (error) {
+            console.error("Error checking auth status:", error);
+        }
+    };
+
     const showNotification = (message, type = "success") => {
         if (notificationTimeoutRef.current) {
             clearTimeout(notificationTimeoutRef.current);
@@ -28,6 +43,17 @@ const HomeTab = ({ onTabClick, setGeneratedCode }) => {
         notificationTimeoutRef.current = setTimeout(() => {
             setNotification("");
         }, 5000);
+    };
+
+    const handleSignIn = async () => {
+        try {
+            await signIn();
+            setIsSignedIn(true);
+            showNotification("Successfully signed in!", "success");
+        } catch (error) {
+            console.error("Sign in error:", error);
+            showNotification(error.message || "Failed to sign in", "error");
+        }
     };
 
     const handleFeedbackSubmit = async (e) => {
@@ -51,6 +77,16 @@ const HomeTab = ({ onTabClick, setGeneratedCode }) => {
         <>
             <div className="p-1 mb-32">
                 <h2 className="text-center text-lg font-semibold mb-2">Python functions in Excel 🧪</h2>
+                <div className="text-right mb-2">
+                    {!isSignedIn && (
+                        <button
+                            onClick={handleSignIn}
+                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                        >
+                            Sign in with Microsoft
+                        </button>
+                    )}
+                </div>
                 <div className="py-1 border-gray-300 rounded-lg p-2 mb-2">
                     <p><span className="font-bold">Step 1:</span> Write a Python function in the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('editor')}>editor</span>.</p>
                     <div className="py-2 h-[75px]">

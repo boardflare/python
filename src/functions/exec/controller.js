@@ -1,6 +1,7 @@
 import { getFunction } from './getfunction.js';
 import { ConsoleEvents, EventTypes } from '../../taskpane/utils/constants.js';
 import { pyLogs } from '../../taskpane/utils/logs.js';
+import { getStoredToken } from '../../taskpane/utils/auth.js';
 
 const execPyWorker = new Worker(new URL('./execpy-worker.js', import.meta.url));
 
@@ -24,7 +25,12 @@ async function messageWorker(worker, message) {
 export async function execPython({ code, arg1 }) {
     try {
         code = await getFunction(code);
-        const { result, stdout } = await messageWorker(execPyWorker, { code, arg1 });
+        const token = await getStoredToken();
+        const { result, stdout } = await messageWorker(execPyWorker, {
+            code,
+            arg1,
+            token
+        });
         pyLogs({ code, ref: "execPython" });
         if (stdout.trim()) {
             ConsoleEvents.emit(EventTypes.LOG, stdout.trim());
