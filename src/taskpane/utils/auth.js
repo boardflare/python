@@ -57,7 +57,7 @@ export async function storeToken(token) {
 export async function signIn() {
     return new Promise((resolve, reject) => {
         Office.context.ui.displayDialogAsync(
-            'https://localhost:3000/auth.html',
+            window.location.origin + "/auth.html",
             { height: 60, width: 30 },
             (result) => {
                 if (result.status === Office.AsyncResultStatus.Failed) {
