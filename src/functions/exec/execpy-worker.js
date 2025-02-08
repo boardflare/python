@@ -18,7 +18,7 @@ let pyodideReadyPromise = loadPyodideAndPackages();
 
 self.onmessage = async (event) => {
     await pyodideReadyPromise;
-    const { code, arg1 } = event.data;
+    const { code, arg1, graphToken } = event.data;
 
     let stdout = "";
     self.pyodide.setStdout({ batched: (msg) => { stdout += msg + "\n"; } });
@@ -40,6 +40,11 @@ self.onmessage = async (event) => {
         // Set global args array from arg1 to args
         if (arg1) {
             self.pyodide.globals.set('global_args', arg1);
+        }
+
+        // Set graphToken as global if provided
+        if (graphToken) {
+            self.pyodide.globals.set('graphToken', graphToken);
         }
 
         // Run setup code
