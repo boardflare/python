@@ -28,10 +28,16 @@ export function SignInButton({ onSuccess }) {
     const signIn = async () => {
         try {
             console.log('Starting sign in process...');
+            const dialogUrl = window.location.href.includes("preview")
+                ? window.location.origin + "/preview/auth.html"
+                : window.location.href.includes("prod")
+                    ? window.location.origin + "/prod/auth.html"
+                    : window.location.origin + "/auth.html";
+            console.log("Using dialog URL:", dialogUrl);
             const token = await new Promise((resolve, reject) => {
                 console.log('Opening auth dialog...');
                 Office.context.ui.displayDialogAsync(
-                    window.location.origin + "/auth.html",
+                    dialogUrl,
                     { height: 60, width: 30 },
                     (result) => {
                         console.log('Dialog callback result:', result);
