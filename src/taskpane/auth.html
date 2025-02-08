@@ -23,19 +23,45 @@
             await pca.initialize();
 
             try {
-                const response = await pca.handleRedirectPromise();
-                if (response) {
-                    Office.context.ui.messageParent(JSON.stringify({ status: 'success', msalResponse: response }));
-                } else {
+                await pca.handleRedirectPromise();
+                const accounts = pca.getAllAccounts();
+                if (accounts.length === 0) {
                     await pca.loginRedirect();
+                    return;
                 }
+
+                const tokenRequest = {
+                    scopes: ["User.Read"],
+                    account: accounts[0]
+                };
+
+                let tokenResponse;
+                try {
+                    tokenResponse = await pca.acquireTokenSilent(tokenRequest);
+                } catch (error) {
+                    if (error.errorMessage && error.errorMessage.indexOf("AADSTS65001") !== -1) {
+                        await pca.acquireTokenRedirect(tokenRequest);
+                        return;
+                    } else {
+                        throw error;
+                    }
+                }
+                
+                Office.context.ui.messageParent(JSON.stringify({
+                    status: 'success',
+                    msalResponse: tokenResponse,
+                    graphToken: tokenResponse.accessToken
+                }));
             } catch (error) {
                 const errorData = {
                     errorMessage: error.errorCode,
                     message: error.errorMessage,
                     errorCode: error.stack
                 };
-                Office.context.ui.messageParent(JSON.stringify({ status: 'error', errorData: errorData }));
+                Office.context.ui.messageParent(JSON.stringify({
+                    status: 'error',
+                    errorData: errorData
+                }));
             }
         });
     </script>

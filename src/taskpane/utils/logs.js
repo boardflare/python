@@ -21,7 +21,7 @@ const getUserId = async () => {
         const storageKey = 'anonymous_id';
 
         return new Promise((resolve, reject) => {
-            const request = indexedDB.open(dbName, 1);
+            const request = indexedDB.open(dbName, 1); // Keep as version 1
 
             request.onupgradeneeded = (event) => {
                 const db = event.target.result;
