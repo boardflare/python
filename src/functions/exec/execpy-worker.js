@@ -48,13 +48,13 @@ self.onmessage = async (event) => {
         }
 
         // Run setup code
-        await self.pyodide.runPythonAsync(setupCode);
+        await self.pyodide.runPythonAsync(setupCode, { filename: "setup.py" });
 
         // Run user code
-        await self.pyodide.runPythonAsync(code);
+        await self.pyodide.runPythonAsync(code, { filename: "user_code" });
 
         // Run result conversion code
-        const pyodideResult = await self.pyodide.runPythonAsync(resultCode);
+        const pyodideResult = await self.pyodide.runPythonAsync(resultCode, { filename: "result.py" });
 
         const result = pyodideResult?.toJs ? pyodideResult.toJs({ create_proxies: false }) : pyodideResult;
         self.postMessage({ result, stdout });
