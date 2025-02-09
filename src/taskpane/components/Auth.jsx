@@ -1,12 +1,5 @@
 import * as React from "react";
-
-const msalConfig = {
-    auth: {
-        clientId: "0c94fdd5-ec39-4167-84ea-06ea727149b1",
-        authority: "https://login.microsoftonline.com/common",
-        redirectUri: window.location.origin + "/auth.html",
-    }
-};
+import { pyLogs } from "../utils/logs";
 
 export function SignInButton({ onSuccess }) {
     const [isSignedIn, setIsSignedIn] = React.useState(false);
@@ -22,44 +15,40 @@ export function SignInButton({ onSuccess }) {
             setIsSignedIn(!!token);
         } catch (error) {
             console.error("Error checking auth status:", error);
+            await pyLogs({ errorMessage: error.message, ref: "auth_checkAuthStatus_error" });
         }
     };
 
     const signIn = async () => {
         try {
-            console.log('Starting sign in process...');
-            const dialogUrl = window.location.href.includes("preview")
-                ? window.location.origin + "/preview/auth.html"
-                : window.location.href.includes("prod")
-                    ? window.location.origin + "/prod/auth.html"
-                    : window.location.origin + "/auth.html";
-            console.log("Using dialog URL:", dialogUrl);
+            let dialogUrl;
+            if (window.location.href.includes("preview")) {
+                dialogUrl = "https://addins.boardflare.com/python/preview/auth.html";
+            } else if (window.location.href.includes("prod")) {
+                dialogUrl = "https://addins.boardflare.com/python/prod/auth.html";
+            } else {
+                dialogUrl = window.location.origin + "/auth.html";
+            }
             const token = await new Promise((resolve, reject) => {
-                console.log('Opening auth dialog...');
                 Office.context.ui.displayDialogAsync(
                     dialogUrl,
                     { height: 60, width: 30 },
                     (result) => {
-                        console.log('Dialog callback result:', result);
                         if (result.status === Office.AsyncResultStatus.Failed) {
                             reject(new Error(result.error.message));
                         }
 
                         const dialog = result.value;
                         dialog.addEventHandler(Office.EventType.DialogMessageReceived, (args) => {
-                            console.log('Dialog message received:', args.message);
                             dialog.close();
                             const message = JSON.parse(args.message);
-                            console.log('Parsed message:', message);
                             if (message.status === 'error') {
                                 reject(new Error(message.errorData.message));
                             } else {
-                                console.log('MSAL Response:', message.msalResponse);
                                 const tokenObj = {
                                     auth_token: message.msalResponse?.accessToken,
                                     graphToken: message.graphToken
                                 };
-                                console.log('Created token object:', tokenObj);
                                 resolve(tokenObj);
                             }
                         });
@@ -67,13 +56,15 @@ export function SignInButton({ onSuccess }) {
                 );
             });
 
-            console.log('Token received, storing...', token);
             await storeToken(token);
-            console.log('Token stored successfully');
             setIsSignedIn(true);
             onSuccess?.();
         } catch (error) {
             console.error("Detailed sign in error:", error);
+            await pyLogs({
+                errorMessage: error.message,
+                ref: "auth_signIn_error"
+            });
             setError(error.message);
         }
     };
@@ -84,6 +75,7 @@ export function SignInButton({ onSuccess }) {
             setIsSignedIn(false);
         } catch (error) {
             console.error("Error signing out:", error);
+            await pyLogs({ errorMessage: error.message, ref: "auth_signOut_error" });
         }
     };
 
@@ -176,32 +168,27 @@ async function getStoredToken() {
         });
     } catch (error) {
         console.error('Failed to get token:', error);
+        await pyLogs({ errorMessage: error.message, ref: "auth_getStoredToken_error" });
         return null;
     }
 }
 
 async function storeToken(tokenObj) {
-    console.log('storeToken called with:', tokenObj);
     const storeName = 'User';
     const authKey = 'auth_token';
     const graphKey = 'graphToken';
 
     try {
         const db = await initializeDB();
-        console.log('DB initialized');
         return new Promise((resolve, reject) => {
             try {
                 const transaction = db.transaction(storeName, 'readwrite');
                 const store = transaction.objectStore(storeName);
 
-                console.log('Storing auth_token:', tokenObj.auth_token);
                 const authRequest = store.put(tokenObj.auth_token, authKey);
-
-                console.log('Storing graphToken:', tokenObj.graphToken);
                 const graphRequest = store.put(tokenObj.graphToken, graphKey);
 
                 transaction.oncomplete = () => {
-                    console.log('Transaction completed successfully');
                     resolve();
                 };
                 transaction.onerror = (error) => {
@@ -215,6 +202,7 @@ async function storeToken(tokenObj) {
         });
     } catch (error) {
         console.error('DB initialization error:', error);
+        await pyLogs({ errorMessage: error.message, ref: "auth_storeToken_error" });
         throw error;
     }
 }
@@ -240,6 +228,7 @@ async function removeToken() {
         });
     } catch (error) {
         console.error('DB initialization error during sign out:', error);
+        await pyLogs({ errorMessage: error.message, ref: "auth_removeToken_error" });
         throw error;
     }
 }
