@@ -46,6 +46,13 @@ def convert_result():
     if result is None:
         raise ValueError("Your function returned None. If you wanted a blank cell, return an empty string ('') instead.")
 
+    # Handle tuples by converting them to 2D lists
+    if isinstance(result, tuple):
+        if result and isinstance(result[0], tuple):
+            result = [list(row) for row in result]
+        else:
+            result = [list(result)]
+
     # Check pandas types
     if 'pandas' in sys.modules:
         pandas_result = handle_pandas_types(result)

@@ -1,14 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { pyLogs } from "../utils/logs";  // Add this import
 
 const LLM_URL = process.env.NODE_ENV === 'development'
     ? 'https://codepy.boardflare.workers.dev' //'http://127.0.0.1:8787'
     : 'https://codepy.boardflare.workers.dev';
 
-const LLM = ({ isOpen, onClose, onSuccess }) => {
-    const [input, setInput] = useState("");
+const LLM = ({ isOpen, onClose, onSuccess, prompt }) => {
+    const [input, setInput] = useState(prompt || "");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+
+    // Add useEffect to update prompt state when prompt prop changes
+    useEffect(() => {
+        setInput(prompt || "");
+    }, [prompt]);
 
     const examplePrompts = [
         { value: "", label: "Select an example ..." },
@@ -78,7 +83,8 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
                 }
             });
 
-            onSuccess(generatedCode);
+            // Add prompt to the success callback
+            onSuccess(generatedCode, input);
             onClose();
         } catch (err) {
             setError(err.message);

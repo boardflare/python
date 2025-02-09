@@ -6,12 +6,7 @@ import { DEFAULT_CODE } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
 import { EventTypes } from "../utils/constants";
 import { updateNameManager } from "../utils/nameManager";
-import { singleDemo } from "../utils/demo";
 import { runTests } from "../utils/testRunner";
-
-const LLM_URL = process.env.NODE_ENV === 'development'
-    ? 'http://127.0.0.1:8787'
-    : 'https://codepy.boardflare.workers.dev';
 
 const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCode, setGeneratedCode }) => {
     const [notification, setNotification] = React.useState("");
@@ -86,6 +81,10 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
         try {
             const code = editorRef.current.getValue();
             const parsedFunction = await parsePython(code);
+            // Preserve prompt if it exists
+            if (selectedFunction.prompt) {
+                parsedFunction.prompt = selectedFunction.prompt;
+            }
             await saveFunctionToSettings(parsedFunction);
             await updateNameManager(parsedFunction);
             showNotification(`${parsedFunction.signature} saved!`, "success");
@@ -118,9 +117,9 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
         }
     };
 
-    const handleLLMSuccess = (generatedCode) => {
+    const handleLLMSuccess = (generatedCode, prompt) => {
         editorRef.current.setValue(generatedCode);
-        setSelectedFunction({ name: selectedFunction.name, code: generatedCode });
+        setSelectedFunction({ name: selectedFunction.name, code: generatedCode, prompt });
         showNotification("Function generated successfully!", "success");
     };
 
@@ -159,7 +158,11 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
                         const func = functions.find(f => f.name === e.target.value);
                         const newCode = func?.code || DEFAULT_CODE;
                         editorRef.current.setValue(newCode);
-                        setSelectedFunction({ name: e.target.value, code: newCode });
+                        setSelectedFunction({
+                            name: e.target.value,
+                            code: newCode,
+                            prompt: func?.prompt || ""
+                        });
                     }}
                     className="px-2 py-1 border rounded"
                 >
@@ -179,6 +182,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
                 isOpen={isLLMOpen}
                 onClose={() => setIsLLMOpen(false)}
                 onSuccess={handleLLMSuccess}
+                prompt={selectedFunction.prompt}
             />
         </div>
     );
