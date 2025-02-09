@@ -4,6 +4,7 @@ import { DISPLAY_CODE } from "../utils/constants";
 import LLM from "./LLM";
 import { SignInButton } from "./Auth";
 import Feedback from "./Feedback";
+import Demo from "./Demo";
 
 const HomeTab = ({ onTabClick, setGeneratedCode }) => {
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
@@ -34,12 +35,15 @@ const HomeTab = ({ onTabClick, setGeneratedCode }) => {
                 </div>
                 <p className="m-2">Check out the <a href="https://whistlernetworks.sharepoint.com/:p:/s/Boardflare/EavKXzTcSmJArk1FadRoH40BaFTd1xrff2cw3bGSRs3AFg?rtime=Mhp28Ns33Ug" target="_blank" rel="noopener" className="text-blue-500 underline">slideshow</a> and <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>. Use the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('editor')}>code editor</span> to create and edit functions. Import example functions on the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('functions')}>functions</span> tab.</p>
                 <div className="text-center mt-4 space-y-2">
-                    <button
-                        onClick={() => setIsLLMOpen(true)}
-                        className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
-                    >
-                        Create Function with AI ✨
-                    </button>
+                    <div className="space-x-2">
+                        <Demo />
+                        <button
+                            onClick={() => setIsLLMOpen(true)}
+                            className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+                        >
+                            Create Function
+                        </button>
+                    </div>
                     <br />
                 </div>
             </div>
