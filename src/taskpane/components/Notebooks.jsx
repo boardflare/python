@@ -62,9 +62,9 @@ const Notebooks = ({ onImportComplete }) => {
     const handleImport = async () => {
         setIsImporting(true);
         try {
-            const { functions: parsedFunctions } = await fetchNotebookUrl(selectedNotebook);
+            const { functions } = await fetchNotebookUrl(selectedNotebook);
 
-            for (const func of parsedFunctions) {
+            for (const func of functions) {
                 await saveFunctionToSettings(func);
                 await updateNameManager(func);
             }
