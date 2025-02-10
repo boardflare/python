@@ -138,6 +138,31 @@ export const removeNotebook = async (url) => {
     });
 };
 
+export const parseNotebook = async (notebook) => {
+    const codeCells = notebook.cells.filter(cell => cell.cell_type === 'code').slice(1);
+    const validFunctions = [];
+
+    for (const cell of codeCells) {
+        try {
+            const code = cell.source.filter(line => !line.startsWith('run_tests')).join('');
+            const parsedFunction = await parsePython(code);
+            validFunctions.push(parsedFunction);
+        } catch (error) {
+            await pyLogs({
+                errorMessage: error.message,
+                code: cell.source.join(''),
+                ref: 'parseNotebook_cell_error'
+            });
+            console.warn('Skipping invalid code cell:', {
+                error: error.message,
+                code: cell.source.join(''),
+            });
+        }
+    }
+
+    return validFunctions;
+};
+
 export const fetchNotebookUrl = async (url = DEFAULT_NOTEBOOK) => {
     try {
         let notebook;
@@ -150,27 +175,8 @@ export const fetchNotebookUrl = async (url = DEFAULT_NOTEBOOK) => {
             notebook = await response.json();
         }
 
-        const codeCells = notebook.cells.filter(cell => cell.cell_type === 'code').slice(1);
-        const allFunctions = codeCells.reduce(async (validFunctionsPromise, cell) => {
-            const validFunctions = await validFunctionsPromise;
-            try {
-                const code = cell.source.filter(line => !line.startsWith('run_tests')).join('');
-                validFunctions.push(await parsePython(code));
-            } catch (error) {
-                pyLogs({
-                    errorMessage: error.message,
-                    code: cell.source.join(''),
-                    ref: 'fetchNotebookUrl_cell_error'
-                });
-                console.warn('Skipping invalid code cell:', {
-                    error: error.message,
-                    code: cell.source.join(''),
-                });
-            }
-            return validFunctions;
-        }, Promise.resolve([]));
-
-        return { functions: await allFunctions };
+        const functions = await parseNotebook(notebook);
+        return { functions };
     } catch (error) {
         await pyLogs({
             errorMessage: error.message,

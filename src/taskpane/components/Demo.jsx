@@ -1,7 +1,16 @@
 import React from "react";
 import { insertWorksheetFromBase64 } from "../utils/demo";
-// Replace static import with URL creation so webpack returns a URL string.
+import { parseNotebook } from "../utils/notebooks";
+import { saveFunctionToSettings } from "../utils/workbookSettings";
+import demoFunctions from '../utils/demo_functions.ipynb';
 const demoSheetUrl = new URL("../utils/demo_sheet.xlsx", import.meta.url).href;
+
+async function addFunctionsFromNotebook(notebook) {
+    const functions = await parseNotebook(notebook);
+    for (const func of functions) {
+        await saveFunctionToSettings(func);
+    }
+}
 
 const convertFileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
@@ -18,6 +27,7 @@ const convertFileToBase64 = (file) => {
 const Demo = () => {
     const handleInsertDemo = async () => {
         try {
+            await addFunctionsFromNotebook(demoFunctions);
             const response = await fetch(demoSheetUrl);
             const blob = await response.blob();
             const base64Data = await convertFileToBase64(blob);

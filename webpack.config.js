@@ -77,6 +77,10 @@ module.exports = async (env, options) => {
           type: 'asset/source'
         },
         {
+          test: /\.ipynb$/,
+          type: 'json'  // This will automatically parse JSON files
+        },
+        {
           test: /\.xlsx$/,
           type: 'asset/resource',
           generator: {
