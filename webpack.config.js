@@ -75,6 +75,13 @@ module.exports = async (env, options) => {
         {
           test: /\.py$/,
           type: 'asset/source'
+        },
+        {
+          test: /\.xlsx$/,
+          type: 'asset/resource',
+          generator: {
+            filename: 'assets/[name][ext][query]'
+          }
         }
       ],
     },
