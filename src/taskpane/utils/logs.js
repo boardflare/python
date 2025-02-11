@@ -113,7 +113,9 @@ export async function pyLogs(data) {
                 diagnostics: Office.context?.diagnostics,
                 displayLanguage: Office.context?.displayLanguage
             }) : 'not available',
-            Data: JSON.stringify(data)
+            DocumentUrl: Office?.context?.document?.url || 'not available',
+            Data: JSON.stringify(data),
+            Testing: !window.location.pathname.includes('prod')
         };
 
         logQueue.push(logEntity);
