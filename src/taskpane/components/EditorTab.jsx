@@ -1,22 +1,29 @@
 import * as React from "react";
 import { MonacoEditor } from "./MonacoEditor";
-import LLM from "./LLM"; // Import LLM component
-import { saveFunctionToSettings, getFunctionFromSettings } from "../utils/workbookSettings";
+import LLM from "./LLM"; // 
+import { saveFunctionToSettings } from "../utils/workbookSettings";
 import { DEFAULT_CODE } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
 import { EventTypes } from "../utils/constants";
 import { updateNameManager } from "../utils/nameManager";
 import { runTests } from "../utils/testRunner";
-import { saveFile, formatAsNotebook, loadFunctionFiles } from "../utils/drive";
+import { saveFile, formatAsNotebook, TokenExpiredError } from "../utils/drive";
 
-const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCode, setGeneratedCode, functionsCache }) => {
+const EditorTab = ({
+    selectedFunction,
+    setSelectedFunction,
+    onTest,
+    generatedCode,
+    setGeneratedCode,
+    functionsCache,
+    workbookFunctions,
+    onedriveFunctions,
+    loadFunctions  // Changed from onFunctionSaved
+}) => {
     const [notification, setNotification] = React.useState("");
-    const [functions, setFunctions] = React.useState([]);
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const notificationTimeoutRef = React.useRef();
     const editorRef = React.useRef(null);
-    const [workbookFunctions, setWorkbookFunctions] = React.useState([]);
-    const [onedriveFunctions, setOnedriveFunctions] = React.useState([]);
 
     const showNotification = (message, type = "success") => {
         if (notificationTimeoutRef.current) {
@@ -34,26 +41,6 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
                 clearTimeout(notificationTimeoutRef.current);
             }
         };
-    }, []);
-
-    const loadFunctions = async () => {
-        try {
-            // Load workbook functions
-            const workbookData = await getFunctionFromSettings();
-            setWorkbookFunctions(workbookData || []);
-            workbookData?.forEach(func => functionsCache.current.set(`workbook-${func.name}`, func));
-
-            // Load OneDrive functions
-            const driveFunctions = await loadFunctionFiles();
-            setOnedriveFunctions(driveFunctions);
-            driveFunctions?.forEach(func => functionsCache.current.set(`onedrive-${func.fileName}`, func));
-        } catch (err) {
-            showNotification(err.message, "error");
-        }
-    };
-
-    React.useEffect(() => {
-        loadFunctions();
     }, []);
 
     React.useEffect(() => {
@@ -120,7 +107,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
             await updateNameManager(parsedFunction);
             showNotification(`${parsedFunction.signature} saved!`, "success");
 
-            // Reload functions to update dropdown
+            // Notify parent to reload functions
             await loadFunctions();
 
             // Update selected function with source

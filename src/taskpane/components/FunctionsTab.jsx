@@ -4,49 +4,19 @@ import { TokenExpiredError, deleteFile, loadFunctionFiles } from "../utils/drive
 import { runTests } from "../utils/testRunner";
 import Notebooks from "./Notebooks";
 
-const FunctionsTab = ({ onEdit, onTest, functionsCache }) => {
-    const [workbookFunctions, setWorkbookFunctions] = React.useState([]);
-    const [onedriveFunctions, setOnedriveFunctions] = React.useState([]);
-    const [isLoading, setIsLoading] = React.useState(false);
-    const [error, setError] = React.useState(null);
+const FunctionsTab = ({
+    onEdit,
+    onTest,
+    functionsCache,
+    workbookFunctions,
+    onedriveFunctions,
+    isLoading,
+    error,
+    loadFunctions
+}) => {
     const [deleteConfirm, setDeleteConfirm] = React.useState(null);
 
-    const loadFunctions = async () => {
-        try {
-            // Load workbook functions
-            const workbookData = await getFunctionFromSettings();
-            setWorkbookFunctions(workbookData || []);
-            // Cache workbook functions with full properties
-            workbookData?.forEach(func => {
-                const fullFunc = {
-                    ...func,
-                    source: 'workbook',
-                    code: func.code || '',
-                    fileName: `${func.name}.ipynb`
-                };
-                functionsCache.current.set(`workbook-${func.name}`, fullFunc);
-            });
-
-            // Load OneDrive functions
-            setIsLoading(true);
-            const driveFunctions = await loadFunctionFiles();
-            setOnedriveFunctions(driveFunctions);
-            // Cache OneDrive functions with full properties
-            driveFunctions?.forEach(func => {
-                const fullFunc = {
-                    ...func,
-                    source: 'onedrive',
-                    code: func.code || ''
-                };
-                functionsCache.current.set(`onedrive-${func.fileName}`, fullFunc);
-            });
-        } catch (error) {
-            console.error('Error loading functions:', error);
-            setError(error instanceof TokenExpiredError ? error.message : 'Failed to load functions. Please try again.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    // Remove any useEffect hooks that might be calling loadFunctions
 
     const handleDelete = async (functionName, source, fileName) => {
         try {
@@ -59,13 +29,9 @@ const FunctionsTab = ({ onEdit, onTest, functionsCache }) => {
             setDeleteConfirm(null);
         } catch (error) {
             console.error('Error deleting function:', error);
-            setError(error instanceof TokenExpiredError ? error.message : 'Failed to delete function. Please try again.');
+            setError(error instanceof TokenExpiredError ? error.message : 'Failed to delete function');
         }
     };
-
-    React.useEffect(() => {
-        loadFunctions();
-    }, []);
 
     const handleTest = async (func) => {
         onTest(); // Switch to output tab
@@ -135,7 +101,7 @@ const FunctionsTab = ({ onEdit, onTest, functionsCache }) => {
     return (
         <div className="h-full flex flex-col overflow-y-auto">
             {error && (
-                <div className="p-2 text-red-600 bg-red-50 mb-4">
+                <div className="p-2 text-red-600 bg-red-50 mb-4 text-center">
                     {error}
                 </div>
             )}

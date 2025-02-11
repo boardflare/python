@@ -4,6 +4,8 @@ import OutputTab from "./OutputTab";
 import HomeTab from "./HomeTab";
 import FunctionsTab from "./FunctionsTab";
 import { EventTypes } from "../utils/constants";
+import { getFunctionFromSettings } from "../utils/workbookSettings";
+import { loadFunctionFiles, TokenExpiredError } from "../utils/drive";
 
 const App = ({ title }) => {
   const [selectedTab, setSelectedTab] = React.useState("home");
@@ -11,6 +13,10 @@ const App = ({ title }) => {
   const [logs, setLogs] = React.useState([]);
   const [generatedCode, setGeneratedCode] = React.useState(null);
   const functionsCache = React.useRef(new Map());
+  const [workbookFunctions, setWorkbookFunctions] = React.useState([]);
+  const [onedriveFunctions, setOnedriveFunctions] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
 
   React.useEffect(() => {
     const handleLog = (event) => {
@@ -37,12 +43,8 @@ const App = ({ title }) => {
   };
 
   const handleTabSelect = (event) => {
-    // Preserve editor content when switching tabs
-    if (event.target.value === "editor" && selectedFunction.code) {
-      setSelectedTab("editor");
-    } else {
-      setSelectedTab(event.target.value);
-    }
+    // Just change the tab, no need to reload functions
+    setSelectedTab(event.target.value);
   };
 
   const handleFunctionEdit = (func) => {
@@ -65,6 +67,45 @@ const App = ({ title }) => {
   const handleTabClick = (tab) => {
     setSelectedTab(tab);
   };
+
+  const loadFunctions = async () => {
+    try {
+      setIsLoading(true);
+      // Load workbook functions
+      const workbookData = await getFunctionFromSettings();
+      setWorkbookFunctions(workbookData || []);
+      workbookData?.forEach(func => {
+        const fullFunc = {
+          ...func,
+          source: 'workbook',
+          code: func.code || '',
+          fileName: `${func.name}.ipynb`
+        };
+        functionsCache.current.set(`workbook-${func.name}`, fullFunc);
+      });
+
+      // Load OneDrive functions
+      const driveFunctions = await loadFunctionFiles();
+      setOnedriveFunctions(driveFunctions);
+      driveFunctions?.forEach(func => {
+        const fullFunc = {
+          ...func,
+          source: 'onedrive',
+          code: func.code || ''
+        };
+        functionsCache.current.set(`onedrive-${func.fileName}`, fullFunc);
+      });
+    } catch (error) {
+      console.error('Error loading functions:', error);
+      setError(error instanceof TokenExpiredError ? error.message : 'Failed to load functions');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    loadFunctions();
+  }, []); // This should only run once on mount
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -91,10 +132,24 @@ const App = ({ title }) => {
               generatedCode={generatedCode}
               setGeneratedCode={setGeneratedCode}
               functionsCache={functionsCache}
+              workbookFunctions={workbookFunctions}
+              onedriveFunctions={onedriveFunctions}
+              loadFunctions={loadFunctions}  // Changed from onFunctionSaved
             />
           )}
           {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} />}
-          {selectedTab === "functions" && <FunctionsTab onEdit={handleFunctionEdit} onTest={handleTest} functionsCache={functionsCache} />}
+          {selectedTab === "functions" && (
+            <FunctionsTab
+              onEdit={handleFunctionEdit}
+              onTest={handleTest}
+              functionsCache={functionsCache}
+              workbookFunctions={workbookFunctions}
+              onedriveFunctions={onedriveFunctions}
+              isLoading={isLoading}
+              error={error}
+              loadFunctions={loadFunctions}  // Changed from onFunctionDeleted
+            />
+          )}
         </div>
       </main>
     </div>
