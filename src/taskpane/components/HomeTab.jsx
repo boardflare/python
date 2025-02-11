@@ -6,7 +6,7 @@ import { SignInButton } from "./Auth";
 import Feedback from "./Feedback";
 import Demo from "./Demo";
 
-const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction }) => {
+const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFunctions }) => {
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
 
     const handleLLMSuccess = (generatedCode, prompt) => {
@@ -55,7 +55,7 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction }) => {
             />
             <div className="fixed bottom-3 w-full flex justify-between items-center mt-2 px-3">
                 <a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener" className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">Email Us!🛟</a>
-                <SignInButton />
+                <SignInButton loadFunctions={loadFunctions} />
             </div>
         </>
     );

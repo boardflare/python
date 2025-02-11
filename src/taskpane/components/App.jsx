@@ -18,6 +18,13 @@ const App = ({ title }) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
 
+  const clearFunctions = () => {
+    setWorkbookFunctions([]);
+    setOnedriveFunctions([]);
+    functionsCache.current.clear();
+    setError(null);
+  };
+
   React.useEffect(() => {
     const handleLog = (event) => {
       setLogs(prev => [...prev, event.detail]);
@@ -71,7 +78,9 @@ const App = ({ title }) => {
   const loadFunctions = async () => {
     try {
       setIsLoading(true);
-      // Load workbook functions
+      clearFunctions(); // Always clear first
+
+      // Load workbook functions first since they don't require auth
       const workbookData = await getFunctionFromSettings();
       setWorkbookFunctions(workbookData || []);
       workbookData?.forEach(func => {
@@ -84,19 +93,28 @@ const App = ({ title }) => {
         functionsCache.current.set(`workbook-${func.name}`, fullFunc);
       });
 
-      // Load OneDrive functions
-      const driveFunctions = await loadFunctionFiles();
-      setOnedriveFunctions(driveFunctions);
-      driveFunctions?.forEach(func => {
-        const fullFunc = {
-          ...func,
-          source: 'onedrive',
-          code: func.code || ''
-        };
-        functionsCache.current.set(`onedrive-${func.fileName}`, fullFunc);
-      });
+      // Try to load OneDrive functions, but don't fail if unauthorized
+      try {
+        const driveFunctions = await loadFunctionFiles();
+        setOnedriveFunctions(driveFunctions || []); // Ensure we set empty array if null
+        driveFunctions?.forEach(func => {
+          const fullFunc = {
+            ...func,
+            source: 'onedrive',
+            code: func.code || ''
+          };
+          functionsCache.current.set(`onedrive-${func.fileName}`, fullFunc);
+        });
+      } catch (driveError) {
+        console.error('OneDrive load failed:', driveError);
+        setOnedriveFunctions([]); // Ensure OneDrive functions are cleared
+        if (!(driveError instanceof TokenExpiredError)) {
+          throw driveError; // Only rethrow if not a token error
+        }
+      }
     } catch (error) {
       console.error('Error loading functions:', error);
+      clearFunctions(); // Ensure everything is cleared on error
       setError(error instanceof TokenExpiredError ? error.message : 'Failed to load functions');
     } finally {
       setIsLoading(false);
@@ -122,6 +140,7 @@ const App = ({ title }) => {
               onTabClick={handleTabClick}
               setGeneratedCode={setGeneratedCode}
               setSelectedFunction={setSelectedFunction}
+              loadFunctions={loadFunctions}
             />
           )}
           {selectedTab === "editor" && (

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { pyLogs } from "../utils/logs";
 
-export function SignInButton({ onSuccess }) {
+export function SignInButton({ loadFunctions }) {
     const [isSignedIn, setIsSignedIn] = React.useState(false);
     const [error, setError] = React.useState(null);
 
@@ -71,7 +71,7 @@ export function SignInButton({ onSuccess }) {
 
             await storeToken(token);
             setIsSignedIn(true);
-            onSuccess?.();
+            loadFunctions?.();
         } catch (error) {
             console.error("Detailed sign in error:", error);
             await pyLogs({
@@ -86,6 +86,8 @@ export function SignInButton({ onSuccess }) {
         try {
             await removeToken();
             setIsSignedIn(false);
+            setError(null);
+            loadFunctions?.(); // This will now trigger the clearFunctions first
         } catch (error) {
             console.error("Error signing out:", error);
             await pyLogs({ errorMessage: error.message, ref: "auth_signOut_error" });
