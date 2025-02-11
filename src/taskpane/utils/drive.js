@@ -1,6 +1,23 @@
 import { getStoredToken } from "../../functions/utils/auth";
 
+class TokenExpiredError extends Error {
+    constructor(message = 'Sign in on Home tab to access OneDrive functions.') {
+        super(message);
+        this.name = 'TokenExpiredError';
+    }
+}
+
 const DRIVE_APPROOT = 'https://graph.microsoft.com/v1.0/me/drive/special/approot:';
+
+async function handleResponse(response) {
+    if (response.status === 401) {
+        throw new TokenExpiredError();
+    }
+    if (!response.ok) {
+        throw new Error(`Request failed: ${response.statusText}`);
+    }
+    return response;
+}
 
 /**
  * Creates or updates a file in the app's special folder
@@ -19,7 +36,7 @@ export async function saveFile(content, fileName) {
             body: typeof content === 'string' ? content : JSON.stringify(content)
         });
 
-        if (!response.ok) throw new Error(`Failed to save file: ${response.statusText}`);
+        await handleResponse(response);
         return await response.json();
     } catch (error) {
         console.error('Error saving file:', error);
@@ -41,7 +58,7 @@ export async function readFile(fileName) {
             }
         });
 
-        if (!response.ok) throw new Error(`Failed to read file: ${response.statusText}`);
+        await handleResponse(response);
         return await response.json();
     } catch (error) {
         console.error('Error reading file:', error);
@@ -63,7 +80,7 @@ export async function deleteFile(fileName) {
             }
         });
 
-        if (!response.ok) throw new Error(`Failed to delete file: ${response.statusText}`);
+        await handleResponse(response);
         return true;
     } catch (error) {
         console.error('Error deleting file:', error);
@@ -85,7 +102,7 @@ export async function listFiles() {
             }
         });
 
-        if (!response.ok) throw new Error(`Failed to list files: ${response.statusText}`);
+        await handleResponse(response);
         const data = await response.json();
         return data.value.filter(file => !file.folder); // Filter out folders
     } catch (error) {
@@ -160,3 +177,5 @@ export function formatAsNotebook(metadata) {
         nbformat_minor: 4
     };
 }
+
+export { TokenExpiredError };

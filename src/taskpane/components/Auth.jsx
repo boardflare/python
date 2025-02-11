@@ -11,11 +11,24 @@ export function SignInButton({ onSuccess }) {
 
     const checkAuthStatus = async () => {
         try {
-            const token = await getStoredToken();
-            setIsSignedIn(!!token);
+            const tokenObj = await getStoredToken();
+            if (!tokenObj) {
+                setIsSignedIn(false);
+                return;
+            }
+
+            const isValid = await isTokenValid(tokenObj.auth_token);
+            if (!isValid) {
+                await removeToken();
+                setIsSignedIn(false);
+                return;
+            }
+
+            setIsSignedIn(true);
         } catch (error) {
             console.error("Error checking auth status:", error);
             await pyLogs({ errorMessage: error.message, ref: "auth_checkAuthStatus_error" });
+            setIsSignedIn(false);
         }
     };
 
@@ -148,9 +161,30 @@ function initializeDB() {
     });
 }
 
+async function isTokenValid(token) {
+    if (!token) return false;
+    try {
+        // JWT tokens are base64 encoded and split by dots
+        const [, payloadBase64] = token.split('.');
+        if (!payloadBase64) return false;
+
+        // Decode the base64 payload
+        const payload = JSON.parse(atob(payloadBase64));
+
+        // Check if token is expired
+        const currentTime = Math.floor(Date.now() / 1000);
+        return payload.exp > currentTime;
+    } catch (error) {
+        console.error("Error validating token:", error);
+        await pyLogs({ errorMessage: error.message, ref: "auth_validateToken_error" });
+        return false;
+    }
+}
+
 async function getStoredToken() {
     const storeName = 'User';
     const tokenKey = 'auth_token';
+    const graphKey = 'graphToken';
 
     try {
         const db = await initializeDB();
@@ -158,10 +192,28 @@ async function getStoredToken() {
             try {
                 const transaction = db.transaction(storeName, 'readonly');
                 const store = transaction.objectStore(storeName);
-                const request = store.get(tokenKey);
+                const authRequest = store.get(tokenKey);
+                const graphRequest = store.get(graphKey);
 
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
+                let tokens = {};
+
+                authRequest.onsuccess = () => {
+                    tokens.auth_token = authRequest.result;
+                };
+
+                graphRequest.onsuccess = () => {
+                    tokens.graphToken = graphRequest.result;
+                };
+
+                transaction.oncomplete = () => {
+                    if (!tokens.auth_token || !tokens.graphToken) {
+                        resolve(null);
+                        return;
+                    }
+                    resolve(tokens);
+                };
+
+                transaction.onerror = () => reject(transaction.error);
             } catch (error) {
                 reject(error);
             }

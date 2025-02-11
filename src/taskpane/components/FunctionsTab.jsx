@@ -1,12 +1,13 @@
 import * as React from "react";
 import { getFunctionFromSettings, deleteFunctionFromSettings } from "../utils/workbookSettings";
-import { deleteFile, loadFunctionFiles } from "../utils/drive";
+import { TokenExpiredError, deleteFile, loadFunctionFiles } from "../utils/drive";
 import { runTests } from "../utils/testRunner";
 import Notebooks from "./Notebooks";
 
 const FunctionsTab = ({ onEdit, onTest, functionsCache }) => {
     const [workbookFunctions, setWorkbookFunctions] = React.useState([]);
     const [onedriveFunctions, setOnedriveFunctions] = React.useState([]);
+    const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState(null);
     const [deleteConfirm, setDeleteConfirm] = React.useState(null);
 
@@ -15,23 +16,35 @@ const FunctionsTab = ({ onEdit, onTest, functionsCache }) => {
             // Load workbook functions
             const workbookData = await getFunctionFromSettings();
             setWorkbookFunctions(workbookData || []);
-            // Cache workbook functions
+            // Cache workbook functions with full properties
             workbookData?.forEach(func => {
-                func.source = 'workbook';
-                functionsCache.current.set(`workbook-${func.name}`, func);
+                const fullFunc = {
+                    ...func,
+                    source: 'workbook',
+                    code: func.code || '',
+                    fileName: `${func.name}.ipynb`
+                };
+                functionsCache.current.set(`workbook-${func.name}`, fullFunc);
             });
 
             // Load OneDrive functions
+            setIsLoading(true);
             const driveFunctions = await loadFunctionFiles();
             setOnedriveFunctions(driveFunctions);
-            // Cache OneDrive functions
+            // Cache OneDrive functions with full properties
             driveFunctions?.forEach(func => {
-                func.source = 'onedrive';
-                functionsCache.current.set(`onedrive-${func.fileName}`, func);
+                const fullFunc = {
+                    ...func,
+                    source: 'onedrive',
+                    code: func.code || ''
+                };
+                functionsCache.current.set(`onedrive-${func.fileName}`, fullFunc);
             });
         } catch (error) {
             console.error('Error loading functions:', error);
-            setError('Failed to load functions. Please try again.');
+            setError(error instanceof TokenExpiredError ? error.message : 'Failed to load functions. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -46,7 +59,7 @@ const FunctionsTab = ({ onEdit, onTest, functionsCache }) => {
             setDeleteConfirm(null);
         } catch (error) {
             console.error('Error deleting function:', error);
-            setError('Failed to delete function. Please try again.');
+            setError(error instanceof TokenExpiredError ? error.message : 'Failed to delete function. Please try again.');
         }
     };
 
@@ -128,16 +141,21 @@ const FunctionsTab = ({ onEdit, onTest, functionsCache }) => {
             )}
 
             <div className="mt-2">
-                {(workbookFunctions.length > 0 || onedriveFunctions.length > 0) ? (
-                    <>
-                        {workbookFunctions.length > 0 && (
-                            <FunctionTable functions={workbookFunctions} source="workbook" />
-                        )}
-                        {onedriveFunctions.length > 0 && (
-                            <FunctionTable functions={onedriveFunctions} source="onedrive" />
-                        )}
-                    </>
+                {workbookFunctions.length > 0 && (
+                    <FunctionTable functions={workbookFunctions} source="workbook" />
+                )}
+
+                {isLoading ? (
+                    <div className="p-4 text-gray-600">
+                        Loading OneDrive functions... ⏳
+                    </div>
                 ) : (
+                    onedriveFunctions.length > 0 && (
+                        <FunctionTable functions={onedriveFunctions} source="onedrive" />
+                    )
+                )}
+
+                {!isLoading && workbookFunctions.length === 0 && onedriveFunctions.length === 0 && (
                     <div className="flex flex-col items-center justify-center p-5 text-center text-gray-600">
                         <div className="text-4xl mb-4">📝</div>
                         <div className="text-base mb-2">No functions found</div>

@@ -64,14 +64,23 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
         const cacheKey = `${source}-${id}`;
         const cachedFunc = functionsCache.current.get(cacheKey);
 
-        if (cachedFunc?.code) {
+        // Only update if we have valid data and editor
+        if (cachedFunc?.code && editorRef.current?.setValue) {
             editorRef.current.setValue(cachedFunc.code);
-        } else if (selectedFunction.code) {
+        } else if (selectedFunction.code && editorRef.current?.setValue) {
             editorRef.current.setValue(selectedFunction.code);
-        } else {
+        } else if (editorRef.current?.setValue) {
             editorRef.current.setValue(DEFAULT_CODE);
         }
     }, [selectedFunction?.name, selectedFunction?.fileName]);
+
+    // Add cleanup
+    React.useEffect(() => {
+        return () => {
+            editorRef.current = null;
+            setNotification("");
+        };
+    }, []);
 
     const handleEditorDidMount = (editor, monaco) => {
         editorRef.current = editor;
