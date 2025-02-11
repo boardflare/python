@@ -7,6 +7,7 @@ import { parsePython } from "../utils/codeparser";
 import { EventTypes } from "../utils/constants";
 import { updateNameManager } from "../utils/nameManager";
 import { runTests } from "../utils/testRunner";
+import { saveFile, formatAsNotebook } from "../utils/drive";
 
 const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCode, setGeneratedCode }) => {
     const [notification, setNotification] = React.useState("");
@@ -81,10 +82,16 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
         try {
             const code = editorRef.current.getValue();
             const parsedFunction = await parsePython(code);
-            // Preserve prompt if it exists
+
             if (selectedFunction.prompt) {
                 parsedFunction.prompt = selectedFunction.prompt;
             }
+
+            // Save to OneDrive
+            const notebook = formatAsNotebook(parsedFunction);
+            await saveFile(notebook, `${parsedFunction.name}.ipynb`);
+
+            // Continue with existing save logic
             await saveFunctionToSettings(parsedFunction);
             await updateNameManager(parsedFunction);
             showNotification(`${parsedFunction.signature} saved!`, "success");
