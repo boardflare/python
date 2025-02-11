@@ -10,6 +10,7 @@ const App = ({ title }) => {
   const [selectedFunction, setSelectedFunction] = React.useState({ name: "", code: "" });
   const [logs, setLogs] = React.useState([]);
   const [generatedCode, setGeneratedCode] = React.useState(null);
+  const functionsCache = React.useRef(new Map());
 
   React.useEffect(() => {
     const handleLog = (event) => {
@@ -44,8 +45,16 @@ const App = ({ title }) => {
     }
   };
 
-  const handleFunctionEdit = (functionName) => {
-    setSelectedFunction({ name: functionName, code: "" }); // code will be set by EditorTab when loaded
+  const handleFunctionEdit = (func) => {
+    const source = func.source || 'workbook';
+    const id = source === 'workbook' ? func.name : func.fileName;
+    const cacheKey = `${source}-${id}`;
+
+    if (!functionsCache.current.has(cacheKey)) {
+      functionsCache.current.set(cacheKey, func);
+    }
+
+    setSelectedFunction(func);
     setSelectedTab("editor");
   };
 
@@ -80,10 +89,11 @@ const App = ({ title }) => {
               onTest={handleTest}
               generatedCode={generatedCode}
               setGeneratedCode={setGeneratedCode}
+              functionsCache={functionsCache}
             />
           )}
           {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} />}
-          {selectedTab === "functions" && <FunctionsTab onEdit={handleFunctionEdit} onTest={handleTest} />}
+          {selectedTab === "functions" && <FunctionsTab onEdit={handleFunctionEdit} onTest={handleTest} functionsCache={functionsCache} />}
         </div>
       </main>
     </div>

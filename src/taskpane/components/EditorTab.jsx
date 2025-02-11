@@ -7,14 +7,16 @@ import { parsePython } from "../utils/codeparser";
 import { EventTypes } from "../utils/constants";
 import { updateNameManager } from "../utils/nameManager";
 import { runTests } from "../utils/testRunner";
-import { saveFile, formatAsNotebook } from "../utils/drive";
+import { saveFile, formatAsNotebook, loadFunctionFiles } from "../utils/drive";
 
-const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCode, setGeneratedCode }) => {
+const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCode, setGeneratedCode, functionsCache }) => {
     const [notification, setNotification] = React.useState("");
     const [functions, setFunctions] = React.useState([]);
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const notificationTimeoutRef = React.useRef();
     const editorRef = React.useRef(null);
+    const [workbookFunctions, setWorkbookFunctions] = React.useState([]);
+    const [onedriveFunctions, setOnedriveFunctions] = React.useState([]);
 
     const showNotification = (message, type = "success") => {
         if (notificationTimeoutRef.current) {
@@ -34,45 +36,47 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
         };
     }, []);
 
+    const loadFunctions = async () => {
+        try {
+            // Load workbook functions
+            const workbookData = await getFunctionFromSettings();
+            setWorkbookFunctions(workbookData || []);
+            workbookData?.forEach(func => functionsCache.current.set(`workbook-${func.name}`, func));
+
+            // Load OneDrive functions
+            const driveFunctions = await loadFunctionFiles();
+            setOnedriveFunctions(driveFunctions);
+            driveFunctions?.forEach(func => functionsCache.current.set(`onedrive-${func.fileName}`, func));
+        } catch (err) {
+            showNotification(err.message, "error");
+        }
+    };
+
     React.useEffect(() => {
-        const loadFunctions = async () => {
-            try {
-                const funcs = await getFunctionFromSettings();
-                setFunctions(funcs);
-            } catch (err) {
-                showNotification(err.message, "error");  // Use notification instead of error
-            }
-        };
         loadFunctions();
     }, []);
 
     React.useEffect(() => {
-        if (selectedFunction.name && editorRef.current) {
-            const func = functions.find(f => f.name === selectedFunction.name);
-            if (func && !selectedFunction.code) {  // Only update if code is not already set
-                editorRef.current.setValue(func.code);
-                setSelectedFunction(func);
-            }
-        }
-    }, [selectedFunction.name, functions]);
+        if (!editorRef.current || !selectedFunction) return;
 
-    React.useEffect(() => {
-        if (generatedCode && editorRef.current) {
-            editorRef.current.setValue(generatedCode);
-            setSelectedFunction({ name: "", code: generatedCode });
-            setGeneratedCode(null); // Clear the generated code after using it
+        const source = selectedFunction.source || 'workbook';
+        const id = source === 'workbook' ? selectedFunction.name : selectedFunction.fileName;
+        const cacheKey = `${source}-${id}`;
+        const cachedFunc = functionsCache.current.get(cacheKey);
+
+        if (cachedFunc?.code) {
+            editorRef.current.setValue(cachedFunc.code);
+        } else if (selectedFunction.code) {
+            editorRef.current.setValue(selectedFunction.code);
+        } else {
+            editorRef.current.setValue(DEFAULT_CODE);
         }
-    }, [generatedCode, setGeneratedCode]);
+    }, [selectedFunction?.name, selectedFunction?.fileName]);
 
     const handleEditorDidMount = (editor, monaco) => {
         editorRef.current = editor;
-        if (selectedFunction.code) {
+        if (selectedFunction?.code) {
             editor.setValue(selectedFunction.code);
-        } else if (selectedFunction.name) {
-            const func = functions.find(f => f.name === selectedFunction.name);
-            if (func) {
-                editor.setValue(func.code);
-            }
         } else {
             editor.setValue(DEFAULT_CODE);
         }
@@ -95,9 +99,15 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
             await saveFunctionToSettings(parsedFunction);
             await updateNameManager(parsedFunction);
             showNotification(`${parsedFunction.signature} saved!`, "success");
-            const updatedFunctions = await getFunctionFromSettings();
-            setFunctions(updatedFunctions);
-            setSelectedFunction(parsedFunction);
+
+            // Reload functions to update dropdown
+            await loadFunctions();
+
+            // Update selected function with source
+            setSelectedFunction({
+                ...parsedFunction,
+                source: 'workbook'  // New functions are always saved to workbook first
+            });
         } catch (err) {
             showNotification(err.message, "error");
         }
@@ -134,9 +144,13 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
         <div className="flex flex-col h-full overflow-hidden">
             <div className="flex-1 overflow-hidden mt-2">
                 <MonacoEditor
-                    value={selectedFunction.code || DEFAULT_CODE}
+                    value={selectedFunction?.code || DEFAULT_CODE}
                     onMount={handleEditorDidMount}
-                    onChange={(value) => setSelectedFunction(prev => ({ ...prev, code: value }))}
+                    onChange={(value) => {
+                        if (value !== selectedFunction?.code) { // Only update if actually changed
+                            setSelectedFunction(prev => ({ ...prev, code: value }));
+                        }
+                    }}
                 />
             </div>
             {notification && (
@@ -160,23 +174,43 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
             )}
             <div className="flex justify-between items-center py-2">
                 <select
-                    value={selectedFunction.name}
+                    value={selectedFunction ? `${selectedFunction.source || 'workbook'}-${selectedFunction.source === 'onedrive' ? selectedFunction.fileName : selectedFunction.name}` : ""}
                     onChange={(e) => {
-                        const func = functions.find(f => f.name === e.target.value);
-                        const newCode = func?.code || DEFAULT_CODE;
-                        editorRef.current.setValue(newCode);
-                        setSelectedFunction({
-                            name: e.target.value,
-                            code: newCode,
-                            prompt: func?.prompt || ""
-                        });
+                        const [source, id] = e.target.value.split('-');
+                        const cacheKey = `${source}-${id}`;
+                        const func = functionsCache.current.get(cacheKey);
+                        if (func) {
+                            editorRef.current.setValue(func.code);
+                            setSelectedFunction({
+                                ...func,
+                                source: source
+                            });
+                        } else {
+                            editorRef.current.setValue(DEFAULT_CODE);
+                            setSelectedFunction({ name: "", code: DEFAULT_CODE });
+                        }
                     }}
                     className="px-2 py-1 border rounded"
                 >
                     <option value="">Select a function...</option>
-                    {functions.map(f => (
-                        <option key={f.name} value={f.name}>{f.name}</option>
-                    ))}
+                    {workbookFunctions.length > 0 && (
+                        <optgroup label="📄 Workbook Functions">
+                            {workbookFunctions.map(f => (
+                                <option key={`workbook-${f.name}`} value={`workbook-${f.name}`}>
+                                    {f.name}
+                                </option>
+                            ))}
+                        </optgroup>
+                    )}
+                    {onedriveFunctions.length > 0 && (
+                        <optgroup label="☁️ OneDrive Functions">
+                            {onedriveFunctions.map(f => (
+                                <option key={`onedrive-${f.fileName}`} value={`onedrive-${f.fileName}`}>
+                                    {f.name}
+                                </option>
+                            ))}
+                        </optgroup>
+                    )}
                 </select>
                 <div className="space-x-2">
                     <button onClick={handleReset} className="px-2 py-1 bg-gray-200 rounded">Reset</button>

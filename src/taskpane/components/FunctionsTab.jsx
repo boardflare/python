@@ -4,7 +4,7 @@ import { deleteFile, loadFunctionFiles } from "../utils/drive";
 import { runTests } from "../utils/testRunner";
 import Notebooks from "./Notebooks";
 
-const FunctionsTab = ({ onEdit, onTest }) => {
+const FunctionsTab = ({ onEdit, onTest, functionsCache }) => {
     const [workbookFunctions, setWorkbookFunctions] = React.useState([]);
     const [onedriveFunctions, setOnedriveFunctions] = React.useState([]);
     const [error, setError] = React.useState(null);
@@ -15,10 +15,20 @@ const FunctionsTab = ({ onEdit, onTest }) => {
             // Load workbook functions
             const workbookData = await getFunctionFromSettings();
             setWorkbookFunctions(workbookData || []);
+            // Cache workbook functions
+            workbookData?.forEach(func => {
+                func.source = 'workbook';
+                functionsCache.current.set(`workbook-${func.name}`, func);
+            });
 
             // Load OneDrive functions
             const driveFunctions = await loadFunctionFiles();
             setOnedriveFunctions(driveFunctions);
+            // Cache OneDrive functions
+            driveFunctions?.forEach(func => {
+                func.source = 'onedrive';
+                functionsCache.current.set(`onedrive-${func.fileName}`, func);
+            });
         } catch (error) {
             console.error('Error loading functions:', error);
             setError('Failed to load functions. Please try again.');
@@ -77,7 +87,16 @@ const FunctionsTab = ({ onEdit, onTest }) => {
                                     </button>
                                     <button
                                         className="text-blue-500 hover:text-blue-700"
-                                        onClick={() => onEdit(func.name)}
+                                        onClick={() => {
+                                            const cacheKey = `${source}-${source === 'workbook' ? func.name : func.fileName}`;
+                                            const cachedFunc = functionsCache.current.get(cacheKey);
+                                            if (cachedFunc) {
+                                                onEdit({
+                                                    ...cachedFunc,
+                                                    source: source
+                                                });
+                                            }
+                                        }}
                                         title="Edit function"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
