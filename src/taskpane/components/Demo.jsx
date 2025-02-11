@@ -3,12 +3,15 @@ import { insertWorksheetFromBase64 } from "../utils/demo";
 import { parseNotebook } from "../utils/notebooks";
 import { saveFunctionToSettings } from "../utils/workbookSettings";
 import demoFunctions from '../utils/demo_functions.ipynb';
+import { updateNameManager } from "../utils/nameManager";
+
 const demoSheetUrl = new URL("../utils/demo_sheet.xlsx", import.meta.url).href;
 
 async function addFunctionsFromNotebook(notebook) {
     const functions = await parseNotebook(notebook);
     for (const func of functions) {
         await saveFunctionToSettings(func);
+        await updateNameManager(func);
     }
 }
 
@@ -27,11 +30,11 @@ const convertFileToBase64 = (file) => {
 const Demo = () => {
     const handleInsertDemo = async () => {
         try {
-            await addFunctionsFromNotebook(demoFunctions);
             const response = await fetch(demoSheetUrl);
             const blob = await response.blob();
             const base64Data = await convertFileToBase64(blob);
             await insertWorksheetFromBase64(base64Data);
+            await addFunctionsFromNotebook(demoFunctions);
         } catch (err) {
             console.error('Failed to insert demo sheet:', err);
         }
