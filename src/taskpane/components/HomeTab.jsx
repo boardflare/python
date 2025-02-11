@@ -6,11 +6,12 @@ import { SignInButton } from "./Auth";
 import Feedback from "./Feedback";
 import Demo from "./Demo";
 
-const HomeTab = ({ onTabClick, setGeneratedCode }) => {
+const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction }) => {
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
 
-    const handleLLMSuccess = (generatedCode) => {
-        setGeneratedCode(generatedCode); // Directly set the code
+    const handleLLMSuccess = (generatedCode, prompt) => {
+        setGeneratedCode(generatedCode);
+        setSelectedFunction({ name: "", code: generatedCode, prompt });
         onTabClick('editor');
     };
 

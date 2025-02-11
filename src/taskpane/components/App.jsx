@@ -80,6 +80,7 @@ const App = ({ title }) => {
             <HomeTab
               onTabClick={handleTabClick}
               setGeneratedCode={setGeneratedCode}
+              setSelectedFunction={setSelectedFunction}
             />
           )}
           {selectedTab === "editor" && (

@@ -57,22 +57,27 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
     }, []);
 
     React.useEffect(() => {
-        if (!editorRef.current || !selectedFunction) return;
+        if (!editorRef.current) return;
 
-        const source = selectedFunction.source || 'workbook';
-        const id = source === 'workbook' ? selectedFunction.name : selectedFunction.fileName;
+        if (generatedCode) {
+            editorRef.current.setValue(generatedCode);
+            setGeneratedCode(null); // Clear after setting
+            return;
+        }
+
+        const source = selectedFunction?.source || 'workbook';
+        const id = source === 'workbook' ? selectedFunction?.name : selectedFunction?.fileName;
         const cacheKey = `${source}-${id}`;
         const cachedFunc = functionsCache.current.get(cacheKey);
 
-        // Only update if we have valid data and editor
         if (cachedFunc?.code && editorRef.current?.setValue) {
             editorRef.current.setValue(cachedFunc.code);
-        } else if (selectedFunction.code && editorRef.current?.setValue) {
+        } else if (selectedFunction?.code && editorRef.current?.setValue) {
             editorRef.current.setValue(selectedFunction.code);
         } else if (editorRef.current?.setValue) {
             editorRef.current.setValue(DEFAULT_CODE);
         }
-    }, [selectedFunction?.name, selectedFunction?.fileName]);
+    }, [selectedFunction?.name, selectedFunction?.fileName, generatedCode]);
 
     // Add cleanup
     React.useEffect(() => {
@@ -102,7 +107,13 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
 
             // Save to OneDrive
             const notebook = formatAsNotebook(parsedFunction);
-            await saveFile(notebook, `${parsedFunction.name}.ipynb`);
+            try {
+                await saveFile(notebook, `${parsedFunction.name}.ipynb`);
+            } catch (err) {
+                if (!(err instanceof TokenExpiredError)) {
+                    throw err;
+                }
+            }
 
             // Continue with existing save logic
             await saveFunctionToSettings(parsedFunction);
@@ -118,7 +129,9 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
                 source: 'workbook'  // New functions are always saved to workbook first
             });
         } catch (err) {
-            showNotification(err.message, "error");
+            if (!(err instanceof TokenExpiredError)) {
+                showNotification(err.message, "error");
+            }
         }
     };
 
@@ -203,7 +216,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
                 >
                     <option value="">Select a function...</option>
                     {workbookFunctions.length > 0 && (
-                        <optgroup label="📄 Workbook Functions">
+                        <optgroup label="Workbook Functions">
                             {workbookFunctions.map(f => (
                                 <option key={`workbook-${f.name}`} value={`workbook-${f.name}`}>
                                     {f.name}
@@ -212,7 +225,7 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
                         </optgroup>
                     )}
                     {onedriveFunctions.length > 0 && (
-                        <optgroup label="☁️ OneDrive Functions">
+                        <optgroup label="OneDrive Functions">
                             {onedriveFunctions.map(f => (
                                 <option key={`onedrive-${f.fileName}`} value={`onedrive-${f.fileName}`}>
                                     {f.name}

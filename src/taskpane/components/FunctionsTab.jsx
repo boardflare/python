@@ -79,17 +79,17 @@ const FunctionsTab = ({ onEdit, onTest, functionsCache }) => {
 
     const FunctionTable = ({ functions, source }) => (
         <div className="overflow-x-auto">
-            <h3 className="text-lg font-semibold mb-2">
-                {source === 'workbook' ? '📄 Workbook Functions' : '☁️ OneDrive Functions'}
+            <h3 className="font-semibold mb-1 text-center">
+                {source === 'workbook' ? 'Workbook Functions' : 'OneDrive Functions'}
             </h3>
             <table className="min-w-full bg-white mb-6">
                 <tbody>
                     {functions.map((func) => (
                         <tr key={source === 'workbook' ? func.name : func.fileName}>
-                            <td className="py-2 px-2 border-b">
+                            <td className="py-0 px-2 border-b">
                                 <code className="font-mono text-sm">{func.name.toUpperCase()}</code>
                             </td>
-                            <td className="py-2 px-2 border-b w-fit">
+                            <td className="py-0 px-2 border-b w-fit">
                                 <div className="flex gap-2 justify-end">
                                     <button
                                         className="text-green-500 hover:text-green-700"
@@ -135,7 +135,7 @@ const FunctionsTab = ({ onEdit, onTest, functionsCache }) => {
     return (
         <div className="h-full flex flex-col overflow-y-auto">
             {error && (
-                <div className="p-4 text-red-600 bg-red-50 mb-4">
+                <div className="p-2 text-red-600 bg-red-50 mb-4">
                     {error}
                 </div>
             )}
@@ -146,8 +146,8 @@ const FunctionsTab = ({ onEdit, onTest, functionsCache }) => {
                 )}
 
                 {isLoading ? (
-                    <div className="p-4 text-gray-600">
-                        Loading OneDrive functions... ⏳
+                    <div className="p-4 text-gray-900 text-center">
+                        Loading OneDrive functions...
                     </div>
                 ) : (
                     onedriveFunctions.length > 0 && (

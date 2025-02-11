@@ -29,11 +29,17 @@ export async function insertWorksheetFromBase64(base64String) {
     try {
         await Excel.run(async (context) => {
             const workbook = context.workbook;
-            await workbook.insertWorksheetsFromBase64(base64String, {
-                formatCell: true,
-                includeFormulas: true
-            });
+            // Check if DemoFunctions sheet exists
+            const sheet = context.workbook.worksheets.getItemOrNullObject('DemoFunctions');
             await context.sync();
+
+            if (sheet.isNullObject) {
+                await workbook.insertWorksheetsFromBase64(base64String, {
+                    formatCell: true,
+                    includeFormulas: true
+                });
+                await context.sync();
+            }
         });
         return true;
     } catch (error) {
@@ -85,7 +91,6 @@ export async function singleDemo(parsedCode) {
             // Activate the sheet
             sheet.activate();
             await context.sync();
-
         } catch (error) {
             if (sheet) {
                 try {
@@ -113,31 +118,29 @@ export async function multiDemo(parsedFunctions, sheetName = "Demo_Functions") {
             let sheet = context.workbook.worksheets.getItemOrNullObject(sheetName);
             await context.sync();
 
-            if (!sheet.isNullObject) {
-                sheet.delete();
+            // If sheet doesn't exist, create it and populate
+            if (sheet.isNullObject) {
+                sheet = context.workbook.worksheets.add(sheetName);
                 await context.sync();
+
+                const headerRange = sheet.getRange("A1:B1");
+                headerRange.values = [["Function", "Example Use"]];
+                headerRange.format.fill.color = "#D9D9D9";
+                headerRange.format.font.bold = true;
+
+                parsedFunctions.forEach((parsedFunction, index) => {
+                    const rowIndex = index + 1;
+                    const functionRange = sheet.getRange(`A${rowIndex + 1}`);
+                    const exampleRange = sheet.getRange(`B${rowIndex + 1}`);
+                    functionRange.values = [[parsedFunction.signature]];
+                    exampleRange.values = [[parsedFunction.excelExample]];
+                    exampleRange.format.horizontalAlignment = 'Left';
+                });
+
+                // Set column widths
+                sheet.getRange("A:A").format.columnWidth = 250;
+                sheet.getRange("B:B").format.columnWidth = 150;
             }
-
-            sheet = context.workbook.worksheets.add(sheetName);
-            await context.sync();
-
-            const headerRange = sheet.getRange("A1:B1");
-            headerRange.values = [["Function", "Example Use"]];
-            headerRange.format.fill.color = "#D9D9D9";
-            headerRange.format.font.bold = true;
-
-            parsedFunctions.forEach((parsedFunction, index) => {
-                const rowIndex = index + 1;
-                const functionRange = sheet.getRange(`A${rowIndex + 1}`);
-                const exampleRange = sheet.getRange(`B${rowIndex + 1}`);
-                functionRange.values = [[parsedFunction.signature]];
-                exampleRange.values = [[parsedFunction.excelExample]];
-                exampleRange.format.horizontalAlignment = 'Left';
-            });
-
-            // Set column widths
-            sheet.getRange("A:A").format.columnWidth = 250;
-            sheet.getRange("B:B").format.columnWidth = 150;
 
             sheet.activate();
             await context.sync();
