@@ -1,5 +1,17 @@
 import * as React from "react";
+import { PublicClientApplication } from "@azure/msal-browser";
 import { pyLogs } from "../utils/logs";
+
+const msalConfig = {
+    auth: {
+        clientId: '0c94fdd5-ec39-4167-84ea-06ea727149b1',
+        authority: "https://login.microsoftonline.com/common",
+        redirectUri: window.location.origin + window.location.pathname,
+    },
+    cache: {
+        cacheLocation: 'localStorage'
+    }
+};
 
 export function SignInButton({ loadFunctions }) {
     const [isSignedIn, setIsSignedIn] = React.useState(false);
@@ -163,6 +175,33 @@ function initializeDB() {
     });
 }
 
+async function silentTokenRenewal() {
+    try {
+        const pca = new PublicClientApplication(msalConfig);
+        await pca.initialize();
+
+        const accounts = pca.getAllAccounts();
+        if (accounts.length === 0) {
+            return null;
+        }
+
+        const tokenRequest = {
+            scopes: ["User.Read", "Sites.ReadWrite.All"],
+            account: accounts[0]
+        };
+
+        const response = await pca.acquireTokenSilent(tokenRequest);
+        return {
+            auth_token: response.accessToken,
+            graphToken: response.accessToken
+        };
+    } catch (error) {
+        console.error("Silent token renewal failed:", error);
+        await pyLogs({ errorMessage: error.message, ref: "auth_silentRenewal_error" });
+        return null;
+    }
+}
+
 async function isTokenValid(token) {
     if (!token) return false;
     try {
@@ -175,7 +214,18 @@ async function isTokenValid(token) {
 
         // Check if token is expired
         const currentTime = Math.floor(Date.now() / 1000);
-        return payload.exp > currentTime;
+
+        // If token is expired, try silent renewal
+        if (payload.exp <= currentTime) {
+            const newTokens = await silentTokenRenewal();
+            if (newTokens) {
+                await storeToken(newTokens);
+                return true;
+            }
+            return false;
+        }
+
+        return true;
     } catch (error) {
         console.error("Error validating token:", error);
         await pyLogs({ errorMessage: error.message, ref: "auth_validateToken_error" });
