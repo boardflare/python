@@ -27,7 +27,7 @@ const convertFileToBase64 = (file) => {
     });
 };
 
-const Demo = () => {
+const Demo = ({ loadFunctions }) => {
     const handleInsertDemo = async () => {
         try {
             const response = await fetch(demoSheetUrl);
@@ -35,6 +35,7 @@ const Demo = () => {
             const base64Data = await convertFileToBase64(blob);
             await insertWorksheetFromBase64(base64Data);
             await addFunctionsFromNotebook(demoFunctions);
+            await loadFunctions();
         } catch (err) {
             console.error('Failed to insert demo sheet:', err);
         }
