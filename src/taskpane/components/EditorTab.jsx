@@ -122,14 +122,6 @@ const EditorTab = ({
         }
     };
 
-    const handleReset = () => {
-        if (editorRef.current) {
-            editorRef.current.setValue(DEFAULT_CODE);
-            setSelectedFunction({ name: "", code: DEFAULT_CODE });
-            setNotification(""); // Only clear notification
-        }
-    };
-
     const handleTest = async () => {
         onTest();
         try {
@@ -222,7 +214,6 @@ const EditorTab = ({
                     )}
                 </select>
                 <div className="space-x-2">
-                    <button onClick={handleReset} className="px-2 py-1 bg-gray-200 rounded">Reset</button>
                     <button onClick={handleTest} className="px-2 py-1 bg-green-500 text-white rounded">Test</button>
                     <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
                     <button onClick={() => setIsLLMOpen(true)} className="px-2 py-1 bg-purple-500 text-white rounded">AI✨</button>
