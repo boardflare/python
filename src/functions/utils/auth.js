@@ -1,23 +1,35 @@
 export async function getStoredToken() {
-    const dbName = 'Boardflare';
-    const storeName = 'User';
-    const tokenKey = 'graphToken';
+    try {
+        const dbName = 'Boardflare';
+        const storeName = 'User';
+        const tokenKey = 'graphToken';
 
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(dbName, 1);
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(dbName, 1);
 
-        request.onsuccess = (event) => {
-            const db = event.target.result;
-            const transaction = db.transaction(storeName, 'readonly');
-            const store = transaction.objectStore(storeName);
-            const getRequest = store.get(tokenKey);
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(storeName)) {
+                    db.createObjectStore(storeName);
+                }
+            };
 
-            getRequest.onsuccess = () => resolve(getRequest.result);
-            getRequest.onerror = () => reject(getRequest.error);
-        };
+            request.onsuccess = (event) => {
+                const db = event.target.result;
+                const transaction = db.transaction(storeName, 'readonly');
+                const store = transaction.objectStore(storeName);
+                const getRequest = store.get(tokenKey);
 
-        request.onerror = () => reject(request.error);
-    });
+                getRequest.onsuccess = () => resolve(getRequest.result);
+                getRequest.onerror = () => reject(getRequest.error);
+            };
+
+            request.onerror = () => reject(request.error);
+        });
+    } catch (error) {
+        console.error('Error accessing IndexedDB:', error);
+        throw error;
+    }
 }
 
 
