@@ -25,28 +25,7 @@ export function sanitizeSheetName(name) {
     return sanitized;
 }
 
-export async function insertWorksheetFromBase64(base64String) {
-    try {
-        await Excel.run(async (context) => {
-            const workbook = context.workbook;
-            // Check if DemoFunctions sheet exists
-            const sheet = context.workbook.worksheets.getItemOrNullObject('DemoFunctions');
-            await context.sync();
-
-            if (sheet.isNullObject) {
-                await workbook.insertWorksheetsFromBase64(base64String, {
-                    formatCell: true,
-                    includeFormulas: true
-                });
-                await context.sync();
-            }
-        });
-        return true;
-    } catch (error) {
-        console.error("Error inserting worksheet:", error);
-        throw error;
-    }
-}
+// Remove the insertWorksheetFromBase64 function from here
 
 export async function singleDemo(parsedCode) {
     return Excel.run(async (context) => {
@@ -111,36 +90,51 @@ export async function singleDemo(parsedCode) {
     });
 }
 
-export async function multiDemo(parsedFunctions, sheetName = "Demo_Functions") {
+export async function multiDemo(parsedFunctions, sheetName = "ExampleFunctions") {
     return Excel.run(async (context) => {
         try {
             sheetName = sanitizeSheetName(sheetName);
             let sheet = context.workbook.worksheets.getItemOrNullObject(sheetName);
             await context.sync();
 
-            // If sheet doesn't exist, create it and populate
-            if (sheet.isNullObject) {
-                sheet = context.workbook.worksheets.add(sheetName);
+            // If sheet exists, delete it
+            if (!sheet.isNullObject) {
+                sheet.delete();
                 await context.sync();
-
-                const headerRange = sheet.getRange("A1:B1");
-                headerRange.values = [["Function", "Example Use"]];
-                headerRange.format.fill.color = "#D9D9D9";
-                headerRange.format.font.bold = true;
-
-                parsedFunctions.forEach((parsedFunction, index) => {
-                    const rowIndex = index + 1;
-                    const functionRange = sheet.getRange(`A${rowIndex + 1}`);
-                    const exampleRange = sheet.getRange(`B${rowIndex + 1}`);
-                    functionRange.values = [[parsedFunction.signature]];
-                    exampleRange.values = [[parsedFunction.excelExample]];
-                    exampleRange.format.horizontalAlignment = 'Left';
-                });
-
-                // Set column widths
-                sheet.getRange("A:A").format.columnWidth = 250;
-                sheet.getRange("B:B").format.columnWidth = 150;
             }
+
+            // Create new sheet
+            sheet = context.workbook.worksheets.add(sheetName);
+            await context.sync();
+
+            // Add explanation row using getRangeByIndexes for valid syntax
+            const explanationRange = sheet.getRangeByIndexes(0, 0, 1, 3);
+            explanationRange.merge();
+            explanationRange.getCell(0, 0).values = [["Note that you will see #BUSY! for a few seconds on the first use of a function, subsequent uses will be much faster."]];
+            explanationRange.format.fill.color = "#FFFFE0";
+            explanationRange.format.horizontalAlignment = "Center";
+
+            // Add header row just below the explanation row
+            const headerRange = sheet.getRangeByIndexes(1, 0, 1, 3);
+            headerRange.values = [["Function", "Description", "Example Use"]];
+            headerRange.format.fill.color = "#D9D9D9";
+            headerRange.format.font.bold = true;
+
+            parsedFunctions.forEach((parsedFunction, index) => {
+                const dataRow = index + 2; // Data rows start at row index 2
+                const functionRange = sheet.getRange(`A${dataRow + 1}`);
+                const descriptionRange = sheet.getRange(`B${dataRow + 1}`);
+                const exampleRange = sheet.getRange(`C${dataRow + 1}`);
+                functionRange.values = [[parsedFunction.signature]];
+                descriptionRange.values = [[parsedFunction.description]];
+                exampleRange.values = [[parsedFunction.excelExample]];
+                exampleRange.format.horizontalAlignment = "Left";
+            });
+
+            // Set column widths
+            sheet.getRange("A:A").format.columnWidth = 250;
+            sheet.getRange("B:B").format.columnWidth = 400;
+            sheet.getRange("C:C").format.columnWidth = 150;
 
             sheet.activate();
             await context.sync();

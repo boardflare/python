@@ -42,6 +42,8 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt }) => {
     const handleSubmit = async () => {
         setIsLoading(true);
         setError("");
+        const abortController = new AbortController();
+        const timeoutId = setTimeout(() => abortController.abort(), 15000); // 15-second timeout
 
         // Use default prompt if input is empty
         const promptText = input.trim() || "Add two numbers and return their sum.";
@@ -52,7 +54,7 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt }) => {
                 { role: 'system', content: `Create a single Python function with docstring that fulfills the user's request. The function args must be Python types float, str, bool, None or a 2D list of those types. Parameter names cannot contain numbers. Variable length arguments (e.g. *args or **kwargs) are not allowed. Do not include any print statements, example usage, type hints, or explanations.  Define a test_cases variable that is a list with nested lists of example args.  e.g. test_cases = [["hello"],[[["hello", "world"]]]] includes a case with a str arg, and a case with a 2D list arg.` },
                 { role: 'user', content: promptText },
             ],
-            max_tokens: 1000,
+            max_tokens: 800,
             temperature: 0.1
         };
 
@@ -61,7 +63,10 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt }) => {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ genText }),
+                signal: abortController.signal
             });
+
+            clearTimeout(timeoutId); // clear timeout upon response
 
             if (!response.ok) {
                 throw new Error('Failed to generate code');
@@ -87,7 +92,11 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt }) => {
             onSuccess(generatedCode, input);
             onClose();
         } catch (err) {
-            setError(err.message);
+            if (err.name === "AbortError") {
+                setError("Request timed out after 10 seconds.");
+            } else {
+                setError(err.message);
+            }
         } finally {
             setIsLoading(false);
         }
