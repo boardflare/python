@@ -135,37 +135,11 @@ const EditorTab = ({
         }
     };
 
-    const handleLLMSuccess = async (generatedCode, prompt) => {
-        editorRef.current.setValue(generatedCode);
-        try {
-            const parsedFunction = await parsePython(generatedCode);
-            if (prompt) {
-                parsedFunction.prompt = prompt;
-            }
-            // Force fileName to match workbook option format in App
-            parsedFunction.fileName = `${parsedFunction.name}.ipynb`;
-            const notebook = formatAsNotebook(parsedFunction);
-            try {
-                await saveFile(notebook, parsedFunction.fileName);
-            } catch (err) {
-                if (!(err instanceof TokenExpiredError)) {
-                    throw err;
-                }
-            }
-            await saveFunctionToSettings(parsedFunction);
-            await updateNameManager(parsedFunction);
-            await loadFunctions();
-            // Set selector to the newly saved function using workbook format
-            setSelectedFunction({
-                ...parsedFunction,
-                source: 'workbook'
-            });
-            showNotification(`Function saved successfully, you can use it as =${parsedFunction.name.toUpperCase()} in your workbook.`, "success");
-        } catch (err) {
-            if (!(err instanceof TokenExpiredError)) {
-                showNotification(err.message, "error");
-            }
-        }
+    // Updated onSuccess callback from LLM – now only updates the UI.
+    const handleLLMSuccess = (savedFunction, prompt) => {
+        editorRef.current.setValue(savedFunction.code);
+        setSelectedFunction({ ...savedFunction, source: 'workbook' });
+        showNotification(`Function saved successfully!`, "success");
     };
 
     return (
@@ -247,6 +221,7 @@ const EditorTab = ({
                 onClose={() => setIsLLMOpen(false)}
                 onSuccess={handleLLMSuccess}
                 prompt={selectedFunction.prompt}
+                loadFunctions={loadFunctions} // NEW: pass loadFunctions for refreshing functions list
             />
         </div>
     );
