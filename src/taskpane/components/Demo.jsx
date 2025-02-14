@@ -4,6 +4,7 @@ import { parseNotebook } from "../utils/notebooks";
 import { saveFunctionToSettings } from "../utils/workbookSettings";
 import demoFunctions from '../utils/demo_functions.ipynb';
 import { updateNameManager } from "../utils/nameManager";
+import { pyLogs } from "../utils/logs"; // added import
 
 const demoSheetUrl = new URL("../utils/demo_sheet.xlsx", import.meta.url).href;
 
@@ -64,7 +65,9 @@ const Demo = ({ loadFunctions }) => {
             //await insertWorksheetFromBase64(base64Data);
             await addFunctionsFromNotebook(demoFunctions);
             await loadFunctions();
+            await pyLogs({ ref: 'successful_demo_insert' }); // updated log on success
         } catch (err) {
+            await pyLogs({ errorMessage: err.message, ref: 'demo_insert_error' }); // updated log on error
             console.error('Failed to insert demo sheet:', err);
         }
     };

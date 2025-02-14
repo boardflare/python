@@ -134,6 +134,7 @@ export function SignInButton({ loadFunctions }) {
             });
 
             await storeToken(token);
+            pyLogs({ message: "Sign in successful", ref: "auth_signin_success" });
             setIsSignedIn(true);
             loadFunctions?.();
         } catch (error) {
