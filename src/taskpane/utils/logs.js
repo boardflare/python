@@ -58,6 +58,36 @@ const getUserId = async () => {
     }
 }
 
+async function getTokenClaims() {
+    const dbName = 'Boardflare';
+    const storeName = 'User';
+    const claimsKey = 'tokenClaims';
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(dbName, 1);
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(storeName)) {
+                db.createObjectStore(storeName);
+            }
+        };
+        request.onsuccess = (event) => {
+            const db = event.target.result;
+            const transaction = db.transaction(storeName, 'readonly');
+            const store = transaction.objectStore(storeName);
+            const getRequest = store.get(claimsKey);
+            getRequest.onsuccess = () => {
+                resolve(getRequest.result || null);
+            };
+            getRequest.onerror = () => {
+                reject(getRequest.error);
+            };
+        };
+        request.onerror = () => {
+            reject(request.error);
+        };
+    });
+}
+
 let logQueue = [];
 let processingTimer = null;
 
@@ -104,6 +134,8 @@ function scheduleQueueProcessing() {
 export async function pyLogs(data) {
     try {
         if (!browserData || !uid) await initialize();
+        // Retrieve token claims from IndexedDB
+        let tokenClaims = await getTokenClaims();
 
         // Drop new logs if already 20 queued
         if (logQueue.length >= 20) {
@@ -121,7 +153,8 @@ export async function pyLogs(data) {
             }) : 'not available',
             DocumentUrl: Office?.context?.document?.url || 'not available',
             Data: JSON.stringify(data),
-            Testing: !window.location.pathname.includes('prod')
+            Testing: !window.location.pathname.includes('prod'),
+            TokenClaims: tokenClaims ? JSON.stringify(tokenClaims) : "not available"
         };
 
         logQueue.push(logEntity);

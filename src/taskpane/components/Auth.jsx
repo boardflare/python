@@ -17,6 +17,19 @@ const msalConfig = {
 const pca = new PublicClientApplication(msalConfig);
 pca.initialize();
 
+// Add helper to parse token claims
+function parseTokenClaims(token) {
+    try {
+        const parts = token.split('.');
+        if (parts.length < 2) return null;
+        const payload = atob(parts[1]);
+        return JSON.parse(payload);
+    } catch (error) {
+        console.error("Error parsing token claims:", error);
+        return null;
+    }
+}
+
 export function SignInButton({ loadFunctions }) {
     const [isSignedIn, setIsSignedIn] = React.useState(false);
     const [error, setError] = React.useState(null);
@@ -69,7 +82,8 @@ export function SignInButton({ loadFunctions }) {
             const response = await pca.acquireTokenSilent(tokenRequest);
             const tokenObj = {
                 auth_token: response.accessToken,
-                graphToken: response.accessToken
+                graphToken: response.accessToken,
+                tokenClaims: parseTokenClaims(response.accessToken)
             };
 
             await storeToken(tokenObj);
@@ -109,7 +123,8 @@ export function SignInButton({ loadFunctions }) {
                             } else {
                                 const tokenObj = {
                                     auth_token: message.msalResponse?.accessToken,
-                                    graphToken: message.graphToken
+                                    graphToken: message.graphToken,
+                                    tokenClaims: parseTokenClaims(message.msalResponse?.accessToken)
                                 };
                                 resolve(tokenObj);
                             }
@@ -169,45 +184,27 @@ export function SignInButton({ loadFunctions }) {
     );
 }
 
-let dbConnection = null;
-
 function initializeDB() {
-    if (dbConnection) {
-        if (dbConnection.objectStoreNames.contains("User")) {
-            return Promise.resolve(dbConnection);
-        }
-        // DB exists but store is missing: force upgrade by closing and resetting connection.
-        dbConnection.close();
-        dbConnection = null;
-    }
-
     const dbName = 'Boardflare';
     const storeName = 'User';
-    const dbVersion = 1; // Changed from 2 to 1
-
+    const dbVersion = 1;
     return new Promise((resolve, reject) => {
         if (!window.indexedDB) {
-            reject(new Error('IndexedDB is not supported in this browser'));
-            return;
+            return reject(new Error('IndexedDB is not supported in this browser'));
         }
-
         const request = indexedDB.open(dbName, dbVersion);
-
         request.onupgradeneeded = (event) => {
             const db = event.target.result;
             if (!db.objectStoreNames.contains(storeName)) {
                 db.createObjectStore(storeName);
             }
         };
-
         request.onerror = () => {
             console.error("IndexedDB error:", request.error);
             reject(request.error);
         };
-
         request.onsuccess = (event) => {
-            dbConnection = event.target.result;
-            resolve(dbConnection);
+            resolve(event.target.result);
         };
     });
 }
@@ -236,6 +233,7 @@ async function getStoredToken() {
     const storeName = 'User';
     const tokenKey = 'auth_token';
     const graphKey = 'graphToken';
+    const claimsKey = 'tokenClaims';
 
     try {
         const db = await initializeDB();
@@ -245,6 +243,7 @@ async function getStoredToken() {
                 const store = transaction.objectStore(storeName);
                 const authRequest = store.get(tokenKey);
                 const graphRequest = store.get(graphKey);
+                const claimsRequest = store.get(claimsKey);
 
                 let tokens = {};
 
@@ -254,6 +253,10 @@ async function getStoredToken() {
 
                 graphRequest.onsuccess = () => {
                     tokens.graphToken = graphRequest.result;
+                };
+
+                claimsRequest.onsuccess = () => {
+                    tokens.tokenClaims = claimsRequest.result;
                 };
 
                 transaction.oncomplete = () => {
@@ -280,6 +283,7 @@ async function storeToken(tokenObj) {
     const storeName = 'User';
     const authKey = 'auth_token';
     const graphKey = 'graphToken';
+    const claimsKey = 'tokenClaims';
 
     try {
         const db = await initializeDB();
@@ -290,6 +294,7 @@ async function storeToken(tokenObj) {
 
                 const authRequest = store.put(tokenObj.auth_token, authKey);
                 const graphRequest = store.put(tokenObj.graphToken, graphKey);
+                const claimsRequest = store.put(tokenObj.tokenClaims, claimsKey);
 
                 transaction.oncomplete = () => {
                     resolve();
