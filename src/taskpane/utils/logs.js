@@ -105,6 +105,12 @@ export async function pyLogs(data) {
     try {
         if (!browserData || !uid) await initialize();
 
+        // Drop new logs if already 20 queued
+        if (logQueue.length >= 20) {
+            console.warn('Log dropped: maximum log queue reached');
+            return true;
+        }
+
         const logEntity = {
             PartitionKey: new Date().toISOString(),
             RowKey: uid,

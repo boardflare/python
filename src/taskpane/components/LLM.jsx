@@ -80,15 +80,13 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt }) => {
                 generatedCode = codeMatch[1].trim();
             }
 
-            // Add logging
-            await pyLogs({
+            pyLogs({
                 LLM: {
                     prompt: input,
                     content: generatedCode
                 }
             });
 
-            // Add prompt to the success callback
             onSuccess(generatedCode, input);
             onClose();
         } catch (err) {
