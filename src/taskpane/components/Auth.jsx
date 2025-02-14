@@ -1,5 +1,21 @@
 import * as React from "react";
 import { pyLogs } from "../utils/logs";
+import { PublicClientApplication } from "@azure/msal-browser";
+
+// Initialize MSAL configuration
+const msalConfig = {
+    auth: {
+        clientId: '0c94fdd5-ec39-4167-84ea-06ea727149b1',
+        authority: "https://login.microsoftonline.com/common",
+        redirectUri: window.location.origin + window.location.pathname
+    },
+    cache: {
+        cacheLocation: 'localStorage'
+    }
+};
+
+const pca = new PublicClientApplication(msalConfig);
+pca.initialize();
 
 export function SignInButton({ loadFunctions }) {
     const [isSignedIn, setIsSignedIn] = React.useState(false);
@@ -11,6 +27,10 @@ export function SignInButton({ loadFunctions }) {
 
     const checkAuthStatus = async () => {
         try {
+            // Try to refresh and store a new token first
+            await refreshToken();
+
+            // Now check stored token (either fresh or existing)
             const tokenObj = await getStoredToken();
             if (!tokenObj) {
                 setIsSignedIn(false);
@@ -29,6 +49,35 @@ export function SignInButton({ loadFunctions }) {
             console.error("Error checking auth status:", error);
             await pyLogs({ errorMessage: error.message, ref: "auth_checkAuthStatus_error" });
             setIsSignedIn(false);
+        }
+    };
+
+    const refreshToken = async () => {
+        try {
+            const accounts = pca.getAllAccounts();
+
+            // If no accounts, return null immediately
+            if (accounts.length === 0) {
+                return null;
+            }
+
+            const tokenRequest = {
+                scopes: ["User.Read", "Files.ReadWrite", "offline_access"],
+                account: accounts[0] // Always use first account if available
+            };
+
+            const response = await pca.acquireTokenSilent(tokenRequest);
+            const tokenObj = {
+                auth_token: response.accessToken,
+                graphToken: response.accessToken
+            };
+
+            await storeToken(tokenObj);
+            return tokenObj;
+        } catch (error) {
+            console.error("Error refreshing token:", error);
+            await pyLogs({ errorMessage: error.message, ref: "auth_refreshToken_error" });
+            return null;
         }
     };
 

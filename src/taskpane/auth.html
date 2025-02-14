@@ -26,12 +26,15 @@
                 await pca.handleRedirectPromise();
                 const accounts = pca.getAllAccounts();
                 if (accounts.length === 0) {
-                    await pca.loginRedirect();
+                    const loginRequest = {
+                        scopes: ["User.Read", "Files.ReadWrite", "offline_access"]
+                    };
+                    await pca.loginRedirect(loginRequest);
                     return;
                 }
 
                 const tokenRequest = {
-                    scopes: ["User.Read", "Files.ReadWrite"],
+                    scopes: ["User.Read", "Files.ReadWrite", "offline_access"],
                     account: accounts[0]
                 };
 
