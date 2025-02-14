@@ -45,8 +45,19 @@ const FunctionsTab = ({
 
     const FunctionTable = ({ functions, source }) => (
         <div className="overflow-x-auto">
-            <h3 className="font-semibold mb-1 text-center">
-                {source === 'workbook' ? 'Workbook Functions' : 'OneDrive Functions'}
+            <h3 className="font-semibold mb-1 text-center flex items-center justify-center gap-2">
+                {source === 'workbook' ? 'Workbook Functions' : (
+                    <>
+                        OneDrive Functions
+                        <button
+                            onClick={loadFunctions}
+                            className="text-blue-500 hover:text-blue-700"
+                            title="Refresh OneDrive functions"
+                        >
+                            🔄
+                        </button>
+                    </>
+                )}
             </h3>
             <table className="min-w-full bg-white mb-6">
                 <tbody>
