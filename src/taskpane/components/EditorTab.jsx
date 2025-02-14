@@ -135,10 +135,37 @@ const EditorTab = ({
         }
     };
 
-    const handleLLMSuccess = (generatedCode, prompt) => {
+    const handleLLMSuccess = async (generatedCode, prompt) => {
         editorRef.current.setValue(generatedCode);
-        setSelectedFunction({ name: selectedFunction.name, code: generatedCode, prompt });
-        showNotification("Function generated successfully!", "success");
+        try {
+            const parsedFunction = await parsePython(generatedCode);
+            if (prompt) {
+                parsedFunction.prompt = prompt;
+            }
+            // Force fileName to match workbook option format in App
+            parsedFunction.fileName = `${parsedFunction.name}.ipynb`;
+            const notebook = formatAsNotebook(parsedFunction);
+            try {
+                await saveFile(notebook, parsedFunction.fileName);
+            } catch (err) {
+                if (!(err instanceof TokenExpiredError)) {
+                    throw err;
+                }
+            }
+            await saveFunctionToSettings(parsedFunction);
+            await updateNameManager(parsedFunction);
+            await loadFunctions();
+            // Set selector to the newly saved function using workbook format
+            setSelectedFunction({
+                ...parsedFunction,
+                source: 'workbook'
+            });
+            showNotification(`Function saved successfully, you can use it as =${parsedFunction.name.toUpperCase()} in your workbook.`, "success");
+        } catch (err) {
+            if (!(err instanceof TokenExpiredError)) {
+                showNotification(err.message, "error");
+            }
+        }
     };
 
     return (
@@ -164,11 +191,7 @@ const EditorTab = ({
                     <h2 className="font-semibold"> ⬅️ Drag task pane open for more room.</h2>
                     <ul className="list-disc pl-5">
                         <li>Your code ⚠️MUST BE A FUNCTION!⚠️</li>
-                        <li>NO variable (e.g. *args) and optional (e.g. arg=4) args.</li>
-                        <li>NO AUTO-SAVE, make sure to save your work.</li>
-                        <li>Save: updates code if function already exists.</li>
-                        <li>Reset: returns editor to example function.</li>
-                        <li>Test: executes function using test_cases.</li>
+                        <li>Save will update code if function already exists.</li>
                         <li>See <a href="https://whistlernetworks.sharepoint.com/:p:/s/Boardflare/EavKXzTcSmJArk1FadRoH40BaFTd1xrff2cw3bGSRs3AFg?rtime=Mhp28Ns33Ug" target="_blank" rel="noopener" className="text-blue-500 underline">slideshow</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a> for details.</li>
                     </ul>
                 </div>

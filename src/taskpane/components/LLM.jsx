@@ -125,7 +125,7 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt }) => {
                     className="w-full h-60 p-2 border rounded mb-2 placeholder-gray-600"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="What should the function do?."
+                    placeholder="Describe what your custom function should do, and the AI will try to create one like =EXTRACT_EMAILS or =CALCULATE_AVERAGE that you can save and use in your workbook.  You can't' ask it general questions, it can only create functions."
                     disabled={isLoading}
                 />
                 <div className="flex justify-end space-x-2">
