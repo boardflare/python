@@ -97,41 +97,53 @@ async function processQueue() {
         return;
     }
 
-    // Process up to 20 items
-    const itemsToProcess = logQueue.slice(0, 20);
-    logQueue = logQueue.slice(20);
+    // Process up to 100 items
+    const itemsToProcess = logQueue.slice(0, 100);
+    logQueue = logQueue.slice(100);
+
+    // Aggregate logs using Timestamp as key
+    let aggregatedLogs = {};
+    for (const logEntity of itemsToProcess) {
+        const { Timestamp, ...rest } = logEntity; // remove Timestamp property before stringifying
+        aggregatedLogs[Timestamp] = JSON.stringify(rest);
+    }
+
+    // Create one aggregated entity and spread each key from aggregatedLogs
+    const aggregatedEntity = {
+        PartitionKey: new Date().toISOString(),
+        RowKey: uid,
+        ...aggregatedLogs
+    };
+
+    const body = JSON.stringify(aggregatedEntity);
 
     const headers = {
         'Accept': 'application/json;odata=nometadata',
         'Content-Type': 'application/json',
         'x-ms-date': new Date().toUTCString(),
         'x-ms-version': '2024-05-04',
-        'Prefer': 'return-no-content'
+        'Prefer': 'return-no-content',
+        'Content-Length': body.length.toString()
     };
 
-    for (const logEntity of itemsToProcess) {
-        const body = JSON.stringify(logEntity);
-        headers['Content-Length'] = body.length.toString();
-
-        try {
-            await fetch(pythonlogs_url, {
-                method: 'POST',
-                headers,
-                body
-            });
-        } catch (error) {
-            console.error('Error processing log:', error);
-        }
+    try {
+        await fetch(pythonlogs_url, {
+            method: 'POST',
+            headers,
+            body
+        });
+    } catch (error) {
+        console.error('Error processing aggregated log:', error);
     }
 
-    // Chain next processing after 5 seconds regardless of queue length
-    processingTimer = setTimeout(processQueue, 5000);
+    // Chain next processing after 10 seconds regardless of queue length
+    processingTimer = setTimeout(processQueue, 10000);
 }
 
 function scheduleQueueProcessing() {
     // Start processing if not scheduled already
     if (processingTimer === null) {
-        processingTimer = setTimeout(processQueue, 5000);
+        processingTimer = setTimeout(processQueue, 10000);
     }
 }
 
@@ -141,24 +153,24 @@ export async function pyLogs(data) {
         // Retrieve token claims from IndexedDB
         let tokenClaims = await getTokenClaims();
 
-        // Drop new logs if already 20 queued
-        if (logQueue.length >= 20) {
+        // Drop new logs if already 100 queued
+        if (logQueue.length >= 100) {
             console.warn('Log dropped: maximum log queue reached');
             return true;
         }
 
+        // Refactored logEntity: no stringification, Timestamp instead of PartitionKey, removed RowKey
         const logEntity = {
-            PartitionKey: new Date().toISOString(),
-            RowKey: uid,
-            BrowserData: JSON.stringify(browserData),
-            Office: Office?.context ? JSON.stringify({
-                diagnostics: Office.context?.diagnostics,
-                displayLanguage: Office.context?.displayLanguage
-            }) : 'not available',
+            Timestamp: new Date().toISOString(),
+            BrowserData: browserData,
+            Office: Office?.context ? {
+                diagnostics: Office.context.diagnostics,
+                displayLanguage: Office.context.displayLanguage
+            } : 'not available',
             DocumentUrl: Office?.context?.document?.url || 'not available',
-            Data: JSON.stringify(data),
+            Data: data,
             Testing: !window.location.pathname.includes('prod'),
-            TokenClaims: tokenClaims ? JSON.stringify(tokenClaims) : "not available"
+            TokenClaims: tokenClaims || "not available"
         };
 
         logQueue.push(logEntity);
