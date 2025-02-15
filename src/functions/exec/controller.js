@@ -31,7 +31,14 @@ export async function execPython({ code, arg1 }) {
             arg1,
             graphToken
         });
-        pyLogs({ code, ref: "execPython" });
+        try {
+            if (window.isChromiumOrEdge) {
+                window.gtag('event', 'py', { code_length: code.length });
+            }
+            pyLogs({ code, ref: "execPython" });
+        } catch (logError) {
+            console.error('Logging error in execPython:', logError);
+        }
         if (stdout.trim()) {
             ConsoleEvents.emit(EventTypes.LOG, stdout.trim());
         }

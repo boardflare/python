@@ -97,7 +97,7 @@ async function processQueue() {
         return;
     }
 
-    // Take first 20 items and clear them from queue
+    // Process up to 20 items
     const itemsToProcess = logQueue.slice(0, 20);
     logQueue = logQueue.slice(20);
 
@@ -123,9 +123,13 @@ async function processQueue() {
             console.error('Error processing log:', error);
         }
     }
+
+    // Chain next processing after 5 seconds regardless of queue length
+    processingTimer = setTimeout(processQueue, 5000);
 }
 
 function scheduleQueueProcessing() {
+    // Start processing if not scheduled already
     if (processingTimer === null) {
         processingTimer = setTimeout(processQueue, 5000);
     }
