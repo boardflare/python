@@ -111,13 +111,13 @@ async function flushLogs() {
 
             let aggregatedLogs = {
                 BrowserData: JSON.stringify(browserData),
-                Office: (typeof Office !== "undefined" && Office.context) ? JSON.stringify({
-                    diagnostics: Office.context.diagnostics,
-                    displayLanguage: Office.context.displayLanguage
-                }) : 'not available',
-                DocumentUrl: (typeof Office !== "undefined" && Office.context && Office.context.document) ? Office.context.document.url : 'not available',
+                Office: JSON.stringify({
+                    diagnostics: Office?.context?.diagnostics,
+                    displayLanguage: Office?.context?.displayLanguage
+                }),
+                DocumentUrl: Office?.context?.document?.url,
                 Testing: !window.location.pathname.includes('prod'),
-                TokenClaims: JSON.stringify(tokenClaims || "not available")
+                TokenClaims: JSON.stringify(tokenClaims)
             };
 
             // Add individual logs
