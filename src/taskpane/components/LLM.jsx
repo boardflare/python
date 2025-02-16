@@ -1,17 +1,28 @@
-import React, { useState } from "react";
-import { pyLogs } from "../utils/logs";  // Add this import
+import React, { useState, useEffect } from "react";
+import { pyLogs } from "../utils/logs";
+// New imports for saving inside LLM:
+import { parsePython } from "../utils/codeparser";
+import { saveFunctionToSettings } from "../utils/workbookSettings";
+import { updateNameManager } from "../utils/nameManager";
 
 const LLM_URL = process.env.NODE_ENV === 'development'
     ? 'https://codepy.boardflare.workers.dev' //'http://127.0.0.1:8787'
     : 'https://codepy.boardflare.workers.dev';
 
-const LLM = ({ isOpen, onClose, onSuccess }) => {
-    const [input, setInput] = useState("");
+const LLM = ({ isOpen, onClose, onSuccess, prompt, loadFunctions }) => { // NEW: added loadFunctions prop
+    const [input, setInput] = useState(prompt || "");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [isSaved, setIsSaved] = useState(false);
+    const [savedFunction, setSavedFunction] = useState(null);
+
+    // Add useEffect to update prompt state when prompt prop changes
+    useEffect(() => {
+        setInput(prompt || "");
+    }, [prompt]);
 
     const examplePrompts = [
-        { value: "", label: "Select an example prompt..." },
+        { value: "", label: "Select an example ..." },
         { value: "Add two numbers and return their sum.", label: "Add two numbers" },
         { value: "Convert a single string, or 2D list of strings, to uppercase.", label: "Convert to uppercase" },
         { value: "Calculate the average of a 2D list of numbers", label: "Calculate average" },
@@ -37,6 +48,8 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
     const handleSubmit = async () => {
         setIsLoading(true);
         setError("");
+        const abortController = new AbortController();
+        const timeoutId = setTimeout(() => abortController.abort(), 15000); // 15-second timeout
 
         // Use default prompt if input is empty
         const promptText = input.trim() || "Add two numbers and return their sum.";
@@ -47,7 +60,7 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
                 { role: 'system', content: `Create a single Python function with docstring that fulfills the user's request. The function args must be Python types float, str, bool, None or a 2D list of those types. Parameter names cannot contain numbers. Variable length arguments (e.g. *args or **kwargs) are not allowed. Do not include any print statements, example usage, type hints, or explanations.  Define a test_cases variable that is a list with nested lists of example args.  e.g. test_cases = [["hello"],[[["hello", "world"]]]] includes a case with a str arg, and a case with a 2D list arg.` },
                 { role: 'user', content: promptText },
             ],
-            max_tokens: 1000,
+            max_tokens: 800,
             temperature: 0.1
         };
 
@@ -56,7 +69,10 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ genText }),
+                signal: abortController.signal
             });
+
+            clearTimeout(timeoutId); // clear timeout upon response
 
             if (!response.ok) {
                 throw new Error('Failed to generate code');
@@ -70,22 +86,54 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
                 generatedCode = codeMatch[1].trim();
             }
 
-            // Add logging
-            await pyLogs({
+            pyLogs({
                 LLM: {
                     prompt: input,
                     content: generatedCode
                 }
             });
 
-            onSuccess(generatedCode);
-            onClose();
+            // NEW: Parse and save the generated function inside LLM
+            const parsedFunction = await parsePython(generatedCode);
+            await saveFunctionToSettings(parsedFunction);
+            await updateNameManager(parsedFunction);
+            // NEW: Refresh function list after saving
+            if (loadFunctions) {
+                await loadFunctions();
+            }
+            setSavedFunction(parsedFunction);
+            setIsSaved(true);
+
         } catch (err) {
-            setError(err.message);
+            if (err.name === "AbortError") {
+                setError("Request timed out after 10 seconds.");
+            } else {
+                setError(err.message);
+            }
         } finally {
             setIsLoading(false);
         }
     };
+
+    // If successfully saved, show success message with a button to continue to editor.
+    if (isSaved) {
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center px-2">
+                <div className="bg-white rounded-lg p-3 w-full">
+                    <h2 className="text-xl mb-2">Function Created Successfully!</h2>
+                    <p className="mb-4">Use your function in Excel as follows:</p>
+                    <p className="mb-4">={savedFunction.signature}</p>
+                    <p className="mb-4">Next, you will be taken to the code editor where you can edit the code generated by the AI and test the function.</p>
+                    <button
+                        onClick={() => { onSuccess(savedFunction, input); onClose(); }}
+                        className="px-4 py-2 bg-blue-500 text-white rounded"
+                    >
+                        Continue
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center px-2">
@@ -109,10 +157,10 @@ const LLM = ({ isOpen, onClose, onSuccess }) => {
                     ))}
                 </select>
                 <textarea
-                    className="w-full h-60 p-2 border rounded mb-2"
+                    className="w-full h-60 p-2 border rounded mb-2 placeholder-gray-600"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Describe what the function should do, similar to what you would put in a docstring.  You can try an example prompt using the dropdown above."
+                    placeholder="Describe what your custom function should do, and the AI will try to create one like =EXTRACT_EMAILS or =CALCULATE_AVERAGE that you can save and use in your workbook.  You can't' ask it general questions, it can only create functions."
                     disabled={isLoading}
                 />
                 <div className="flex justify-end space-x-2">

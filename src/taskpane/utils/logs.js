@@ -1,8 +1,19 @@
-const pythonlogs_url = "https://boardflare.table.core.windows.net/PythonLogs?sv=2019-02-02&st=2025-01-10T13%3A22%3A09Z&se=2035-01-11T13%3A22%3A00Z&sp=a&sig=wI1bR8fclUbVW36qtYTzLzi80B0LtYA49ECUlIsLl7M%3D&tn=PythonLogs";
-const feedback_url = "https://boardflare.table.core.windows.net/Feedback?sv=2019-02-02&st=2025-01-10T13%3A55%3A06Z&se=2035-01-11T13%3A55%3A00Z&sp=a&sig=u%2F%2BYYEe17NGq1MhnWJYfk3P2wwxTwSY4Xsps9HsHUxA%3D&tn=Feedback"
-
 let browserData = null;
 let uid = null;
+let isFlushing = false;
+
+// Helper to open IndexedDB; used for both 'User' and 'BoardflareLogs' stores.
+function openDatabase(dbName, version, upgradeCallback) {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(dbName, version);
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            upgradeCallback && upgradeCallback(db);
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
 
 export async function initialize() {
     const adapter = await navigator.gpu.requestAdapter();
@@ -14,120 +25,172 @@ export async function initialize() {
     uid = await getUserId();
 }
 
-const getUserId = async () => {
-    try {
-        const dbName = 'Boardflare';
-        const storeName = 'User';
+async function getUserId() {
+    const db = await openDatabase('Boardflare', 1, (db) => {
+        if (!db.objectStoreNames.contains('User')) {
+            db.createObjectStore('User');
+        }
+    });
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction('User', 'readwrite');
+        const store = tx.objectStore('User');
         const storageKey = 'anonymous_id';
-
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open(dbName, 1);
-
-            request.onupgradeneeded = (event) => {
-                const db = event.target.result;
-                db.createObjectStore(storeName);
-            };
-
-            request.onsuccess = (event) => {
-                const db = event.target.result;
-                const transaction = db.transaction(storeName, 'readwrite');
-                const store = transaction.objectStore(storeName);
-                const getRequest = store.get(storageKey);
-
-                getRequest.onsuccess = () => {
-                    let userId = getRequest.result;
-                    if (!userId) {
-                        userId = crypto.randomUUID();
-                        store.put(userId, storageKey);
-                    }
-                    resolve(userId);
-                };
-
-                getRequest.onerror = () => {
-                    reject(getRequest.error);
-                };
-            };
-
-            request.onerror = () => {
-                reject(request.error);
-            };
-        });
-    } catch (error) {
-        console.error('Error:', error);
-        throw error;
-    }
+        const request = store.get(storageKey);
+        request.onsuccess = () => {
+            let userId = request.result;
+            if (!userId) {
+                userId = crypto.randomUUID();
+                store.put(userId, storageKey);
+            }
+            resolve(userId);
+        };
+        request.onerror = () => reject(request.error);
+    });
 }
 
-let logQueue = [];
-let processingTimer = null;
+async function getTokenClaims() {
+    const db = await openDatabase('Boardflare', 1, (db) => {
+        if (!db.objectStoreNames.contains('User')) {
+            db.createObjectStore('User');
+        }
+    });
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction('User', 'readonly');
+        const store = tx.objectStore('User');
+        const request = store.get('tokenClaims');
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+    });
+}
 
-async function processQueue() {
-    if (logQueue.length === 0) {
-        processingTimer = null;
+async function saveLogToIndexedDB(logEntity) {
+    const db = await openDatabase('BoardflareLogs', 1, (db) => {
+        if (!db.objectStoreNames.contains('Logs')) {
+            db.createObjectStore('Logs', { autoIncrement: true });
+        }
+    });
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction('Logs', 'readwrite');
+        const store = tx.objectStore('Logs');
+        const request = store.add(logEntity);
+        request.onsuccess = () => {
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function flushLogs() {
+    if (isFlushing) {
         return;
     }
+    isFlushing = true;
+    if (!uid) await initialize();
 
-    // Take first 20 items and clear them from queue
-    const itemsToProcess = logQueue.slice(0, 20);
-    logQueue = logQueue.slice(20);
+    try {
+        const db = await openDatabase('BoardflareLogs', 1, (db) => {
+            if (!db.objectStoreNames.contains('Logs')) {
+                db.createObjectStore('Logs', { autoIncrement: true });
+            }
+        });
+        const tx = db.transaction('Logs', 'readwrite');
+        const store = tx.objectStore('Logs');
 
-    const headers = {
-        'Accept': 'application/json;odata=nometadata',
-        'Content-Type': 'application/json',
-        'x-ms-date': new Date().toUTCString(),
-        'x-ms-version': '2024-05-04',
-        'Prefer': 'return-no-content'
-    };
+        // Retrieve all logs
+        const allLogs = await new Promise((resolve, reject) => {
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
 
-    for (const logEntity of itemsToProcess) {
-        const body = JSON.stringify(logEntity);
-        headers['Content-Length'] = body.length.toString();
+        if (allLogs.length) {
+            // Only take the first 100 logs
+            const logsToFlush = allLogs.slice(0, 100);
+            const tokenClaims = await getTokenClaims();
 
-        try {
-            await fetch(pythonlogs_url, {
-                method: 'POST',
-                headers,
-                body
+            let aggregatedLogs = {
+                BrowserData: JSON.stringify(browserData),
+                Office: JSON.stringify({
+                    diagnostics: Office?.context?.diagnostics,
+                    displayLanguage: Office?.context?.displayLanguage
+                }),
+                DocumentUrl: Office?.context?.document?.url,
+                Testing: !window.location.pathname.includes('prod'),
+                TokenClaims: JSON.stringify(tokenClaims)
+            };
+
+            // Add individual logs
+            logsToFlush.forEach((log, index) => {
+                aggregatedLogs["Log" + index] = JSON.stringify({
+                    Timestamp: log.Timestamp,
+                    Data: log.Data
+                });
             });
-        } catch (error) {
-            console.error('Error processing log:', error);
+
+            const body = JSON.stringify({
+                PartitionKey: new Date().toISOString(),
+                RowKey: uid,
+                ...aggregatedLogs
+            });
+            const headers = {
+                'Accept': 'application/json;odata=nometadata',
+                'Content-Type': 'application/json',
+                'x-ms-date': new Date().toUTCString(),
+                'x-ms-version': '2024-05-04',
+                'Prefer': 'return-no-content',
+                'Content-Length': body.length.toString()
+            };
+            try {
+                // Send logs to server
+                await fetch("https://boardflare.table.core.windows.net/NewLogsFeb16?sv=2019-02-02&st=2025-02-16T15%3A04%3A59Z&se=2025-02-17T15%3A04%3A59Z&sp=a&sig=Jsisr%2F%2BK%2B9U5jWB4ilN4jHqzl4HBJnNaL1iusWSFRkA%3D&tn=NewLogsFeb16", { method: 'POST', headers, body });
+                // Clear the logs store
+                await new Promise((resolve, reject) => {
+                    const clearTx = db.transaction('Logs', 'readwrite');
+                    const clearStore = clearTx.objectStore('Logs');
+                    const req = clearStore.clear();
+                    req.onsuccess = () => resolve();
+                    req.onerror = () => reject(req.error);
+                });
+            } catch (err) {
+            }
+        } else {
         }
+    } catch (error) {
+    }
+    isFlushing = false;
+}
+
+// Replace the scheduleFlush with a single async loop.
+async function runFlushLoop() {
+    while (true) {
+        await flushLogs();
+        await new Promise(resolve => setTimeout(resolve, 30000));
     }
 }
 
-function scheduleQueueProcessing() {
-    if (processingTimer === null) {
-        processingTimer = setTimeout(processQueue, 5000);
-    }
+// Guard to ensure only one flush loop is running.
+if (!window.__flushLoopStarted) {
+    window.__flushLoopStarted = true;
+    runFlushLoop();
 }
 
 export async function pyLogs(data) {
     try {
         if (!browserData || !uid) await initialize();
-
         const logEntity = {
-            PartitionKey: new Date().toISOString(),
-            RowKey: uid,
-            BrowserData: JSON.stringify(browserData),
-            Office: Office?.context ? JSON.stringify({
-                diagnostics: Office.context?.diagnostics,
-                displayLanguage: Office.context?.displayLanguage
-            }) : 'not available',
-            Data: JSON.stringify(data)
+            Timestamp: new Date().toISOString(),
+            Data: data
         };
-
-        logQueue.push(logEntity);
-        scheduleQueueProcessing();
+        await saveLogToIndexedDB(logEntity);
         return true;
     } catch (error) {
-        console.error('Error in pyLogs:', error);
         return false;
     }
 }
 
 export async function feedback(data) {
     if (!browserData || !uid) await initialize();
-
     const feedbackEntity = {
         PartitionKey: new Date().toISOString(),
         RowKey: "Python",
@@ -135,9 +198,7 @@ export async function feedback(data) {
         uid,
         ...data
     };
-
     const body = JSON.stringify(feedbackEntity);
-
     const headers = {
         'Accept': 'application/json;odata=nometadata',
         'Content-Type': 'application/json',
@@ -146,16 +207,10 @@ export async function feedback(data) {
         'x-ms-version': '2024-05-04',
         'Prefer': 'return-no-content'
     };
-
     try {
-        const response = await fetch(feedback_url, {
-            method: 'POST',
-            headers,
-            body
-        });
+        const response = await fetch("https://boardflare.table.core.windows.net/Feedback?sv=2019-02-02&st=2025-01-10T13%3A55%3A06Z&se=2035-01-11T13%3A55%3A00Z&sp=a&sig=u%2F%2BYYEe17NGq1MhnWJYfk3P2wwxTwSY4Xsps9HsHUxA%3D&tn=Feedback", { method: 'POST', headers, body });
         return response.ok;
     } catch (error) {
-        console.error('Error:', error);
         return false;
     }
 }

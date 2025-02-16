@@ -24,6 +24,7 @@ module.exports = async (env, options) => {
       vendor: ["react", "react-dom"],
       taskpane: ["./src/taskpane/index.jsx", "./src/taskpane/home.html"],
       functions: "./src/functions/functions.js",
+      auth: "./src/taskpane/auth.html",  // Add auth entry point
     },
     output: {
       clean: true,
@@ -74,6 +75,17 @@ module.exports = async (env, options) => {
         {
           test: /\.py$/,
           type: 'asset/source'
+        },
+        {
+          test: /\.ipynb$/,
+          type: 'json'  // This will automatically parse JSON files
+        },
+        {
+          test: /\.xlsx$/,
+          type: 'asset/resource',
+          generator: {
+            filename: 'assets/[name][ext][query]'
+          }
         }
       ],
     },
@@ -89,6 +101,11 @@ module.exports = async (env, options) => {
         filename: "home.html",
         template: "./src/taskpane/home.html",
         chunks: ["vendor", "functions", "taskpane"],
+      }),
+      new HtmlWebpackPlugin({
+        filename: "auth.html",
+        template: "./src/taskpane/auth.html",
+        chunks: ["auth"],
       }),
       new CopyWebpackPlugin({
         patterns: [

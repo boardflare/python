@@ -5,7 +5,7 @@ import xlsxwriter
 def create_worksheet():
     output = io.BytesIO()
     workbook = xlsxwriter.Workbook(output)
-    worksheet = workbook.add_worksheet()
+    worksheet = workbook.add_worksheet('python_demo')
     
     # Start of where to modify code.
 
@@ -19,6 +19,7 @@ def create_worksheet():
     worksheet.write('A1', 'Header', header_format)
     worksheet.write('A2', 10)
     worksheet.write_formula('B2', '=A2*2')
+    worksheet.write_array_formula('B3', '=HELLO("foo")')  # Remove _xlfn prefix
 
     # End of where to modify code.
     

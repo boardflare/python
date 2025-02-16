@@ -1,21 +1,26 @@
 import * as React from "react";
 import { MonacoEditor } from "./MonacoEditor";
-import LLM from "./LLM"; // Import LLM component
-import { saveFunctionToSettings, getFunctionFromSettings } from "../utils/workbookSettings";
+import LLM from "./LLM"; // 
+import { saveFunctionToSettings } from "../utils/workbookSettings";
 import { DEFAULT_CODE } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
 import { EventTypes } from "../utils/constants";
 import { updateNameManager } from "../utils/nameManager";
-import { singleDemo } from "../utils/demo";
 import { runTests } from "../utils/testRunner";
+import { saveFile, formatAsNotebook, TokenExpiredError } from "../utils/drive";
 
-const LLM_URL = process.env.NODE_ENV === 'development'
-    ? 'http://127.0.0.1:8787'
-    : 'https://codepy.boardflare.workers.dev';
-
-const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCode, setGeneratedCode }) => {
+const EditorTab = ({
+    selectedFunction,
+    setSelectedFunction,
+    onTest,
+    generatedCode,
+    setGeneratedCode,
+    functionsCache,
+    workbookFunctions,
+    onedriveFunctions,
+    loadFunctions  // Changed from onFunctionSaved
+}) => {
     const [notification, setNotification] = React.useState("");
-    const [functions, setFunctions] = React.useState([]);
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const notificationTimeoutRef = React.useRef();
     const editorRef = React.useRef(null);
@@ -39,44 +44,40 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
     }, []);
 
     React.useEffect(() => {
-        const loadFunctions = async () => {
-            try {
-                const funcs = await getFunctionFromSettings();
-                setFunctions(funcs);
-            } catch (err) {
-                showNotification(err.message, "error");  // Use notification instead of error
-            }
-        };
-        loadFunctions();
-    }, []);
+        if (!editorRef.current) return;
 
-    React.useEffect(() => {
-        if (selectedFunction.name && editorRef.current) {
-            const func = functions.find(f => f.name === selectedFunction.name);
-            if (func && !selectedFunction.code) {  // Only update if code is not already set
-                editorRef.current.setValue(func.code);
-                setSelectedFunction(func);
-            }
-        }
-    }, [selectedFunction.name, functions]);
-
-    React.useEffect(() => {
-        if (generatedCode && editorRef.current) {
+        if (generatedCode) {
             editorRef.current.setValue(generatedCode);
-            setSelectedFunction({ name: "", code: generatedCode });
-            setGeneratedCode(null); // Clear the generated code after using it
+            setGeneratedCode(null); // Clear after setting
+            return;
         }
-    }, [generatedCode, setGeneratedCode]);
+
+        const source = selectedFunction?.source || 'workbook';
+        const id = source === 'workbook' ? selectedFunction?.name : selectedFunction?.fileName;
+        const cacheKey = `${source}-${id}`;
+        const cachedFunc = functionsCache.current.get(cacheKey);
+
+        if (cachedFunc?.code && editorRef.current?.setValue) {
+            editorRef.current.setValue(cachedFunc.code);
+        } else if (selectedFunction?.code && editorRef.current?.setValue) {
+            editorRef.current.setValue(selectedFunction.code);
+        } else if (editorRef.current?.setValue) {
+            editorRef.current.setValue(DEFAULT_CODE);
+        }
+    }, [selectedFunction?.name, selectedFunction?.fileName, generatedCode]);
+
+    // Add cleanup
+    React.useEffect(() => {
+        return () => {
+            editorRef.current = null;
+            setNotification("");
+        };
+    }, []);
 
     const handleEditorDidMount = (editor, monaco) => {
         editorRef.current = editor;
-        if (selectedFunction.code) {
+        if (selectedFunction?.code) {
             editor.setValue(selectedFunction.code);
-        } else if (selectedFunction.name) {
-            const func = functions.find(f => f.name === selectedFunction.name);
-            if (func) {
-                editor.setValue(func.code);
-            }
         } else {
             editor.setValue(DEFAULT_CODE);
         }
@@ -86,22 +87,38 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
         try {
             const code = editorRef.current.getValue();
             const parsedFunction = await parsePython(code);
+
+            if (selectedFunction.prompt) {
+                parsedFunction.prompt = selectedFunction.prompt;
+            }
+
+            // Save to OneDrive
+            const notebook = formatAsNotebook(parsedFunction);
+            try {
+                await saveFile(notebook, `${parsedFunction.name}.ipynb`);
+            } catch (err) {
+                if (!(err instanceof TokenExpiredError)) {
+                    throw err;
+                }
+            }
+
+            // Continue with existing save logic
             await saveFunctionToSettings(parsedFunction);
             await updateNameManager(parsedFunction);
             showNotification(`${parsedFunction.signature} saved!`, "success");
-            const updatedFunctions = await getFunctionFromSettings();
-            setFunctions(updatedFunctions);
-            setSelectedFunction(parsedFunction);
-        } catch (err) {
-            showNotification(err.message, "error");
-        }
-    };
 
-    const handleReset = () => {
-        if (editorRef.current) {
-            editorRef.current.setValue(DEFAULT_CODE);
-            setSelectedFunction({ name: "", code: DEFAULT_CODE });
-            setNotification(""); // Only clear notification
+            // Notify parent to reload functions
+            await loadFunctions();
+
+            // Update selected function with source
+            setSelectedFunction({
+                ...parsedFunction,
+                source: 'workbook'  // New functions are always saved to workbook first
+            });
+        } catch (err) {
+            if (!(err instanceof TokenExpiredError)) {
+                showNotification(err.message, "error");
+            }
         }
     };
 
@@ -118,19 +135,24 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
         }
     };
 
-    const handleLLMSuccess = (generatedCode) => {
-        editorRef.current.setValue(generatedCode);
-        setSelectedFunction({ name: selectedFunction.name, code: generatedCode });
-        showNotification("Function generated successfully!", "success");
+    // Updated onSuccess callback from LLM – now only updates the UI.
+    const handleLLMSuccess = (savedFunction, prompt) => {
+        editorRef.current.setValue(savedFunction.code);
+        setSelectedFunction({ ...savedFunction, source: 'workbook' });
+        showNotification(`Function saved successfully!`, "success");
     };
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
             <div className="flex-1 overflow-hidden mt-2">
                 <MonacoEditor
-                    value={selectedFunction.code || DEFAULT_CODE}
+                    value={selectedFunction?.code || DEFAULT_CODE}
                     onMount={handleEditorDidMount}
-                    onChange={(value) => setSelectedFunction(prev => ({ ...prev, code: value }))}
+                    onChange={(value) => {
+                        if (value !== selectedFunction?.code) { // Only update if actually changed
+                            setSelectedFunction(prev => ({ ...prev, code: value }));
+                        }
+                    }}
                 />
             </div>
             {notification && (
@@ -143,33 +165,52 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
                     <h2 className="font-semibold"> ⬅️ Drag task pane open for more room.</h2>
                     <ul className="list-disc pl-5">
                         <li>Your code ⚠️MUST BE A FUNCTION!⚠️</li>
-                        <li>NO variable (e.g. *args) and optional (e.g. arg=4) args.</li>
-                        <li>NO AUTO-SAVE, make sure to save your work.</li>
-                        <li>Save: updates code if function already exists.</li>
-                        <li>Reset: returns editor to example function.</li>
-                        <li>Test: executes function using test_cases.</li>
+                        <li>Save will update code if function already exists.</li>
                         <li>See <a href="https://whistlernetworks.sharepoint.com/:p:/s/Boardflare/EavKXzTcSmJArk1FadRoH40BaFTd1xrff2cw3bGSRs3AFg?rtime=Mhp28Ns33Ug" target="_blank" rel="noopener" className="text-blue-500 underline">slideshow</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a> for details.</li>
                     </ul>
                 </div>
             )}
             <div className="flex justify-between items-center py-2">
                 <select
-                    value={selectedFunction.name}
+                    value={selectedFunction ? `${selectedFunction.source || 'workbook'}-${selectedFunction.source === 'onedrive' ? selectedFunction.fileName : selectedFunction.name}` : ""}
                     onChange={(e) => {
-                        const func = functions.find(f => f.name === e.target.value);
-                        const newCode = func?.code || DEFAULT_CODE;
-                        editorRef.current.setValue(newCode);
-                        setSelectedFunction({ name: e.target.value, code: newCode });
+                        const [source, id] = e.target.value.split('-');
+                        const cacheKey = `${source}-${id}`;
+                        const func = functionsCache.current.get(cacheKey);
+                        if (func) {
+                            editorRef.current.setValue(func.code);
+                            setSelectedFunction({
+                                ...func,
+                                source: source
+                            });
+                        } else {
+                            editorRef.current.setValue(DEFAULT_CODE);
+                            setSelectedFunction({ name: "", code: DEFAULT_CODE });
+                        }
                     }}
                     className="px-2 py-1 border rounded"
                 >
                     <option value="">Select a function...</option>
-                    {functions.map(f => (
-                        <option key={f.name} value={f.name}>{f.name}</option>
-                    ))}
+                    {workbookFunctions.length > 0 && (
+                        <optgroup label="Workbook Functions">
+                            {workbookFunctions.map(f => (
+                                <option key={`workbook-${f.name}`} value={`workbook-${f.name}`}>
+                                    {f.name}
+                                </option>
+                            ))}
+                        </optgroup>
+                    )}
+                    {onedriveFunctions.length > 0 && (
+                        <optgroup label="OneDrive Functions">
+                            {onedriveFunctions.map(f => (
+                                <option key={`onedrive-${f.fileName}`} value={`onedrive-${f.fileName}`}>
+                                    {f.name}
+                                </option>
+                            ))}
+                        </optgroup>
+                    )}
                 </select>
                 <div className="space-x-2">
-                    <button onClick={handleReset} className="px-2 py-1 bg-gray-200 rounded">Reset</button>
                     <button onClick={handleTest} className="px-2 py-1 bg-green-500 text-white rounded">Test</button>
                     <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
                     <button onClick={() => setIsLLMOpen(true)} className="px-2 py-1 bg-purple-500 text-white rounded">AI✨</button>
@@ -179,6 +220,8 @@ const EditorTab = ({ selectedFunction, setSelectedFunction, onTest, generatedCod
                 isOpen={isLLMOpen}
                 onClose={() => setIsLLMOpen(false)}
                 onSuccess={handleLLMSuccess}
+                prompt={selectedFunction.prompt}
+                loadFunctions={loadFunctions} // NEW: pass loadFunctions for refreshing functions list
             />
         </div>
     );
