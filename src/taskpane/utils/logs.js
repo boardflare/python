@@ -105,12 +105,29 @@ async function flushLogs() {
         });
 
         if (allLogs.length) {
-            // Only take the first 100 logs; the rest will be deleted when clear is called
+            // Only take the first 100 logs
             const logsToFlush = allLogs.slice(0, 100);
-            let aggregatedLogs = {};
+            const tokenClaims = await getTokenClaims();
+
+            let aggregatedLogs = {
+                BrowserData: JSON.stringify(browserData),
+                Office: (typeof Office !== "undefined" && Office.context) ? JSON.stringify({
+                    diagnostics: Office.context.diagnostics,
+                    displayLanguage: Office.context.displayLanguage
+                }) : 'not available',
+                DocumentUrl: (typeof Office !== "undefined" && Office.context && Office.context.document) ? Office.context.document.url : 'not available',
+                Testing: !window.location.pathname.includes('prod'),
+                TokenClaims: JSON.stringify(tokenClaims || "not available")
+            };
+
+            // Add individual logs
             logsToFlush.forEach((log, index) => {
-                aggregatedLogs["Log" + index] = JSON.stringify(log);
+                aggregatedLogs["Log" + index] = JSON.stringify({
+                    Timestamp: log.Timestamp,
+                    Data: log.Data
+                });
             });
+
             const body = JSON.stringify({
                 PartitionKey: new Date().toISOString(),
                 RowKey: uid,
@@ -126,7 +143,7 @@ async function flushLogs() {
             };
             try {
                 // Send logs to server
-                await fetch("https://boardflare.table.core.windows.net/Feb152025Logs?sv=2019-02-02&st=2025-02-15T18%3A55%3A48Z&se=2035-02-16T18%3A55%3A00Z&sp=a&sig=coAosFtK4ba65wXu1q70BszVSPLFIU5NitYQTNrGEOI%3D&tn=Feb152025Logs", { method: 'POST', headers, body });
+                await fetch("https://boardflare.table.core.windows.net/NewLogsFeb16?sv=2019-02-02&st=2025-02-16T15%3A04%3A59Z&se=2025-02-17T15%3A04%3A59Z&sp=a&sig=Jsisr%2F%2BK%2B9U5jWB4ilN4jHqzl4HBJnNaL1iusWSFRkA%3D&tn=NewLogsFeb16", { method: 'POST', headers, body });
                 // Clear the logs store
                 await new Promise((resolve, reject) => {
                     const clearTx = db.transaction('Logs', 'readwrite');
@@ -161,21 +178,10 @@ if (!window.__flushLoopStarted) {
 export async function pyLogs(data) {
     try {
         if (!browserData || !uid) await initialize();
-        // Retrieve token claims
-        const tokenClaims = await getTokenClaims();
         const logEntity = {
             Timestamp: new Date().toISOString(),
-            BrowserData: browserData,
-            Office: (typeof Office !== "undefined" && Office.context) ? {
-                diagnostics: Office.context.diagnostics,
-                displayLanguage: Office.context.displayLanguage
-            } : 'not available',
-            DocumentUrl: (typeof Office !== "undefined" && Office.context && Office.context.document) ? Office.context.document.url : 'not available',
-            Data: data,
-            Testing: !window.location.pathname.includes('prod'),
-            TokenClaims: tokenClaims || "not available"
+            Data: data
         };
-        // Save log to IndexedDB
         await saveLogToIndexedDB(logEntity);
         return true;
     } catch (error) {
