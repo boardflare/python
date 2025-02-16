@@ -59,12 +59,21 @@ export async function singleDemo(parsedCode) {
                 // Add excelExample code to cell A3
                 const codeRange = sheet.getRangeByIndexes(2, 0, 1, 1);
                 codeRange.values = [[parsedCode.excelExample]];
+                await context.sync();
             } catch (exampleError) {
-                // If adding example fails, write error message to A3
-                const errorRange = sheet.getRangeByIndexes(2, 0, 1, 1);
-                errorRange.values = [[`Error in example code: ${exampleError.message}`]];
-                errorRange.format.fill.color = "#FFE0E0";
-                console.error("Failed to add example code:", exampleError);
+                // Retry with semicolons instead of commas
+                try {
+                    const modifiedExample = parsedCode.excelExample.replace(/,/g, ';');
+                    const codeRange = sheet.getRangeByIndexes(2, 0, 1, 1);
+                    codeRange.values = [[modifiedExample]];
+                    await context.sync();
+                } catch (retryError) {
+                    // If both attempts fail, write error message to A3
+                    const errorRange = sheet.getRangeByIndexes(2, 0, 1, 1);
+                    errorRange.values = [[`Error in example code: ${exampleError.message}`]];
+                    errorRange.format.fill.color = "#FFE0E0";
+                    console.error("Failed to add example code:", exampleError);
+                }
             }
 
             // Activate the sheet
@@ -120,16 +129,32 @@ export async function multiDemo(parsedFunctions, sheetName = "ExampleFunctions")
             headerRange.format.fill.color = "#D9D9D9";
             headerRange.format.font.bold = true;
 
-            parsedFunctions.forEach((parsedFunction, index) => {
-                const dataRow = index + 2; // Data rows start at row index 2
+            for (const [index, parsedFunction] of parsedFunctions.entries()) {
+                const dataRow = index + 2;
                 const functionRange = sheet.getRange(`A${dataRow + 1}`);
                 const descriptionRange = sheet.getRange(`B${dataRow + 1}`);
                 const exampleRange = sheet.getRange(`C${dataRow + 1}`);
+
                 functionRange.values = [[parsedFunction.signature]];
                 descriptionRange.values = [[parsedFunction.description]];
-                exampleRange.values = [[parsedFunction.excelExample]];
+
+                try {
+                    exampleRange.values = [[parsedFunction.excelExample]];
+                    await context.sync();
+                } catch (exampleError) {
+                    // Retry with semicolons instead of commas
+                    try {
+                        const modifiedExample = parsedFunction.excelExample.replace(/,/g, ';');
+                        exampleRange.values = [[modifiedExample]];
+                        await context.sync();
+                    } catch (retryError) {
+                        exampleRange.values = [[`Error in example: ${exampleError.message}`]];
+                        exampleRange.format.fill.color = "#FFE0E0";
+                        await context.sync();
+                    }
+                }
                 exampleRange.format.horizontalAlignment = "Left";
-            });
+            }
 
             // Set column widths
             sheet.getRange("A:A").format.columnWidth = 250;
