@@ -18,7 +18,7 @@ function openDatabase(dbName, version, upgradeCallback) {
 export async function initialize() {
     const adapter = await navigator.gpu.requestAdapter();
     browserData = {
-        supportsF16: adapter?.features.has('shader-f16'),
+        gpuF16: adapter?.features.has('shader-f16'),
         memory: navigator.deviceMemory,
         cores: navigator.hardwareConcurrency
     };
@@ -110,14 +110,14 @@ async function flushLogs() {
             const tokenClaims = await getTokenClaims();
 
             let aggregatedLogs = {
-                BrowserData: JSON.stringify(browserData),
-                Office: JSON.stringify({
-                    diagnostics: Office?.context?.diagnostics,
-                    displayLanguage: Office?.context?.displayLanguage
-                }),
-                DocumentUrl: Office?.context?.document?.url,
-                Testing: !window.location.pathname.includes('prod'),
-                TokenClaims: JSON.stringify(tokenClaims)
+                Config: JSON.stringify({
+                    ...browserData,
+                    ...Office?.context?.diagnostics,
+                    lang: Office?.context?.displayLanguage,
+                    docUrl: Office?.context?.document?.url,
+                    test: !window.location.pathname.includes('prod'),
+                    tokenClaims
+                })
             };
 
             // Add individual logs
@@ -143,7 +143,7 @@ async function flushLogs() {
             };
             try {
                 // Send logs to server
-                await fetch("https://boardflare.table.core.windows.net/NewLogsFeb16?sv=2019-02-02&st=2025-02-16T15%3A04%3A59Z&se=2025-02-17T15%3A04%3A59Z&sp=a&sig=Jsisr%2F%2BK%2B9U5jWB4ilN4jHqzl4HBJnNaL1iusWSFRkA%3D&tn=NewLogsFeb16", { method: 'POST', headers, body });
+                await fetch("https://boardflare.table.core.windows.net/PythonLogsFeb1725?sv=2019-02-02&st=2025-02-18T00%3A59%3A14Z&se=2035-02-19T00%3A59%3A00Z&sp=a&sig=AEUosEor7IJZt3y%2BM%2BhL3a704G3nfLr1NINPB0BKu4c%3D&tn=PythonLogsFeb1725", { method: 'POST', headers, body });
                 // Clear the logs store
                 await new Promise((resolve, reject) => {
                     const clearTx = db.transaction('Logs', 'readwrite');
