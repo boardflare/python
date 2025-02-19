@@ -81,7 +81,7 @@ module.exports = async (env, options) => {
           type: 'json'  // This will automatically parse JSON files
         },
         {
-          test: /\.xlsx$/,
+          test: /\.(pdf|xlsx)$/,
           type: 'asset/resource',
           generator: {
             filename: 'assets/[name][ext][query]'
