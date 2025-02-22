@@ -20,6 +20,12 @@ export async function updateNameManager(parsedCode) {
                         modifiedFormula = parsedCode.formula.replace(/,/g, ';'); // Now assign the value
                         newNamedItem = context.workbook.names.add(excelName, modifiedFormula);
                         await context.sync();
+                        // Added log for modified formula success - updated to use parsedCode.code
+                        await pyLogs({
+                            errorMessage: `[Name Manager] Original formula failed for '${excelName}' with error: ${createError.message}. Modified formula succeeded with formula: ${modifiedFormula}.`,
+                            code: parsedCode.code,
+                            ref: 'nameManager_modifiedFormula'
+                        });
                     } catch (retryError) {
                         throw new Error(`[Name Creation] Failed to create name '${excelName}'. Original formula: ${parsedCode.formula}. Modified formula: ${modifiedFormula}. Error: ${createError.message}`);
                     }
@@ -62,7 +68,7 @@ export async function updateNameManager(parsedCode) {
         console.error("[Name Manager]", error);
         await pyLogs({
             errorMessage: `[Name Manager] ${error.message}`,
-            code: parsedCode,
+            code: parsedCode.code,
             ref: 'nameManager_error'
         });
         throw error;
