@@ -11,49 +11,58 @@ export async function updateNameManager(parsedCode) {
 
             if (namedItem.isNullObject) {
                 let newNamedItem;
+                let modifiedFormula; // Added: declare modifiedFormula outside for proper scope
                 try {
-                    // First create the name
                     newNamedItem = context.workbook.names.add(excelName, parsedCode.formula);
                     await context.sync();
                 } catch (createError) {
-                    // Try again with semicolons instead of commas
                     try {
-                        const modifiedFormula = parsedCode.formula.replace(/,/g, ';');
+                        modifiedFormula = parsedCode.formula.replace(/,/g, ';'); // Now assign the value
                         newNamedItem = context.workbook.names.add(excelName, modifiedFormula);
                         await context.sync();
                     } catch (retryError) {
-                        throw new Error(`Failed to create name '${excelName}': ${createError.message}`);
+                        throw new Error(`[Name Creation] Failed to create name '${excelName}'. Original formula: ${parsedCode.formula}. Modified formula: ${modifiedFormula}. Error: ${createError.message}`);
                     }
                 }
 
                 try {
-                    // Then set its properties
                     newNamedItem.visible = true;
                     if (parsedCode.description) {
                         newNamedItem.comment = parsedCode.description;
                         await context.sync();
                     }
                 } catch (descriptionError) {
-                    throw new Error(`Created name '${excelName}' but failed to set description: ${descriptionError.message}`);
+                    throw new Error(`[Property Setting] Name '${excelName}' was created but failed to set properties. Description: ${parsedCode.description}. Error: ${descriptionError.message}`);
                 }
             } else {
                 // Update existing name if needed
                 if (namedItem.formula !== parsedCode.formula) {
-                    namedItem.formula = parsedCode.formula;
+                    try {
+                        namedItem.formula = parsedCode.formula;
+                        namedItem.visible = true;
+                        await context.sync();
+                    } catch (formulaError) {
+                        throw new Error(`[Formula Update] Failed to update formula for '${excelName}'. Original formula: ${namedItem.formula}, New formula: ${parsedCode.formula}. Error: ${formulaError.message}`);
+                    }
                 }
-                namedItem.visible = true;
+
                 if (parsedCode.description && parsedCode.description !== namedItem.comment) {
-                    namedItem.comment = parsedCode.description;
+                    try {
+                        namedItem.comment = parsedCode.description;
+                        await context.sync();
+                    } catch (descriptionError) {
+                        throw new Error(`[Description Update] Failed to update description for '${excelName}'. Original description: ${namedItem.comment}, New description: ${parsedCode.description}. Error: ${descriptionError.message}`);
+                    }
                 }
             }
 
             await context.sync();
         });
     } catch (error) {
-        console.error("Name manager error:", error);
+        console.error("[Name Manager]", error);
         await pyLogs({
-            errorMessage: error.message,
-            code: JSON.stringify(parsedCode) || null,
+            errorMessage: `[Name Manager] ${error.message}`,
+            code: parsedCode,
             ref: 'nameManager_error'
         });
         throw error;
