@@ -1,13 +1,13 @@
 import * as React from "react";
 import { MonacoEditor } from "./MonacoEditor";
-import LLM from "./LLM"; // 
-import { saveFunctionToSettings } from "../utils/workbookSettings";
+import LLM from "./LLM";
 import { DEFAULT_CODE } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
 import { EventTypes } from "../utils/constants";
-import { updateNameManager } from "../utils/nameManager";
 import { runTests } from "../utils/testRunner";
-import { saveFile, formatAsNotebook, TokenExpiredError } from "../utils/drive";
+import { TokenExpiredError } from "../utils/drive";
+import { saveFunction } from "../utils/save";
+import { pyLogs } from "../utils/logs";
 
 const EditorTab = ({
     selectedFunction,
@@ -92,19 +92,7 @@ const EditorTab = ({
                 parsedFunction.prompt = selectedFunction.prompt;
             }
 
-            // Save to OneDrive
-            const notebook = formatAsNotebook(parsedFunction);
-            try {
-                await saveFile(notebook, `${parsedFunction.name}.ipynb`);
-            } catch (err) {
-                if (!(err instanceof TokenExpiredError)) {
-                    throw err;
-                }
-            }
-
-            // Continue with existing save logic
-            await saveFunctionToSettings(parsedFunction);
-            await updateNameManager(parsedFunction);
+            await saveFunction(parsedFunction);
             showNotification(`${parsedFunction.signature} saved!`, "success");
 
             // Notify parent to reload functions
@@ -129,9 +117,19 @@ const EditorTab = ({
             const parsedFunction = await parsePython(code);
             await runTests(parsedFunction);
             showNotification("Tests completed successfully!", "success");
+            pyLogs({
+                message: `[Test] Function ${parsedFunction.name} tested successfully`,
+                code: parsedFunction.code,
+                ref: 'test_success'
+            });
         } catch (err) {
             showNotification(err.message, "error");
             window.dispatchEvent(new CustomEvent(EventTypes.ERROR, { detail: err.message }));
+            pyLogs({
+                errorMessage: `[Test] Error: ${err.message}`,
+                code: editorRef.current.getValue(),
+                ref: 'test_error'
+            });
         }
     };
 

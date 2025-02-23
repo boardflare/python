@@ -1,3 +1,5 @@
+import { pyLogs } from '../../taskpane/utils/logs';
+
 async function getFunctionFromSettings(name) {
     try {
         await Office.onReady();
@@ -6,10 +8,10 @@ async function getFunctionFromSettings(name) {
             const setting = settings.getItem(name);
             setting.load("value");
             await context.sync();
-            console.log('setting.value:', setting.value);
             return setting.value;
         });
     } catch (error) {
+        pyLogs({ errorMessage: `[GetFunction] Failed to get from settings: ${error.message}`, ref: 'get_settings_error' });
         console.error('Failed to get from settings:', error);
         return null;
     }
@@ -22,12 +24,16 @@ export async function getFunction(func) {
 
     const name = func.replace('workbook-settings:', '').trim();
     if (!name) {
-        throw new Error('Function name not found in settings reference');
+        const error = new Error('Function name not found in settings reference');
+        pyLogs({ errorMessage: '[GetFunction] Function name not found in settings reference', ref: 'get_function_name_error' });
+        throw error;
     }
 
     const functionData = await getFunctionFromSettings(name);
     if (!functionData) {
-        throw new Error(`Function "${name}" not found in workbook settings`);
+        const error = new Error(`Function "${name}" not found in workbook settings`);
+        pyLogs({ errorMessage: `[GetFunction] Function "${name}" not found in workbook settings`, ref: 'get_function_data_error' });
+        throw error;
     }
 
     return functionData.code + (functionData.resultLine || '');

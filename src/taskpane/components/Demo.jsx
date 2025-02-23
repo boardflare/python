@@ -65,9 +65,9 @@ const Demo = ({ loadFunctions }) => {
             //await insertWorksheetFromBase64(base64Data);
             await addFunctionsFromNotebook(demoFunctions);
             await loadFunctions();
-            await pyLogs({ ref: 'successful_demo_insert' }); // updated log on success
+            pyLogs({ ref: 'successful_demo_insert' });
         } catch (err) {
-            await pyLogs({ errorMessage: err.message, ref: 'demo_insert_error' }); // updated log on error
+            pyLogs({ errorMessage: err.message, ref: 'demo_insert_error' });
             console.error('Failed to insert demo sheet:', err);
         }
     };
