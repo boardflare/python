@@ -27,7 +27,7 @@ ${rawCode}
 
         // Generate resultLine to call function with kwargs for non-omitted parameters
         const argList = parameters.length > 0 ? parameters.map((param, index) => {
-            return `("${param.name}", arg${index + 1} if arg${index + 1} != "OMITTED" else None)`
+            return `("${param.name}", arg${index + 1} if arg${index + 1} != "__OMITTED__" else None)`
         }).join(', ') : '';
         const resultLine = `\n\nresult = ${name.toLowerCase()}(**{k: v for k, v in [${argList}] if v is not None})`;
         const code = rawCode.trim();
@@ -50,7 +50,7 @@ ${rawCode}
         // Excel named lambda formula with ISOMITTED handling
         const paramFormula = parameters.map((param, index) => {
             if (param.has_default) {
-                return `IF(ISOMITTED(${param.name}), "OMITTED", ${param.name})`
+                return `IF(ISOMITTED(${param.name}), "__OMITTED__", ${param.name})`
             }
             return param.name;
         }).join(', ');
