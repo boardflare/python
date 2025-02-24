@@ -5,7 +5,7 @@ import LLM from "./LLM";
 import { SignInButton } from "./Auth";
 import Feedback from "./Feedback";
 import Demo from "./Demo";
-import pdfUrl from "../../../assets/Python-v1.1.0.pdf"; // Updated path
+import pdfUrl from "../../../assets/Python-v1.2.1.pdf"; // Updated path
 
 const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFunctions }) => {
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
