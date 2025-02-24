@@ -177,6 +177,11 @@ if (!window.__flushLoopStarted) {
 
 export async function pyLogs(data) {
     try {
+        // Skip logging of codeparser python executions.
+        if (data.code && data.code.includes("parse_python_code(code):")) {
+            return true;
+        }
+
         if (!browserData || !uid) await initialize();
         const logEntity = {
             Timestamp: new Date().toISOString(),
