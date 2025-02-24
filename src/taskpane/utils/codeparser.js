@@ -22,12 +22,14 @@ ${rawCode}
         }
 
         const name = pyResult.name.toLowerCase();
-        const parameters = pyResult.parameters.map(param => param.name);
+        const parameters = pyResult.parameters;
         const description = pyResult.description;
 
-        // Generate resultLine to call function with arg1, arg2, etc.
-        const argList = parameters.length > 0 ? parameters.map((_, index) => `arg${index + 1}`).join(', ') : '';
-        const resultLine = `\n\nresult = ${name.toLowerCase()}(${argList})`;
+        // Generate resultLine to call function with kwargs for non-omitted parameters
+        const argList = parameters.length > 0 ? parameters.map((param, index) => {
+            return `("${param.name}", arg${index + 1} if arg${index + 1} != "OMITTED" else None)`
+        }).join(', ') : '';
+        const resultLine = `\n\nresult = ${name.toLowerCase()}(**{k: v for k, v in [${argList}] if v is not None})`;
         const code = rawCode.trim();
 
         // Determine which EXEC environment to use
@@ -40,19 +42,24 @@ ${rawCode}
             execEnv = 'BFINSIDER.EXEC';
         }
 
-        // Excel named lambda signature
+        // Excel named lambda signature with optional parameters
         const signature = parameters.length > 0
-            ? `${name.toUpperCase()}(${parameters.join(', ')})`
+            ? `${name.toUpperCase()}(${parameters.map(p => p.has_default ? `[${p.name}]` : p.name).join(', ')})`
             : `${name.toUpperCase()}()`;
 
-        // Excel named lambda formula
+        // Excel named lambda formula with ISOMITTED handling
+        const paramFormula = parameters.map((param, index) => {
+            if (param.has_default) {
+                return `IF(ISOMITTED(${param.name}), "OMITTED", ${param.name})`
+            }
+            return param.name;
+        }).join(', ');
+
         const timestamp = new Date().toISOString();
         const uid = "anonymous";
-        const tableRef = `"https://getcode.boardflare.workers.dev/?uid=${uid}&timestamp=${timestamp}&name=${name}&return=code"`;
-        const settingsRef = `"workbook-settings:${name}"`;
-        const codeRef = settingsRef;
+        const codeRef = `"workbook-settings:${name}"`;
         const formula = parameters.length > 0
-            ? `=LAMBDA(${parameters.join(', ')}, ${execEnv}(${codeRef}, ${parameters.join(', ')}))`
+            ? `=LAMBDA(${parameters.map(p => p.has_default ? `[${p.name}]` : p.name).join(', ')}, ${execEnv}(${codeRef}, ${paramFormula}))`
             : `=LAMBDA(${execEnv}(${codeRef}))`;
 
         // Extract Excel demo

@@ -49,16 +49,10 @@ def parse_python_code(code):
                 # Check for default values
                 defaults = node.args.defaults
                 if defaults:
+                    offset = len(parameters) - len(defaults)
                     for i, default in enumerate(defaults):
-                        idx = len(parameters) - len(defaults) + i
-                        param_name = parameters[idx]["name"]
-                        return json.dumps({
-                            "name": name,
-                            "parameters": [],
-                            "docstring": "",
-                            "description": "",
-                            "error": f"Default values are not supported for function parameters at this time. Issue causing error: {param_name}={ast.unparse(default)}"
-                        })
+                        parameters[offset + i]["has_default"] = True
+                        parameters[offset + i]["default"] = ast.unparse(default)
                 
                 # Get docstring
                 docstring = ast.get_docstring(node)
