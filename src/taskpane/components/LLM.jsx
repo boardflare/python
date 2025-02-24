@@ -16,10 +16,15 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt, loadFunctions }) => { // NEW:
     const [isSaved, setIsSaved] = useState(false);
     const [savedFunction, setSavedFunction] = useState(null);
 
-    // Add useEffect to update prompt state when prompt prop changes
+    // NEW: Reset state when modal is opened
     useEffect(() => {
-        setInput(prompt || "");
-    }, [prompt]);
+        if (isOpen) {
+            setIsSaved(false);
+            setSavedFunction(null);
+            setError("");
+            setInput(prompt || "");
+        }
+    }, [isOpen, prompt]);
 
     const examplePrompts = [
         { value: "", label: "Select an example ..." },
