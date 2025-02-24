@@ -90,8 +90,9 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt, loadFunctions }) => { // NEW:
                 }
             });
 
-            // NEW: Parse and save the generated function inside LLM
+            // NEW: Associate the prompt with the parsed function
             const parsedFunction = await parsePython(generatedCode);
+            parsedFunction.prompt = input;
             await saveFunctionToSettings(parsedFunction);
             await updateNameManager(parsedFunction);
             // NEW: Refresh function list after saving
