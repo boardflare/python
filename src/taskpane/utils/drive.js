@@ -90,7 +90,7 @@ export async function deleteFile(fileName) {
 
 /**
  * Lists all files in the app's special folder
- * @returns {Promise<Array>} List of files
+ * @returns {Promise<{files: Array, folderUrl: string}>} List of files and folder URL
  */
 export async function listFiles() {
     const accessToken = await getStoredToken();
@@ -104,7 +104,12 @@ export async function listFiles() {
 
         await handleResponse(response);
         const data = await response.json();
-        return data.value.filter(file => !file.folder); // Filter out folders
+        const files = data.value.filter(file => !file.folder);
+        // Get the folder URL from the first file if available
+        const folderUrl = files.length > 0 ?
+            files[0].webUrl.substring(0, files[0].webUrl.lastIndexOf('/')) :
+            null;
+        return { files, folderUrl };
     } catch (error) {
         console.error('Error listing files:', error);
         throw error;
@@ -113,11 +118,11 @@ export async function listFiles() {
 
 /**
  * Loads all function files from OneDrive and their contents
- * @returns {Promise<Array>} Array of function objects with their contents
+ * @returns {Promise<{functions: Array, folderUrl: string}>} Array of function objects with their contents and folder URL
  */
 export async function loadFunctionFiles() {
     try {
-        const files = await listFiles();
+        const { files, folderUrl } = await listFiles();
         const functionFiles = files.filter(f => f.name.endsWith('.ipynb'));
 
         const driveFunctions = [];
@@ -144,7 +149,7 @@ export async function loadFunctionFiles() {
                 console.warn(`Failed to load ${file.name}:`, e);
             }
         }
-        return driveFunctions;
+        return { driveFunctions, folderUrl };
     } catch (error) {
         console.error('Error loading function files:', error);
         throw error;

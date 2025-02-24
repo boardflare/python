@@ -17,6 +17,7 @@ const App = ({ title }) => {
   const [onedriveFunctions, setOnedriveFunctions] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
+  const [folderUrl, setFolderUrl] = React.useState(null);
 
   const clearFunctions = () => {
     setWorkbookFunctions([]);
@@ -95,8 +96,9 @@ const App = ({ title }) => {
 
       // Try to load OneDrive functions, but don't fail if unauthorized
       try {
-        const driveFunctions = await loadFunctionFiles();
+        const { driveFunctions, folderUrl } = await loadFunctionFiles();  // Match the property name
         setOnedriveFunctions(driveFunctions || []); // Ensure we set empty array if null
+        setFolderUrl(folderUrl);
         driveFunctions?.forEach(func => {
           const fullFunc = {
             ...func,
@@ -167,6 +169,7 @@ const App = ({ title }) => {
               isLoading={isLoading}
               error={error}
               loadFunctions={loadFunctions}  // Changed from onFunctionDeleted
+              folderUrl={folderUrl}
             />
           )}
         </div>

@@ -12,7 +12,8 @@ const FunctionsTab = ({
     onedriveFunctions,
     isLoading,
     error,
-    loadFunctions
+    loadFunctions,
+    folderUrl  // Add this prop
 }) => {
     const [deleteConfirm, setDeleteConfirm] = React.useState(null);
 
@@ -48,7 +49,19 @@ const FunctionsTab = ({
             <h3 className="font-semibold mb-1 text-center flex items-center justify-center gap-2">
                 {source === 'workbook' ? 'Workbook Functions' : (
                     <>
-                        OneDrive Functions
+                        {folderUrl ? (
+                            <a
+                                href={folderUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-blue-500"
+                                title="Open in OneDrive"
+                            >
+                                OneDrive Functions
+                            </a>
+                        ) : (
+                            'OneDrive Functions'
+                        )}
                         <button
                             onClick={loadFunctions}
                             className="text-blue-500 hover:text-blue-700"
