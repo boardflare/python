@@ -9,6 +9,16 @@ import pdfUrl from "../../../assets/Python-v1.2.1.pdf"; // Updated path
 
 const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFunctions }) => {
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
+    const [isWebPlatform, setIsWebPlatform] = React.useState(false);
+
+    React.useEffect(() => {
+        try {
+            setIsWebPlatform(Office?.context?.diagnostics?.platform === 'OfficeOnline');
+        } catch (error) {
+            console.warn('Failed to detect Office platform:', error);
+            setIsWebPlatform(false);
+        }
+    }, []);
 
     const handleLLMSuccess = (savedFunction, prompt) => {
         setSelectedFunction({ ...savedFunction, source: 'workbook', prompt });
@@ -33,6 +43,11 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
                 <div className="py-1 border-gray-300 rounded-lg p-2 mb-2">
                     <p><span className="font-bold">Step 2:</span> Save it to create a LAMBDA function.</p>
                     <div className="p-1 mt-1 bg-white"><code>=HELLO("Annie")</code> <br /><code>Hello Annie!</code></div>
+                    {isWebPlatform && (
+                        <p className="mt-1 text-orange-600">
+                            Note: Function autocomplete does not work in Excel for Web for LAMBDA functions, but the functions are available.
+                        </p>
+                    )}
                 </div>
                 <p className="m-2">
                     Check out the <a href={pdfUrl} target="_blank" rel="noopener" className="text-blue-500 underline">slideshow</a> and <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>. Use the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('editor')}>code editor</span> to create and edit functions. Import example functions on the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('functions')}>functions</span> tab.
