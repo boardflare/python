@@ -1,40 +1,45 @@
-// forked from: https://github.com/chebyrash/cors
-addEventListener("fetch", event => {
-    event.respondWith(handleRequest(event.request))
-})
+const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Methods': 'GET,HEAD,OPTIONS,POST,PUT',
+    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+};
 
-async function handleRequest(request) {
-    try {
-        const url = new URL(request.url);
+export default {
+    async fetch(request, env, ctx) {
+        try {
+            const url = new URL(request.url);
 
-        if (url.pathname === "/") {
-            return new Response(`{"usage": "${url.origin}/<url>"}`);
+            if (url.pathname === "/") {
+                return Response.json({ usage: `${url.origin}/<url>` }, { headers });
+            }
+
+            if (request.method === "OPTIONS") {
+                return new Response(null, { headers });
+            }
+
+            const targetUrl = request.url.slice(url.origin.length + 1);
+            const response = await fetch(targetUrl, {
+                method: request.method,
+                headers: request.headers,
+                redirect: "follow",
+                body: request.body
+            });
+
+            const newResponse = new Response(response.body, response);
+            Object.entries(headers).forEach(([key, value]) => {
+                newResponse.headers.set(key, value);
+            });
+
+            return newResponse;
+        } catch (error) {
+            return Response.json({
+                success: false,
+                error: error.message
+            }, {
+                status: 500,
+                headers
+            });
         }
-
-        function addHeaders(response) {
-            response.headers.set("Access-Control-Allow-Origin", "*");
-            response.headers.set("Access-Control-Allow-Credentials", "true");
-            response.headers.set("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
-            response.headers.set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-        }
-
-        let response;
-        if (request.method == "OPTIONS") {
-            response = new Response("");
-            addHeaders(response);
-            return response;
-        }
-
-        response = await fetch(request.url.slice(url.origin.length + 1), {
-            method: request.method,
-            headers: request.headers,
-            redirect: "follow",
-            body: request.body
-        });
-        response = new Response(response.body, response)
-        addHeaders(response);
-        return response;
-    } catch (e) {
-        return new Response(e.stack || e, { status: 500 });
     }
-}
+};

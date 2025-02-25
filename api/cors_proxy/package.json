@@ -1,0 +1,13 @@
+{
+  "name": "cors_proxy",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev --local-protocol https",
+    "start": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^3.109.3"
+  }
+}
