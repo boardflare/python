@@ -28,31 +28,35 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
-            <div className="shrink-0 p-1">
-                <h2 className="text-center text-lg font-semibold mb-1">Custom functions using Python</h2>
-                <div className="border-gray-300 rounded-lg py-1">
-                    <p><span className="font-bold">Step 1:</span> Write a Python function in the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('editor')}>editor</span>.</p>
-                    <div className="py-1 h-[60px]">
-                        <MonacoEditor
-                            value={DISPLAY_CODE}
-                            onMount={(editor) => {
-                                editor.updateOptions({ readOnly: true });
-                            }}
-                        />
-                    </div>
+            <div className="shrink-0">
+                <div className="px-4 py-2 bg-gray-100 font-bold text-center">
+                    Create Custom Functions
                 </div>
-                <div className="py-1">
-                    <p><span className="font-bold">Step 2:</span> Save it to create a custom function.</p>
-                    <div className="bg-white"><code>=HELLO("Annie")</code> <br />
-                        {isWebPlatform && (
-                            <p className="mt-1 text-orange-600">
-                                Autocomplete does not work in Excel for Web for LAMBDA functions, but they are there!
-                            </p>
-                        )}
+                <div className="p-2">
+                    <div className="border-gray-300 rounded-lg py-0">
+                        <p><span className="font-bold">Step 1:</span> Write a Python function in the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('editor')}>editor</span>.</p>
+                        <div className="py-1 h-[60px]">
+                            <MonacoEditor
+                                value={DISPLAY_CODE}
+                                onMount={(editor) => {
+                                    editor.updateOptions({ readOnly: true });
+                                }}
+                            />
+                        </div>
                     </div>
-                    <p className="mt-1">
-                        Check out the <a href={pdfUrl} target="_blank" rel="noopener" className="text-blue-500 underline">slideshow</a> and <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>. Use the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('editor')}>code editor</span> to create and edit functions.
-                    </p>
+                    <div className="py-1">
+                        <p><span className="font-bold">Step 2:</span> Save it to create a custom function.</p>
+                        <div className="bg-white"><code>=HELLO("Annie")</code> <br />
+                            {isWebPlatform && (
+                                <p className="mt-1 text-orange-600">
+                                    Autocomplete does not work in Excel for Web for LAMBDA functions, but they are there!
+                                </p>
+                            )}
+                        </div>
+                        <p className="mt-1">
+                            Check out the <a href={pdfUrl} target="_blank" rel="noopener" className="text-blue-500 underline">slideshow</a> and <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>.
+                        </p>
+                    </div>
                 </div>
             </div>
             <div className="flex-1 min-h-0">
