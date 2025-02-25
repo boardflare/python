@@ -5,7 +5,7 @@ import { PublicClientApplication } from "@azure/msal-browser";
 // Initialize MSAL configuration
 const msalConfig = {
     auth: {
-        clientId: '0c94fdd5-ec39-4167-84ea-06ea727149b1',
+        clientId: '7fc35253-f44d-4c02-aea9-9b0b7a0a4b61',
         authority: "https://login.microsoftonline.com/common",
         redirectUri: window.location.origin + window.location.pathname
     },
@@ -18,7 +18,7 @@ const pca = new PublicClientApplication(msalConfig);
 pca.initialize();
 
 // Add helper to parse token claims
-function parseTokenClaims(token) {
+export function parseTokenClaims(token) {
     try {
         const parts = token.split('.');
         if (parts.length < 2) return null;
@@ -75,7 +75,7 @@ export function SignInButton({ loadFunctions }) {
             }
 
             const tokenRequest = {
-                scopes: ["User.Read", "Files.ReadWrite", "offline_access"],
+                scopes: await getScopes(),
                 account: accounts[0] // Always use first account if available
             };
 
@@ -280,7 +280,7 @@ async function getStoredToken() {
     }
 }
 
-async function storeToken(tokenObj) {
+export async function storeToken(tokenObj) {
     const storeName = 'User';
     const authKey = 'auth_token';
     const graphKey = 'graphToken';
@@ -339,5 +339,53 @@ async function removeToken() {
         console.error('DB initialization error during sign out:', error);
         await pyLogs({ errorMessage: error.message, ref: "auth_removeToken_error" });
         throw error;
+    }
+}
+
+export async function storeScopes(scopes) {
+    const storeName = 'User';
+    const scopesKey = 'scopes';
+
+    try {
+        const db = await initializeDB();
+        return new Promise((resolve, reject) => {
+            try {
+                const transaction = db.transaction(storeName, 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.put(scopes, scopesKey);
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject(transaction.error);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    } catch (error) {
+        console.error('DB initialization error:', error);
+        await pyLogs({ errorMessage: error.message, ref: "auth_storeScopes_error" });
+        throw error;
+    }
+}
+
+export async function getScopes() {
+    const storeName = 'User';
+    const scopesKey = 'scopes';
+
+    try {
+        const db = await initializeDB();
+        return new Promise((resolve, reject) => {
+            try {
+                const transaction = db.transaction(storeName, 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.get(scopesKey);
+                request.onsuccess = () => resolve(request.result || ["User.Read", "offline_access"]);
+                request.onerror = () => reject(request.error);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    } catch (error) {
+        console.error('Failed to get scopes:', error);
+        await pyLogs({ errorMessage: error.message, ref: "auth_getScopes_error" });
+        return ["User.Read", "offline_access"];
     }
 }
