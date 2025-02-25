@@ -3,6 +3,7 @@ import { getFunctionFromSettings, deleteFunctionFromSettings } from "../utils/wo
 import { TokenExpiredError, deleteFile, loadFunctionFiles } from "../utils/drive";
 import { runTests } from "../utils/testRunner";
 import Notebooks from "./Notebooks";
+import SharedFunctions from "./SharedFunctions";
 
 const FunctionsTab = ({
     onEdit,
@@ -12,8 +13,8 @@ const FunctionsTab = ({
     onedriveFunctions,
     isLoading,
     error,
-    loadFunctions,
-    folderUrl  // Add this prop
+    loadFunctions, // This function refreshes both workbook and OneDrive functions
+    folderUrl
 }) => {
     const [deleteConfirm, setDeleteConfirm] = React.useState(null);
 
@@ -154,7 +155,8 @@ const FunctionsTab = ({
                 )}
             </div>
 
-            <Notebooks onImportComplete={loadFunctions} />
+            <Notebooks onImportComplete={() => loadFunctions()} />
+            <SharedFunctions onImportComplete={() => loadFunctions()} />
 
             {deleteConfirm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
