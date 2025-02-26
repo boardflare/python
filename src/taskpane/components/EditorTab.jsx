@@ -162,10 +162,9 @@ const EditorTab = ({
                 <div className="mt-2 p-2 bg-yellow-100 rounded">
                     <h2 className="font-semibold"> ⬅️ Drag task pane open for more room.</h2>
                     <ul className="list-disc pl-5">
-                        <li>Your code ⚠️MUST BE A FUNCTION!⚠️</li>
+                        <li>Your code MUST BE A FUNCTION!</li>
                         <li>Save will update code if function already exists.</li>
-                        <li>If signed in, function will also be saved to OneDrive.</li>
-                        <li>See <a href="https://whistlernetworks.sharepoint.com/:p:/s/Boardflare/EavKXzTcSmJArk1FadRoH40BaFTd1xrff2cw3bGSRs3AFg?rtime=Mhp28Ns33Ug" target="_blank" rel="noopener" className="text-blue-500 underline">slideshow</a> and <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a> for details.</li>
+                        <li>See <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a> for details.</li>
                     </ul>
                 </div>
             )}
