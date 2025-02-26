@@ -167,6 +167,26 @@ const FunctionDialog = ({
         });
     };
 
+    const handleFocus = async (paramName) => {
+        // Don't start a new selection if we're already selecting for this parameter
+        if (selectionState.isSelecting && selectionState.paramName === paramName) {
+            return;
+        }
+        await toggleRangeSelection(paramName);
+    };
+
+    const handleBlur = async (paramName, event) => {
+        // If we're clicking the selection button, don't end the selection
+        if (event.relatedTarget?.getAttribute('data-param') === paramName) {
+            return;
+        }
+
+        // Only end selection if we're currently selecting this parameter
+        if (selectionState.isSelecting && selectionState.paramName === paramName) {
+            await toggleRangeSelection(paramName);
+        }
+    };
+
     // Clean up the event handler when dialog closes or component unmounts
     React.useEffect(() => {
         if (!isOpen && selectionState.handler) {
@@ -262,6 +282,8 @@ const FunctionDialog = ({
                                             : (functionArgs[param.name] || '')
                                     }
                                     onChange={(e) => handleArgumentChange(param.name, e.target.value)}
+                                    onFocus={() => handleFocus(param.name)}
+                                    onBlur={(e) => handleBlur(param.name, e)}
                                     className={`flex-1 px-2 py-1 border rounded ${selectionState.isSelecting && selectionState.paramName === param.name
                                         ? "border-blue-500 bg-blue-50"
                                         : ""
@@ -269,6 +291,7 @@ const FunctionDialog = ({
                                     placeholder={`Enter value or cell reference${param.has_default ? ' (optional)' : ''}`}
                                 />
                                 <button
+                                    data-param={param.name}
                                     onClick={() => toggleRangeSelection(param.name)}
                                     className={`px-2 py-1 border rounded ${selectionState.isSelecting && selectionState.paramName === param.name
                                         ? 'bg-blue-500 text-white'
