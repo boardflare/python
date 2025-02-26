@@ -251,7 +251,26 @@ const FunctionDialog = ({
         }
     };
 
-    if (!isOpen || !selectedFunction) return null;
+    if (!isOpen) return null;
+
+    if (!selectedFunction) {
+        return (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+                <div className="bg-white p-4 rounded-lg shadow-lg w-96">
+                    <h2 className="text-xl mb-4">No Function Selected</h2>
+                    <p className="mb-4">Please select a function to use first.</p>
+                    <div className="flex justify-end">
+                        <button
+                            onClick={onClose}
+                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        >
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
@@ -299,7 +318,7 @@ const FunctionDialog = ({
                                         }`}
                                     title="Select range"
                                 >
-                                    {selectionState.isSelecting && selectionState.paramName === param.name ? '✓' : '📑'}
+                                    {selectionState.isSelecting && selectionState.paramName === param.name ? '✓' : '⬆️'}
                                 </button>
                             </div>
                         </div>
