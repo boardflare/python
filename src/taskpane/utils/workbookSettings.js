@@ -1,4 +1,7 @@
 import { pyLogs } from './logs';
+import { DEFAULT_CODE } from './constants';
+import { parsePython } from './codeparser';
+import { updateNameManager } from './nameManager';  // Changed from saveName
 
 const retry = async (fn, retries = 3, delay = 1000) => {
     try {
@@ -46,7 +49,18 @@ export async function getFunctionFromSettings(name = null) {
             } else {
                 const items = settings.load("items");
                 await context.sync();
-                return items.items.map(item => item.value);
+                const functions = items.items.map(item => item.value);
+
+                if (functions.length === 0) {
+                    const defaultFunction = await parsePython(DEFAULT_CODE);
+
+                    // Add to name manager using the correct helper
+                    await updateNameManager(defaultFunction);
+                    await saveFunctionToSettings(defaultFunction);
+                    return [defaultFunction];
+                }
+
+                return functions;
             }
         });
     } catch (error) {

@@ -95,6 +95,12 @@ const App = ({ title }) => {
         functionsCache.current.set(`workbook-${func.name}`, fullFunc);
       });
 
+      // Only set hello function if found
+      const helloFunc = workbookData?.find(f => f.name.toLowerCase() === 'hello');
+      if (helloFunc) {
+        setSelectedFunction({ ...helloFunc, source: 'workbook' });
+      }
+
       // Try to load OneDrive functions, but don't fail if unauthorized
       try {
         const { driveFunctions, folderUrl } = await loadFunctionFiles();  // Match the property name
@@ -108,6 +114,7 @@ const App = ({ title }) => {
           };
           functionsCache.current.set(`onedrive-${func.fileName}`, fullFunc);
         });
+
       } catch (driveError) {
         console.error('OneDrive load failed:', driveError);
         setOnedriveFunctions([]); // Ensure OneDrive functions are cleared

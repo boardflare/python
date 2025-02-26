@@ -10,7 +10,10 @@ export const DEFAULT_CODE = `def hello(name):
 test_cases = [
     ["Nancy"],
     ["Ming"]
-]`;
+]
+    
+# Excel usage: =HELLO("Nancy")
+`;
 
 export const EventTypes = {
     LOG: 'console:log',
