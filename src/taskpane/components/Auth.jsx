@@ -30,6 +30,48 @@ export function parseTokenClaims(token) {
     }
 }
 
+export async function authenticateWithDialog() {
+    let dialogUrl;
+    if (window.location.href.includes("preview")) {
+        dialogUrl = "https://addins.boardflare.com/python/preview/auth.html";
+    } else if (window.location.href.includes("prod")) {
+        dialogUrl = "https://addins.boardflare.com/python/prod/auth.html";
+    } else {
+        dialogUrl = window.location.origin + "/auth.html";
+    }
+
+    const token = await new Promise((resolve, reject) => {
+        Office.context.ui.displayDialogAsync(
+            dialogUrl,
+            { height: 60, width: 30 },
+            (result) => {
+                if (result.status === Office.AsyncResultStatus.Failed) {
+                    reject(new Error(result.error.message));
+                }
+
+                const dialog = result.value;
+                dialog.addEventHandler(Office.EventType.DialogMessageReceived, (args) => {
+                    dialog.close();
+                    const message = JSON.parse(args.message);
+                    if (message.status === 'error') {
+                        reject(new Error(message.errorData.message));
+                    } else {
+                        const tokenObj = {
+                            auth_token: message.msalResponse?.accessToken,
+                            graphToken: message.graphToken,
+                            tokenClaims: parseTokenClaims(message.msalResponse?.accessToken)
+                        };
+                        resolve(tokenObj);
+                    }
+                });
+            }
+        );
+    });
+
+    await storeToken(token);
+    return token;
+}
+
 export function SignInButton({ loadFunctions }) {
     const [isSignedIn, setIsSignedIn] = React.useState(false);
     const [error, setError] = React.useState(null);
@@ -97,43 +139,7 @@ export function SignInButton({ loadFunctions }) {
 
     const signIn = async () => {
         try {
-            let dialogUrl;
-            if (window.location.href.includes("preview")) {
-                dialogUrl = "https://addins.boardflare.com/python/preview/auth.html";
-            } else if (window.location.href.includes("prod")) {
-                dialogUrl = "https://addins.boardflare.com/python/prod/auth.html";
-            } else {
-                dialogUrl = window.location.origin + "/auth.html";
-            }
-            const token = await new Promise((resolve, reject) => {
-                Office.context.ui.displayDialogAsync(
-                    dialogUrl,
-                    { height: 60, width: 30 },
-                    (result) => {
-                        if (result.status === Office.AsyncResultStatus.Failed) {
-                            reject(new Error(result.error.message));
-                        }
-
-                        const dialog = result.value;
-                        dialog.addEventHandler(Office.EventType.DialogMessageReceived, (args) => {
-                            dialog.close();
-                            const message = JSON.parse(args.message);
-                            if (message.status === 'error') {
-                                reject(new Error(message.errorData.message));
-                            } else {
-                                const tokenObj = {
-                                    auth_token: message.msalResponse?.accessToken,
-                                    graphToken: message.graphToken,
-                                    tokenClaims: parseTokenClaims(message.msalResponse?.accessToken)
-                                };
-                                resolve(tokenObj);
-                            }
-                        });
-                    }
-                );
-            });
-
-            await storeToken(token);
+            await authenticateWithDialog();
             pyLogs({ message: "Sign in successful", ref: "auth_signin_success" });
             setIsSignedIn(true);
             loadFunctions?.();

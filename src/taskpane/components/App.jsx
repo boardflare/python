@@ -174,7 +174,7 @@ const App = ({ title }) => {
               folderUrl={folderUrl}
             />
           )}
-          {selectedTab === "settings" && <SettingsTab />}
+          {selectedTab === "settings" && <SettingsTab loadFunctions={loadFunctions} />}
         </div>
       </main>
     </div>
