@@ -8,8 +8,12 @@ const FunctionDialog = ({
     const [selectedCell, setSelectedCell] = React.useState("");
     const [functionArgs, setFunctionArgs] = React.useState({});
     const [error, setError] = React.useState("");
-    const [isSelectingRange, setIsSelectingRange] = React.useState(false);
-    const [selectingParamName, setSelectingParamName] = React.useState(null);
+    const [selectionState, setSelectionState] = React.useState({
+        isSelecting: false,
+        paramName: null,
+        handler: null,
+        previewValue: null  // Add preview value
+    });
 
     // Reset state when dialog opens
     React.useEffect(() => {
@@ -44,58 +48,148 @@ const FunctionDialog = ({
 
     const toggleRangeSelection = async (paramName) => {
         try {
-            if (isSelectingRange) {
-                // End range selection
-                setIsSelectingRange(false);
-                setSelectingParamName(null);
-                await Excel.run(async (context) => {
-                    // Get the selected range
-                    const range = context.workbook.getSelectedRange();
-                    range.load("address");
-                    await context.sync();
-                    const address = range.address.split("!")[1]; // Remove sheet name
-                    handleArgumentChange(selectingParamName, address);
+            const isCurrentlySelecting = selectionState.isSelecting;
+            const currentParam = selectionState.paramName;
+
+            // If we're already selecting this parameter, commit the selection
+            if (isCurrentlySelecting && currentParam === paramName) {
+                // Remove the handler
+                if (selectionState.handler) {
+                    await Excel.run(async (context) => {
+                        context.workbook.onSelectionChanged.remove(selectionState.handler);
+                        await context.sync();
+                    });
+                }
+
+                // Commit the preview value to the actual arguments
+                if (selectionState.previewValue) {
+                    setFunctionArgs(prev => ({
+                        ...prev,
+                        [paramName]: selectionState.previewValue
+                    }));
+                }
+
+                // Reset selection state
+                setSelectionState({
+                    isSelecting: false,
+                    paramName: null,
+                    handler: null,
+                    previewValue: null
                 });
-            } else {
-                // Start range selection
-                setIsSelectingRange(true);
-                setSelectingParamName(paramName);
             }
-        } catch (error) {
-            setError(error.message);
-        }
-    };
+            // If we're selecting a different parameter, switch to it
+            else {
+                // Clean up existing handler if any
+                if (selectionState.handler) {
+                    await Excel.run(async (context) => {
+                        context.workbook.onSelectionChanged.remove(selectionState.handler);
+                        await context.sync();
+                    });
+                }
 
-    // Add selection change handler
-    React.useEffect(() => {
-        if (!isSelectingRange) return;
-
-        const handleSelectionChange = async () => {
-            try {
+                // Set up new handler
                 await Excel.run(async (context) => {
+                    const handler = context.workbook.onSelectionChanged.add((eventArgs) => {
+                        Excel.run(async (innerContext) => {
+                            const range = innerContext.workbook.getSelectedRange();
+                            range.load("address");
+                            await innerContext.sync();
+                            const address = range.address.split("!")[1];
+
+                            // Update preview only
+                            setSelectionState(prev => ({
+                                ...prev,
+                                previewValue: address
+                            }));
+                        });
+                    });
+
+                    // Get initial selection
                     const range = context.workbook.getSelectedRange();
                     range.load("address");
                     await context.sync();
                     const address = range.address.split("!")[1];
-                    handleArgumentChange(selectingParamName, address);
-                });
-            } catch (error) {
-                console.error("Selection change error:", error);
-            }
-        };
 
-        Office.context.document.addHandlerAsync(
-            Office.EventType.DocumentSelectionChanged,
-            handleSelectionChange
-        );
+                    setSelectionState({
+                        isSelecting: true,
+                        paramName: paramName,
+                        handler: handler,
+                        previewValue: address
+                    });
+                });
+            }
+        } catch (error) {
+            setError(`Range selection error: ${error.message}`);
+            setSelectionState({
+                isSelecting: false,
+                paramName: null,
+                handler: null,
+                previewValue: null
+            });
+        }
+    };
+
+    const setupSelectionHandler = async (paramName) => {
+        await Excel.run(async (context) => {
+            const handler = context.workbook.onSelectionChanged.add((eventArgs) => {
+                Excel.run(async (innerContext) => {
+                    const range = innerContext.workbook.getSelectedRange();
+                    range.load("address");
+                    await innerContext.sync();
+                    const address = range.address.split("!")[1];
+
+                    // Only update the specific parameter being selected
+                    setFunctionArgs(prev => ({
+                        ...prev,
+                        [paramName]: address
+                    }));
+                });
+            });
+
+            await context.sync();
+
+            // Initialize with current selection
+            const range = context.workbook.getSelectedRange();
+            range.load("address");
+            await context.sync();
+            const address = range.address.split("!")[1];
+
+            setFunctionArgs(prev => ({
+                ...prev,
+                [paramName]: address
+            }));
+
+            setSelectionState({
+                isSelecting: true,
+                paramName: paramName,
+                handler: handler
+            });
+        });
+    };
+
+    // Clean up the event handler when dialog closes or component unmounts
+    React.useEffect(() => {
+        if (!isOpen && selectionState.handler) {
+            Excel.run(async (context) => {
+                context.workbook.onSelectionChanged.remove(selectionState.handler);
+                await context.sync();
+            }).catch(console.error);
+            setSelectionState({
+                isSelecting: false,
+                paramName: null,
+                handler: null
+            });
+        }
 
         return () => {
-            Office.context.document.removeHandlerAsync(
-                Office.EventType.DocumentSelectionChanged,
-                handleSelectionChange
-            );
+            if (selectionState.handler) {
+                Excel.run(async (context) => {
+                    context.workbook.onSelectionChanged.remove(selectionState.handler);
+                    await context.sync();
+                }).catch(console.error);
+            }
         };
-    }, [isSelectingRange, selectingParamName]);
+    }, [isOpen, selectionState.handler]);
 
     const handleSubmit = async () => {
         if (!selectedFunction || !selectedCell) return;
@@ -142,18 +236,7 @@ const FunctionDialog = ({
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
             <div className="bg-white p-4 rounded-lg shadow-lg w-96">
-                <h2 className="text-xl mb-4">Insert Function: {selectedFunction.name}</h2>
-
-                <div className="mb-4">
-                    <label className="block mb-2">Selected Cell</label>
-                    <input
-                        type="text"
-                        value={selectedCell}
-                        readOnly
-                        className="w-full px-2 py-1 border rounded bg-gray-100"
-                    />
-                </div>
-
+                <h2 className="text-xl mb-4">Insert function into cell {selectedCell}</h2>
                 <div className="mb-4 p-2 bg-gray-50 rounded">
                     <h3 className="font-bold">{selectedFunction.signature}</h3>
                     {selectedFunction.description && (
@@ -173,19 +256,27 @@ const FunctionDialog = ({
                             <div className="flex gap-2">
                                 <input
                                     type="text"
-                                    value={functionArgs[param.name] || ""}
+                                    value={
+                                        (selectionState.isSelecting && selectionState.paramName === param.name)
+                                            ? (selectionState.previewValue || '')
+                                            : (functionArgs[param.name] || '')
+                                    }
                                     onChange={(e) => handleArgumentChange(param.name, e.target.value)}
-                                    className="flex-1 px-2 py-1 border rounded"
+                                    className={`flex-1 px-2 py-1 border rounded ${selectionState.isSelecting && selectionState.paramName === param.name
+                                        ? "border-blue-500 bg-blue-50"
+                                        : ""
+                                        }`}
                                     placeholder={`Enter value or cell reference${param.has_default ? ' (optional)' : ''}`}
                                 />
                                 <button
                                     onClick={() => toggleRangeSelection(param.name)}
-                                    className={`px-2 py-1 border rounded ${isSelectingRange && selectingParamName === param.name
-                                            ? 'bg-blue-100 border-blue-500'
-                                            : 'hover:bg-gray-100'
+                                    className={`px-2 py-1 border rounded ${selectionState.isSelecting && selectionState.paramName === param.name
+                                        ? 'bg-blue-500 text-white'
+                                        : 'hover:bg-gray-100'
                                         }`}
+                                    title="Select range"
                                 >
-                                    {isSelectingRange && selectingParamName === param.name ? '✓' : '📑'}
+                                    {selectionState.isSelecting && selectionState.paramName === param.name ? '✓' : '📑'}
                                 </button>
                             </div>
                         </div>
