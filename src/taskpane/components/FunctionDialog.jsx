@@ -253,7 +253,7 @@ const FunctionDialog = ({
 
     if (!isOpen) return null;
 
-    if (!selectedFunction) {
+    if (!selectedFunction.name) {
         return (
             <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
                 <div className="bg-white p-4 rounded-lg shadow-lg w-96">

@@ -213,7 +213,7 @@ const EditorTab = ({
                 <div className="space-x-2">
                     <button onClick={handleTest} className="px-2 py-1 bg-green-500 text-white rounded">Test</button>
                     <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
-                    <button onClick={() => setIsFunctionDialogOpen(true)} className="px-2 py-1 bg-yellow-500 text-white rounded">Insert</button>
+                    <button onClick={() => setIsFunctionDialogOpen(true)} className="px-2 py-1 bg-yellow-500 text-white rounded">Use</button>
                     <button onClick={() => setIsLLMOpen(true)} className="px-2 py-1 bg-purple-500 text-white rounded">AI✨</button>
                 </div>
             </div>
