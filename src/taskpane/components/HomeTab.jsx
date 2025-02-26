@@ -30,7 +30,7 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
         <div className="flex flex-col h-full overflow-hidden">
             <div className="shrink-0">
                 <div className="px-4 py-2 bg-gray-100 font-bold text-center">
-                    Create Custom Functions
+                    Create Functions
                 </div>
                 <div className="p-2">
                     <div className="border-gray-300 rounded-lg py-0">
@@ -72,8 +72,8 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
                 <a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener" className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">Email Us!🛟</a>
                 <div className="group relative flex items-center gap-2">
                     <SignInButton loadFunctions={loadFunctions} />
-                    <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block bg-green-50 text-black text-sm py-2 px-4 rounded shadow-md border border-green-200 whitespace-normal min-w-[200px]">
-                        Login to save functions to OneDrive for access in other workbooks.
+                    <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block bg-blue-50 text-black text-sm py-2 px-4 rounded shadow-md whitespace-normal min-w-[200px]">
+                        Configure permissions to access data in settings ⚙️.
                     </div>
                 </div>
             </div>

@@ -51,41 +51,33 @@ const AddFunctions = ({ loadFunctions }) => {
     return (
         <div className="h-full flex flex-col">
             <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center">
-                Add Example Functions
+                Add Functions
             </div>
-            <div className="flex-1 flex flex-col min-h-0"> {/* Container for table */}
-                <table className="min-w-full bg-white">
-                    <thead className="sticky top-0 bg-white z-10">
-                        <tr>
-                            <th className="py-2 px-4 border-b text-left w-full">Excel Function</th>
-                            <th className="py-2 px-4 border-b w-12">Add</th>
-                        </tr>
-                    </thead>
-                </table>
-                <div className="flex-1 overflow-y-auto"> {/* Scrollable container */}
+            <div className="flex-1 flex flex-col min-h-0">
+                <div className="flex-1 overflow-y-auto">
                     <table className="min-w-full bg-white">
                         <tbody>
                             {functions.map((func) => (
                                 <tr key={func.name}>
-                                    <td className="py-2 px-4 border-b w-full">
+                                    <td className="py-1 px-2 border-b w-full">
                                         <div className="relative group w-full">
                                             <span className="font-mono cursor-help text-left block w-full">={func.name.toUpperCase()}</span>
-                                            <div className="absolute left-0 bottom-full mb-2 w-64 p-2 bg-gray-800 text-white text-sm rounded shadow-lg hidden group-hover:block z-10">
+                                            <div className="absolute left-0 top-full mt-2 w-64 p-2 bg-blue-50 text-black text-sm rounded shadow-lg hidden group-hover:block z-10">
                                                 {func.description}
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="py-2 px-4 border-b w-12 text-center">
+                                    <td className="py-1 px-2 border-b w-12 text-center">
                                         <div className="relative group">
                                             <button
                                                 onClick={() => handleInsert(func)}
-                                                className="text-blue-500 hover:text-blue-700 cursor-help"
+                                                className="px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 transition-colors"
                                                 aria-label="Insert function"
                                             >
-                                                ➕
+                                                Add
                                             </button>
-                                            <div className="absolute right-0 bottom-full mb-2 w-64 p-2 bg-gray-800 text-white text-sm rounded shadow-lg hidden group-hover:block z-10">
-                                                Adds this function to the workbook and creates a demo sheet showing how to use it
+                                            <div className="absolute right-0 top-full mt-2 w-64 p-2 bg-blue-50 text-black text-sm rounded shadow-lg hidden group-hover:block z-10">
+                                                Adds this function to the workbook.
                                             </div>
                                         </div>
                                     </td>
