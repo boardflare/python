@@ -108,10 +108,13 @@ const SharedFunctions = ({ onImportComplete }) => {
     };
 
     return (
-        <details className="mt-4">
+        <details className="mt-0">
             <summary className="px-4 py-2 bg-gray-100 cursor-pointer font-bold">
-                Shared Functions (Experimental)
+                Shared Folder
             </summary>
+            <div className="p-1">
+                Import functions from a shared folder in SharePoint or OneDrive.  Microsoft Files.ReadWrite.All permissions are required in settings.
+            </div>
             <div className="border-t pt-2">
                 {sharedFunctions.length > 0 && (
                     <div className="overflow-x-auto mb-2">
@@ -165,7 +168,7 @@ const SharedFunctions = ({ onImportComplete }) => {
                                 value={url}
                                 onChange={(e) => setUrl(e.target.value)}
                                 className="flex-1 px-2 py-1 border rounded"
-                                placeholder="Enter shared folder URL"
+                                placeholder="Enter folder sharing link."
                             />
                             <button
                                 type="submit"

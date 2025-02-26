@@ -86,15 +86,18 @@ const Notebooks = ({ onImportComplete }) => {
 
     return (
         <details>
-            <summary className="px-4 py-2 bg-gray-100 cursor-pointer font-bold">Notebooks</summary>
-            <div className="border-t pt-2">
+            <summary className="px-4 py-2 bg-gray-100 cursor-pointer font-bold">GitHub Gist</summary>
+            <div className="">
+                <div className="p-1">
+                    Import functions from a notebook in a GitHub Gist.  Each function should be in a separate cell.
+                </div>
                 <div className="px-4 mb-4">
                     <select
                         value={selectedNotebook}
                         onChange={(e) => setSelectedNotebook(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-lg text-sm mb-2"
                     >
-                        <option value="">Select a notebook with example functions...</option>
+                        <option value="">Select an example notebook...</option>
                         {Object.keys(myNotebooks).length > 0 && (
                             <optgroup label="Custom Notebooks">
                                 {Object.entries(myNotebooks).map(([url, { fileName }]) => (
@@ -110,13 +113,15 @@ const Notebooks = ({ onImportComplete }) => {
                             </optgroup>
                         ))}
                     </select>
-                    <button
-                        onClick={handleImport}
-                        disabled={isImporting || !selectedNotebook}
-                        className="w-full px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300"
-                    >
-                        {isImporting ? "Importing Functions..." : "Import Notebook Functions"}
-                    </button>
+                    <div className="flex justify-center">
+                        <button
+                            onClick={handleImport}
+                            disabled={isImporting || !selectedNotebook}
+                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300 text-center"
+                        >
+                            {isImporting ? "Importing Functions..." : "Import Functions"}
+                        </button>
+                    </div>
                 </div>
 
                 <div className="px-4 mb-2">
@@ -127,7 +132,7 @@ const Notebooks = ({ onImportComplete }) => {
                                 value={url}
                                 onChange={(e) => setUrl(e.target.value)}
                                 className="flex-1 px-2 py-1 border rounded"
-                                placeholder="Enter notebook URL (advanced)"
+                                placeholder="Enter GitHub Gist URL"
                             />
                             <button
                                 type="submit"

@@ -35,7 +35,7 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
                 <div className="p-2">
                     <div className="border-gray-300 rounded-lg py-0">
                         <p><span className="font-bold">Step 1:</span> Write a Python function in the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('editor')}>editor</span>.</p>
-                        <div className="py-1 h-[60px]">
+                        <div className="py-1 h-16">
                             <MonacoEditor
                                 value={DISPLAY_CODE}
                                 onMount={(editor) => {
