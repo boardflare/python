@@ -41,7 +41,15 @@ const SettingsTab = ({ loadFunctions }) => {
         <div className="p-2">
             <div className="mb-2">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-left font-semibold">Microsoft Permissions</h2>
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-left font-semibold">Microsoft Permissions</h2>
+                        <span
+                            className="cursor-help"
+                            title="Add permissions here to access data using your Microsoft account."
+                        >
+                            ℹ️
+                        </span>
+                    </div>
                     <button
                         onClick={updateToken}
                         className="px-2 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-normal"

@@ -113,7 +113,7 @@ const SharedFunctions = ({ onImportComplete }) => {
                 Shared Folder
             </summary>
             <div className="p-1">
-                Import functions from a shared folder in SharePoint or OneDrive.  Microsoft Files.ReadWrite.All permissions are required in settings.
+                Import functions from a shared folder in SharePoint or OneDrive.  Add Files.Read.All permissions in settings ⚙️ and refresh login.
             </div>
             <div className="border-t pt-2">
                 {sharedFunctions.length > 0 && (

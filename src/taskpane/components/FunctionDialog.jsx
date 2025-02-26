@@ -126,7 +126,7 @@ const FunctionDialog = ({
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
             <div className="bg-white p-4 rounded-lg shadow-lg w-96">
                 <div className="flex items-center gap-2 mb-4">
-                    <h2 className="text-xl">Insert function into</h2>
+                    <h2 className="text-xl">Insert into cell:</h2>
                     <input
                         id="targetCell"
                         type="text"
@@ -146,7 +146,6 @@ const FunctionDialog = ({
                 </div>
 
                 <div className="mb-4">
-                    <h3 className="font-bold mb-2">Arguments</h3>
                     {(selectedFunction.parameters || []).map((param, index) => (
                         <div key={`${param.name}-${index}`} className="mb-2">
                             <label className="block mb-1">
@@ -161,7 +160,7 @@ const FunctionDialog = ({
                                 onFocus={handleFocus}
                                 data-param={param.name}
                                 className="w-full px-2 py-1 border rounded"
-                                placeholder={`Enter value or select cells${param.has_default ? ' (optional)' : ''}`}
+                                placeholder={`Select cell(s) first then click here`}
                             />
                         </div>
                     ))}
