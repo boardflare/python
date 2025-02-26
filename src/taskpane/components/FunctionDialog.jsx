@@ -318,7 +318,7 @@ const FunctionDialog = ({
                                         }`}
                                     title="Select range"
                                 >
-                                    {selectionState.isSelecting && selectionState.paramName === param.name ? '✓' : '⬆️'}
+                                    {selectionState.isSelecting && selectionState.paramName === param.name ? '✓' : '✏️'}
                                 </button>
                             </div>
                         </div>

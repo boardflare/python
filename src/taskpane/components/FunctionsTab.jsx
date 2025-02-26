@@ -4,6 +4,7 @@ import { TokenExpiredError, deleteFile, loadFunctionFiles } from "../utils/drive
 import { runTests } from "../utils/testRunner";
 import Notebooks from "./Notebooks";
 import SharedFunctions from "./SharedFunctions";
+import FunctionDialog from "./FunctionDialog";
 
 const FunctionsTab = ({
     onEdit,
@@ -17,6 +18,7 @@ const FunctionsTab = ({
     folderUrl
 }) => {
     const [deleteConfirm, setDeleteConfirm] = React.useState(null);
+    const [dialogFunction, setDialogFunction] = React.useState(null);
 
     // Remove any useEffect hooks that might be calling loadFunctions
 
@@ -82,6 +84,13 @@ const FunctionsTab = ({
                             </td>
                             <td className="py-0 px-2 border-b w-fit">
                                 <div className="flex gap-2 justify-end">
+                                    <button
+                                        className="text-gray-500 hover:text-gray-700"
+                                        onClick={() => setDialogFunction(func)}
+                                        title="Use function"
+                                    >
+                                        ⬆️
+                                    </button>
                                     <button
                                         className="text-green-500 hover:text-green-700"
                                         onClick={() => handleTest(func)}
@@ -191,6 +200,12 @@ const FunctionsTab = ({
                     </div>
                 </div>
             )}
+
+            <FunctionDialog
+                isOpen={dialogFunction !== null}
+                onClose={() => setDialogFunction(null)}
+                selectedFunction={dialogFunction || {}}
+            />
         </div>
     );
 };

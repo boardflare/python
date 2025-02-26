@@ -1,7 +1,6 @@
 import * as React from "react";
 import { MonacoEditor } from "./MonacoEditor";
 import LLM from "./LLM";
-import FunctionDialog from "./FunctionDialog";
 import { DEFAULT_CODE } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
 import { EventTypes } from "../utils/constants";
@@ -23,7 +22,6 @@ const EditorTab = ({
 }) => {
     const [notification, setNotification] = React.useState("");
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
-    const [isFunctionDialogOpen, setIsFunctionDialogOpen] = React.useState(false);
     const notificationTimeoutRef = React.useRef();
     const editorRef = React.useRef(null);
 
@@ -213,7 +211,6 @@ const EditorTab = ({
                 <div className="space-x-2">
                     <button onClick={handleTest} className="px-2 py-1 bg-green-500 text-white rounded">Test</button>
                     <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
-                    <button onClick={() => setIsFunctionDialogOpen(true)} className="px-2 py-1 bg-yellow-500 text-white rounded">Use</button>
                     <button onClick={() => setIsLLMOpen(true)} className="px-2 py-1 bg-purple-500 text-white rounded">AI✨</button>
                 </div>
             </div>
@@ -223,11 +220,6 @@ const EditorTab = ({
                 onSuccess={handleLLMSuccess}
                 prompt={selectedFunction.prompt}
                 loadFunctions={loadFunctions} // NEW: pass loadFunctions for refreshing functions list
-            />
-            <FunctionDialog
-                isOpen={isFunctionDialogOpen}
-                onClose={() => setIsFunctionDialogOpen(false)}
-                selectedFunction={selectedFunction}
             />
         </div>
     );
