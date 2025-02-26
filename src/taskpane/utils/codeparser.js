@@ -77,7 +77,8 @@ ${rawCode}
             formula,
             timestamp,
             uid,
-            excelExample
+            excelExample,
+            parameters  // Add parameters to the result
         };
 
         return result;
