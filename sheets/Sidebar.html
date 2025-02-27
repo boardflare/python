@@ -3,10 +3,15 @@
   <head>
     <base target="_top">
     <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js"></script>
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
     <style>
       body {
         font-family: Arial, sans-serif;
-        margin: 10px;
+        margin: 5px;
+      }
+      #editor-container {
+        height: 400px;
       }
       #output {
         white-space: pre-wrap;
@@ -20,141 +25,32 @@
       .log {
         margin: 5px 0;
       }
-      .log-info {
-        color: #0066cc;
+      .log-info { color: #0066cc; }
+      .log-error { color: #cc0000; }
+      .log-success { color: #008800; }
+      .button-container {
+        margin: 10px 0;
       }
-      .log-error {
-        color: #cc0000;
-      }
-      .log-success {
-        color: #008800;
-      }
+      /* Remove .input-container styles as they're no longer needed */
     </style>
   </head>
   <body>
-    <h2>Python Runner</h2>
-    <p>Use the <code>PYTHON()</code> function in your spreadsheet to execute Python code.</p>
+    <p>Run Python code locally in your browser.  More features coming soon!</p>
+    
+    <div id="editor-container"></div>
+    <div class="button-container">
+      <button onclick="runEditorCode()">Run Code</button>
+      <button onclick="clearOutput()">Clear Output</button>
+      <button onclick="getSelectedRangeData()">Get Data</button>
+    </div>
     
     <div id="status">Loading Pyodide...</div>
     <div id="output"></div>
     
-    <script>
-      // Initialize Pyodide
-      let pyodide;
-      let isInitialized = false;
-      let isProcessing = false;
-      
-      async function initPyodide() {
-        try {
-          pyodide = await loadPyodide();
-          log("Pyodide loaded and ready!", "success");
-          document.getElementById('status').textContent = 'Pyodide loaded and ready!';
-          isInitialized = true;
-          
-          // Start checking for Python code to execute
-          checkForPendingCode();
-        } catch (error) {
-          log("Error loading Pyodide: " + error.message, "error");
-          document.getElementById('status').textContent = 'Error loading Pyodide: ' + error.message;
-        }
-      }
-      
-      // Execute Python code
-      async function executePythonCode(code) {
-        if (!isInitialized) {
-          return "Pyodide is not yet initialized";
-        }
-        
-        try {
-          // Execute the code and capture the result
-          const result = await pyodide.runPythonAsync(code);
-          return String(result);
-        } catch (error) {
-          return "Error: " + error.message;
-        }
-      }
-      
-      // Add log message to the output div
-      function log(message, type = "info") {
-        const output = document.getElementById('output');
-        const logElement = document.createElement('div');
-        logElement.classList.add('log', `log-${type}`);
-        logElement.textContent = message;
-        output.appendChild(logElement);
-        
-        // Scroll to bottom
-        output.scrollTop = output.scrollHeight;
-      }
-      
-      // Check for pending Python requests
-      async function checkForPendingCode() {
-        if (isProcessing || !isInitialized) {
-          // If already processing or not initialized, try again later
-          setTimeout(checkForPendingCode, 2000);
-          return;
-        }
-        
-        isProcessing = true;
-        
-        try {
-          // Get pending requests from server
-          google.script.run
-            .withSuccessHandler(processPendingRequests)
-            .withFailureHandler(handleError)
-            .getPendingRequests();
-        } catch (error) {
-          log("Error checking for pending code: " + error.message, "error");
-          isProcessing = false;
-          setTimeout(checkForPendingCode, 5000);
-        }
-      }
-      
-      // Process pending Python requests
-      async function processPendingRequests(pendingRequests) {
-        const results = {};
-        const requestIds = Object.keys(pendingRequests);
-        
-        if (requestIds.length > 0) {
-          log(`Processing ${requestIds.length} Python request(s)...`, "info");
-          
-          for (const requestId of requestIds) {
-            const request = pendingRequests[requestId];
-            log(`Executing Python code from cell ${request.cell}`, "info");
-            
-            try {
-              const result = await executePythonCode(request.code);
-              results[requestId] = result;
-              log(`Result for cell ${request.cell}: ${result}`, "success");
-            } catch (error) {
-              results[requestId] = "Error: " + error.message;
-              log(`Error: ${error.message}`, "error");
-            }
-          }
-          
-          // Save results back to the server
-          google.script.run
-            .withSuccessHandler(() => {
-              log("Results sent to spreadsheet", "success");
-            })
-            .withFailureHandler(handleError)
-            .saveResults(results);
-        }
-        
-        isProcessing = false;
-        
-        // Schedule next check
-        setTimeout(checkForPendingCode, 2000);
-      }
-      
-      // Handle errors
-      function handleError(error) {
-        log("Error: " + error.message, "error");
-        isProcessing = false;
-        setTimeout(checkForPendingCode, 5000); // Try again after a delay
-      }
-      
-      // Initialize Pyodide when the page loads
-      window.onload = initPyodide;
-    </script>
+    <div style="margin-top: 10px; font-size: 12px;">
+      <a href="https://www.boardflare.com/company/privacy" target="_blank">Privacy Policy</a>
+    </div>
+    
+    <?!= include('JavaScript')?>
   </body>
 </html>
