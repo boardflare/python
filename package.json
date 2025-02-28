@@ -51,6 +51,7 @@
     "copy-webpack-plugin": "^12.0.2",
     "css-loader": "^6.7.1",
     "custom-functions-metadata-plugin": "^1.7.2",
+    "dotenv": "^16.4.7",
     "file-loader": "^6.2.0",
     "find-process": "^1.4.4",
     "html-loader": "^5.0.0",

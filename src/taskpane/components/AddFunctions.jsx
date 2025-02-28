@@ -1,44 +1,79 @@
 import * as React from "react";
-import { parseNotebook } from "../utils/notebooks";
 import { saveFunctionToSettings } from "../utils/workbookSettings";
 import { updateNameManager } from "../utils/nameManager";
 import { singleDemo } from "../utils/demo";
 import { pyLogs } from "../utils/logs";
-import demoFunctions from '../utils/demo_functions.ipynb';
+// Import the example functions directly from assets
+import exampleFunctions from '../../../assets/example_functions.json';
 
 const AddFunctions = ({ loadFunctions }) => {
     const [functions, setFunctions] = React.useState([]);
     const [error, setError] = React.useState(null);
+    const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
-        loadDemoFunctions();
+        loadExampleFunctions();
     }, []);
 
-    const loadDemoFunctions = async () => {
+    const loadExampleFunctions = async () => {
         try {
-            const parsedFunctions = await parseNotebook(demoFunctions);
-            setFunctions(parsedFunctions);
+            setLoading(true);
+            // The functions are already parsed in the JSON file
+            setFunctions(exampleFunctions);
             setError(null);
+            console.log(`Loaded ${exampleFunctions.length} example functions`);
         } catch (error) {
-            console.error('Error loading demo functions:', error);
+            console.error('Error loading example functions:', error);
             setError('Failed to load example functions');
             setFunctions([]);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleInsert = async (func) => {
         try {
-            await saveFunctionToSettings(func);
-            await updateNameManager(func);
-            await singleDemo(func);
+            // Make sure we have the full function data with code for insertion
+            if (!func.code) {
+                throw new Error("Function code missing");
+            }
+
+            let appEnvironment = "BOARDFLARE";
+            if (window.location.href.includes("preview")) {
+                appEnvironment = "PREVIEW";
+            } else if (window.location.hostname == "localhost") {
+                appEnvironment = "LOCAL";
+            }
+
+            // Create a copy of the function and update its formula if needed
+            const funcToSave = { ...func };
+            // Replace environment prefix only when it appears before EXEC
+            funcToSave.formula = func.formula.replace(/(BOARDFLARE\.|LOCAL\.|PREVIEW\.)(?=EXEC)/g, `${appEnvironment}.`);
+
+            await saveFunctionToSettings(funcToSave);
+            await updateNameManager(funcToSave);
+            await singleDemo(funcToSave);
             await loadFunctions();
-            pyLogs({ function: func.name, ref: 'imported_example_function' });
+
+            pyLogs({
+                function: func.name,
+                ref: 'imported_example_function',
+                source: 'example'
+            });
         } catch (error) {
             console.error("Error importing function:", error);
             setError("Failed to import function");
-            pyLogs({ function: func.name, ref: 'import_example_function_error' });
+            pyLogs({
+                function: func.name,
+                ref: 'import_example_function_error',
+                error: error.message
+            });
         }
     };
+
+    if (loading) {
+        return <div className="text-gray-600 text-sm px-4">Loading example functions...</div>;
+    }
 
     if (error) {
         return <div className="text-red-600 text-sm px-4">{error}</div>;

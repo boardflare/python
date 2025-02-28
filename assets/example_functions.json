@@ -1,0 +1,15 @@
+[
+  {
+    "name": "calculate_area",
+    "signature": "CALCULATE_AREA(length, [width])",
+    "description": "Calculate area of rectangle",
+    "resultLine": "\n\nresult = calculate_area(**{k: v for k, v in [(\"length\", arg1 if arg1 != \"__OMITTED__\" else None), (\"width\", arg2 if arg2 != \"__OMITTED__\" else None)] if v is not None})",
+    "formula": "=LAMBDA(length, [width], PREVIEW.EXEC(\"workbook-settings:calculate_area\", length, IF(ISOMITTED(width), \"__OMITTED__\", width)))",
+    "timestamp": "2025-02-25T02:52:55.584Z",
+    "uid": "anonymous",
+    "excelExample": "=CALCULATE_AREA(5, 4)",
+    "code": "def calculate_area(length, width=5):\n    \"\"\"Calculate area of rectangle.\n    Args:\n        length (float): Length of rectangle\n        width (float): Width of rectangle\n    Returns:\n        float: Area of rectangle\n    \"\"\"\n    return length * width\n\ntest_cases = [\n    [5, 4],      # -> 20\n    [2.5, 4],    # -> 10\n    [10, 10],    # -> 100\n    [1, 1],      # -> 1\n    [0.5, 2]     # -> 1\n]\n\n# Excel usage: =CALCULATE_AREA(5, 4)",
+    "fileName": "calculate_area.ipynb",
+    "fileId": "2"
+  }
+]
