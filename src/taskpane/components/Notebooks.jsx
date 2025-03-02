@@ -74,11 +74,11 @@ const Notebooks = ({ onImportComplete }) => {
 
             onImportComplete();
             setError(null);
-            pyLogs({ code: selectedNotebook, ref: 'imported_notebook' }); // removed errorMessage: null
+            pyLogs({ code: JSON.stringify(selectedNotebook), ref: 'imported_notebook' }); // removed errorMessage: null
         } catch (error) {
             console.error("Error importing functions:", error);
             setError("Failed to import functions");
-            pyLogs({ code: selectedNotebook, ref: 'import_notebook_error', errorMessage: error.message }); // keeping errorMessage
+            pyLogs({ code: JSON.stringify(selectedNotebook), ref: 'import_notebook_error', errorMessage: error.message }); // keeping errorMessage
         } finally {
             setIsImporting(false);
         }
