@@ -42,11 +42,11 @@ const Notebooks = ({ onImportComplete }) => {
             setMyNotebooks(notebooks);
             setUrl('');
             setSaveSuccess(true);
-            pyLogs({ notebook: url, ref: 'notebook_url_submitted' }); // updated ref value
+            pyLogs({ code: url, ref: 'notebook_url_submitted' }); // removed errorMessage: null
             setTimeout(() => setSaveSuccess(false), 3000);
         } catch (error) {
             setError(`Failed to add notebook: ${error.message}`);
-            pyLogs({ notebook: url, ref: 'notebook_url_submit_error' }); // updated ref value
+            pyLogs({ code: url, ref: 'notebook_url_submit_error', errorMessage: error.message }); // keeping errorMessage
         } finally {
             setIsUrlSaving(false);
         }
@@ -74,11 +74,11 @@ const Notebooks = ({ onImportComplete }) => {
 
             onImportComplete();
             setError(null);
-            pyLogs({ notebook: selectedNotebook, ref: 'imported_notebook' }); // reverted ref value
+            pyLogs({ code: selectedNotebook, ref: 'imported_notebook' }); // removed errorMessage: null
         } catch (error) {
             console.error("Error importing functions:", error);
             setError("Failed to import functions");
-            pyLogs({ notebook: selectedNotebook, ref: 'import_notebook_error' }); // reverted ref value
+            pyLogs({ code: selectedNotebook, ref: 'import_notebook_error', errorMessage: error.message }); // keeping errorMessage
         } finally {
             setIsImporting(false);
         }
