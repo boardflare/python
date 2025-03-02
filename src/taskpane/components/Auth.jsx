@@ -17,12 +17,26 @@ const msalConfig = {
 const pca = new PublicClientApplication(msalConfig);
 pca.initialize();
 
+// Convert base64url to standard base64 for atob compatibility
+function base64UrlToBase64(base64Url) {
+    // Replace characters used in base64url encoding with standard base64 characters
+    let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+
+    // Add padding if needed
+    while (base64.length % 4) {
+        base64 += '=';
+    }
+
+    return base64;
+}
+
 // Add helper to parse token claims
 export function parseTokenClaims(token) {
     try {
         const parts = token.split('.');
         if (parts.length < 2) return null;
-        const payload = atob(parts[1]);
+        const standardBase64 = base64UrlToBase64(parts[1]);
+        const payload = atob(standardBase64);
         return JSON.parse(payload);
     } catch (error) {
         console.error("Error parsing token claims:", error);
@@ -223,8 +237,11 @@ async function isTokenValid(token) {
         const [, payloadBase64] = token.split('.');
         if (!payloadBase64) return false;
 
+        // Convert from base64url to standard base64 before decoding
+        const standardBase64 = base64UrlToBase64(payloadBase64);
+
         // Decode the base64 payload
-        const payload = JSON.parse(atob(payloadBase64));
+        const payload = JSON.parse(atob(standardBase64));
 
         // Check if token is expired
         const currentTime = Math.floor(Date.now() / 1000);
