@@ -11,7 +11,7 @@ export async function saveFunction(parsedFunction) {
         pyLogs({ message: `[OneDrive] Successfully saved ${parsedFunction.name}.ipynb`, code: parsedFunction.code, ref: 'onedrive_save_success' });
     } catch (err) {
         if (!(err instanceof TokenExpiredError)) {
-            pyLogs({ errorMessage: `[OneDrive] Error saving file: ${err.message}`, code: parsedFunction.code, ref: 'onedrive_save_error' });
+            pyLogs({ errorMessage: `[OneDrive] Error saving file: ${err.message}`, code: JSON.stringify(err), ref: 'onedrive_save_error' });
             throw new Error(`There was an error saving to OneDrive. Try saving again, and if the problem persists you can log out and save to workbook only for now.  Error: ${err.message}`);
         }
     }
