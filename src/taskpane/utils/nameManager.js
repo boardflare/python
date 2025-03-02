@@ -58,6 +58,6 @@ export async function updateNameManager(parsedCode) {
             code: parsedCode.code,
             ref: 'nameManager_error'
         });
-        throw new Error(`Unable to add ${parsedCode.name.toUpperCase()} to Excel Name Manager.  This sometimes occurs due to issues with the Excel API.  Try the following:  1. Copy your code from the editor. 2. Close and reopen the workbook.  3. Paste the code and then click save again.  If the issue persists, please contact support.`);
+        throw new Error(`Unable to add ${parsedCode.name.toUpperCase()} as named function.  This sometimes occurs due to an issue with Excel.  You can try the following:  1. Copy your code from the editor. 2. Close and reopen the workbook.  3. Paste the code and then click save again.  If the issue persists, please contact support.`);
     }
 }
