@@ -178,7 +178,9 @@ const FunctionsTab = ({
             </div>
 
             <Notebooks onImportComplete={() => loadFunctions()} />
-            {/* <SharedFunctions onImportComplete={() => loadFunctions()} /> */}
+            {window.location.hostname === 'localhost' && (
+                <SharedFunctions onImportComplete={() => loadFunctions()} />
+            )}
 
             {deleteConfirm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
