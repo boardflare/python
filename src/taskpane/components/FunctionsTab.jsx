@@ -14,13 +14,11 @@ const FunctionsTab = ({
     onedriveFunctions,
     isLoading,
     error,
-    loadFunctions, // This function refreshes both workbook and OneDrive functions
+    loadFunctions,
     folderUrl
 }) => {
     const [deleteConfirm, setDeleteConfirm] = React.useState(null);
     const [dialogFunction, setDialogFunction] = React.useState(null);
-
-    // Remove any useEffect hooks that might be calling loadFunctions
 
     const handleDelete = async (functionName, source, fileName) => {
         try {
