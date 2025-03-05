@@ -4,14 +4,17 @@ import astParserCode from './astParser.py';
 
 export async function parsePython(rawCode) {
     try {
-        // First use Python AST parser
+        // Safely encode the Python code to avoid issues with triple quotes
+        const encodedCode = btoa(
+            String.fromCharCode.apply(null, new TextEncoder().encode(rawCode))
+        );
+
+        // First use Python AST parser with the base64 encoded code
         const parseCode = `
 ${astParserCode}
 
-# Parse the function
-result = parse_python_code('''
-${rawCode}
-''')
+# Parse the function using the safely encoded code
+result = parse_python_code_safe("${encodedCode}")
 `;
 
         const rawResult = await execPython({ code: parseCode, arg1: null });

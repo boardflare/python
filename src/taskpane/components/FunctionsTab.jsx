@@ -19,6 +19,13 @@ const FunctionsTab = ({
 }) => {
     const [deleteConfirm, setDeleteConfirm] = React.useState(null);
     const [dialogFunction, setDialogFunction] = React.useState(null);
+    const [showTooltip, setShowTooltip] = React.useState(false);
+    const [localError, setError] = React.useState(error || null);
+
+    // Use effect to sync error prop with local state
+    React.useEffect(() => {
+        setError(error);
+    }, [error]);
 
     const handleDelete = async (functionName, source, fileName) => {
         try {
@@ -45,6 +52,49 @@ const FunctionsTab = ({
         }
     };
 
+    const OneDriveFunctionsHeader = () => (
+        <div className="mb-1">
+            <h3 className="font-semibold text-center flex items-center justify-center gap-2">
+                <div className="flex items-center relative">
+                    {folderUrl ? (
+                        <a
+                            href={folderUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-blue-500"
+                            title="Open in OneDrive"
+                        >
+                            OneDrive Functions
+                        </a>
+                    ) : (
+                        <span>OneDrive Functions</span>
+                    )}
+                    <div className="relative ml-1">
+                        <span
+                            className="text-blue-500 cursor-help text-sm"
+                            onMouseEnter={() => setShowTooltip(true)}
+                            onMouseLeave={() => setShowTooltip(false)}
+                        >
+                            ⓘ
+                        </span>
+                        {showTooltip && (
+                            <div className="absolute z-10 w-64 p-2 bg-blue-50 text-gray-800 text-xs rounded-lg shadow-lg left-0 transform -translate-x-1/2 mt-2">
+                                To save functions to OneDrive, add Files.ReadWrite permission in settings ⚙️ and refresh login. Once enabled, edit and save a function to see it in OneDrive.
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <button
+                    onClick={loadFunctions}
+                    className="text-blue-500 hover:text-blue-700"
+                    title="Refresh OneDrive functions"
+                >
+                    🔄
+                </button>
+            </h3>
+        </div>
+    );
+
     const FunctionTable = ({ functions, source }) => (
         <div className="overflow-x-auto">
             <h3 className="font-semibold mb-1 text-center flex items-center justify-center gap-2">
@@ -61,8 +111,22 @@ const FunctionsTab = ({
                                 OneDrive Functions
                             </a>
                         ) : (
-                            'OneDrive Functions'
+                            <span>OneDrive Functions</span>
                         )}
+                        <div className="relative ml-1">
+                            <span
+                                className="text-blue-500 cursor-help text-sm"
+                                onMouseEnter={() => setShowTooltip(true)}
+                                onMouseLeave={() => setShowTooltip(false)}
+                            >
+                                ⓘ
+                            </span>
+                            {showTooltip && (
+                                <div className="absolute z-10 w-64 p-2 bg-blue-50 text-gray-800 text-xs rounded-lg shadow-lg left-0 transform -translate-x-1/2 mt-2">
+                                    To save functions to OneDrive, add Files.ReadWrite permission in settings ⚙️ and refresh login. Once enabled, edit and save a function to see it in OneDrive.
+                                </div>
+                            )}
+                        </div>
                         <button
                             onClick={loadFunctions}
                             className="text-blue-500 hover:text-blue-700"
@@ -145,25 +209,24 @@ const FunctionsTab = ({
                     <FunctionTable functions={workbookFunctions} source="workbook" />
                 )}
 
-                {!isLoading && !folderUrl && (
-                    <div className="p-2 bg-blue-50 text-gray-800 rounded-lg mb-1">
-                        <div className="flex items-center justify-center mb-2">
-                            <span className="font-semibold">OneDrive Functions</span>
-                        </div>
-                        <p className="">
-                            Add Files.ReadWrite permission in settings ⚙️ and refresh login to save functions to OneDrive also and use in other workbooks.
-                        </p>
-                    </div>
-                )}
-
                 {isLoading ? (
-                    <div className="p-4 text-gray-900 text-center">
-                        Loading OneDrive functions...
-                    </div>
+                    <>
+                        <OneDriveFunctionsHeader />
+                        <div className="p-4 text-gray-900 text-center">
+                            Loading OneDrive functions...
+                        </div>
+                    </>
+                ) : onedriveFunctions.length > 0 ? (
+                    <FunctionTable functions={onedriveFunctions} source="onedrive" />
                 ) : (
-                    onedriveFunctions.length > 0 && (
-                        <FunctionTable functions={onedriveFunctions} source="onedrive" />
-                    )
+                    <div>
+                        <OneDriveFunctionsHeader />
+                        {!folderUrl && (
+                            <div className="text-center text-sm text-gray-500 mb-4">
+                                No OneDrive functions found
+                            </div>
+                        )}
+                    </div>
                 )}
 
                 {!isLoading && workbookFunctions.length === 0 && onedriveFunctions.length === 0 && (

@@ -134,7 +134,7 @@ export async function loadFunctionFiles() {
                     // Extract function metadata from the cell
                     if (firstCell.metadata) {
                         driveFunctions.push({
-                            name: firstCell.metadata.name,
+                            name: firstCell.metadata.name || file.name,
                             code: firstCell.source.join(''),
                             signature: firstCell.metadata.signature,
                             description: firstCell.metadata.description,
