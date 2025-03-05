@@ -52,11 +52,14 @@ const FunctionsTab = ({
         }
     };
 
-    const OneDriveFunctionsHeader = () => (
-        <div className="mb-1">
-            <h3 className="font-semibold text-center flex items-center justify-center gap-2">
-                <div className="flex items-center relative">
-                    {folderUrl ? (
+    const OneDriveFunctionsHeader = () => {
+        // Only render if folderUrl exists (user is logged in)
+        if (!folderUrl) return null;
+
+        return (
+            <div className="mb-1">
+                <h3 className="font-semibold text-center flex items-center justify-center gap-2">
+                    <div className="flex items-center relative">
                         <a
                             href={folderUrl}
                             target="_blank"
@@ -66,53 +69,6 @@ const FunctionsTab = ({
                         >
                             OneDrive Functions
                         </a>
-                    ) : (
-                        <span>OneDrive Functions</span>
-                    )}
-                    <div className="relative ml-1">
-                        <span
-                            className="text-blue-500 cursor-help text-sm"
-                            onMouseEnter={() => setShowTooltip(true)}
-                            onMouseLeave={() => setShowTooltip(false)}
-                        >
-                            ⓘ
-                        </span>
-                        {showTooltip && (
-                            <div className="absolute z-10 w-64 p-2 bg-blue-50 text-gray-800 text-xs rounded-lg shadow-lg left-0 transform -translate-x-1/2 mt-2">
-                                To save functions to OneDrive, add Files.ReadWrite permission in settings ⚙️ and refresh login. Once enabled, edit and save a function to see it in OneDrive.
-                            </div>
-                        )}
-                    </div>
-                </div>
-                <button
-                    onClick={loadFunctions}
-                    className="text-blue-500 hover:text-blue-700"
-                    title="Refresh OneDrive functions"
-                >
-                    🔄
-                </button>
-            </h3>
-        </div>
-    );
-
-    const FunctionTable = ({ functions, source }) => (
-        <div className="overflow-x-auto">
-            <h3 className="font-semibold mb-1 text-center flex items-center justify-center gap-2">
-                {source === 'workbook' ? 'Workbook Functions' : (
-                    <>
-                        {folderUrl ? (
-                            <a
-                                href={folderUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="hover:text-blue-500"
-                                title="Open in OneDrive"
-                            >
-                                OneDrive Functions
-                            </a>
-                        ) : (
-                            <span>OneDrive Functions</span>
-                        )}
                         <div className="relative ml-1">
                             <span
                                 className="text-blue-500 cursor-help text-sm"
@@ -127,13 +83,58 @@ const FunctionsTab = ({
                                 </div>
                             )}
                         </div>
-                        <button
-                            onClick={loadFunctions}
-                            className="text-blue-500 hover:text-blue-700"
-                            title="Refresh OneDrive functions"
-                        >
-                            🔄
-                        </button>
+                    </div>
+                    <button
+                        onClick={loadFunctions}
+                        className="text-blue-500 hover:text-blue-700"
+                        title="Refresh OneDrive functions"
+                    >
+                        🔄
+                    </button>
+                </h3>
+            </div>
+        );
+    };
+
+    const FunctionTable = ({ functions, source }) => (
+        <div className="overflow-x-auto">
+            <h3 className="font-semibold mb-1 text-center flex items-center justify-center gap-2">
+                {source === 'workbook' ? 'Workbook Functions' : (
+                    <>
+                        {folderUrl && (
+                            <>
+                                <a
+                                    href={folderUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:text-blue-500"
+                                    title="Open in OneDrive"
+                                >
+                                    OneDrive Functions
+                                </a>
+                                <div className="relative ml-1">
+                                    <span
+                                        className="text-blue-500 cursor-help text-sm"
+                                        onMouseEnter={() => setShowTooltip(true)}
+                                        onMouseLeave={() => setShowTooltip(false)}
+                                    >
+                                        ⓘ
+                                    </span>
+                                    {showTooltip && (
+                                        <div className="absolute z-10 w-64 p-2 bg-blue-50 text-gray-800 text-xs rounded-lg shadow-lg left-0 transform -translate-x-1/2 mt-2">
+                                            To save functions to OneDrive, add Files.ReadWrite permission in settings ⚙️ and refresh login. Once enabled, edit and save a function to see it in OneDrive.
+                                        </div>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={loadFunctions}
+                                    className="text-blue-500 hover:text-blue-700"
+                                    title="Refresh OneDrive functions"
+                                >
+                                    🔄
+                                </button>
+                            </>
+                        )}
                     </>
                 )}
             </h3>
@@ -209,7 +210,7 @@ const FunctionsTab = ({
                     <FunctionTable functions={workbookFunctions} source="workbook" />
                 )}
 
-                {isLoading ? (
+                {isLoading && folderUrl ? (
                     <>
                         <OneDriveFunctionsHeader />
                         <div className="p-4 text-gray-900 text-center">
@@ -219,14 +220,14 @@ const FunctionsTab = ({
                 ) : onedriveFunctions.length > 0 ? (
                     <FunctionTable functions={onedriveFunctions} source="onedrive" />
                 ) : (
-                    <div>
-                        <OneDriveFunctionsHeader />
-                        {!folderUrl && (
+                    folderUrl && (
+                        <div>
+                            <OneDriveFunctionsHeader />
                             <div className="text-center text-sm text-gray-500 mb-4">
                                 No OneDrive functions found
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )
                 )}
 
                 {!isLoading && workbookFunctions.length === 0 && onedriveFunctions.length === 0 && (

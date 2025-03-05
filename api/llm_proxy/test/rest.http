@@ -17,3 +17,20 @@ content-type: application/json
     "max_tokens": 100,
     "temperature": 0.1
 }
+
+### prod endpoint
+POST https://llm.boardflare.com HTTP/1.1
+content-type: application/json
+
+{
+    "model": "mistral-large-2411",
+    "messages": [
+        {
+            "role": "user",
+            "content": "What is the capital of France?"
+        }
+    ],
+    "max_tokens": 250,
+    "temperature": 0
+}
+
