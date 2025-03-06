@@ -88,16 +88,13 @@ const Notebooks = ({ onImportComplete }) => {
         <details>
             <summary className="px-4 py-2 bg-gray-100 cursor-pointer font-bold">GitHub Gist</summary>
             <div className="">
-                <div className="p-1">
-                    Import functions from a notebook in a GitHub Gist.  Each function should be in a separate cell. You must provide the URL of the Gist in this format:  https://gist.github.com/bolleman/c2d1e1bf47680f8e5d699a2ae1be8c82
-                </div>
                 <div className="px-4 mb-4">
                     <select
                         value={selectedNotebook}
                         onChange={(e) => setSelectedNotebook(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-lg text-sm mb-2"
                     >
-                        <option value="">Select an example notebook...</option>
+                        <option value="">Select a notebook...</option>
                         {Object.keys(myNotebooks).length === 0 ? (
                             <option disabled>No notebooks available</option>
                         ) : (
@@ -105,13 +102,6 @@ const Notebooks = ({ onImportComplete }) => {
                                 <option key={url} value={url}>{fileName || url}</option>
                             ))
                         )}
-                        {/* {Object.entries(demoNotebooks).map(([category, notebooks]) => (
-                            <optgroup key={category} label={category}>
-                                {notebooks.map(({ url, title }) => (
-                                    <option key={url} value={url}>{title}</option>
-                                ))}
-                            </optgroup>
-                        ))} */}
                     </select>
                     <div className="flex justify-center">
                         <button
