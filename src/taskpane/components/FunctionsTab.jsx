@@ -81,15 +81,6 @@ const FunctionsTab = ({
                                     >
                                         ⬇️
                                     </button>
-                                    {window.location.hostname === 'localhost' && (
-                                        <button
-                                            className="text-green-500 hover:text-green-700"
-                                            onClick={() => handleTest(func)}
-                                            title="Run tests"
-                                        >
-                                            ▶️
-                                        </button>
-                                    )}
                                     <button
                                         className="text-blue-500 hover:text-blue-700"
                                         onClick={() => {

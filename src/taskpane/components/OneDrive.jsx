@@ -120,11 +120,6 @@ const OneDrive = ({
                                                 💻
                                             </button>
                                         )}
-                                        <button className="text-green-500 hover:text-green-700"
-                                            onClick={() => onTest(func)}
-                                            title="Run tests">
-                                            ▶️
-                                        </button>
                                         <button className="text-blue-500 hover:text-blue-700"
                                             onClick={() => {
                                                 const cacheKey = `onedrive-${func.fileName}`;
