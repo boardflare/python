@@ -63,24 +63,26 @@ const FunctionsTab = ({
                             </td>
                             <td className="py-0 px-2 border-b w-fit">
                                 <div className="flex gap-2 justify-end">
-                                    <button
-                                        className="text-blue-500 hover:text-blue-700"
-                                        onClick={async () => {
-                                            const cacheKey = `workbook-${func.name}`;
-                                            const cachedFunc = functionsCache.current.get(cacheKey);
-                                            if (cachedFunc) {
-                                                try {
-                                                    await saveFunction(cachedFunc);
-                                                    await loadFunctions();
-                                                } catch (error) {
-                                                    setError(error.message);
+                                    {folderUrl && (
+                                        <button
+                                            className="text-blue-500 hover:text-blue-700"
+                                            onClick={async () => {
+                                                const cacheKey = `workbook-${func.name}`;
+                                                const cachedFunc = functionsCache.current.get(cacheKey);
+                                                if (cachedFunc) {
+                                                    try {
+                                                        await saveFunction(cachedFunc);
+                                                        await loadFunctions();
+                                                    } catch (error) {
+                                                        setError(error.message);
+                                                    }
                                                 }
-                                            }
-                                        }}
-                                        title="Save to OneDrive"
-                                    >
-                                        ⬇️
-                                    </button>
+                                            }}
+                                            title="Save to OneDrive"
+                                        >
+                                            ⬇️
+                                        </button>
+                                    )}
                                     <button
                                         className="text-blue-500 hover:text-blue-700"
                                         onClick={() => {
