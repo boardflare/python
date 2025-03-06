@@ -2,6 +2,7 @@ import * as React from "react";
 import { getFunctionFromSettings, deleteFunctionFromSettings } from "../utils/workbookSettings";
 import { TokenExpiredError, deleteFile, loadFunctionFiles } from "../utils/drive";
 import { runTests } from "../utils/testRunner";
+import { saveWorkbookOnly } from "../utils/save";
 import Notebooks from "./Notebooks";
 import SharedFunctions from "./SharedFunctions";
 import FunctionDialog from "./FunctionDialog";
@@ -49,6 +50,27 @@ const FunctionsTab = ({
         } catch (error) {
             console.error('Error running tests:', error);
             setError('Failed to run tests. Please try again.');
+        }
+    };
+
+    const handleSync = async (func) => {
+        try {
+            // Get fresh copy of all OneDrive functions
+            const { driveFunctions } = await loadFunctionFiles();
+
+            // Find matching function by name
+            const freshFunc = driveFunctions?.find(f => f.name === func.name);
+            if (!freshFunc) {
+                throw new Error('Function no longer exists in OneDrive');
+            }
+
+            // Save fresh copy to workbook
+            await saveWorkbookOnly(freshFunc);
+            await loadFunctions();
+            setError(null);
+        } catch (error) {
+            console.error('Error syncing function:', error);
+            setError(error.message || 'Failed to sync function to workbook');
         }
     };
 
@@ -147,6 +169,15 @@ const FunctionsTab = ({
                             </td>
                             <td className="py-0 px-2 border-b w-fit">
                                 <div className="flex gap-2 justify-end">
+                                    {source === 'onedrive' && (
+                                        <button
+                                            className="text-blue-500 hover:text-blue-700"
+                                            onClick={() => handleSync(func)}
+                                            title="Save to workbook"
+                                        >
+                                            🔃
+                                        </button>
+                                    )}
                                     {window.location.hostname === 'localhost' && (
                                         <button
                                             className="text-gray-500 hover:text-gray-700"
