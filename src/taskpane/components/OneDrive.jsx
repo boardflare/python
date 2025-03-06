@@ -2,6 +2,7 @@ import * as React from "react";
 import { loadFunctionFiles } from "../utils/drive";
 import { saveWorkbookOnly } from "../utils/save";
 import FunctionDialog from "./FunctionDialog";
+import { parsePython } from "../utils/codeparser";
 
 const OneDrive = ({
     onedriveFunctions,
@@ -29,7 +30,8 @@ const OneDrive = ({
             if (!freshFunc) {
                 throw new Error('Function no longer exists in OneDrive');
             }
-            await saveWorkbookOnly(freshFunc);
+            const reparsedFunc = await parsePython(freshFunc.code); // Needed to ensure environment is set correctly for local, preview, etc.
+            await saveWorkbookOnly(reparsedFunc);
             await loadFunctions();
             setError(null);
         } catch (error) {
