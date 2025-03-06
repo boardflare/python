@@ -1,11 +1,11 @@
 import * as React from "react";
 import { getFunctionFromSettings, deleteFunctionFromSettings } from "../utils/workbookSettings";
-import { TokenExpiredError, deleteFile, loadFunctionFiles } from "../utils/drive";
+import { TokenExpiredError, deleteFile } from "../utils/drive";
 import { runTests } from "../utils/testRunner";
-import { saveWorkbookOnly } from "../utils/save";
 import Notebooks from "./Notebooks";
 import SharedFunctions from "./SharedFunctions";
-import FunctionDialog from "./FunctionDialog";
+import OneDrive from "./OneDrive";
+import { saveFunction } from "../utils/save";  // Add this import
 
 const FunctionsTab = ({
     onEdit,
@@ -19,8 +19,6 @@ const FunctionsTab = ({
     folderUrl
 }) => {
     const [deleteConfirm, setDeleteConfirm] = React.useState(null);
-    const [dialogFunction, setDialogFunction] = React.useState(null);
-    const [showTooltip, setShowTooltip] = React.useState(false);
     const [localError, setError] = React.useState(error || null);
 
     // Use effect to sync error prop with local state
@@ -53,156 +51,54 @@ const FunctionsTab = ({
         }
     };
 
-    const handleSync = async (func) => {
-        try {
-            // Get fresh copy of all OneDrive functions
-            const { driveFunctions } = await loadFunctionFiles();
-
-            // Find matching function by name
-            const freshFunc = driveFunctions?.find(f => f.name === func.name);
-            if (!freshFunc) {
-                throw new Error('Function no longer exists in OneDrive');
-            }
-
-            // Save fresh copy to workbook
-            await saveWorkbookOnly(freshFunc);
-            await loadFunctions();
-            setError(null);
-        } catch (error) {
-            console.error('Error syncing function:', error);
-            setError(error.message || 'Failed to sync function to workbook');
-        }
-    };
-
-    const OneDriveFunctionsHeader = () => {
-        // Only render if folderUrl exists (user is logged in)
-        if (!folderUrl) return null;
-
-        return (
-            <div className="mb-1">
-                <h3 className="font-semibold text-center flex items-center justify-center gap-2">
-                    <div className="flex items-center relative">
-                        <a
-                            href={folderUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hover:text-blue-500"
-                            title="Open in OneDrive"
-                        >
-                            OneDrive Functions
-                        </a>
-                        <div className="relative ml-1">
-                            <span
-                                className="text-blue-500 cursor-help text-sm"
-                                onMouseEnter={() => setShowTooltip(true)}
-                                onMouseLeave={() => setShowTooltip(false)}
-                            >
-                                ⓘ
-                            </span>
-                            {showTooltip && (
-                                <div className="absolute z-10 w-64 p-2 bg-blue-50 text-gray-800 text-xs rounded-lg shadow-lg left-0 transform -translate-x-1/2 mt-2">
-                                    To save functions to OneDrive, add Files.ReadWrite permission in settings ⚙️ and refresh login. Once enabled, edit and save a function to see it in OneDrive.
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    <button
-                        onClick={loadFunctions}
-                        className="text-blue-500 hover:text-blue-700"
-                        title="Refresh OneDrive functions"
-                    >
-                        🔄
-                    </button>
-                </h3>
-            </div>
-        );
-    };
-
-    const FunctionTable = ({ functions, source }) => (
+    const WorkbookFunctionTable = ({ functions }) => (
         <div className="overflow-x-auto">
-            <h3 className="font-semibold mb-1 text-center flex items-center justify-center gap-2">
-                {source === 'workbook' ? 'Workbook Functions' : (
-                    <>
-                        {folderUrl && (
-                            <>
-                                <a
-                                    href={folderUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="hover:text-blue-500"
-                                    title="Open in OneDrive"
-                                >
-                                    OneDrive Functions
-                                </a>
-                                <div className="relative ml-1">
-                                    <span
-                                        className="text-blue-500 cursor-help text-sm"
-                                        onMouseEnter={() => setShowTooltip(true)}
-                                        onMouseLeave={() => setShowTooltip(false)}
-                                    >
-                                        ⓘ
-                                    </span>
-                                    {showTooltip && (
-                                        <div className="absolute z-10 w-64 p-2 bg-blue-50 text-gray-800 text-xs rounded-lg shadow-lg left-0 transform -translate-x-1/2 mt-2">
-                                            To save functions to OneDrive, add Files.ReadWrite permission in settings ⚙️ and refresh login. Once enabled, edit and save a function to see it in OneDrive.
-                                        </div>
-                                    )}
-                                </div>
-                                <button
-                                    onClick={loadFunctions}
-                                    className="text-blue-500 hover:text-blue-700"
-                                    title="Refresh OneDrive functions"
-                                >
-                                    🔄
-                                </button>
-                            </>
-                        )}
-                    </>
-                )}
-            </h3>
+            <h3 className="font-semibold mb-1 text-center">Workbook Functions</h3>
             <table className="min-w-full bg-white mb-6">
                 <tbody>
                     {functions.map((func) => (
-                        <tr key={source === 'workbook' ? func.name : func.fileName}>
+                        <tr key={func.name}>
                             <td className="py-0 px-2 border-b">
                                 <code className="font-mono text-sm">{func.name.toUpperCase()}</code>
                             </td>
                             <td className="py-0 px-2 border-b w-fit">
                                 <div className="flex gap-2 justify-end">
-                                    {source === 'onedrive' && (
-                                        <button
-                                            className="text-blue-500 hover:text-blue-700"
-                                            onClick={() => handleSync(func)}
-                                            title="Save to workbook"
-                                        >
-                                            🔃
-                                        </button>
-                                    )}
+                                    <button
+                                        className="text-blue-500 hover:text-blue-700"
+                                        onClick={async () => {
+                                            const cacheKey = `workbook-${func.name}`;
+                                            const cachedFunc = functionsCache.current.get(cacheKey);
+                                            if (cachedFunc) {
+                                                try {
+                                                    await saveFunction(cachedFunc);
+                                                    await loadFunctions();
+                                                } catch (error) {
+                                                    setError(error.message);
+                                                }
+                                            }
+                                        }}
+                                        title="Save to OneDrive"
+                                    >
+                                        ⬇️
+                                    </button>
                                     {window.location.hostname === 'localhost' && (
                                         <button
-                                            className="text-gray-500 hover:text-gray-700"
-                                            onClick={() => setDialogFunction(func)}
-                                            title="Use function"
+                                            className="text-green-500 hover:text-green-700"
+                                            onClick={() => handleTest(func)}
+                                            title="Run tests"
                                         >
-                                            ⬆️
+                                            ▶️
                                         </button>
                                     )}
-                                    <button
-                                        className="text-green-500 hover:text-green-700"
-                                        onClick={() => handleTest(func)}
-                                        title="Run tests"
-                                    >
-                                        ▶️
-                                    </button>
                                     <button
                                         className="text-blue-500 hover:text-blue-700"
                                         onClick={() => {
-                                            const cacheKey = `${source}-${source === 'workbook' ? func.name : func.fileName}`;
+                                            const cacheKey = `workbook-${func.name}`;
                                             const cachedFunc = functionsCache.current.get(cacheKey);
                                             if (cachedFunc) {
                                                 onEdit({
                                                     ...cachedFunc,
-                                                    source: source
+                                                    source: 'workbook'
                                                 });
                                             }
                                         }}
@@ -214,7 +110,7 @@ const FunctionsTab = ({
                                     </button>
                                     <button
                                         className="text-red-500 hover:text-red-700 text-lg"
-                                        onClick={() => setDeleteConfirm({ name: func.name, source, fileName: func.fileName })}
+                                        onClick={() => setDeleteConfirm({ name: func.name, source: 'workbook' })}
                                         title="Delete function"
                                     >
                                         ❌
@@ -230,36 +126,28 @@ const FunctionsTab = ({
 
     return (
         <div className="h-full flex flex-col overflow-y-auto">
-            {error && (
+            {localError && (
                 <div className="p-2 text-red-600 bg-red-50 mb-4 text-center">
-                    {error}
+                    {localError}
                 </div>
             )}
 
             <div className="mt-2">
                 {workbookFunctions.length > 0 && (
-                    <FunctionTable functions={workbookFunctions} source="workbook" />
+                    <WorkbookFunctionTable functions={workbookFunctions} />
                 )}
 
-                {isLoading && folderUrl ? (
-                    <>
-                        <OneDriveFunctionsHeader />
-                        <div className="p-4 text-gray-900 text-center">
-                            Loading OneDrive functions...
-                        </div>
-                    </>
-                ) : onedriveFunctions.length > 0 ? (
-                    <FunctionTable functions={onedriveFunctions} source="onedrive" />
-                ) : (
-                    folderUrl && (
-                        <div>
-                            <OneDriveFunctionsHeader />
-                            <div className="text-center text-sm text-gray-500 mb-4">
-                                No OneDrive functions found
-                            </div>
-                        </div>
-                    )
-                )}
+                <OneDrive
+                    onedriveFunctions={onedriveFunctions}
+                    isLoading={isLoading}
+                    folderUrl={folderUrl}
+                    loadFunctions={loadFunctions}
+                    onEdit={onEdit}
+                    onTest={handleTest}
+                    functionsCache={functionsCache}
+                    error={localError}
+                    onDelete={(func) => setDeleteConfirm({ name: func.name, source: 'onedrive', fileName: func.fileName })}
+                />
 
                 {!isLoading && workbookFunctions.length === 0 && onedriveFunctions.length === 0 && (
                     <div className="flex flex-col items-center justify-center p-5 text-center text-gray-600">
@@ -297,12 +185,6 @@ const FunctionsTab = ({
                     </div>
                 </div>
             )}
-
-            <FunctionDialog
-                isOpen={dialogFunction !== null}
-                onClose={() => setDialogFunction(null)}
-                selectedFunction={dialogFunction || {}}
-            />
         </div>
     );
 };

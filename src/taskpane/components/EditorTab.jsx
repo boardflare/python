@@ -6,7 +6,7 @@ import { parsePython } from "../utils/codeparser";
 import { EventTypes } from "../utils/constants";
 import { runTests } from "../utils/testRunner";
 import { TokenExpiredError } from "../utils/drive";
-import { saveFunction } from "../utils/save";
+import { saveWorkbookOnly } from "../utils/save";  // Change import
 import { pyLogs } from "../utils/logs";
 
 const EditorTab = ({
@@ -92,16 +92,12 @@ const EditorTab = ({
                 parsedFunction.prompt = selectedFunction.prompt;
             }
 
-            await saveFunction(parsedFunction);
+            await saveWorkbookOnly(parsedFunction);  // Use saveWorkbookOnly instead
             showNotification(`${parsedFunction.signature} saved!`, "success");
-
-            // Notify parent to reload functions
             await loadFunctions();
-
-            // Update selected function with source
             setSelectedFunction({
                 ...parsedFunction,
-                source: 'workbook'  // New functions are always saved to workbook first
+                source: 'workbook'
             });
         } catch (err) {
             if (!(err instanceof TokenExpiredError)) {
@@ -170,16 +166,14 @@ const EditorTab = ({
             )}
             <div className="flex justify-between items-center py-2">
                 <select
-                    value={selectedFunction ? `${selectedFunction.source || 'workbook'}-${selectedFunction.source === 'onedrive' ? selectedFunction.fileName : selectedFunction.name}` : ""}
+                    value={selectedFunction ? selectedFunction.name : ""}
                     onChange={(e) => {
-                        const [source, id] = e.target.value.split('-');
-                        const cacheKey = `${source}-${id}`;
-                        const func = functionsCache.current.get(cacheKey);
+                        const func = workbookFunctions.find(f => f.name === e.target.value);
                         if (func) {
                             editorRef.current.setValue(func.code);
                             setSelectedFunction({
                                 ...func,
-                                source: source
+                                source: 'workbook'
                             });
                         } else {
                             editorRef.current.setValue(DEFAULT_CODE);
@@ -189,24 +183,11 @@ const EditorTab = ({
                     className="px-2 py-1 border rounded"
                 >
                     <option value="">Select a function...</option>
-                    {workbookFunctions.length > 0 && (
-                        <optgroup label="Workbook Functions">
-                            {workbookFunctions.map(f => (
-                                <option key={`workbook-${f.name}`} value={`workbook-${f.name}`}>
-                                    {f.name}
-                                </option>
-                            ))}
-                        </optgroup>
-                    )}
-                    {onedriveFunctions.length > 0 && (
-                        <optgroup label="OneDrive Functions">
-                            {onedriveFunctions.map(f => (
-                                <option key={`onedrive-${f.fileName}`} value={`onedrive-${f.fileName}`}>
-                                    {f.name}
-                                </option>
-                            ))}
-                        </optgroup>
-                    )}
+                    {workbookFunctions.length > 0 && workbookFunctions.map(f => (
+                        <option key={f.name} value={f.name}>
+                            {f.name}
+                        </option>
+                    ))}
                 </select>
                 <div className="space-x-2">
                     <button onClick={handleTest} className="px-2 py-1 bg-green-500 text-white rounded">Test</button>
