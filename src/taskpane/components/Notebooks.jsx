@@ -1,12 +1,11 @@
 import * as React from "react";
-import { getStoredNotebooks, addNotebook, removeNotebook, fetchDemoNotebooks, fetchNotebookUrl, DEFAULT_NOTEBOOK } from "../utils/notebooks";
+import { getStoredNotebooks, addNotebook, removeNotebook, fetchNotebookUrl, DEFAULT_NOTEBOOK } from "../utils/notebooks";
 import { saveFunctionToSettings } from "../utils/workbookSettings";
 import { updateNameManager } from "../utils/nameManager";
 import { pyLogs } from "../utils/logs";
 
 const Notebooks = ({ onImportComplete }) => {
     const [myNotebooks, setMyNotebooks] = React.useState({});
-    const [demoNotebooks, setDemoNotebooks] = React.useState({});
     const [url, setUrl] = React.useState('');
     const [isUrlSaving, setIsUrlSaving] = React.useState(false);
     const [saveSuccess, setSaveSuccess] = React.useState(false);
@@ -17,12 +16,8 @@ const Notebooks = ({ onImportComplete }) => {
     React.useEffect(() => {
         const loadData = async () => {
             try {
-                const [stored, demos] = await Promise.all([
-                    getStoredNotebooks(),
-                    fetchDemoNotebooks()
-                ]);
+                const stored = await getStoredNotebooks();
                 setMyNotebooks(stored);
-                setDemoNotebooks(demos);
             } catch (error) {
                 setError('Failed to load notebooks');
                 console.error('Error loading notebooks:', error);
@@ -31,6 +26,11 @@ const Notebooks = ({ onImportComplete }) => {
 
         loadData();
     }, []);
+
+    // If no notebooks are stored, don't render the component
+    if (Object.keys(myNotebooks).length === 0) {
+        return null;
+    }
 
     const handleUrlSubmit = async (e) => {
         e.preventDefault();
