@@ -187,6 +187,7 @@ const App = ({ title }) => {
               error={error}
               loadFunctions={loadFunctions}  // Changed from onFunctionDeleted
               folderUrl={folderUrl}
+              isPreview={isPreview}
             />
           )}
           {isPreview && selectedTab === "settings" && <SettingsTab loadFunctions={loadFunctions} />}

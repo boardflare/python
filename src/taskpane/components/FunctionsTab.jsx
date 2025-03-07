@@ -16,7 +16,8 @@ const FunctionsTab = ({
     isLoading,
     error,
     loadFunctions,
-    folderUrl
+    folderUrl,
+    isPreview
 }) => {
     const [deleteConfirm, setDeleteConfirm] = React.useState(null);
     const [localError, setError] = React.useState(error || null);
@@ -95,7 +96,7 @@ const FunctionsTab = ({
                                             }}
                                             title="Save to OneDrive"
                                         >
-                                        ⬇️
+                                            ⬇️
                                         </button>
                                     )}
                                     <button
@@ -155,6 +156,7 @@ const FunctionsTab = ({
                     functionsCache={functionsCache}
                     error={localError}
                     onDelete={(func) => setDeleteConfirm({ name: func.name, source: 'onedrive', fileName: func.fileName })}
+                    isPreview={isPreview}
                 />
 
                 {!isLoading && workbookFunctions.length === 0 && onedriveFunctions.length === 0 && (

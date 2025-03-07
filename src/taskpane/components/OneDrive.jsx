@@ -11,7 +11,8 @@ const OneDrive = ({
     folderUrl,
     loadFunctions,
     onDelete,
-    error: parentError
+    error: parentError,
+    isPreview
 }) => {
     const [error, setError] = React.useState(parentError);
 
@@ -72,7 +73,7 @@ const OneDrive = ({
                             OneDrive Functions
                         </a>
                     </div>
-                    {folderUrl && (
+                    {folderUrl && isPreview && (
                         <button onClick={loadFunctions} className="text-blue-500 hover:text-blue-700"
                             title="Refresh OneDrive functions">
                             🔄
@@ -88,7 +89,7 @@ const OneDrive = ({
             <div className="flex flex-col items-center">
                 <OneDriveFunctionsHeader />
                 <div className="text-gray-500 px-2 mb-2">
-                Login to OneDrive to save functions to OneDrive and add them to other workbooks.  This requires the Files.ReadWrite permission.
+                    Login to OneDrive to save functions to OneDrive and add them to other workbooks.  This requires the Files.ReadWrite permission.
                 </div>
                 <button
                     onClick={handleLogin}
@@ -152,7 +153,7 @@ const OneDrive = ({
                     </tbody>
                 </table>
                 <div className="text-gray-500 px-2 mb-2">
-                Use ⬇️ to save to OneDrive, and ⬆️ to save to the workbook.  Saving updates a function with the same name.  You need to add a function to the workbook first in order to edit it.
+                    Use ⬇️ to save to OneDrive, and ⬆️ to save to the workbook.  Saving updates a function with the same name.  You need to add a function to the workbook first in order to edit it.
                 </div>
             </div>
         </>
