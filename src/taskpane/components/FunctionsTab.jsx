@@ -1,11 +1,10 @@
 import * as React from "react";
-import { getFunctionFromSettings, deleteFunctionFromSettings } from "../utils/workbookSettings";
+import { deleteFunctionFromSettings } from "../utils/workbookSettings";
 import { TokenExpiredError, deleteFile } from "../utils/drive";
 import { runTests } from "../utils/testRunner";
 import Notebooks from "./Notebooks";
-import SharedFunctions from "./SharedFunctions";
 import OneDrive from "./OneDrive";
-import { saveFunction, saveToOneDriveOnly } from "../utils/save";  // Update import
+import { saveToOneDriveOnly } from "../utils/save";  // Update import
 
 const FunctionsTab = ({
     onEdit,
@@ -152,9 +151,6 @@ const FunctionsTab = ({
             </div>
 
             <Notebooks onImportComplete={() => loadFunctions()} />
-            {window.location.hostname === 'localhost' && (
-                <SharedFunctions onImportComplete={() => loadFunctions()} />
-            )}
 
             {deleteConfirm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">

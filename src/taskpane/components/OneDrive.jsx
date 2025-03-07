@@ -1,22 +1,18 @@
 import * as React from "react";
 import { loadFunctionFiles } from "../utils/drive";
 import { saveWorkbookOnly } from "../utils/save";
-import FunctionDialog from "./FunctionDialog";
 import { parsePython } from "../utils/codeparser";
+import { storeScopes, authenticateWithDialog } from "./Auth";
+import { pyLogs } from "../utils/logs";
 
 const OneDrive = ({
     onedriveFunctions,
     isLoading,
     folderUrl,
     loadFunctions,
-    onEdit,
-    onTest,
-    functionsCache,
-    onDelete,  // Add this prop
+    onDelete,
     error: parentError
 }) => {
-    const [showTooltip, setShowTooltip] = React.useState(false);
-    const [dialogFunction, setDialogFunction] = React.useState(null);
     const [error, setError] = React.useState(parentError);
 
     React.useEffect(() => {
@@ -40,40 +36,61 @@ const OneDrive = ({
         }
     };
 
-    const OneDriveFunctionsHeader = () => {
-        if (!folderUrl) return null;
+    const handleLogin = async () => {
+        try {
+            await storeScopes(["Files.ReadWrite"]);
+            await authenticateWithDialog();
+            loadFunctions?.();
+            pyLogs({
+                message: "[OneDrive] Successfully logged in with Files.ReadWrite scope",
+                ref: 'onedrive_login_success'
+            });
+        } catch (error) {
+            console.error("Error logging in:", error);
+            pyLogs({
+                errorMessage: `[OneDrive] Login error: ${error.message}`,
+                ref: 'onedrive_login_error'
+            });
+        }
+    };
 
+    const OneDriveFunctionsHeader = () => {
         return (
             <div className="mb-1">
                 <h3 className="font-semibold text-center flex items-center justify-center gap-2">
-                    <div className="flex items-center relative">
+                    <div className="flex items-center">
                         <a href={folderUrl} target="_blank" rel="noopener noreferrer"
                             className="hover:text-blue-500" title="Open in OneDrive">
                             OneDrive Functions
                         </a>
-                        <div className="relative ml-1">
-                            <span className="text-blue-500 cursor-help text-sm"
-                                onMouseEnter={() => setShowTooltip(true)}
-                                onMouseLeave={() => setShowTooltip(false)}>
-                                ⓘ
-                            </span>
-                            {showTooltip && (
-                                <div className="absolute z-10 w-64 p-2 bg-blue-50 text-gray-800 text-xs rounded-lg shadow-lg left-0 transform -translate-x-1/2 mt-2">
-                                    To save functions to OneDrive, add Files.ReadWrite permission in settings ⚙️ and refresh login. Once enabled, edit and save a function to see it in OneDrive.
-                                </div>
-                            )}
-                        </div>
                     </div>
-                    <button onClick={loadFunctions} className="text-blue-500 hover:text-blue-700"
-                        title="Refresh OneDrive functions">
-                        🔄
-                    </button>
+                    {folderUrl && (
+                        <button onClick={loadFunctions} className="text-blue-500 hover:text-blue-700"
+                            title="Refresh OneDrive functions">
+                            🔄
+                        </button>
+                    )}
                 </h3>
             </div>
         );
     };
 
-    if (!folderUrl) return null;
+    if (!folderUrl) {
+        return (
+            <div className="flex flex-col items-center">
+                <OneDriveFunctionsHeader />
+                <div className="text-gray-500 px-2 mb-2">
+                Login to OneDrive enables saving functions to your OneDrive and adding them to other workbooks.  It requires adding the Files.ReadWrite permission.
+                </div>
+                <button
+                    onClick={handleLogin}
+                    className="px-2 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-normal"
+                >
+                    Login to OneDrive
+                </button>
+            </div>
+        );
+    }
 
     if (isLoading) {
         return (
@@ -86,7 +103,7 @@ const OneDrive = ({
         );
     }
 
-    if (onedriveFunctions.length === 0) {
+    if (onedriveFunctions.length === 0 && folderUrl) {
         return (
             <div>
                 <OneDriveFunctionsHeader />
@@ -115,29 +132,6 @@ const OneDrive = ({
                                             title="Save to workbook">
                                             ⬆️
                                         </button>
-                                        {window.location.hostname === 'localhost' && (
-                                            <button className="text-gray-500 hover:text-gray-700"
-                                                onClick={() => setDialogFunction(func)}
-                                                title="Use function">
-                                                💻
-                                            </button>
-                                        )}
-                                        <button className="text-blue-500 hover:text-blue-700"
-                                            onClick={() => {
-                                                const cacheKey = `onedrive-${func.fileName}`;
-                                                const cachedFunc = functionsCache.current.get(cacheKey);
-                                                if (cachedFunc) {
-                                                    onEdit({
-                                                        ...cachedFunc,
-                                                        source: 'onedrive'
-                                                    });
-                                                }
-                                            }}
-                                            title="Edit function">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                            </svg>
-                                        </button>
                                         <button className="text-red-500 hover:text-red-700 text-lg"
                                             onClick={() => onDelete(func)}
                                             title="Delete function">
@@ -150,12 +144,6 @@ const OneDrive = ({
                     </tbody>
                 </table>
             </div>
-
-            <FunctionDialog
-                isOpen={dialogFunction !== null}
-                onClose={() => setDialogFunction(null)}
-                selectedFunction={dialogFunction || {}}
-            />
         </>
     );
 };
