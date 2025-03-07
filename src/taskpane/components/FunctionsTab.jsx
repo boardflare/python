@@ -4,7 +4,8 @@ import { TokenExpiredError, deleteFile } from "../utils/drive";
 import { runTests } from "../utils/testRunner";
 import Notebooks from "./Notebooks";
 import OneDrive from "./OneDrive";
-import { saveToOneDriveOnly } from "../utils/save";  // Update import
+import { saveToOneDriveOnly } from "../utils/save";
+import { pyLogs } from "../utils/logs";  // Add this import
 
 const FunctionsTab = ({
     onEdit,
@@ -50,6 +51,26 @@ const FunctionsTab = ({
         }
     };
 
+    const handleSaveToOneDrive = async (func) => {
+        try {
+            await saveToOneDriveOnly(func);
+            await loadFunctions();
+            setError(null);
+            pyLogs({
+                ref: 'save_to_onedrive_success',
+                code: func.code
+            });
+        } catch (error) {
+            console.error('Error saving to OneDrive:', error);
+            setError(error.message);
+            pyLogs({
+                ref: 'save_to_onedrive_error',
+                errorMessage: `Save to OneDrive error: ${error.message}`,
+                code: func.code
+            });
+        }
+    };
+
     const WorkbookFunctionTable = ({ functions }) => (
         <div className="overflow-x-auto">
             <h3 className="font-semibold mb-1 text-center">Workbook Functions</h3>
@@ -69,17 +90,12 @@ const FunctionsTab = ({
                                                 const cacheKey = `workbook-${func.name}`;
                                                 const cachedFunc = functionsCache.current.get(cacheKey);
                                                 if (cachedFunc) {
-                                                    try {
-                                                        await saveToOneDriveOnly(cachedFunc);
-                                                        await loadFunctions();
-                                                    } catch (error) {
-                                                        setError(error.message);
-                                                    }
+                                                    await handleSaveToOneDrive(cachedFunc);
                                                 }
                                             }}
                                             title="Save to OneDrive"
                                         >
-                                            ⬇️
+                                        ⬇️
                                         </button>
                                     )}
                                     <button

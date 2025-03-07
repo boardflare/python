@@ -40,8 +40,6 @@ async function makeBatchRequests(requests) {
             url: req.url.replace(/^https:\/\/graph\.microsoft\.com\/v1\.0\//, '')
         }));
 
-        console.log("Sending batch request:", JSON.stringify({ requests: batchRequests }));
-
         const response = await fetch('https://graph.microsoft.com/v1.0/$batch', {
             method: 'POST',
             headers: {
@@ -53,7 +51,6 @@ async function makeBatchRequests(requests) {
 
         await handleResponse(response);
         const batchResponse = await response.json();
-        console.log("Batch response:", JSON.stringify(batchResponse));
         allResponses.push(...batchResponse.responses);
     }
     return allResponses;
@@ -185,9 +182,7 @@ export async function listFiles() {
 export async function loadFunctionFiles() {
     try {
         const { files, folderUrl } = await listFiles();
-        console.log("Files found:", files.length);
         const functionFiles = files.filter(f => f.name.endsWith('.ipynb'));
-        console.log("IPython files found:", functionFiles.length);
 
         if (functionFiles.length === 0) {
             return { driveFunctions: [], folderUrl };
@@ -201,9 +196,7 @@ export async function loadFunctionFiles() {
             fileRef: file
         }));
 
-        console.log("Requests prepared:", requests.length);
         const responses = await makeBatchRequests(requests);
-        console.log("Responses received:", responses.length);
 
         // Create a map to associate responses with their files using the ID
         const fileMap = {};
@@ -214,7 +207,6 @@ export async function loadFunctionFiles() {
         const driveFunctions = [];
         // Process all responses and match them to their files
         const promises = responses.map(async (response) => {
-            console.log(`Processing response ID ${response.id}, status: ${response.status}`);
             if (response.status === 302 && response.headers && response.headers.Location) {
                 const file = fileMap[response.id];
                 if (!file) {
@@ -223,9 +215,7 @@ export async function loadFunctionFiles() {
                 }
 
                 try {
-                    console.log(`Following redirect for ${file.name}...`);
                     const notebook = await fetchRedirectContent(response.headers.Location);
-                    console.log(`Notebook for ${file.name}:`, notebook ? "Found" : "Missing");
 
                     if (notebook && notebook.cells && notebook.cells.length > 0) {
                         const firstCell = notebook.cells[0];
@@ -258,7 +248,6 @@ export async function loadFunctionFiles() {
 
                 try {
                     const notebook = response.body;
-                    console.log(`Notebook for ${file.name}:`, notebook ? "Found" : "Missing");
 
                     if (notebook && notebook.cells && notebook.cells.length > 0) {
                         const firstCell = notebook.cells[0];
@@ -296,7 +285,6 @@ export async function loadFunctionFiles() {
         const validResults = results.filter(Boolean);
         driveFunctions.push(...validResults);
 
-        console.log("Total functions loaded:", driveFunctions.length);
         return { driveFunctions, folderUrl };
     } catch (error) {
         console.error('Error loading function files:', error);
@@ -315,6 +303,7 @@ export function formatAsNotebook(parsedFunction) {
             cell_type: "code",
             source: [parsedFunction.code],
             execution_count: null,
+            metadata: { "name": parsedFunction.name, "description": parsedFunction.description },
             outputs: []
         }],
         metadata: {
