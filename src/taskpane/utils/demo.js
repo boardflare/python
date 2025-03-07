@@ -48,11 +48,8 @@ export async function singleDemo(parsedCode) {
 
             // Add explanation text cell A1
             const explanationRange = sheet.getRangeByIndexes(0, 0, 1, 1);
-            explanationRange.values = [[`Based on this comment in your function code:\n# Excel usage: ${parsedCode.excelExample}`]];
-            explanationRange.format.fill.color = "#FFFFE0";
-            //explanationRange.format.wrapText = true;
-            //explanationRange.format.rowHeight = 40;
-            explanationRange.format.columnWidth = 300;
+            explanationRange.values = [[parsedCode.name.toUpperCase()]];
+            // explanationRange.format.columnWidth = 100;
             explanationRange.format.verticalAlignment = 'Top';
 
             try {

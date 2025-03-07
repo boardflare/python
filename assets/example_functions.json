@@ -8,8 +8,8 @@
   },
   {
     "description": "Add two days to the given date",
-    "name": "add_two_days",
-    "code": "def add_days(date_input):\n    \"\"\"Add two days to the given date.\n    Args:\n        date_input (str or int): Date in 'YYYY-MM-DD' format or Excel serial date\n    Returns:\n        str: New date in 'YYYY-MM-DD' format\n    \"\"\"\n    from datetime import datetime, timedelta\n    \n    if isinstance(date_input, int):\n        # Excel serial date to datetime conversion\n        date = datetime(1899, 12, 30) + timedelta(days=date_input)\n    else:\n        date = datetime.strptime(date_input, '%Y-%m-%d')\n    \n    new_date = date + timedelta(days=2)\n    return new_date.strftime('%Y-%m-%d')\n\ntest_cases = [\n    [43831],\n    [44561],\n    ['2024-06-15'],\n    ['2025-01-01']\n]\n\n# Excel usage: =ADD_TWO_DAYS(43831)",
+    "name": "add_days",
+    "code": "def add_days(date_input):\n    \"\"\"Add two days to the given date.\n    Args:\n        date_input (str or int): Date in 'YYYY-MM-DD' format or Excel serial date\n    Returns:\n        str: New date in 'YYYY-MM-DD' format\n    \"\"\"\n    from datetime import datetime, timedelta\n    \n    if isinstance(date_input, int):\n        # Excel serial date to datetime conversion\n        date = datetime(1899, 12, 30) + timedelta(days=date_input)\n    else:\n        date = datetime.strptime(date_input, '%Y-%m-%d')\n    \n    new_date = date + timedelta(days=2)\n    return new_date.strftime('%Y-%m-%d')\n\ntest_cases = [\n    [43831],\n    [44561],\n    ['2024-06-15'],\n    ['2025-01-01']\n]\n\n# Excel usage: =ADD_DAYS(43831)",
     "fileName": "add_days.ipynb",
     "fileId": "14"
   },

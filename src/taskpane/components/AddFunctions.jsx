@@ -40,7 +40,6 @@ const AddFunctions = ({ loadFunctions }) => {
 
             // Parse the function code to get formula and metadata
             const funcToSave = await parsePython(func.code);
-
             await saveFunctionToSettings(funcToSave);
             await updateNameManager(funcToSave);
             await singleDemo(funcToSave);
