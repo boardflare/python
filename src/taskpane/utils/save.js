@@ -34,9 +34,23 @@ export async function saveWorkbookOnly(parsedFunction) {
         await saveFunctionToSettings(parsedFunction);
         await updateNameManager(parsedFunction);
         pyLogs({ message: `[Save] Function ${parsedFunction.name} saved to workbook`, code: parsedFunction.code, ref: 'save_workbook_success' });
-        return parsedFunction; // Ensure we return the updated function
     } catch (err) {
         pyLogs({ errorMessage: `[Save] Error saving to workbook: ${err.message}`, code: parsedFunction.code, ref: 'save_workbook_error' });
+        throw err;
+    }
+    return parsedFunction;
+}
+
+export async function saveToOneDriveOnly(parsedFunction) {
+    const notebook = formatAsNotebook(parsedFunction);
+    try {
+        await saveFile(notebook, `${parsedFunction.name}.ipynb`);
+        pyLogs({ message: `[OneDrive] Successfully saved ${parsedFunction.name}.ipynb`, code: parsedFunction.code, ref: 'onedrive_save_success' });
+    } catch (err) {
+        if (!(err instanceof TokenExpiredError)) {
+            pyLogs({ errorMessage: `[OneDrive] Error saving file: ${err.message}`, code: JSON.stringify(err), ref: 'onedrive_save_error' });
+            throw new Error(`There was an error saving to OneDrive. Try saving again. Error: ${err.message}`);
+        }
         throw err;
     }
     return parsedFunction;

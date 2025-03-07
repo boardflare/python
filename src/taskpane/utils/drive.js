@@ -306,16 +306,14 @@ export async function loadFunctionFiles() {
 
 /**
  * Formats a Python function and its metadata into an IPython notebook format
- * @param {Object} metadata - Function metadata containing code and other properties
+ * @param {Object} parsedFunction - Function metadata containing code and other properties
  * @returns {Object} Notebook formatted object
  */
-export function formatAsNotebook(metadata) {
-    const { code, ...cellMetadata } = metadata;
+export function formatAsNotebook(parsedFunction) {
     return {
         cells: [{
             cell_type: "code",
-            source: [code],
-            metadata: cellMetadata,
+            source: [parsedFunction.code],
             execution_count: null,
             outputs: []
         }],

@@ -1,81 +1,129 @@
 [
   {
-    "name": "calculate_area",
-    "signature": "CALCULATE_AREA(length, [width])",
-    "description": "Calculate area of rectangle",
-    "resultLine": "\n\nresult = calculate_area(**{k: v for k, v in [(\"length\", arg1 if arg1 != \"__OMITTED__\" else None), (\"width\", arg2 if arg2 != \"__OMITTED__\" else None)] if v is not None})",
-    "formula": "=LAMBDA(length, [width], PREVIEW.EXEC(\"workbook-settings:calculate_area\", length, IF(ISOMITTED(width), \"__OMITTED__\", width)))",
-    "timestamp": "2025-02-25T02:52:55.584Z",
+    "description": "No description available",
+    "excelExample": null,
+    "formula": "=LAMBDA(needle, haystack_df, [algorithm], LOCAL.EXEC(\"workbook-settings:text_distance\", needle, haystack_df, IF(ISOMITTED(algorithm), \"__OMITTED__\", algorithm)))",
+    "name": "text_distance",
+    "parameters": [
+      {
+        "name": "needle"
+      },
+      {
+        "name": "haystack_df"
+      },
+      {
+        "default": "'jaccard'",
+        "has_default": true,
+        "name": "algorithm"
+      }
+    ],
+    "resultLine": "\n\nresult = text_distance(**{k: v for k, v in [(\"needle\", arg1 if arg1 != \"__OMITTED__\" else None), (\"haystack_df\", arg2 if arg2 != \"__OMITTED__\" else None), (\"algorithm\", arg3 if arg3 != \"__OMITTED__\" else None)] if v is not None})",
+    "signature": "TEXT_DISTANCE(needle, haystack_df, [algorithm])",
+    "timestamp": "2025-03-03T02:27:29.364Z",
     "uid": "anonymous",
-    "excelExample": "=CALCULATE_AREA(5, 4)",
-    "code": "def calculate_area(length, width=5):\n    \"\"\"Calculate area of rectangle.\n    Args:\n        length (float): Length of rectangle\n        width (float): Width of rectangle\n    Returns:\n        float: Area of rectangle\n    \"\"\"\n    return length * width\n\ntest_cases = [\n    [5, 4],      # -> 20\n    [2.5, 4],    # -> 10\n    [10, 10],    # -> 100\n    [1, 1],      # -> 1\n    [0.5, 2]     # -> 1\n]\n\n# Excel usage: =CALCULATE_AREA(5, 4)",
-    "fileName": "calculate_area.ipynb",
-    "fileId": "2"
+    "code": "import textdistance\n\ndef text_distance(needle, haystack, algorithm='jaccard'):\n    \"\"\"Calculate text similarity scores between needle(s) and haystack items.\n    \n    Args:\n        needle: 2D list of strings to search for\n        haystack: 2D list of strings to search within\n        algorithm (str): Algorithm name from textdistance library (default: 'jaccard')\n    \n    Returns:\n        list: 2D list of [position, score] pairs for best matches\n    \"\"\"\n    # Get the algorithm function from textdistance\n    algo_func = getattr(textdistance, algorithm)\n    \n    # Flatten 2D lists\n    needle_flat = [item for sublist in needle for item in sublist if item is not None]\n    haystack_flat = [item for sublist in haystack for item in sublist if item is not None]\n    \n    results = []\n    for needle_item in needle_flat:\n        if not str(needle_item).strip():\n            results.append([0, 0.0])  # Handle empty values\n            continue\n            \n        # Calculate similarity scores with normalization and round to 2 decimal places\n        # Adjust index to be 1-based\n        scores = [(index + 1, round(algo_func.normalized_similarity(str(needle_item), str(item)), 2)) \n                 for index, item in enumerate(haystack_flat)]\n        # Sort based on scores in descending order\n        scores.sort(key=lambda x: x[1], reverse=True)\n        # Append the top index and score to results as a list\n        results.append(list(scores[0]) if scores else [0, 0.0])\n\n    return results\n\n# Test cases\ntest_cases = [\n    [\n        [[\"apple\"]], \n        [[\"apple\"], [\"banana\"], [\"orange\"], [\"grape\"]]\n    ],  # Exact match\n    [\n        [[\"aple\"]], \n        [[\"apple\"], [\"banana\"], [\"orange\"], [\"grape\"]]\n    ],  # Close match\n    [\n        [[\"car\"], [\"truck\"]], \n        [[\"car\"], [\"bus\"], [\"train\"], [\"truck\"]]\n    ],  # Multiple needle items\n    [\n        [[\"London\", \"Paris\"]], \n        [[\"New York\"], [\"London\"], [\"Tokyo\"], [\"Berlin\"]]\n    ],  # Multiple items per needle sublist, column vector haystack\n    [\n        [[\"cat\", \"dog\"]], \n        [[\"cat\"], [\"dog\"], [\"fish\"]]\n    ]  # Different haystack structure\n]\n\n# Excel usage: =TEXT_DISTANCE(\"apple\", {\"appl\",\"banana\"}, \"jaccard\")",
+    "fileName": "text_distance.ipynb",
+    "fileId": "13"
   },
   {
-    "name": "add_two_days",
-    "signature": "ADD_TWO_DAYS(date_input)",
     "description": "Add two days to the given date",
-    "resultLine": "\n\nresult = add_two_days(**{k: v for k, v in [(\"date_input\", arg1 if arg1 != \"__OMITTED__\" else None)] if v is not None})",
-    "formula": "=LAMBDA(date_input, LOCAL.EXEC(\"workbook-settings:add_two_days\", date_input))",
-    "timestamp": "2025-03-03T17:00:59.386Z",
-    "uid": "anonymous",
     "excelExample": "=ADD_TWO_DAYS(43831)",
+    "fileName": "add_days.ipynb",
+    "formula": "=LAMBDA(date_input, PREVIEW.EXEC(\"workbook-settings:add_two_days\", date_input))",
+    "name": "add_two_days",
     "parameters": [
       {
         "name": "date_input"
       }
     ],
-    "code": "def add_two_days(date_input):\n    \"\"\"Add two days to the given date.\n    Args:\n        date_input (str or int): Date in 'YYYY-MM-DD' format or Excel serial date\n    Returns:\n        str: New date in 'YYYY-MM-DD' format\n    \"\"\"\n    from datetime import datetime, timedelta\n    \n    if isinstance(date_input, int):\n        # Excel serial date to datetime conversion\n        date = datetime(1899, 12, 30) + timedelta(days=date_input)\n    else:\n        date = datetime.strptime(date_input, '%Y-%m-%d')\n    \n    new_date = date + timedelta(days=2)\n    return new_date.strftime('%Y-%m-%d')\n\ntest_cases = [\n    [43831],\n    [44561],\n    ['2024-06-15'],\n    ['2025-01-01']\n]\n\n# Excel usage: =ADD_TWO_DAYS(43831)",
-    "fileName": "add_two_days.ipynb",
-    "fileId": "7"
+    "resultLine": "\n\nresult = add_two_days(**{k: v for k, v in [(\"date_input\", arg1 if arg1 != \"__OMITTED__\" else None)] if v is not None})",
+    "signature": "ADD_TWO_DAYS(date_input)",
+    "source": "workbook",
+    "timestamp": "2025-03-06T03:49:11.329Z",
+    "uid": "anonymous",
+    "code": "def add_days(date_input):\n    \"\"\"Add two days to the given date.\n    Args:\n        date_input (str or int): Date in 'YYYY-MM-DD' format or Excel serial date\n    Returns:\n        str: New date in 'YYYY-MM-DD' format\n    \"\"\"\n    from datetime import datetime, timedelta\n    \n    if isinstance(date_input, int):\n        # Excel serial date to datetime conversion\n        date = datetime(1899, 12, 30) + timedelta(days=date_input)\n    else:\n        date = datetime.strptime(date_input, '%Y-%m-%d')\n    \n    new_date = date + timedelta(days=2)\n    return new_date.strftime('%Y-%m-%d')\n\ntest_cases = [\n    [43831],\n    [44561],\n    ['2024-06-15'],\n    ['2025-01-01']\n]\n\n# Excel usage: =ADD_TWO_DAYS(43831)",
+    "fileId": "14"
   },
   {
-    "name": "in_range",
-    "signature": "IN_RANGE(number, min_val, max_val)",
-    "description": "Check if number is in range [min_val, max_val]",
-    "resultLine": "\n\nresult = in_range(**{k: v for k, v in [(\"number\", arg1 if arg1 != \"__OMITTED__\" else None), (\"min_val\", arg2 if arg2 != \"__OMITTED__\" else None), (\"max_val\", arg3 if arg3 != \"__OMITTED__\" else None)] if v is not None})",
-    "formula": "=LAMBDA(number, min_val, max_val, LOCAL.EXEC(\"workbook-settings:in_range\", number, min_val, max_val))",
-    "timestamp": "2025-03-03T17:01:12.718Z",
-    "uid": "anonymous",
-    "excelExample": "=IN_RANGE(5, 0, 10)",
+    "description": "Uses AI to generate responses based on prompts and optional data ranges",
+    "excelExample": null,
+    "formula": "=LAMBDA(prompt, [data], [temperature], [max_tokens], [model], [api_key], LOCAL.EXEC(\"workbook-settings:ask_ai\", prompt, IF(ISOMITTED(data), \"__OMITTED__\", data), IF(ISOMITTED(temperature), \"__OMITTED__\", temperature), IF(ISOMITTED(max_tokens), \"__OMITTED__\", max_tokens), IF(ISOMITTED(model), \"__OMITTED__\", model), IF(ISOMITTED(api_key), \"__OMITTED__\", api_key)))",
+    "name": "ask_ai",
     "parameters": [
       {
-        "name": "number"
+        "name": "prompt"
       },
       {
-        "name": "min_val"
+        "default": "None",
+        "has_default": true,
+        "name": "data"
       },
       {
-        "name": "max_val"
+        "default": "0",
+        "has_default": true,
+        "name": "temperature"
+      },
+      {
+        "default": "250",
+        "has_default": true,
+        "name": "max_tokens"
+      },
+      {
+        "default": "'mistral-large-2411'",
+        "has_default": true,
+        "name": "model"
+      },
+      {
+        "default": "None",
+        "has_default": true,
+        "name": "api_key"
       }
     ],
-    "code": "def in_range(number, min_val, max_val):\n    \"\"\"Check if number is in range [min_val, max_val].\n    Args:\n        number (float): Number to check\n        min_val (float): Minimum value\n        max_val (float): Maximum value\n    Returns:\n        bool: True if in range, False otherwise\n    \"\"\"\n    return min_val <= number <= max_val\n\ntest_cases = [\n    [5, 0, 10],       # -> True\n    [-1, 0, 100],     # -> False\n    [50, 50, 50],     # -> True\n    [25, 0, 20],      # -> False\n    [3.14, 3, 4]      # -> True\n]\n\n# Excel usage: =IN_RANGE(5, 0, 10)",
-    "fileName": "in_range.ipynb",
-    "fileId": "8"
+    "resultLine": "\n\nresult = ask_ai(**{k: v for k, v in [(\"prompt\", arg1 if arg1 != \"__OMITTED__\" else None), (\"data\", arg2 if arg2 != \"__OMITTED__\" else None), (\"temperature\", arg3 if arg3 != \"__OMITTED__\" else None), (\"max_tokens\", arg4 if arg4 != \"__OMITTED__\" else None), (\"model\", arg5 if arg5 != \"__OMITTED__\" else None), (\"api_key\", arg6 if arg6 != \"__OMITTED__\" else None)] if v is not None})",
+    "signature": "ASK_AI(prompt, [data], [temperature], [max_tokens], [model], [api_key])",
+    "timestamp": "2025-03-05T05:42:34.133Z",
+    "uid": "anonymous",
+    "code": "import requests\nimport json\n\ndef ask_ai(prompt, data=None, temperature=0.5, max_tokens=250, model='mistral-small-2501'):\n    \"\"\"\n    Uses AI to generate responses based on prompts and optional data ranges.\n\n    Args:\n        prompt (str): The question, task, or analysis to perform\n        data (list, optional): 2D list containing data from Excel range to analyze\n        temperature (float, optional): Controls response creativity (0-2). Default is 0\n        max_tokens (int, optional): Maximum tokens for response generation\n        model (str, optional): ID of the model to use\n        api_key (str, optional): API key for authentication. If None, uses OPENAI_API_KEY from env vars\n\n    Returns:\n        str: The AI-generated response\n    \"\"\"\n    \n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    # Sign up for your free Mistral API account at https://console.mistral.ai/ then replace the following:\n    \n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Construct the message incorporating both prompt and data if provided\n    message = prompt\n    if data is not None:\n        data_str = json.dumps(data, indent=2)\n        message += f\"\\n\\nData to analyze:\\n{data_str}\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": message}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    # Make the API request\n    response = requests.post(api_url, headers=headers, json=payload)\n    response.raise_for_status()\n    \n    # Extract and return the response content\n    response_data = response.json()\n    content = response_data[\"choices\"][0][\"message\"][\"content\"]\n\n    return content\n    \ntest_cases = [[\"What is the capital of France?\"]]\n\n# Excel usage: =ASK_AI(\"What is the capital of France?\")",
+    "fileName": "ask_ai.ipynb",
+    "fileId": "15"
   },
   {
-    "name": "join_strings",
-    "signature": "JOIN_STRINGS(first_str, second_str, separator)",
-    "description": "Join two strings with a separator",
-    "resultLine": "\n\nresult = join_strings(**{k: v for k, v in [(\"first_str\", arg1 if arg1 != \"__OMITTED__\" else None), (\"second_str\", arg2 if arg2 != \"__OMITTED__\" else None), (\"separator\", arg3 if arg3 != \"__OMITTED__\" else None)] if v is not None})",
-    "formula": "=LAMBDA(first_str, second_str, separator, LOCAL.EXEC(\"workbook-settings:join_strings\", first_str, second_str, separator))",
-    "timestamp": "2025-03-03T17:01:23.821Z",
+    "name": "calculate_area",
+    "signature": "CALCULATE_AREA(length, width)",
+    "description": "Calculate area of rectangle",
+    "resultLine": "\n\nresult = calculate_area(**{k: v for k, v in [(\"length\", arg1 if arg1 != \"__OMITTED__\" else None), (\"width\", arg2 if arg2 != \"__OMITTED__\" else None)] if v is not None})",
+    "formula": "=LAMBDA(length, width, LOCAL.EXEC(\"workbook-settings:calculate_area\", length, width))",
+    "timestamp": "2025-03-03T17:01:38.120Z",
     "uid": "anonymous",
-    "excelExample": "=JOIN_STRINGS(\"hello\", \"world\", \" \")",
+    "excelExample": "=CALCULATE_AREA(5, 4)",
     "parameters": [
       {
-        "name": "first_str"
+        "name": "length"
       },
       {
-        "name": "second_str"
-      },
-      {
-        "name": "separator"
+        "name": "width"
       }
     ],
-    "code": "def join_strings(first_str, second_str, separator):\n    \"\"\"Join two strings with a separator.\n    Args:\n        first_str (str): First string\n        second_str (str): Second string\n        separator (str): Separator between strings\n    Returns:\n        str: Joined string\n    \"\"\"\n    return f\"{first_str}{separator}{second_str}\"\n\ntest_cases = [\n    [\"hello\", \"world\", \" \"],      # -> \"hello world\"\n    [\"first\", \"last\", \"-\"],       # -> \"first-last\"\n    [\"a\", \"b\", \"_\"],             # -> \"a_b\"\n    [\"python\", \"code\", \"::\"],     # -> \"python::code\"\n    [\"x\", \"y\", \"\"]               # -> \"xy\"\n]\n\n# Excel usage: =JOIN_STRINGS(\"hello\", \"world\", \" \")",
-    "fileName": "join_strings.ipynb",
-    "fileId": "9"
+    "code": "def calculate_area(length, width):\n    \"\"\"Calculate area of rectangle.\n    Args:\n        length (float): Length of rectangle\n        width (float): Width of rectangle\n    Returns:\n        float: Area of rectangle\n    \"\"\"\n    return length * width\n\ntest_cases = [\n    [5, 4],      # -> 20\n    [2.5, 4],    # -> 10\n    [10, 10],    # -> 100\n    [1, 1],      # -> 1\n    [0.5, 2]     # -> 1\n]\n\n# Excel usage: =CALCULATE_AREA(5, 4)",
+    "fileName": "calculate_area.ipynb",
+    "fileId": "20"
+  },
+  {
+    "description": "Returns a greeting",
+    "excelExample": "=HELLO(\"Nancy\")",
+    "formula": "=LAMBDA(name, PREVIEW.EXEC(\"workbook-settings:hello\", name))",
+    "name": "hello",
+    "parameters": [
+      {
+        "name": "name"
+      }
+    ],
+    "resultLine": "\n\nresult = hello(**{k: v for k, v in [(\"name\", arg1 if arg1 != \"__OMITTED__\" else None)] if v is not None})",
+    "signature": "HELLO(name)",
+    "timestamp": "2025-02-28T20:20:42.405Z",
+    "uid": "anonymous",
+    "code": "import requests\n\ndef web_content(url):\n    \"\"\"\n    Returns web page content in markdown format using Jina.  Useful as a starting point for extraction, summarization, etc.\n\n    Args:\n        url (str): The full URL to fetch.\n\n    Returns:\n        str: The content of the response from the URL.\n    \"\"\"\n    headers = {\n        \"X-Retain-Images\": \"none\"\n    }\n    base_url = \"https://r.jina.ai/\"\n    full_url = base_url + url\n    response = requests.get(full_url, headers=headers)\n    response.raise_for_status()\n    content = response.text.split(\"Markdown Content:\")[1]\n    return content\n\n# Test case using Y Combinator company page for \"airbnb\"\ntest_cases = [\n    [\"https://www.ycombinator.com/companies/airbnb\"]\n]\n\n# Excel usage: =WEB_CONTENT(\"https://www.ycombinator.com/companies/airbnb\")\n\n",
+    "fileName": "web_content.ipynb",
+    "fileId": "21"
   }
 ]

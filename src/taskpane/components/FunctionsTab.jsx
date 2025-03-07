@@ -5,7 +5,7 @@ import { runTests } from "../utils/testRunner";
 import Notebooks from "./Notebooks";
 import SharedFunctions from "./SharedFunctions";
 import OneDrive from "./OneDrive";
-import { saveFunction } from "../utils/save";  // Add this import
+import { saveFunction, saveToOneDriveOnly } from "../utils/save";  // Update import
 
 const FunctionsTab = ({
     onEdit,
@@ -71,7 +71,7 @@ const FunctionsTab = ({
                                                 const cachedFunc = functionsCache.current.get(cacheKey);
                                                 if (cachedFunc) {
                                                     try {
-                                                        await saveFunction(cachedFunc);
+                                                        await saveToOneDriveOnly(cachedFunc);
                                                         await loadFunctions();
                                                     } catch (error) {
                                                         setError(error.message);

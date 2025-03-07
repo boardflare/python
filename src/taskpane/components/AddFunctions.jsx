@@ -3,6 +3,7 @@ import { saveFunctionToSettings } from "../utils/workbookSettings";
 import { updateNameManager } from "../utils/nameManager";
 import { singleDemo } from "../utils/demo";
 import { pyLogs } from "../utils/logs";
+import { parsePython } from "../utils/codeparser";
 // Import the example functions directly from assets
 import exampleFunctions from '../../../assets/example_functions.json';
 
@@ -33,22 +34,12 @@ const AddFunctions = ({ loadFunctions }) => {
 
     const handleInsert = async (func) => {
         try {
-            // Make sure we have the full function data with code for insertion
             if (!func.code) {
                 throw new Error("Function code missing");
             }
 
-            let appEnvironment = "BOARDFLARE";
-            if (window.location.href.includes("preview")) {
-                appEnvironment = "PREVIEW";
-            } else if (window.location.hostname == "localhost") {
-                appEnvironment = "LOCAL";
-            }
-
-            // Create a copy of the function and update its formula if needed
-            const funcToSave = { ...func };
-            // Replace environment prefix only when it appears before EXEC
-            funcToSave.formula = func.formula.replace(/(BOARDFLARE\.|LOCAL\.|PREVIEW\.)(?=EXEC)/g, `${appEnvironment}.`);
+            // Parse the function code to get formula and metadata
+            const funcToSave = await parsePython(func.code);
 
             await saveFunctionToSettings(funcToSave);
             await updateNameManager(funcToSave);
