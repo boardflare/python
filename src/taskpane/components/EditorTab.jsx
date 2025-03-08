@@ -18,7 +18,9 @@ const EditorTab = ({
     functionsCache,
     workbookFunctions,
     onedriveFunctions,
-    loadFunctions  // Changed from onFunctionSaved
+    loadFunctions,  // Changed from onFunctionSaved
+    unsavedCode,
+    setUnsavedCode
 }) => {
     const [notification, setNotification] = React.useState("");
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
@@ -52,6 +54,11 @@ const EditorTab = ({
             return;
         }
 
+        if (unsavedCode !== null) {
+            editorRef.current.setValue(unsavedCode);
+            return;
+        }
+
         const source = selectedFunction?.source || 'workbook';
         const id = source === 'workbook' ? selectedFunction?.name : selectedFunction?.fileName;
         const cacheKey = `${source}-${id}`;
@@ -64,7 +71,7 @@ const EditorTab = ({
         } else if (editorRef.current?.setValue) {
             editorRef.current.setValue(DEFAULT_CODE);
         }
-    }, [selectedFunction?.name, selectedFunction?.fileName, generatedCode]);
+    }, [selectedFunction?.name, selectedFunction?.fileName, generatedCode]); // Remove unsavedCode dependency
 
     // Add cleanup
     React.useEffect(() => {
@@ -99,6 +106,7 @@ const EditorTab = ({
                 ...parsedFunction,
                 source: 'workbook'
             });
+            setUnsavedCode(null); // Clear unsaved code after successful save
         } catch (err) {
             if (!(err instanceof TokenExpiredError)) {
                 showNotification(err.message, "error");
@@ -107,10 +115,11 @@ const EditorTab = ({
     };
 
     const handleTest = async () => {
+        const currentCode = editorRef.current.getValue();
+        setUnsavedCode(currentCode);
         onTest();
         try {
-            const code = editorRef.current.getValue();
-            const parsedFunction = await parsePython(code);
+            const parsedFunction = await parsePython(currentCode);
             await runTests(parsedFunction);
             showNotification("Tests completed successfully!", "success");
             pyLogs({
@@ -143,9 +152,7 @@ const EditorTab = ({
                     value={selectedFunction?.code || DEFAULT_CODE}
                     onMount={handleEditorDidMount}
                     onChange={(value) => {
-                        if (value !== selectedFunction?.code) { // Only update if actually changed
-                            setSelectedFunction(prev => ({ ...prev, code: value }));
-                        }
+                        setUnsavedCode(value); // Only track unsaved changes, don't update selectedFunction
                     }}
                 />
             </div>
@@ -170,14 +177,14 @@ const EditorTab = ({
                     onChange={(e) => {
                         const func = workbookFunctions.find(f => f.name === e.target.value);
                         if (func) {
-                            editorRef.current.setValue(func.code);
                             setSelectedFunction({
                                 ...func,
                                 source: 'workbook'
                             });
+                            setUnsavedCode(null);
                         } else {
-                            editorRef.current.setValue(DEFAULT_CODE);
                             setSelectedFunction({ name: "", code: DEFAULT_CODE });
+                            setUnsavedCode(null);
                         }
                     }}
                     className="px-2 py-1 border rounded"

@@ -20,6 +20,7 @@ const App = ({ title }) => {
   const [error, setError] = React.useState(null);
   const [folderUrl, setFolderUrl] = React.useState(null);
   const [isPreview, setIsPreview] = React.useState(false);
+  const [unsavedCode, setUnsavedCode] = React.useState(null);
 
   React.useEffect(() => {
     setIsPreview(
@@ -60,7 +61,7 @@ const App = ({ title }) => {
   };
 
   const handleTabSelect = (event) => {
-    // Just change the tab, no need to reload functions
+    // Don't clear unsaved code when switching tabs
     setSelectedTab(event.target.value);
   };
 
@@ -74,6 +75,7 @@ const App = ({ title }) => {
     }
 
     setSelectedFunction(func);
+    setUnsavedCode(null); // Only clear unsaved code when explicitly selecting a new function
     setSelectedTab("editor");
   };
 
@@ -173,9 +175,11 @@ const App = ({ title }) => {
               workbookFunctions={workbookFunctions}
               onedriveFunctions={onedriveFunctions}
               loadFunctions={loadFunctions}  // Changed from onFunctionSaved
+              unsavedCode={unsavedCode}
+              setUnsavedCode={setUnsavedCode}
             />
           )}
-          {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} />}
+          {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} unsavedCode={unsavedCode} />}
           {selectedTab === "functions" && (
             <FunctionsTab
               onEdit={handleFunctionEdit}
