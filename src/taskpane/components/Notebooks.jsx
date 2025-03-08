@@ -1,12 +1,11 @@
 import * as React from "react";
-import { getStoredNotebooks, addNotebook, removeNotebook, fetchDemoNotebooks, fetchNotebookUrl, DEFAULT_NOTEBOOK } from "../utils/notebooks";
+import { getStoredNotebooks, addNotebook, removeNotebook, fetchNotebookUrl, DEFAULT_NOTEBOOK } from "../utils/notebooks";
 import { saveFunctionToSettings } from "../utils/workbookSettings";
 import { updateNameManager } from "../utils/nameManager";
 import { pyLogs } from "../utils/logs";
 
 const Notebooks = ({ onImportComplete }) => {
     const [myNotebooks, setMyNotebooks] = React.useState({});
-    const [demoNotebooks, setDemoNotebooks] = React.useState({});
     const [url, setUrl] = React.useState('');
     const [isUrlSaving, setIsUrlSaving] = React.useState(false);
     const [saveSuccess, setSaveSuccess] = React.useState(false);
@@ -17,12 +16,8 @@ const Notebooks = ({ onImportComplete }) => {
     React.useEffect(() => {
         const loadData = async () => {
             try {
-                const [stored, demos] = await Promise.all([
-                    getStoredNotebooks(),
-                    fetchDemoNotebooks()
-                ]);
+                const stored = await getStoredNotebooks();
                 setMyNotebooks(stored);
-                setDemoNotebooks(demos);
             } catch (error) {
                 setError('Failed to load notebooks');
                 console.error('Error loading notebooks:', error);
@@ -31,6 +26,11 @@ const Notebooks = ({ onImportComplete }) => {
 
         loadData();
     }, []);
+
+    // If no notebooks are stored, don't render the component
+    if (Object.keys(myNotebooks).length === 0) {
+        return null;
+    }
 
     const handleUrlSubmit = async (e) => {
         e.preventDefault();
@@ -42,11 +42,11 @@ const Notebooks = ({ onImportComplete }) => {
             setMyNotebooks(notebooks);
             setUrl('');
             setSaveSuccess(true);
-            pyLogs({ notebook: url, ref: 'notebook_url_submitted' }); // updated ref value
+            pyLogs({ code: url, ref: 'notebook_url_submitted' }); // removed errorMessage: null
             setTimeout(() => setSaveSuccess(false), 3000);
         } catch (error) {
             setError(`Failed to add notebook: ${error.message}`);
-            pyLogs({ notebook: url, ref: 'notebook_url_submit_error' }); // updated ref value
+            pyLogs({ code: url, ref: 'notebook_url_submit_error', errorMessage: error.message }); // keeping errorMessage
         } finally {
             setIsUrlSaving(false);
         }
@@ -74,11 +74,11 @@ const Notebooks = ({ onImportComplete }) => {
 
             onImportComplete();
             setError(null);
-            pyLogs({ notebook: selectedNotebook, ref: 'imported_notebook' }); // reverted ref value
+            pyLogs({ code: JSON.stringify(selectedNotebook), ref: 'imported_notebook' }); // removed errorMessage: null
         } catch (error) {
             console.error("Error importing functions:", error);
             setError("Failed to import functions");
-            pyLogs({ notebook: selectedNotebook, ref: 'import_notebook_error' }); // reverted ref value
+            pyLogs({ code: JSON.stringify(selectedNotebook), ref: 'import_notebook_error', errorMessage: error.message }); // keeping errorMessage
         } finally {
             setIsImporting(false);
         }
@@ -86,37 +86,32 @@ const Notebooks = ({ onImportComplete }) => {
 
     return (
         <details>
-            <summary className="px-4 py-2 bg-gray-100 cursor-pointer font-bold">Notebooks</summary>
-            <div className="border-t pt-2">
+            <summary className="px-4 py-2 bg-gray-100 cursor-pointer font-bold">GitHub Gist</summary>
+            <div className="">
                 <div className="px-4 mb-4">
                     <select
                         value={selectedNotebook}
                         onChange={(e) => setSelectedNotebook(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-lg text-sm mb-2"
                     >
-                        <option value="">Select a notebook with example functions...</option>
-                        {Object.keys(myNotebooks).length > 0 && (
-                            <optgroup label="Custom Notebooks">
-                                {Object.entries(myNotebooks).map(([url, { fileName }]) => (
-                                    <option key={url} value={url}>{fileName || url}</option>
-                                ))}
-                            </optgroup>
+                        <option value="">Select a notebook...</option>
+                        {Object.keys(myNotebooks).length === 0 ? (
+                            <option disabled>No notebooks available</option>
+                        ) : (
+                            Object.entries(myNotebooks).map(([url, { fileName }]) => (
+                                <option key={url} value={url}>{fileName || url}</option>
+                            ))
                         )}
-                        {Object.entries(demoNotebooks).map(([category, notebooks]) => (
-                            <optgroup key={category} label={category}>
-                                {notebooks.map(({ url, title }) => (
-                                    <option key={url} value={url}>{title}</option>
-                                ))}
-                            </optgroup>
-                        ))}
                     </select>
-                    <button
-                        onClick={handleImport}
-                        disabled={isImporting || !selectedNotebook}
-                        className="w-full px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300"
-                    >
-                        {isImporting ? "Importing Functions..." : "Import Notebook Functions"}
-                    </button>
+                    <div className="flex justify-center">
+                        <button
+                            onClick={handleImport}
+                            disabled={isImporting || !selectedNotebook}
+                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300 text-center"
+                        >
+                            {isImporting ? "Importing Functions..." : "Import Functions"}
+                        </button>
+                    </div>
                 </div>
 
                 <div className="px-4 mb-2">
@@ -127,7 +122,7 @@ const Notebooks = ({ onImportComplete }) => {
                                 value={url}
                                 onChange={(e) => setUrl(e.target.value)}
                                 className="flex-1 px-2 py-1 border rounded"
-                                placeholder="Enter notebook URL (advanced)"
+                                placeholder="Enter GitHub Gist URL"
                             />
                             <button
                                 type="submit"

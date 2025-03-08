@@ -1,8 +1,11 @@
 import * as React from "react";
-import { getFunctionFromSettings, deleteFunctionFromSettings } from "../utils/workbookSettings";
-import { TokenExpiredError, deleteFile, loadFunctionFiles } from "../utils/drive";
+import { deleteFunctionFromSettings } from "../utils/workbookSettings";
+import { TokenExpiredError, deleteFile } from "../utils/drive";
 import { runTests } from "../utils/testRunner";
 import Notebooks from "./Notebooks";
+import OneDrive from "./OneDrive";
+import { saveToOneDriveOnly } from "../utils/save";
+import { pyLogs } from "../utils/logs";  // Add this import
 
 const FunctionsTab = ({
     onEdit,
@@ -12,11 +15,17 @@ const FunctionsTab = ({
     onedriveFunctions,
     isLoading,
     error,
-    loadFunctions
+    loadFunctions,
+    folderUrl,
+    isPreview
 }) => {
     const [deleteConfirm, setDeleteConfirm] = React.useState(null);
+    const [localError, setError] = React.useState(error || null);
 
-    // Remove any useEffect hooks that might be calling loadFunctions
+    // Use effect to sync error prop with local state
+    React.useEffect(() => {
+        setError(error);
+    }, [error]);
 
     const handleDelete = async (functionName, source, fileName) => {
         try {
@@ -43,47 +52,62 @@ const FunctionsTab = ({
         }
     };
 
-    const FunctionTable = ({ functions, source }) => (
+    const handleSaveToOneDrive = async (func) => {
+        try {
+            await saveToOneDriveOnly(func);
+            await loadFunctions();
+            setError(null);
+            pyLogs({
+                ref: 'save_to_onedrive_success',
+                code: func.code
+            });
+        } catch (error) {
+            console.error('Error saving to OneDrive:', error);
+            setError(error.message);
+            pyLogs({
+                ref: 'save_to_onedrive_error',
+                errorMessage: `Save to OneDrive error: ${error.message}`,
+                code: func.code
+            });
+        }
+    };
+
+    const WorkbookFunctionTable = ({ functions }) => (
         <div className="overflow-x-auto">
-            <h3 className="font-semibold mb-1 text-center flex items-center justify-center gap-2">
-                {source === 'workbook' ? 'Workbook Functions' : (
-                    <>
-                        OneDrive Functions
-                        <button
-                            onClick={loadFunctions}
-                            className="text-blue-500 hover:text-blue-700"
-                            title="Refresh OneDrive functions"
-                        >
-                            🔄
-                        </button>
-                    </>
-                )}
-            </h3>
+            <h3 className="font-semibold mb-1 text-center">Workbook Functions</h3>
             <table className="min-w-full bg-white mb-6">
                 <tbody>
                     {functions.map((func) => (
-                        <tr key={source === 'workbook' ? func.name : func.fileName}>
+                        <tr key={func.name}>
                             <td className="py-0 px-2 border-b">
                                 <code className="font-mono text-sm">{func.name.toUpperCase()}</code>
                             </td>
                             <td className="py-0 px-2 border-b w-fit">
                                 <div className="flex gap-2 justify-end">
-                                    <button
-                                        className="text-green-500 hover:text-green-700"
-                                        onClick={() => handleTest(func)}
-                                        title="Run tests"
-                                    >
-                                        ▶️
-                                    </button>
+                                    {folderUrl && (
+                                        <button
+                                            className="text-blue-500 hover:text-blue-700"
+                                            onClick={async () => {
+                                                const cacheKey = `workbook-${func.name}`;
+                                                const cachedFunc = functionsCache.current.get(cacheKey);
+                                                if (cachedFunc) {
+                                                    await handleSaveToOneDrive(cachedFunc);
+                                                }
+                                            }}
+                                            title="Save to OneDrive"
+                                        >
+                                            ⬇️
+                                        </button>
+                                    )}
                                     <button
                                         className="text-blue-500 hover:text-blue-700"
                                         onClick={() => {
-                                            const cacheKey = `${source}-${source === 'workbook' ? func.name : func.fileName}`;
+                                            const cacheKey = `workbook-${func.name}`;
                                             const cachedFunc = functionsCache.current.get(cacheKey);
                                             if (cachedFunc) {
                                                 onEdit({
                                                     ...cachedFunc,
-                                                    source: source
+                                                    source: 'workbook'
                                                 });
                                             }
                                         }}
@@ -95,7 +119,7 @@ const FunctionsTab = ({
                                     </button>
                                     <button
                                         className="text-red-500 hover:text-red-700 text-lg"
-                                        onClick={() => setDeleteConfirm({ name: func.name, source, fileName: func.fileName })}
+                                        onClick={() => setDeleteConfirm({ name: func.name, source: 'workbook' })}
                                         title="Delete function"
                                     >
                                         ❌
@@ -111,26 +135,29 @@ const FunctionsTab = ({
 
     return (
         <div className="h-full flex flex-col overflow-y-auto">
-            {error && (
+            {localError && (
                 <div className="p-2 text-red-600 bg-red-50 mb-4 text-center">
-                    {error}
+                    {localError}
                 </div>
             )}
 
             <div className="mt-2">
                 {workbookFunctions.length > 0 && (
-                    <FunctionTable functions={workbookFunctions} source="workbook" />
+                    <WorkbookFunctionTable functions={workbookFunctions} />
                 )}
 
-                {isLoading ? (
-                    <div className="p-4 text-gray-900 text-center">
-                        Loading OneDrive functions...
-                    </div>
-                ) : (
-                    onedriveFunctions.length > 0 && (
-                        <FunctionTable functions={onedriveFunctions} source="onedrive" />
-                    )
-                )}
+                <OneDrive
+                    onedriveFunctions={onedriveFunctions}
+                    isLoading={isLoading}
+                    folderUrl={folderUrl}
+                    loadFunctions={loadFunctions}
+                    onEdit={onEdit}
+                    onTest={handleTest}
+                    functionsCache={functionsCache}
+                    error={localError}
+                    onDelete={(func) => setDeleteConfirm({ name: func.name, source: 'onedrive', fileName: func.fileName })}
+                    isPreview={isPreview}
+                />
 
                 {!isLoading && workbookFunctions.length === 0 && onedriveFunctions.length === 0 && (
                     <div className="flex flex-col items-center justify-center p-5 text-center text-gray-600">
@@ -141,7 +168,7 @@ const FunctionsTab = ({
                 )}
             </div>
 
-            <Notebooks onImportComplete={loadFunctions} />
+            <Notebooks onImportComplete={() => loadFunctions()} />
 
             {deleteConfirm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">

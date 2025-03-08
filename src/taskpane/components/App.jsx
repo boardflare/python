@@ -3,6 +3,7 @@ import EditorTab from "./EditorTab";
 import OutputTab from "./OutputTab";
 import HomeTab from "./HomeTab";
 import FunctionsTab from "./FunctionsTab";
+import SettingsTab from "./SettingsTab";
 import { EventTypes } from "../utils/constants";
 import { getFunctionFromSettings } from "../utils/workbookSettings";
 import { loadFunctionFiles, TokenExpiredError } from "../utils/drive";
@@ -17,6 +18,16 @@ const App = ({ title }) => {
   const [onedriveFunctions, setOnedriveFunctions] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
+  const [folderUrl, setFolderUrl] = React.useState(null);
+  const [isPreview, setIsPreview] = React.useState(false);
+  const [unsavedCode, setUnsavedCode] = React.useState(null);
+
+  React.useEffect(() => {
+    setIsPreview(
+      window.location.pathname.toLowerCase().includes('preview') ||
+      window.location.hostname === 'localhost'
+    );
+  }, []);
 
   const clearFunctions = () => {
     setWorkbookFunctions([]);
@@ -50,7 +61,7 @@ const App = ({ title }) => {
   };
 
   const handleTabSelect = (event) => {
-    // Just change the tab, no need to reload functions
+    // Don't clear unsaved code when switching tabs
     setSelectedTab(event.target.value);
   };
 
@@ -64,6 +75,7 @@ const App = ({ title }) => {
     }
 
     setSelectedFunction(func);
+    setUnsavedCode(null); // Only clear unsaved code when explicitly selecting a new function
     setSelectedTab("editor");
   };
 
@@ -93,10 +105,17 @@ const App = ({ title }) => {
         functionsCache.current.set(`workbook-${func.name}`, fullFunc);
       });
 
+      // Only set hello function if found
+      const helloFunc = workbookData?.find(f => f.name.toLowerCase() === 'hello');
+      if (helloFunc) {
+        setSelectedFunction({ ...helloFunc, source: 'workbook' });
+      }
+
       // Try to load OneDrive functions, but don't fail if unauthorized
       try {
-        const driveFunctions = await loadFunctionFiles();
+        const { driveFunctions, folderUrl } = await loadFunctionFiles();  // Match the property name
         setOnedriveFunctions(driveFunctions || []); // Ensure we set empty array if null
+        setFolderUrl(folderUrl);
         driveFunctions?.forEach(func => {
           const fullFunc = {
             ...func,
@@ -105,8 +124,8 @@ const App = ({ title }) => {
           };
           functionsCache.current.set(`onedrive-${func.fileName}`, fullFunc);
         });
+
       } catch (driveError) {
-        console.error('OneDrive load failed:', driveError);
         setOnedriveFunctions([]); // Ensure OneDrive functions are cleared
         if (!(driveError instanceof TokenExpiredError)) {
           throw driveError; // Only rethrow if not a token error
@@ -126,13 +145,14 @@ const App = ({ title }) => {
   }, []); // This should only run once on mount
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      <main className="flex-1 flex flex-col overflow-hidden min-h-0 text-sm bg-white">
+    <div className="h-screen flex flex-col overflow-hidden"> {/* Ensure full screen and hidden overflow */}
+      <main className="flex-1 flex flex-col overflow-hidden min-h-0 text-sm bg-white"> {/* Allow shrinking */}
         <div className="flex space p-0 border-b">
           <button className={`flex-grow px-2 py-2 ${selectedTab === "home" ? "border-b-2 border-blue-500" : ""}`} value="home" onClick={handleTabSelect}>Home</button>
           <button className={`flex-grow px-2 py-2 ${selectedTab === "editor" ? "border-b-2 border-blue-500" : ""}`} value="editor" onClick={handleTabSelect}>Editor</button>
           <button className={`flex-grow px-2 py-2 ${selectedTab === "functions" ? "border-b-2 border-blue-500" : ""}`} value="functions" onClick={handleTabSelect}>Functions</button>
-          <button className={`flex-grow px-2 py-2 mr-2 ${selectedTab === "output" ? "border-b-2 border-blue-500" : ""}`} value="output" onClick={handleTabSelect}>Output</button>
+          <button className={`flex-grow px-2 py-2 ${selectedTab === "output" ? "border-b-2 border-blue-500" : ""}`} value="output" onClick={handleTabSelect}>Output</button>
+          {isPreview && <button className={`flex-grow px-2 py-2 mr-2 ${selectedTab === "settings" ? "border-b-2 border-blue-500" : ""}`} value="settings" onClick={handleTabSelect}>⚙️</button>}
         </div>
         <div className="flex-1 overflow-hidden">
           {selectedTab === "home" && (
@@ -154,9 +174,11 @@ const App = ({ title }) => {
               workbookFunctions={workbookFunctions}
               onedriveFunctions={onedriveFunctions}
               loadFunctions={loadFunctions}  // Changed from onFunctionSaved
+              unsavedCode={unsavedCode}
+              setUnsavedCode={setUnsavedCode}
             />
           )}
-          {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} />}
+          {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} unsavedCode={unsavedCode} />}
           {selectedTab === "functions" && (
             <FunctionsTab
               onEdit={handleFunctionEdit}
@@ -167,8 +189,11 @@ const App = ({ title }) => {
               isLoading={isLoading}
               error={error}
               loadFunctions={loadFunctions}  // Changed from onFunctionDeleted
+              folderUrl={folderUrl}
+              isPreview={isPreview}
             />
           )}
+          {isPreview && selectedTab === "settings" && <SettingsTab loadFunctions={loadFunctions} />}
         </div>
       </main>
     </div>

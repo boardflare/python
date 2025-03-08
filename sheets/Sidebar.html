@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js"></script>
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 5px;
+      }
+      #editor-container {
+        height: 400px;
+      }
+      #output {
+        white-space: pre-wrap;
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-top: 10px;
+        max-height: 300px;
+        overflow-y: auto;
+        font-family: monospace;
+      }
+      .log {
+        margin: 5px 0;
+      }
+      .log-info { color: #0066cc; }
+      .log-error { color: #cc0000; }
+      .log-success { color: #008800; }
+      .button-container {
+        margin: 10px 0;
+      }
+      /* Remove .input-container styles as they're no longer needed */
+    </style>
+  </head>
+  <body>
+    <p>Run Python code locally in your browser.  More features coming soon!</p>
+    
+    <div id="editor-container"></div>
+    <div class="button-container">
+      <button onclick="runEditorCode()">Run Code</button>
+      <button onclick="clearOutput()">Clear Output</button>
+      <button onclick="getSelectedRangeData()">Get Data</button>
+    </div>
+    
+    <div id="status">Loading Pyodide...</div>
+    <div id="output"></div>
+    
+    <p>To use data from your sheet, select a range of cells and click Get Data.  The "data" variable will be assigned a 2D list representing the selected range.</p>
+    <div style="margin-top: 10px; font-size: 12px;">
+      <a href="https://www.boardflare.com/company/privacy" target="_blank">Privacy Policy</a>
+      <a href="https://www.boardflare.com/apps/sheets/python" target="_blank">Documentation</a>
+    </div>
+    
+    <?!= include('JavaScript')?>
+  </body>
+</html>

@@ -1,10 +1,10 @@
 #:schema node_modules/wrangler/config-schema.json
-name = "cors_proxy"
+name = "llm_proxy"
 main = "src/index.js"
 compatibility_date = "2024-11-06"
 compatibility_flags = ["nodejs_compat"]
 routes = [
-  { pattern = "cors.boardflare.com", custom_domain = true }
+  { pattern = "llm.boardflare.com", custom_domain = true }
 ]
 
 [observability]
@@ -12,4 +12,4 @@ enabled = true
 
 [[analytics_engine_datasets]]
 binding = "ANALYTICS"
-dataset = "cors_proxy"
+dataset = "llm_proxy"

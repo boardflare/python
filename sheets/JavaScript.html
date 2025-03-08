@@ -1,0 +1,112 @@
+<script>
+  let editor;
+  let pyodide;
+  let isInitialized = false;
+
+  const exampleCode = `def calculate_area(length, width):
+    """Calculate area of rectangle.
+    Args:
+        length (float): Length of rectangle
+        width (float): Width of rectangle
+    Returns:
+        float: Area of rectangle
+    """
+    return length * width
+
+calculate_area(2,3)`;
+
+  // Initialize Monaco Editor
+  require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' }});
+  require(['vs/editor/editor.main'], function() {
+    editor = monaco.editor.create(document.getElementById('editor-container'), {
+      value: exampleCode,
+      language: 'python',
+      fontSize: 14,
+      automaticLayout: true,
+      minimap: { enabled: false },
+      scrollBeyondLastLine: false,
+      folding: false,
+      lineNumbersMinChars: 2
+    });
+  });
+
+  async function runEditorCode() {
+    if (!editor || !isInitialized) return;
+    
+    const code = editor.getValue();
+    log("Executing code...", "info");
+    
+    try {
+      const result = await executePythonCode(code);
+      log("Result: " + result, "success");
+    } catch (error) {
+      log("Error: " + error.message, "error");
+    }
+  }
+
+  async function initPyodide() {
+    try {
+      pyodide = await loadPyodide();
+            log("Pyodide loaded and ready!", "success");
+      document.getElementById('status').textContent = 'Ready to execute Python code';
+      isInitialized = true;
+    } catch (error) {
+      log("Error loading Pyodide: " + error.message, "error");
+      document.getElementById('status').textContent = 'Error loading Pyodide: ' + error.message;
+    }
+  }
+
+  async function executePythonCode(code) {
+    if (!isInitialized) {
+      return "Pyodide is not yet initialized";
+    }
+    
+    try {
+      const result = await pyodide.runPythonAsync(code);
+      return String(result);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  function log(message, type = "info") {
+    const output = document.getElementById('output');
+    const logElement = document.createElement('div');
+    logElement.classList.add('log', `log-${type}`);
+    logElement.textContent = message;
+    output.appendChild(logElement);
+    output.scrollTop = output.scrollHeight;
+  }
+
+  function clearOutput() {
+    document.getElementById('output').innerHTML = '';
+  }
+
+  async function getSelectedRangeData() {
+    try {
+      await new Promise((resolve) => {
+        google.script.run
+          .withSuccessHandler((rangeInfo) => {
+            if (rangeInfo && rangeInfo.values && rangeInfo.values.length > 0) {
+              if (isInitialized) {
+                pyodide.globals.set('data', pyodide.toPy(rangeInfo.values));
+                log(`Range ${rangeInfo.address} loaded into 'data' variable`, "success");
+              }
+            } else {
+              log("No range selected", "error");
+            }
+            resolve();
+          })
+          .withFailureHandler((error) => {
+            log("Error loading range data: " + error.message, "error");
+            resolve();
+          })
+          .getSelectedRange();
+      });
+    } catch (error) {
+      log("Error loading range data: " + error.message, "error");
+    }
+  }
+
+  window.onload = initPyodide;
+</script>

@@ -5,7 +5,7 @@ import { PublicClientApplication } from "@azure/msal-browser";
 // Initialize MSAL configuration
 const msalConfig = {
     auth: {
-        clientId: '0c94fdd5-ec39-4167-84ea-06ea727149b1',
+        clientId: '7fc35253-f44d-4c02-aea9-9b0b7a0a4b61',
         authority: "https://login.microsoftonline.com/common",
         redirectUri: window.location.origin + window.location.pathname
     },
@@ -17,17 +17,73 @@ const msalConfig = {
 const pca = new PublicClientApplication(msalConfig);
 pca.initialize();
 
+// Convert base64url to standard base64 for atob compatibility
+function base64UrlToBase64(base64Url) {
+    // Replace characters used in base64url encoding with standard base64 characters
+    let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+
+    // Add padding if needed
+    while (base64.length % 4) {
+        base64 += '=';
+    }
+
+    return base64;
+}
+
 // Add helper to parse token claims
-function parseTokenClaims(token) {
+export function parseTokenClaims(token) {
     try {
         const parts = token.split('.');
         if (parts.length < 2) return null;
-        const payload = atob(parts[1]);
+        const standardBase64 = base64UrlToBase64(parts[1]);
+        const payload = atob(standardBase64);
         return JSON.parse(payload);
     } catch (error) {
         console.error("Error parsing token claims:", error);
         return null;
     }
+}
+
+export async function authenticateWithDialog() {
+    let dialogUrl;
+    if (window.location.href.includes("preview")) {
+        dialogUrl = "https://addins.boardflare.com/python/preview/auth.html";
+    } else if (window.location.href.includes("prod")) {
+        dialogUrl = "https://addins.boardflare.com/python/prod/auth.html";
+    } else {
+        dialogUrl = window.location.origin + "/auth.html";
+    }
+
+    const token = await new Promise((resolve, reject) => {
+        Office.context.ui.displayDialogAsync(
+            dialogUrl,
+            { height: 60, width: 30 },
+            (result) => {
+                if (result.status === Office.AsyncResultStatus.Failed) {
+                    reject(new Error(result.error.message));
+                }
+
+                const dialog = result.value;
+                dialog.addEventHandler(Office.EventType.DialogMessageReceived, (args) => {
+                    dialog.close();
+                    const message = JSON.parse(args.message);
+                    if (message.status === 'error') {
+                        reject(new Error(message.errorData.message));
+                    } else {
+                        const tokenObj = {
+                            auth_token: message.msalResponse?.accessToken,
+                            graphToken: message.graphToken,
+                            tokenClaims: parseTokenClaims(message.msalResponse?.accessToken)
+                        };
+                        resolve(tokenObj);
+                    }
+                });
+            }
+        );
+    });
+
+    await storeToken(token);
+    return token;
 }
 
 export function SignInButton({ loadFunctions }) {
@@ -75,7 +131,7 @@ export function SignInButton({ loadFunctions }) {
             }
 
             const tokenRequest = {
-                scopes: ["User.Read", "Files.ReadWrite", "offline_access"],
+                scopes: await getScopes(),
                 account: accounts[0] // Always use first account if available
             };
 
@@ -97,43 +153,7 @@ export function SignInButton({ loadFunctions }) {
 
     const signIn = async () => {
         try {
-            let dialogUrl;
-            if (window.location.href.includes("preview")) {
-                dialogUrl = "https://addins.boardflare.com/python/preview/auth.html";
-            } else if (window.location.href.includes("prod")) {
-                dialogUrl = "https://addins.boardflare.com/python/prod/auth.html";
-            } else {
-                dialogUrl = window.location.origin + "/auth.html";
-            }
-            const token = await new Promise((resolve, reject) => {
-                Office.context.ui.displayDialogAsync(
-                    dialogUrl,
-                    { height: 60, width: 30 },
-                    (result) => {
-                        if (result.status === Office.AsyncResultStatus.Failed) {
-                            reject(new Error(result.error.message));
-                        }
-
-                        const dialog = result.value;
-                        dialog.addEventHandler(Office.EventType.DialogMessageReceived, (args) => {
-                            dialog.close();
-                            const message = JSON.parse(args.message);
-                            if (message.status === 'error') {
-                                reject(new Error(message.errorData.message));
-                            } else {
-                                const tokenObj = {
-                                    auth_token: message.msalResponse?.accessToken,
-                                    graphToken: message.graphToken,
-                                    tokenClaims: parseTokenClaims(message.msalResponse?.accessToken)
-                                };
-                                resolve(tokenObj);
-                            }
-                        });
-                    }
-                );
-            });
-
-            await storeToken(token);
+            await authenticateWithDialog();
             pyLogs({ message: "Sign in successful", ref: "auth_signin_success" });
             setIsSignedIn(true);
             loadFunctions?.();
@@ -164,7 +184,7 @@ export function SignInButton({ loadFunctions }) {
             <div>
                 <button
                     onClick={signOut}
-                    className="px-2 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    className="px-2 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
                 >
                     Logout
                 </button>
@@ -217,8 +237,11 @@ async function isTokenValid(token) {
         const [, payloadBase64] = token.split('.');
         if (!payloadBase64) return false;
 
+        // Convert from base64url to standard base64 before decoding
+        const standardBase64 = base64UrlToBase64(payloadBase64);
+
         // Decode the base64 payload
-        const payload = JSON.parse(atob(payloadBase64));
+        const payload = JSON.parse(atob(standardBase64));
 
         // Check if token is expired
         const currentTime = Math.floor(Date.now() / 1000);
@@ -280,7 +303,7 @@ async function getStoredToken() {
     }
 }
 
-async function storeToken(tokenObj) {
+export async function storeToken(tokenObj) {
     const storeName = 'User';
     const authKey = 'auth_token';
     const graphKey = 'graphToken';
@@ -339,5 +362,53 @@ async function removeToken() {
         console.error('DB initialization error during sign out:', error);
         await pyLogs({ errorMessage: error.message, ref: "auth_removeToken_error" });
         throw error;
+    }
+}
+
+export async function storeScopes(scopes) {
+    const storeName = 'User';
+    const scopesKey = 'scopes';
+
+    try {
+        const db = await initializeDB();
+        return new Promise((resolve, reject) => {
+            try {
+                const transaction = db.transaction(storeName, 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.put(scopes, scopesKey);
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject(transaction.error);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    } catch (error) {
+        console.error('DB initialization error:', error);
+        await pyLogs({ errorMessage: error.message, ref: "auth_storeScopes_error" });
+        throw error;
+    }
+}
+
+export async function getScopes() {
+    const storeName = 'User';
+    const scopesKey = 'scopes';
+
+    try {
+        const db = await initializeDB();
+        return new Promise((resolve, reject) => {
+            try {
+                const transaction = db.transaction(storeName, 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.get(scopesKey);
+                request.onsuccess = () => resolve(request.result || ["User.Read", "offline_access"]);
+                request.onerror = () => reject(request.error);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    } catch (error) {
+        console.error('Failed to get scopes:', error);
+        await pyLogs({ errorMessage: error.message, ref: "auth_getScopes_error" });
+        return ["User.Read", "offline_access"];
     }
 }

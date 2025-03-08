@@ -8,6 +8,7 @@ class TokenExpiredError extends Error {
 }
 
 const DRIVE_APPROOT = 'https://graph.microsoft.com/v1.0/me/drive/special/approot:';
+const BATCH_SIZE_LIMIT = 20;
 
 async function handleResponse(response) {
     if (response.status === 401) {
@@ -17,6 +18,64 @@ async function handleResponse(response) {
         throw new Error(`Request failed: ${response.statusText}`);
     }
     return response;
+}
+
+/**
+ * Makes batch requests to Graph API with size limit handling
+ * @param {Array} requests - Array of request objects with url, method, and file reference
+ * @returns {Promise<Array>} Combined responses from all batches with file references
+ */
+async function makeBatchRequests(requests) {
+    const accessToken = await getStoredToken();
+    const chunks = [];
+    for (let i = 0; i < requests.length; i += BATCH_SIZE_LIMIT) {
+        chunks.push(requests.slice(i, i + BATCH_SIZE_LIMIT));
+    }
+
+    const allResponses = [];
+    for (const chunk of chunks) {
+        const batchRequests = chunk.map((req) => ({
+            id: req.id,
+            method: req.method || 'GET',
+            url: req.url.replace(/^https:\/\/graph\.microsoft\.com\/v1\.0\//, '')
+        }));
+
+        const response = await fetch('https://graph.microsoft.com/v1.0/$batch', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ requests: batchRequests })
+        });
+
+        await handleResponse(response);
+        const batchResponse = await response.json();
+        allResponses.push(...batchResponse.responses);
+    }
+    return allResponses;
+}
+
+/**
+ * Fetches content from a redirect URL
+ * @param {string} redirectUrl - The URL to fetch content from
+ * @returns {Promise<Object>} The parsed JSON response
+ */
+async function fetchRedirectContent(redirectUrl) {
+    try {
+        const response = await fetch(redirectUrl, {
+            method: 'GET'
+        });
+
+        if (!response.ok) {
+            throw new Error(`Request to redirect failed: ${response.statusText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching redirect content:', error);
+        throw error;
+    }
 }
 
 /**
@@ -90,7 +149,7 @@ export async function deleteFile(fileName) {
 
 /**
  * Lists all files in the app's special folder
- * @returns {Promise<Array>} List of files
+ * @returns {Promise<{files: Array, folderUrl: string}>} List of files and folder URL
  */
 export async function listFiles() {
     const accessToken = await getStoredToken();
@@ -104,66 +163,145 @@ export async function listFiles() {
 
         await handleResponse(response);
         const data = await response.json();
-        return data.value.filter(file => !file.folder); // Filter out folders
+        const files = data.value.filter(file => !file.folder);
+        // Get the folder URL from the first file if available
+        const folderUrl = files.length > 0 ?
+            files[0].webUrl.substring(0, files[0].webUrl.lastIndexOf('/')) :
+            null;
+        return { files, folderUrl };
     } catch (error) {
-        console.error('Error listing files:', error);
         throw error;
     }
 }
 
 /**
  * Loads all function files from OneDrive and their contents
- * @returns {Promise<Array>} Array of function objects with their contents
+ * @returns {Promise<{functions: Array, folderUrl: string}>} Array of function objects with their contents and folder URL
  */
 export async function loadFunctionFiles() {
     try {
-        const files = await listFiles();
+        const { files, folderUrl } = await listFiles();
         const functionFiles = files.filter(f => f.name.endsWith('.ipynb'));
 
-        const driveFunctions = [];
-        for (const file of functionFiles) {
-            try {
-                const notebook = await readFile(file.name);
-                if (notebook.cells && notebook.cells.length > 0) {
-                    const firstCell = notebook.cells[0];
-                    // Extract function metadata from the cell
-                    if (firstCell.metadata) {
-                        driveFunctions.push({
-                            name: firstCell.metadata.name,
-                            code: firstCell.source.join(''),
-                            signature: firstCell.metadata.signature,
-                            description: firstCell.metadata.description,
-                            resultLine: firstCell.metadata.resultLine,
-                            formula: firstCell.metadata.formula,
-                            fileName: file.name,
-                            source: 'onedrive'
-                        });
-                    }
-                }
-            } catch (e) {
-                console.warn(`Failed to load ${file.name}:`, e);
-            }
+        if (functionFiles.length === 0) {
+            return { driveFunctions: [], folderUrl };
         }
-        return driveFunctions;
+
+        // Create requests with unique IDs that match file indices
+        const requests = functionFiles.map((file, index) => ({
+            id: index.toString(),
+            url: `${DRIVE_APPROOT}/${encodeURIComponent(file.name)}:/content`,
+            method: 'GET',
+            fileRef: file
+        }));
+
+        const responses = await makeBatchRequests(requests);
+
+        // Create a map to associate responses with their files using the ID
+        const fileMap = {};
+        functionFiles.forEach((file, index) => {
+            fileMap[index.toString()] = file;
+        });
+
+        const driveFunctions = [];
+        // Process all responses and match them to their files
+        const promises = responses.map(async (response) => {
+            if (response.status === 302 && response.headers && response.headers.Location) {
+                const file = fileMap[response.id];
+                if (!file) {
+                    console.error(`No file found for response ID ${response.id}`);
+                    return null;
+                }
+
+                try {
+                    const notebook = await fetchRedirectContent(response.headers.Location);
+
+                    if (notebook && notebook.cells && notebook.cells.length > 0) {
+                        const firstCell = notebook.cells[0];
+                        if (firstCell.metadata) {
+                            return {
+                                name: firstCell.metadata.name || file.name.replace('.ipynb', ''),
+                                code: Array.isArray(firstCell.source) ? firstCell.source.join('') : firstCell.source,
+                                signature: firstCell.metadata.signature,
+                                description: firstCell.metadata.description,
+                                resultLine: firstCell.metadata.resultLine,
+                                formula: firstCell.metadata.formula,
+                                fileName: file.name,
+                                source: 'onedrive'
+                            };
+                        } else {
+                            console.warn(`No metadata found in notebook cell for ${file.name}`);
+                        }
+                    } else {
+                        console.warn(`No valid cells found in notebook for ${file.name}`);
+                    }
+                } catch (e) {
+                    console.error(`Error processing notebook for ${file.name}:`, e);
+                }
+            } else if (response.status === 200) {
+                const file = fileMap[response.id];
+                if (!file) {
+                    console.error(`No file found for response ID ${response.id}`);
+                    return null; // Using return instead of continue
+                }
+
+                try {
+                    const notebook = response.body;
+
+                    if (notebook && notebook.cells && notebook.cells.length > 0) {
+                        const firstCell = notebook.cells[0];
+                        if (firstCell.metadata) {
+                            return {  // Return the function object instead of pushing to array
+                                name: firstCell.metadata.name || file.name.replace('.ipynb', ''),
+                                code: Array.isArray(firstCell.source) ? firstCell.source.join('') : firstCell.source,
+                                signature: firstCell.metadata.signature,
+                                description: firstCell.metadata.description,
+                                resultLine: firstCell.metadata.resultLine,
+                                formula: firstCell.metadata.formula,
+                                fileName: file.name,
+                                source: 'onedrive'
+                            };
+                        } else {
+                            console.warn(`No metadata found in notebook cell for ${file.name}`);
+                        }
+                    } else {
+                        console.warn(`No valid cells found in notebook for ${file.name}`);
+                    }
+                } catch (e) {
+                    console.error(`Error processing notebook for ${file.name}:`, e);
+                }
+            } else {
+                console.warn(`Failed to load file with response ID ${response.id}: Status ${response.status}`);
+                if (response.body && response.body.error) {
+                    console.error("Error details:", response.body.error);
+                }
+            }
+            return null;
+        });
+
+        // Wait for all promises to resolve
+        const results = await Promise.all(promises);
+        const validResults = results.filter(Boolean);
+        driveFunctions.push(...validResults);
+
+        return { driveFunctions, folderUrl };
     } catch (error) {
-        console.error('Error loading function files:', error);
         throw error;
     }
 }
 
 /**
  * Formats a Python function and its metadata into an IPython notebook format
- * @param {Object} metadata - Function metadata containing code and other properties
+ * @param {Object} parsedFunction - Function metadata containing code and other properties
  * @returns {Object} Notebook formatted object
  */
-export function formatAsNotebook(metadata) {
-    const { code, ...cellMetadata } = metadata;
+export function formatAsNotebook(parsedFunction) {
     return {
         cells: [{
             cell_type: "code",
-            source: [code],
-            metadata: cellMetadata,
+            source: [parsedFunction.code],
             execution_count: null,
+            metadata: { "name": parsedFunction.name, "description": parsedFunction.description },
             outputs: []
         }],
         metadata: {

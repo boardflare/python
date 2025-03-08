@@ -9,3 +9,6 @@ if 'global_args' in globals():
             globals()[f'arg{index + 1}'] = value[0][0]
         else:
             globals()[f'arg{index + 1}'] = value
+
+# Set test_cases global to None
+globals()['test_cases'] = None

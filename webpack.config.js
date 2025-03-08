@@ -81,6 +81,11 @@ module.exports = async (env, options) => {
           type: 'json'  // This will automatically parse JSON files
         },
         {
+          test: /\.json$/,
+          type: 'json',
+          exclude: /node_modules/
+        },
+        {
           test: /\.(pdf|xlsx)$/,
           type: 'asset/resource',
           generator: {

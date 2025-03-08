@@ -2,6 +2,25 @@ import ast
 import textwrap
 import re
 import json
+import base64
+
+def parse_python_code_safe(encoded_code):
+    """
+    Parse safely encoded Python code to avoid issues with triple quotes
+    
+    Args:
+        encoded_code: Base64 encoded Python code
+        
+    Returns:
+        JSON string with parsed function metadata
+    """
+    try:
+        # Decode the base64 encoded code
+        decoded_bytes = base64.b64decode(encoded_code)
+        code = decoded_bytes.decode('utf-8')
+        return parse_python_code(code)
+    except Exception as e:
+        return json.dumps({"error": f"Failed to decode Python code: {str(e)}"})
 
 def parse_python_code(code):
     try:
@@ -49,16 +68,10 @@ def parse_python_code(code):
                 # Check for default values
                 defaults = node.args.defaults
                 if defaults:
+                    offset = len(parameters) - len(defaults)
                     for i, default in enumerate(defaults):
-                        idx = len(parameters) - len(defaults) + i
-                        param_name = parameters[idx]["name"]
-                        return json.dumps({
-                            "name": name,
-                            "parameters": [],
-                            "docstring": "",
-                            "description": "",
-                            "error": f"Default values are not supported for function parameters at this time. Issue causing error: {param_name}={ast.unparse(default)}"
-                        })
+                        parameters[offset + i]["has_default"] = True
+                        parameters[offset + i]["default"] = ast.unparse(default)
                 
                 # Get docstring
                 docstring = ast.get_docstring(node)
