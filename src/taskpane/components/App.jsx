@@ -126,7 +126,6 @@ const App = ({ title }) => {
         });
 
       } catch (driveError) {
-        console.error('OneDrive load failed:', driveError);
         setOnedriveFunctions([]); // Ensure OneDrive functions are cleared
         if (!(driveError instanceof TokenExpiredError)) {
           throw driveError; // Only rethrow if not a token error

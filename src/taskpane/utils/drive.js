@@ -286,7 +286,6 @@ export async function loadFunctionFiles() {
 
         return { driveFunctions, folderUrl };
     } catch (error) {
-        console.error('Error loading function files:', error);
         throw error;
     }
 }
