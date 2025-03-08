@@ -89,7 +89,7 @@ const OneDrive = ({
             <div className="flex flex-col items-center">
                 <OneDriveFunctionsHeader />
                 <div className="text-gray-500 px-2 mb-2">
-                    Login to OneDrive to save functions to OneDrive and add them to other workbooks.
+                    Login to OneDrive to save functions to OneDrive and use them with other workbooks.
                 </div>
                 <button
                     onClick={handleLogin}
