@@ -170,7 +170,6 @@ export async function listFiles() {
             null;
         return { files, folderUrl };
     } catch (error) {
-        console.error('Error listing files:', error);
         throw error;
     }
 }
