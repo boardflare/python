@@ -184,7 +184,7 @@ export function SignInButton({ loadFunctions }) {
             <div>
                 <button
                     onClick={signOut}
-                    className="px-2 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    className="px-2 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
                 >
                     Logout
                 </button>

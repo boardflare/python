@@ -89,7 +89,7 @@ const OneDrive = ({
             <div className="flex flex-col items-center">
                 <OneDriveFunctionsHeader />
                 <div className="text-gray-500 px-2 mb-2">
-                    Login to OneDrive to save functions to OneDrive and add them to other workbooks.  This requires the Files.ReadWrite permission.
+                    Login to OneDrive to save functions to OneDrive and add them to other workbooks.
                 </div>
                 <button
                     onClick={handleLogin}
@@ -153,7 +153,9 @@ const OneDrive = ({
                     </tbody>
                 </table>
                 <div className="text-gray-500 px-2 mb-2">
-                    Use ⬇️ to save to OneDrive, and ⬆️ to save to the workbook.  Saving updates a function with the same name.  You need to add a function to the workbook first in order to edit it.
+                    ⬇️ to save from Workbook to OneDrive<br />
+                    ⬆️ to save from OneDrive to Workbook<br />
+                    Saving updates a function with the same name.
                 </div>
             </div>
         </>
