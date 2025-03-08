@@ -70,12 +70,7 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
             />
             <div className="fixed bottom-3 w-full flex justify-between items-center mt-2 px-3">
                 <a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener" className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">Email Us!🛟</a>
-                <div className="group relative flex items-center gap-2">
-                    <SignInButton loadFunctions={loadFunctions} />
-                    <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block bg-blue-50 text-black text-sm py-2 px-4 rounded shadow-md whitespace-normal min-w-[200px]">
-                        Configure permissions to access data in settings ⚙️.
-                    </div>
-                </div>
+                <SignInButton loadFunctions={loadFunctions} />
             </div>
         </div>
     );
