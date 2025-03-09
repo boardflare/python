@@ -3,10 +3,9 @@ import { MonacoEditor } from "./MonacoEditor";
 import { DISPLAY_CODE } from "../utils/constants";
 import LLM from "./LLM";
 import { SignInButton } from "./Auth";
-import Feedback from "./Feedback";
-import Demo from "./Demo";
-import pdfUrl from "../../../assets/Python-v1.2.1.pdf"; // Updated path
+import pdfUrl from "../../../assets/Python-v1.2.2.pdf"; // Updated path
 import AddFunctions from "./AddFunctions";
+import { pyLogs } from "../utils/logs";
 
 const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFunctions }) => {
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
@@ -54,7 +53,7 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
                             )}
                         </div>
                         <p className="mt-1">
-                            Check out the <a href={pdfUrl} target="_blank" rel="noopener" className="text-blue-500 underline">slideshow</a> and <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>.
+                            Check out the <a href={pdfUrl} target="_blank" rel="noopener" className="text-blue-500 underline" onClick={() => pyLogs({ ref: "slideshow_clicked" })}>slideshow</a> and <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>.
                         </p>
                     </div>
                 </div>
