@@ -1,10 +1,53 @@
 import { pyLogs } from './logs';
 
+async function logSeparator(context) {
+    const separatorTestName = "SEPARATORTEST";
+    let separator;
+    let namedItem;
+
+    try {
+        const worksheet = context.workbook.worksheets.getActiveWorksheet();
+        namedItem = worksheet.names.getItemOrNullObject(separatorTestName);
+        await context.sync();
+
+        if (!namedItem.isNullObject) {
+            namedItem.delete();
+            await context.sync();
+        }
+
+        try {
+            const refersToFormula = "=SUM(1,2)";
+            namedItem = worksheet.names.add(separatorTestName, refersToFormula);
+            await context.sync();
+            separator = ",";
+        } catch {
+            separator = ";";
+        } finally {
+            if (namedItem) {
+                namedItem.delete();
+                await context.sync();
+            }
+        }
+
+        const testExec = CustomFunctions._association.mappings.EXEC.length?.toString()
+
+        await pyLogs({
+            errorMessage: `Separator detected as '${separator}'`,
+            ref: 'separator_logger',
+            code: testExec
+        });
+    } catch (error) {
+        console.error("[Separator Logger]", error);
+    }
+}
+
 export async function updateNameManager(parsedCode) {
     try {
         const excelName = parsedCode.name.toUpperCase();
 
         return await Excel.run(async (context) => {
+            await logSeparator(context);  // Add back the await
+
             const namedItem = context.workbook.names.getItemOrNullObject(excelName);
             namedItem.load(['isNullObject']);
             await context.sync();
