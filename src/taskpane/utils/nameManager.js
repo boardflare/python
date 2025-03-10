@@ -1,8 +1,8 @@
 import { pyLogs } from './logs';
 
-async function logSeparator(context) {
+async function testSeparator(context) {
     const separatorTestName = "SEPARATORTEST";
-    let separator;
+    let separator = null;
     let namedItem;
 
     try {
@@ -28,16 +28,10 @@ async function logSeparator(context) {
                 await context.sync();
             }
         }
-
-        const testExec = CustomFunctions._association.mappings.EXEC.length?.toString()
-
-        await pyLogs({
-            errorMessage: `Separator detected as '${separator}'`,
-            ref: 'separator_logger',
-            code: testExec
-        });
+        return { separator, testExec: CustomFunctions._association.mappings.EXEC.length?.toString() };
     } catch (error) {
         console.error("[Separator Logger]", error);
+        return { separator: null, testExec: null };
     }
 }
 
@@ -46,8 +40,6 @@ export async function updateNameManager(parsedCode) {
         const excelName = parsedCode.name.toUpperCase();
 
         return await Excel.run(async (context) => {
-            await logSeparator(context);  // Add back the await
-
             const namedItem = context.workbook.names.getItemOrNullObject(excelName);
             namedItem.load(['isNullObject']);
             await context.sync();
@@ -96,8 +88,9 @@ export async function updateNameManager(parsedCode) {
         });
     } catch (error) {
         console.error("[Name Manager]", error);
+        const { separator, testExec } = await testSeparator(context);
         await pyLogs({
-            errorMessage: `[Name Manager] ${error.message}`,
+            errorMessage: `[Name Manager] ${error.message} (separator: '${separator}', testExec: ${testExec})`,
             code: parsedCode.code,
             ref: 'nameManager_error'
         });
