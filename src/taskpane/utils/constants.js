@@ -4,16 +4,7 @@ export const DISPLAY_CODE = `def hello(name):
 
 export const DEFAULT_CODE = `def hello(name):
     """ Returns a greeting. """
-    return f"Hello {name}!"
-    
-# Arguments to test the function.
-test_cases = [
-    ["Nancy"],
-    ["Ming"]
-]
-    
-# Excel usage: =HELLO("Nancy")
-`;
+    return f"Hello {name}!"`;
 
 export const EventTypes = {
     LOG: 'console:log',
