@@ -1,9 +1,8 @@
 import React from "react";
 import { multiDemo } from "../utils/demo";
 import { parseNotebook } from "../utils/notebooks";
-import { saveFunctionToSettings } from "../utils/workbookSettings";
+import { saveWorkbookOnly } from "../utils/save";
 import demoFunctions from '../utils/demo_functions.ipynb';
-import { updateNameManager } from "../utils/nameManager";
 import { pyLogs } from "../utils/logs"; // added import
 
 const demoSheetUrl = new URL("../utils/demo_sheet.xlsx", import.meta.url).href;
@@ -39,8 +38,7 @@ async function addFunctionsFromNotebook(notebook) {
     const functions = await parseNotebook(notebook);
     await multiDemo(functions);
     for (const func of functions) {
-        await saveFunctionToSettings(func);
-        await updateNameManager(func);
+        await saveWorkbookOnly(func);
     }
 }
 

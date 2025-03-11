@@ -1,7 +1,6 @@
 import * as React from "react";
 import { getStoredNotebooks, addNotebook, removeNotebook, fetchNotebookUrl, DEFAULT_NOTEBOOK } from "../utils/notebooks";
-import { saveFunctionToSettings } from "../utils/workbookSettings";
-import { updateNameManager } from "../utils/nameManager";
+import { saveWorkbookOnly } from "../utils/save";
 import { pyLogs } from "../utils/logs";
 
 const Notebooks = ({ onImportComplete }) => {
@@ -68,8 +67,7 @@ const Notebooks = ({ onImportComplete }) => {
             const { functions } = await fetchNotebookUrl(selectedNotebook);
 
             for (const func of functions) {
-                await saveFunctionToSettings(func);
-                await updateNameManager(func);
+                await saveWorkbookOnly(func);
             }
 
             onImportComplete();

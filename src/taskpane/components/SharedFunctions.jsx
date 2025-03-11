@@ -2,8 +2,7 @@ import * as React from "react";
 import { TokenExpiredError } from "../utils/drive";
 import { loadSharedFunctionFiles } from "../utils/shared";
 import { pyLogs } from "../utils/logs";
-import { saveFunctionToSettings } from "../utils/workbookSettings";
-import { updateNameManager } from "../utils/nameManager";
+import { saveWorkbookOnly } from "../utils/save";
 
 const SharedFunctions = ({ onImportComplete }) => {
     const [sharedFunctions, setSharedFunctions] = React.useState([]);
@@ -96,8 +95,7 @@ const SharedFunctions = ({ onImportComplete }) => {
 
     const handleImport = async (func) => {
         try {
-            await saveFunctionToSettings(func);
-            await updateNameManager(func);
+            await saveWorkbookOnly(func);
             onImportComplete();
             pyLogs({ function: func.name, ref: 'imported_shared_function' });
         } catch (error) {

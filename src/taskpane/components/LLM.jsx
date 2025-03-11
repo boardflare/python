@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { pyLogs } from "../utils/logs";
 // New imports for saving inside LLM:
 import { parsePython } from "../utils/codeparser";
-import { saveFunctionToSettings } from "../utils/workbookSettings";
-import { updateNameManager } from "../utils/nameManager";
+import { saveWorkbookOnly } from "../utils/save";
 
 const LLM_URL = process.env.NODE_ENV === 'development'
     ? 'https://codepy.boardflare.workers.dev' //'http://127.0.0.1:8787'
@@ -98,8 +97,7 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt, loadFunctions }) => { // NEW:
             // NEW: Associate the prompt with the parsed function
             const parsedFunction = await parsePython(generatedCode);
             parsedFunction.prompt = input;
-            await saveFunctionToSettings(parsedFunction);
-            await updateNameManager(parsedFunction);
+            await saveWorkbookOnly(parsedFunction);
             // NEW: Refresh function list after saving
             if (loadFunctions) {
                 await loadFunctions();

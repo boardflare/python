@@ -1,6 +1,5 @@
 import * as React from "react";
-import { saveFunctionToSettings } from "../utils/workbookSettings";
-import { updateNameManager } from "../utils/nameManager";
+import { saveWorkbookOnly } from "../utils/save";
 import { singleDemo } from "../utils/demo";
 import { pyLogs } from "../utils/logs";
 import { parsePython } from "../utils/codeparser";
@@ -40,8 +39,7 @@ const AddFunctions = ({ loadFunctions }) => {
 
             // Parse the function code to get formula and metadata
             const funcToSave = await parsePython(func.code);
-            await saveFunctionToSettings(funcToSave);
-            await updateNameManager(funcToSave);
+            await saveWorkbookOnly(funcToSave);
             await singleDemo(funcToSave);
             await loadFunctions();
 
