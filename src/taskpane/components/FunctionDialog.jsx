@@ -126,7 +126,7 @@ const FunctionDialog = ({
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
             <div className="bg-white p-4 rounded-lg shadow-lg w-96">
                 <div className="flex items-center gap-2 mb-4">
-                    <h2 className="text-xl">Insert into cell:</h2>
+                    <h2 className="text-xl">Insert function into cell:</h2>
                     <input
                         id="targetCell"
                         type="text"
