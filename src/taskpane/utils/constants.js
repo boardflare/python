@@ -4,7 +4,11 @@ export const DISPLAY_CODE = `def hello(name):
 
 export const DEFAULT_CODE = `def hello(name):
     """ Returns a greeting. """
-    return f"Hello {name}!"`;
+    return f"Hello {name}!"
+
+# code must be a function.
+# args must be 2D list or scalar.
+# return must be 2D list or scalar.`;
 
 export const EventTypes = {
     LOG: 'console:log',
