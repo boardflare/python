@@ -27,7 +27,6 @@ const EditorTab = ({
     const [notification, setNotification] = React.useState("");
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const [showConfirmModal, setShowConfirmModal] = React.useState(false);
-    const [isFunctionDialogOpen, setIsFunctionDialogOpen] = React.useState(false);
     const [pendingFunction, setPendingFunction] = React.useState(null);
     const [isSaveOpen, setIsSaveOpen] = React.useState(false);
     const notificationTimeoutRef = React.useRef();
@@ -125,7 +124,7 @@ const EditorTab = ({
         const currentCode = editorRef.current.getValue();
         setUnsavedCode(currentCode);
         try {
-            setIsFunctionDialogOpen(true);
+            setIsSaveOpen(true); // Open save dialog instead
         } catch (err) {
             showNotification(err.message, "error");
             window.dispatchEvent(new CustomEvent(EventTypes.ERROR, { detail: err.message }));
@@ -265,20 +264,10 @@ const EditorTab = ({
                 loadFunctions={loadFunctions} // NEW: pass loadFunctions for refreshing functions list
             />
 
-            <FunctionDialog
-                isOpen={isFunctionDialogOpen}
-                onClose={() => setIsFunctionDialogOpen(false)}
-                selectedFunction={selectedFunction}
-            />
-
             <Save
                 isOpen={isSaveOpen}
                 selectedFunction={selectedFunction}
                 onDismiss={() => setIsSaveOpen(false)}
-                onRun={() => {
-                    setIsFunctionDialogOpen(true);
-                    setIsSaveOpen(false); // Dismiss the Save dialog
-                }}
             />
         </div>
     );

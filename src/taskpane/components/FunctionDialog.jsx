@@ -3,7 +3,8 @@ import * as React from "react";
 const FunctionDialog = ({
     isOpen,
     onClose,
-    selectedFunction
+    selectedFunction,
+    embedded = false
 }) => {
     const [selectedCell, setSelectedCell] = React.useState("");
     const [functionArgs, setFunctionArgs] = React.useState({});
@@ -122,71 +123,82 @@ const FunctionDialog = ({
         );
     }
 
+    // For embedded mode, return just the form content without modal wrapper
+    const content = (
+        <>
+            <div className="flex items-center gap-2 mb-4">
+                <h2 className="text-xl">Insert function into cell:</h2>
+                <input
+                    id="targetCell"
+                    type="text"
+                    value={selectedCell}
+                    onChange={(e) => setSelectedCell(e.target.value)}
+                    onFocus={handleFocus}
+                    className="px-2 py-1 border rounded w-24"
+                    placeholder="Select cell"
+                />
+            </div>
+
+            <div className="mb-4 p-2 bg-gray-50 rounded">
+                <h3 className="font-bold">{selectedFunction.signature}</h3>
+                {selectedFunction.description && (
+                    <p className="text-sm text-gray-600 mt-1">{selectedFunction.description}</p>
+                )}
+            </div>
+
+            <div className="mb-4">
+                {(selectedFunction.parameters || []).map((param, index) => (
+                    <div key={`${param.name}-${index}`} className="mb-2">
+                        <label className="block mb-1">
+                            {param.name}
+                            {!param.has_default && <span className="text-red-500">*</span>}
+                            {param.has_default && <span className="text-gray-500"> (optional)</span>}
+                        </label>
+                        <input
+                            type="text"
+                            value={functionArgs[param.name] || ''}
+                            onChange={(e) => handleArgumentChange(param.name, e.target.value)}
+                            onFocus={handleFocus}
+                            data-param={param.name}
+                            className="w-full px-2 py-1 border rounded"
+                            placeholder={`Select cell(s) first then click here`}
+                        />
+                    </div>
+                ))}
+            </div>
+
+            {error && (
+                <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+                    {error}
+                </div>
+            )}
+
+            <div className="flex justify-end space-x-2">
+                <button
+                    onClick={onClose}
+                    className="px-4 py-2 border rounded hover:bg-gray-100"
+                >
+                    Cancel
+                </button>
+                <button
+                    onClick={handleSubmit}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    disabled={!selectedCell}
+                >
+                    OK
+                </button>
+            </div>
+        </>
+    );
+
+    if (embedded) {
+        return content;
+    }
+
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
             <div className="bg-white p-4 rounded-lg shadow-lg w-96">
-                <div className="flex items-center gap-2 mb-4">
-                    <h2 className="text-xl">Insert function into cell:</h2>
-                    <input
-                        id="targetCell"
-                        type="text"
-                        value={selectedCell}
-                        onChange={(e) => setSelectedCell(e.target.value)}
-                        onFocus={handleFocus}
-                        className="px-2 py-1 border rounded w-24"
-                        placeholder="Select cell"
-                    />
-                </div>
-
-                <div className="mb-4 p-2 bg-gray-50 rounded">
-                    <h3 className="font-bold">{selectedFunction.signature}</h3>
-                    {selectedFunction.description && (
-                        <p className="text-sm text-gray-600 mt-1">{selectedFunction.description}</p>
-                    )}
-                </div>
-
-                <div className="mb-4">
-                    {(selectedFunction.parameters || []).map((param, index) => (
-                        <div key={`${param.name}-${index}`} className="mb-2">
-                            <label className="block mb-1">
-                                {param.name}
-                                {!param.has_default && <span className="text-red-500">*</span>}
-                                {param.has_default && <span className="text-gray-500"> (optional)</span>}
-                            </label>
-                            <input
-                                type="text"
-                                value={functionArgs[param.name] || ''}
-                                onChange={(e) => handleArgumentChange(param.name, e.target.value)}
-                                onFocus={handleFocus}
-                                data-param={param.name}
-                                className="w-full px-2 py-1 border rounded"
-                                placeholder={`Select cell(s) first then click here`}
-                            />
-                        </div>
-                    ))}
-                </div>
-
-                {error && (
-                    <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
-                        {error}
-                    </div>
-                )}
-
-                <div className="flex justify-end space-x-2">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 border rounded hover:bg-gray-100"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleSubmit}
-                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                        disabled={!selectedCell}
-                    >
-                        OK
-                    </button>
-                </div>
+                {content}
             </div>
         </div>
     );
