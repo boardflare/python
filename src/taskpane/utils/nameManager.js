@@ -28,7 +28,7 @@ async function testSeparator(context) {
                 await context.sync();
             }
         }
-        return { separator, testExec: CustomFunctions._association.mappings.EXEC.length?.toString() };
+        return { separator, testExec: CustomFunctions._association.mappings?.EXEC?.length?.toString() };
     } catch (error) {
         console.error("[Separator Logger]", error);
         return { separator: null, testExec: null };
