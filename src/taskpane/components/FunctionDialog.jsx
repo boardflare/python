@@ -1,4 +1,5 @@
 import * as React from "react";
+import { execPython } from "../../functions/exec/controller";
 
 const FunctionDialog = ({
     isOpen,
@@ -9,6 +10,7 @@ const FunctionDialog = ({
     const [selectedCell, setSelectedCell] = React.useState("");
     const [functionArgs, setFunctionArgs] = React.useState({});
     const [error, setError] = React.useState("");
+    const [insertResult, setInsertResult] = React.useState(false);
 
     // Reset state when dialog opens
     React.useEffect(() => {
@@ -69,7 +71,6 @@ const FunctionDialog = ({
         if (!selectedFunction || !selectedCell) return;
 
         try {
-            // Validate required arguments
             const missingArgs = (selectedFunction.parameters || [])
                 .filter(p => !p.has_default && !functionArgs[p.name]);
 
@@ -80,18 +81,53 @@ const FunctionDialog = ({
 
             await Excel.run(async (context) => {
                 const range = context.workbook.worksheets.getActiveWorksheet().getRange(selectedCell);
-                const args = (selectedFunction.parameters || []).map(param => {
-                    const value = functionArgs[param.name];
-                    if (!value && param.has_default) return '""';
-                    if (!value) return "";
 
-                    const isCellRef = /^\$?[A-Za-z]+\$?\d+$/.test(value) ||
-                        /^[A-Za-z]+\d+:[A-Za-z]+\d+$/.test(value);
-                    return isCellRef ? value : `"${value}"`;
-                }).join(",");
+                if (insertResult) {
+                    // Prepare arguments as matrices
+                    const argMatrices = [];
+                    for (const param of selectedFunction.parameters || []) {
+                        const value = functionArgs[param.name];
+                        if (!value && param.has_default) {
+                            argMatrices.push([[""]]);
+                            continue;
+                        }
 
-                const formula = `=${selectedFunction.name.toUpperCase()}(${args})`;
-                range.formulas = [[formula]];
+                        const isCellRef = /^\$?[A-Za-z]+\$?\d+$/.test(value) ||
+                            /^[A-Za-z]+\d+:[A-Za-z]+\d+$/.test(value);
+
+                        if (isCellRef) {
+                            // Get values from the referenced range
+                            const argRange = context.workbook.worksheets.getActiveWorksheet().getRange(value);
+                            argRange.load("values");
+                            await context.sync();
+                            argMatrices.push(argRange.values);
+                        } else {
+                            // Convert scalar value to single-element matrix
+                            argMatrices.push([[value]]);
+                        }
+                    }
+
+                    const result = await execPython({
+                        code: selectedFunction.code + selectedFunction.resultLine,
+                        arg1: argMatrices
+                    });
+
+                    range.values = result;
+                } else {
+                    // Original formula insertion code
+                    const args = (selectedFunction.parameters || []).map(param => {
+                        const value = functionArgs[param.name];
+                        if (!value && param.has_default) return '""';
+                        if (!value) return "";
+
+                        const isCellRef = /^\$?[A-Za-z]+\$?\d+$/.test(value) ||
+                            /^[A-Za-z]+\d+:[A-Za-z]+\d+$/.test(value);
+                        return isCellRef ? value : `"${value}"`;
+                    }).join(",");
+
+                    const formula = `=${selectedFunction.name.toUpperCase()}(${args})`;
+                    range.formulas = [[formula]];
+                }
                 await context.sync();
             });
 
@@ -165,6 +201,18 @@ const FunctionDialog = ({
                         />
                     </div>
                 ))}
+            </div>
+
+            <div className="mb-4">
+                <label className="flex items-center space-x-2">
+                    <input
+                        type="checkbox"
+                        checked={insertResult}
+                        onChange={(e) => setInsertResult(e.target.checked)}
+                        className="rounded"
+                    />
+                    <span>Insert result instead of formula</span>
+                </label>
             </div>
 
             {error && (
