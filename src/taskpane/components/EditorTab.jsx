@@ -1,6 +1,7 @@
 import * as React from "react";
 import { MonacoEditor } from "./MonacoEditor";
 import LLM from "./LLM";
+import FunctionDialog from "./FunctionDialog";
 import { DEFAULT_CODE } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
 import { EventTypes } from "../utils/constants";
@@ -25,6 +26,7 @@ const EditorTab = ({
     const [notification, setNotification] = React.useState("");
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const [showConfirmModal, setShowConfirmModal] = React.useState(false);
+    const [isFunctionDialogOpen, setIsFunctionDialogOpen] = React.useState(false);
     const [pendingFunction, setPendingFunction] = React.useState(null);
     const notificationTimeoutRef = React.useRef();
     const editorRef = React.useRef(null);
@@ -113,6 +115,18 @@ const EditorTab = ({
             if (!(err instanceof TokenExpiredError)) {
                 showNotification(err.message, "error");
             }
+        }
+    };
+
+    const handleRun = async () => {
+        const currentCode = editorRef.current.getValue();
+        setUnsavedCode(currentCode);
+        try {
+            const parsedFunction = await parsePython(currentCode);
+            setIsFunctionDialogOpen(true);
+        } catch (err) {
+            showNotification(err.message, "error");
+            window.dispatchEvent(new CustomEvent(EventTypes.ERROR, { detail: err.message }));
         }
     };
 
@@ -210,7 +224,8 @@ const EditorTab = ({
                     ))}
                 </select>
                 <div className="space-x-2">
-                    <button onClick={handleTest} className="px-2 py-1 bg-green-500 text-white rounded">Test</button>
+                    <button onClick={handleRun} className="px-2 py-1 bg-green-500 text-white rounded">Run</button>
+                    <button onClick={handleTest} className="hidden">Test</button>
                     <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
                     <button onClick={() => setIsLLMOpen(true)} className="px-2 py-1 bg-purple-500 text-white rounded">AI✨</button>
                 </div>
@@ -246,6 +261,12 @@ const EditorTab = ({
                 onSuccess={handleLLMSuccess}
                 prompt={selectedFunction.prompt}
                 loadFunctions={loadFunctions} // NEW: pass loadFunctions for refreshing functions list
+            />
+
+            <FunctionDialog
+                isOpen={isFunctionDialogOpen}
+                onClose={() => setIsFunctionDialogOpen(false)}
+                selectedFunction={selectedFunction}
             />
         </div>
     );
