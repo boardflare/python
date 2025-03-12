@@ -12,6 +12,24 @@ const FunctionDialog = ({
     const [error, setError] = React.useState("");
     const [insertResult, setInsertResult] = React.useState(false);
 
+    // Add cell reference validation helper
+    const isValidCellReference = (ref) => {
+        return /^\$?[A-Za-z]+\$?\d+$/.test(ref);
+    };
+
+    // Modify setSelectedCell to include validation
+    const handleCellChange = (value) => {
+        setSelectedCell(value);
+        // Clear error if value is valid, otherwise set appropriate error
+        if (!value) {
+            setError("Target cell is required");
+        } else if (!isValidCellReference(value)) {
+            setError("Invalid cell reference format");
+        } else {
+            setError("");
+        }
+    };
+
     // Reset state when dialog opens
     React.useEffect(() => {
         if (isOpen && selectedFunction) {
@@ -23,7 +41,8 @@ const FunctionDialog = ({
                 const range = context.workbook.getSelectedRange();
                 range.load("address");
                 await context.sync();
-                setSelectedCell(range.address.split("!")[1]); // Remove sheet name
+                const cellAddress = range.address.split("!")[1]; // Remove sheet name
+                handleCellChange(cellAddress); // Use handleCellChange instead of direct setState
             });
 
             // Initialize arguments with empty strings or default values
@@ -54,7 +73,7 @@ const FunctionDialog = ({
                 // Get the focused input's parameter name from the event
                 const activeElement = document.activeElement;
                 if (activeElement.id === 'targetCell') {
-                    setSelectedCell(address);
+                    handleCellChange(address); // Use handleCellChange instead of direct setState
                 } else {
                     const paramName = activeElement.getAttribute('data-param');
                     if (paramName) {
@@ -68,7 +87,18 @@ const FunctionDialog = ({
     };
 
     const handleSubmit = async () => {
-        if (!selectedFunction || !selectedCell) return;
+        if (!selectedFunction) return;
+
+        // Add validation for targetCell
+        if (!selectedCell) {
+            setError("Target cell is required");
+            return;
+        }
+
+        if (!isValidCellReference(selectedCell)) {
+            setError("Invalid cell reference format");
+            return;
+        }
 
         try {
             const missingArgs = (selectedFunction.parameters || [])
@@ -198,16 +228,19 @@ const FunctionDialog = ({
                 ))}
             </div>
 
-            <div className="flex items-center gap-1">
-                <h2 className="text-lg">Insert function into cell:</h2>
+            <div className="mb-2">
+                <label className="block mb-1">
+                    Insert function into cell:
+                    <span className="text-red-500">*</span>
+                </label>
                 <input
                     id="targetCell"
                     type="text"
                     value={selectedCell}
-                    onChange={(e) => setSelectedCell(e.target.value)}
+                    onChange={(e) => handleCellChange(e.target.value)}
                     onFocus={handleFocus}
-                    className="px-2 py-1 border rounded w-16"
-                    placeholder="Select cell"
+                    className={`w-full px-2 py-1 border rounded ${!selectedCell || !isValidCellReference(selectedCell) ? 'border-red-500' : ''}`}
+                    placeholder="Select cell (required)"
                 />
             </div>
 
@@ -219,7 +252,7 @@ const FunctionDialog = ({
                         onChange={(e) => setInsertResult(e.target.checked)}
                         className="rounded"
                     />
-                    <span>Insert function result only,  do not recalculate.</span>
+                    <span>Insert function result only,  will not recalculate.</span>
                 </label>
             </div>
 
@@ -253,7 +286,7 @@ const FunctionDialog = ({
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-4 rounded-lg shadow-lg w-96">
+            <div className="bg-white m-1 rounded-lg shadow-lg w-96">
                 {content}
             </div>
         </div>
