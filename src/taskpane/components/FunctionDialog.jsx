@@ -88,7 +88,7 @@ const FunctionDialog = ({
                     for (const param of selectedFunction.parameters || []) {
                         const value = functionArgs[param.name];
                         if (!value && param.has_default) {
-                            argMatrices.push([[""]]);
+                            argMatrices.push([["__OMITTED__"]]);
                             continue;
                         }
 
@@ -103,7 +103,7 @@ const FunctionDialog = ({
                             argMatrices.push(argRange.values);
                         } else {
                             // Convert scalar value to single-element matrix
-                            argMatrices.push([[value]]);
+                            argMatrices.push([[value || "__OMITTED__"]]);
                         }
                     }
 
@@ -125,8 +125,8 @@ const FunctionDialog = ({
                     // Original formula insertion code
                     const args = (selectedFunction.parameters || []).map(param => {
                         const value = functionArgs[param.name];
-                        if (!value && param.has_default) return '""';
-                        if (!value) return "";
+                        if (!value && param.has_default) return '"__OMITTED__"';
+                        if (!value) return '"__OMITTED__"';
 
                         const isCellRef = /^\$?[A-Za-z]+\$?\d+$/.test(value) ||
                             /^[A-Za-z]+\d+:[A-Za-z]+\d+$/.test(value);
@@ -169,28 +169,15 @@ const FunctionDialog = ({
 
     // For embedded mode, return just the form content without modal wrapper
     const content = (
-        <>
-            <div className="flex items-center gap-2 mb-4">
-                <h2 className="text-xl">Insert function into cell:</h2>
-                <input
-                    id="targetCell"
-                    type="text"
-                    value={selectedCell}
-                    onChange={(e) => setSelectedCell(e.target.value)}
-                    onFocus={handleFocus}
-                    className="px-2 py-1 border rounded w-24"
-                    placeholder="Select cell"
-                />
-            </div>
-
-            <div className="mb-4 p-2 bg-gray-50 rounded">
+        <div className="p-2">
+            <div className=" bg-gray-50 rounded">
                 <h3 className="font-bold">{selectedFunction.signature}</h3>
                 {selectedFunction.description && (
                     <p className="text-sm text-gray-600 mt-1">{selectedFunction.description}</p>
                 )}
             </div>
 
-            <div className="mb-4">
+            <div className="mt-2 mb-2">
                 {(selectedFunction.parameters || []).map((param, index) => (
                     <div key={`${param.name}-${index}`} className="mb-2">
                         <label className="block mb-1">
@@ -205,10 +192,23 @@ const FunctionDialog = ({
                             onFocus={handleFocus}
                             data-param={param.name}
                             className="w-full px-2 py-1 border rounded"
-                            placeholder={`Select cell(s) first then click here`}
+                            placeholder="Enter value, or select range and click here"
                         />
                     </div>
                 ))}
+            </div>
+
+            <div className="flex items-center gap-1">
+                <h2 className="text-lg">Insert function into cell:</h2>
+                <input
+                    id="targetCell"
+                    type="text"
+                    value={selectedCell}
+                    onChange={(e) => setSelectedCell(e.target.value)}
+                    onFocus={handleFocus}
+                    className="px-2 py-1 border rounded w-16"
+                    placeholder="Select cell"
+                />
             </div>
 
             <div className="mb-4">
@@ -219,7 +219,7 @@ const FunctionDialog = ({
                         onChange={(e) => setInsertResult(e.target.checked)}
                         className="rounded"
                     />
-                    <span>Insert result instead of formula</span>
+                    <span>Insert function result only,  do not recalculate.</span>
                 </label>
             </div>
 
@@ -244,7 +244,7 @@ const FunctionDialog = ({
                     OK
                 </button>
             </div>
-        </>
+        </div>
     );
 
     if (embedded) {
