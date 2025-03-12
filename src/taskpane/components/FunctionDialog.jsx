@@ -112,7 +112,15 @@ const FunctionDialog = ({
                         arg1: argMatrices
                     });
 
-                    range.values = result;
+                    // Resize range if result is a 2D matrix
+                    if (Array.isArray(result) && Array.isArray(result[0])) {
+                        const numRows = result.length;
+                        const numCols = result[0].length;
+                        const newRange = range.getResizedRange(numRows - 1, numCols - 1);
+                        newRange.values = result;
+                    } else {
+                        range.values = result;
+                    }
                 } else {
                     // Original formula insertion code
                     const args = (selectedFunction.parameters || []).map(param => {
