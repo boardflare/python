@@ -71,19 +71,11 @@ export async function singleDemo(parsedCode) {
                 codeRange.values = [[parsedCode.excelExample]];
                 await context.sync();
             } catch (exampleError) {
-                // Retry with semicolons instead of commas
-                try {
-                    const modifiedExample = parsedCode.excelExample.replace(/,/g, ';');
-                    const codeRange = sheet.getRangeByIndexes(3, 1, 1, 1);
-                    codeRange.values = [[modifiedExample]];
-                    await context.sync();
-                } catch (retryError) {
-                    // If both attempts fail, write error message to B4
-                    const errorRange = sheet.getRangeByIndexes(3, 1, 1, 1);
-                    errorRange.values = [[`Error in example code: ${exampleError.message}`]];
-                    errorRange.format.fill.color = "#FFE0E0";
-                    console.error("Failed to add example code:", exampleError);
-                }
+                // If example fails, write error message to B4
+                const errorRange = sheet.getRangeByIndexes(3, 1, 1, 1);
+                errorRange.values = [[`Error in example code: ${exampleError.message}`]];
+                errorRange.format.fill.color = "#FFE0E0";
+                console.error("Failed to add example code:", exampleError);
             }
 
             // Set column widths
