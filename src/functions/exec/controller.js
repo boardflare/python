@@ -22,9 +22,11 @@ async function messageWorker(worker, message) {
     });
 }
 
-export async function execPython({ code, arg1 }) {
+export async function execPython({ code, arg1 }, isName = true) {
     try {
-        code = await getFunction(code);
+        if (isName) {
+            code = await getFunction(code);
+        }
         const graphToken = await getStoredToken();
         const { result, stdout } = await messageWorker(execPyWorker, {
             code,

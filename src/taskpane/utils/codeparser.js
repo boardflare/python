@@ -18,7 +18,7 @@ ${astParserCode}
 result = parse_python_code_safe("${encodedCode}")
 `;
 
-        const rawResult = await execPython({ code: parseCode, arg1: null });
+        const rawResult = await execPython({ code: parseCode, arg1: null }, false);
         let pyResult;
         try {
             pyResult = JSON.parse(rawResult);
@@ -59,15 +59,15 @@ result = parse_python_code_safe("${encodedCode}")
 
         const timestamp = new Date().toISOString();
         const uid = "anonymous";
-        const codeRef = `"workbook-settings:${name}"`;
+        const codeRef = `"${name}"`;
         const formula = parameters.length > 0
             ? `=LAMBDA(${parameters.map(p => p.has_default ? `[${p.name}]` : p.name).join(', ')}, ${execEnv}(${codeRef}, ${paramFormula}))`
             : `=LAMBDA(${execEnv}(${codeRef}))`;
 
         // Build the execFormula for direct EXEC usage
         const execFormula = parameters.length > 0
-            ? `=${execEnv}("workbook-settings:${name}", ${parameters.map((_, i) => `arg${i + 1}`).join(', ')})`
-            : `=${execEnv}("workbook-settings:${name}")`;
+            ? `=${execEnv}(${codeRef}, ${parameters.map((_, i) => `arg${i + 1}`).join(', ')})`
+            : `=${execEnv}(${codeRef})`;
 
         // Extract Excel demo
         const excelDemoMatch = rawCode.match(/^# Excel usage:\s*(.+?)$/m);
@@ -80,7 +80,7 @@ result = parse_python_code_safe("${encodedCode}")
         if (excelExample) {
             execExample = excelExample.replace(
                 new RegExp(`=${name.toUpperCase()}\\((.*?)\\)`, 'i'),
-                `=${execEnv}("workbook-settings:${name}",$1)`
+                `=${execEnv}(${codeRef},$1)`
             );
         }
 
