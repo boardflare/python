@@ -1,5 +1,6 @@
 import { execPython } from "../../functions/exec/controller";
 import { pyLogs } from './logs';
+import { getExecEnv } from './constants';
 import astParserCode from './astParser.py';
 
 export async function parsePython(rawCode) {
@@ -41,14 +42,7 @@ result = parse_python_code_safe("${encodedCode}")
         const code = rawCode.trim();
 
         // Determine which EXEC environment to use
-        let execEnv = 'BOARDFLARE.EXEC';
-        if (window.location.hostname === 'localhost') {
-            execEnv = 'LOCAL.EXEC';
-        } else if (window.location.pathname.toLowerCase().includes('preview')) {
-            execEnv = 'PREVIEW.EXEC';
-        } else if (window.location.hostname === 'python-insider.boardflare.com') {
-            execEnv = 'BFINSIDER.EXEC';
-        }
+        const execEnv = getExecEnv();
 
         // Excel named lambda signature with optional parameters
         const signature = parameters.length > 0
@@ -70,11 +64,25 @@ result = parse_python_code_safe("${encodedCode}")
             ? `=LAMBDA(${parameters.map(p => p.has_default ? `[${p.name}]` : p.name).join(', ')}, ${execEnv}(${codeRef}, ${paramFormula}))`
             : `=LAMBDA(${execEnv}(${codeRef}))`;
 
+        // Build the execFormula for direct EXEC usage
+        const execFormula = parameters.length > 0
+            ? `=${execEnv}("workbook-settings:${name}", ${parameters.map((_, i) => `arg${i + 1}`).join(', ')})`
+            : `=${execEnv}("workbook-settings:${name}")`;
+
         // Extract Excel demo
         const excelDemoMatch = rawCode.match(/^# Excel usage:\s*(.+?)$/m);
         const excelExample = excelDemoMatch
             ? excelDemoMatch[1].trim()
             : null;
+
+        // Build execExample by converting any existing example to use EXEC format
+        let execExample = null;
+        if (excelExample) {
+            execExample = excelExample.replace(
+                new RegExp(`=${name.toUpperCase()}\\((.*?)\\)`, 'i'),
+                `=${execEnv}("workbook-settings:${name}",$1)`
+            );
+        }
 
         const result = {
             name,
@@ -82,10 +90,12 @@ result = parse_python_code_safe("${encodedCode}")
             description,
             code,
             resultLine,
-            formula,
+            formula,         // Named lambda formula
+            execFormula,     // Direct EXEC formula
+            execExample,     // Example using EXEC format
             timestamp,
             uid,
-            excelExample,
+            excelExample,    // Original example
             parameters  // Add parameters to the result
         };
 

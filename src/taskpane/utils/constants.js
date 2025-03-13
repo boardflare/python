@@ -29,3 +29,14 @@ export const ConsoleEvents = {
         window.removeEventListener(type, callback);
     }
 };
+
+export function getExecEnv() {
+    if (window.location.hostname === 'localhost') {
+        return 'LOCAL.EXEC';
+    } else if (window.location.pathname.toLowerCase().includes('preview')) {
+        return 'PREVIEW.EXEC';
+    } else if (window.location.hostname === 'python-insider.boardflare.com') {
+        return 'BFINSIDER.EXEC';
+    }
+    return 'BOARDFLARE.EXEC';
+}
