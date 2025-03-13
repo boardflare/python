@@ -15,11 +15,6 @@ export async function updateNameManager(parsedCode) {
                     namedItem.delete();
                     await context.sync();
                 } catch (deleteError) {
-                    await pyLogs({
-                        errorMessage: `[Name Manager] Failed to delete existing name '${excelName}'. Error: ${deleteError.message}`,
-                        code: parsedCode.code,
-                        ref: 'nameManager_deletion'
-                    });
                     throw new Error(`[Name Deletion] Failed to delete existing name '${excelName}'. Error: ${deleteError.message}`);
                 }
             }
@@ -29,7 +24,8 @@ export async function updateNameManager(parsedCode) {
                 newNamedItem = context.workbook.names.add(excelName, parsedCode.formula);
                 await context.sync();
             } catch (createError) {
-                throw new Error(`[Name Creation] Failed to create name '${excelName}'. Formula: ${parsedCode.formula}. Error: ${createError.message}`);
+                const execMapped = CustomFunctions?._association?.mappings?.EXEC?.length?.toString();
+                throw new Error(`[Name Creation] Failed to create name '${excelName}'. Formula: ${parsedCode.formula}. Error: ${createError.message}. Exec mapped: ${execMapped}`);
             }
 
             try {
@@ -39,13 +35,16 @@ export async function updateNameManager(parsedCode) {
                     await context.sync();
                 }
             } catch (descriptionError) {
-                throw new Error(`[Description Setting] Name '${excelName}' was created but failed to set description. Description: ${parsedCode.description}. Error: ${descriptionError.message}`);
+                await pyLogs({
+                    errorMessage: `[Description Setting] Name '${excelName}' was created but failed to set description. Description: ${parsedCode.description}. Error: ${descriptionError.message}`,
+                    code: parsedCode.code,
+                    ref: 'nameManager_description_error'
+                });
             }
 
             await context.sync();
         });
     } catch (error) {
-        console.error("[Name Manager]", error);
         await pyLogs({
             errorMessage: `[Name Manager] ${error.message}`,
             code: parsedCode.code,
