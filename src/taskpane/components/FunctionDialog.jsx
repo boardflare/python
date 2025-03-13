@@ -11,6 +11,10 @@ const FunctionDialog = ({
     const [functionArgs, setFunctionArgs] = React.useState({});
     const [error, setError] = React.useState("");
     const [insertResult, setInsertResult] = React.useState(false);
+    const [activeField, setActiveField] = React.useState(null); // Track which field is waiting for range selection
+
+    // Reference to store the event handler for cleanup
+    const selectionHandlerRef = React.useRef(null);
 
     // Add cell reference validation helper
     const isValidCellReference = (ref) => {
@@ -30,20 +34,109 @@ const FunctionDialog = ({
         }
     };
 
-    // Reset state when dialog opens
+    // Add helper function to check if a field is empty or invalid
+    const isFieldEmpty = (paramName, value) => {
+        if (paramName === 'targetCell') {
+            return !value || !isValidCellReference(value);
+        }
+        return !value;
+    };
+
+    // Define the selection changed handler
+    const handleSelectionChange = React.useCallback(async (event) => {
+        // Get the current activeField value from a ref to avoid stale closure
+        const currentActiveField = activeFieldRef.current;
+        if (!currentActiveField) return;
+
+        try {
+            await Excel.run(async (context) => {
+                const range = context.workbook.getSelectedRange();
+                range.load("address");
+                await context.sync();
+
+                // Extract the cell reference without the sheet name
+                let address = range.address;
+                if (address.includes('!')) {
+                    address = address.split('!')[1];
+                }
+
+                console.log(`Selection changed to: ${address} for field: ${currentActiveField}`);
+
+                if (currentActiveField === 'targetCell') {
+                    handleCellChange(address);
+                } else {
+                    handleArgumentChange(currentActiveField, address);
+                }
+            });
+        } catch (error) {
+            console.error("Selection change error:", error);
+            setError(`Could not get selected range: ${error.message}`);
+        }
+    }, []); // Remove activeField dependency
+
+    // Add a ref to track the active field
+    const activeFieldRef = React.useRef(null);
+
+    // Update the ref whenever activeField changes
+    React.useEffect(() => {
+        activeFieldRef.current = activeField;
+    }, [activeField]);
+
+    // Setup and cleanup for selection changed event
+    React.useEffect(() => {
+        if (isOpen && selectedFunction) {
+            const setupSelectionHandler = async () => {
+                try {
+                    await Excel.run(async (context) => {
+                        const sheet = context.workbook.worksheets.getActiveWorksheet();
+
+                        // Register the selection changed event handler
+                        sheet.onSelectionChanged.add(handleSelectionChange);
+
+                        // Store reference to the current handler for cleanup
+                        selectionHandlerRef.current = handleSelectionChange;
+
+                        await context.sync();
+                        console.log("Selection change handler registered");
+                    });
+                } catch (error) {
+                    console.error("Error setting up selection handler:", error);
+                }
+            };
+
+            setupSelectionHandler();
+
+            return () => {
+                // Remove the selection handler on cleanup
+                const removeSelectionHandler = async () => {
+                    try {
+                        await Excel.run(async (context) => {
+                            const sheet = context.workbook.worksheets.getActiveWorksheet();
+
+                            if (selectionHandlerRef.current) {
+                                sheet.onSelectionChanged.remove(selectionHandlerRef.current);
+                                selectionHandlerRef.current = null;
+                            }
+
+                            await context.sync();
+                            console.log("Selection change handler removed");
+                        });
+                    } catch (error) {
+                        console.error("Error removing selection handler:", error);
+                    }
+                };
+
+                removeSelectionHandler();
+            };
+        }
+    }, [isOpen, selectedFunction, handleSelectionChange]);
+
+    // Reset state and get initial cell when dialog opens
     React.useEffect(() => {
         if (isOpen && selectedFunction) {
             setError("");
             setFunctionArgs({});
-
-            // Get selected cell when dialog opens
-            Excel.run(async (context) => {
-                const range = context.workbook.getSelectedRange();
-                range.load("address");
-                await context.sync();
-                const cellAddress = range.address.split("!")[1]; // Remove sheet name
-                handleCellChange(cellAddress); // Use handleCellChange instead of direct setState
-            });
+            setActiveField(null);
 
             // Initialize arguments with empty strings or default values
             const newArgs = {};
@@ -62,31 +155,16 @@ const FunctionDialog = ({
         setError("");
     };
 
-    const handleFocus = async () => {
-        try {
-            await Excel.run(async (context) => {
-                const range = context.workbook.getSelectedRange();
-                range.load("address");
-                await context.sync();
-                const address = range.address.split("!")[1]; // Remove sheet name
-
-                // Get the focused input's parameter name from the event
-                const activeElement = document.activeElement;
-                if (activeElement.id === 'targetCell') {
-                    handleCellChange(address); // Use handleCellChange instead of direct setState
-                } else {
-                    const paramName = activeElement.getAttribute('data-param');
-                    if (paramName) {
-                        handleArgumentChange(paramName, address);
-                    }
-                }
-            });
-        } catch (error) {
-            setError(`Could not get selected range: ${error.message}`);
-        }
+    // Activate range selection for a specific field
+    const handleFocus = (fieldName) => {
+        setActiveField(fieldName);
+        console.log(`Activated range selection for field: ${fieldName}`);
     };
 
     const handleSubmit = async () => {
+        // Deactivate range selection when submitting
+        setActiveField(null);
+
         if (!selectedFunction) return;
 
         // Add validation for targetCell
@@ -138,7 +216,7 @@ const FunctionDialog = ({
                     }
 
                     const result = await execPython({
-                        code: selectedFunction.code + selectedFunction.resultLine,
+                        code: selectedFunction.name,
                         arg1: argMatrices
                     });
 
@@ -219,10 +297,13 @@ const FunctionDialog = ({
                             type="text"
                             value={functionArgs[param.name] || ''}
                             onChange={(e) => handleArgumentChange(param.name, e.target.value)}
-                            onFocus={handleFocus}
+                            onFocus={() => handleFocus(param.name)}
+                            onClick={() => handleFocus(param.name)}
                             data-param={param.name}
-                            className="w-full px-2 py-1 border rounded"
-                            placeholder="Enter value, or select range and click here"
+                            className={`w-full px-2 py-1 border rounded ${activeField === param.name ? 'border-blue-500 border-2' :
+                                    !param.has_default && isFieldEmpty(param.name, functionArgs[param.name]) ? 'border-red-500' : ''
+                                }`}
+                            placeholder="Click here, then select range in sheet"
                         />
                     </div>
                 ))}
@@ -238,9 +319,12 @@ const FunctionDialog = ({
                     type="text"
                     value={selectedCell}
                     onChange={(e) => handleCellChange(e.target.value)}
-                    onFocus={handleFocus}
-                    className={`w-full px-2 py-1 border rounded ${!selectedCell || !isValidCellReference(selectedCell) ? 'border-red-500' : ''}`}
-                    placeholder="Select cell (required)"
+                    onFocus={() => handleFocus('targetCell')}
+                    onClick={() => handleFocus('targetCell')}
+                    className={`w-full px-2 py-1 border rounded ${activeField === 'targetCell' ? 'border-blue-500 border-2' :
+                            isFieldEmpty('targetCell', selectedCell) ? 'border-red-500' : ''
+                        }`}
+                    placeholder="Click here, then select cell"
                 />
             </div>
 
@@ -264,7 +348,7 @@ const FunctionDialog = ({
 
             <div className="flex justify-end space-x-2">
                 <button
-                    onClick={onClose}
+                    onClick={() => { setActiveField(null); onClose(); }}
                     className="px-4 py-2 border rounded hover:bg-gray-100"
                 >
                     Cancel
