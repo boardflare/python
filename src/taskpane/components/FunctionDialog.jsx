@@ -16,15 +16,18 @@ const FunctionDialog = ({
     // Reference to store the event handler for cleanup
     const selectionHandlerRef = React.useRef(null);
 
-    // Add cell reference validation helper
+    // Strip $ signs and validate cell references
     const isValidCellReference = (ref) => {
-        return /^\$?[A-Za-z]+\$?\d+$/.test(ref);
+        if (!ref) return false;
+        // Remove $ signs before validation
+        const normalizedRef = ref.replace(/\$/g, '');
+        // Match both single cells (A1) and ranges (A1:B2) in one pattern
+        return /^[A-Za-z]+\d+(?::[A-Za-z]+\d+)?$/.test(normalizedRef);
     };
 
-    // Modify setSelectedCell to include validation
+    // Modify setSelectedCell to use updated validation
     const handleCellChange = (value) => {
         setSelectedCell(value);
-        // Clear error if value is valid, otherwise set appropriate error
         if (!value) {
             setError("Target cell is required");
         } else if (!isValidCellReference(value)) {
@@ -200,8 +203,7 @@ const FunctionDialog = ({
                             continue;
                         }
 
-                        const isCellRef = /^\$?[A-Za-z]+\$?\d+$/.test(value) ||
-                            /^[A-Za-z]+\d+:[A-Za-z]+\d+$/.test(value);
+                        const isCellRef = isValidCellReference(value);
 
                         if (isCellRef) {
                             // Get values from the referenced range
@@ -236,8 +238,7 @@ const FunctionDialog = ({
                         if (!value && param.has_default) return '"__OMITTED__"';
                         if (!value) return '"__OMITTED__"';
 
-                        const isCellRef = /^\$?[A-Za-z]+\$?\d+$/.test(value) ||
-                            /^[A-Za-z]+\d+:[A-Za-z]+\d+$/.test(value);
+                        const isCellRef = isValidCellReference(value);
                         return isCellRef ? value : `"${value}"`;
                     }).join(",");
 
@@ -301,7 +302,7 @@ const FunctionDialog = ({
                             onClick={() => handleFocus(param.name)}
                             data-param={param.name}
                             className={`w-full px-2 py-1 border rounded ${activeField === param.name ? 'border-blue-500 border-2' :
-                                    !param.has_default && isFieldEmpty(param.name, functionArgs[param.name]) ? 'border-red-500' : ''
+                                !param.has_default && isFieldEmpty(param.name, functionArgs[param.name]) ? 'border-red-500' : ''
                                 }`}
                             placeholder="Click here, then select range in sheet"
                         />
@@ -322,7 +323,7 @@ const FunctionDialog = ({
                     onFocus={() => handleFocus('targetCell')}
                     onClick={() => handleFocus('targetCell')}
                     className={`w-full px-2 py-1 border rounded ${activeField === 'targetCell' ? 'border-blue-500 border-2' :
-                            isFieldEmpty('targetCell', selectedCell) ? 'border-red-500' : ''
+                        isFieldEmpty('targetCell', selectedCell) ? 'border-red-500' : ''
                         }`}
                     placeholder="Click here, then select cell"
                 />
