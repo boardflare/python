@@ -310,8 +310,8 @@ const FunctionDialog = ({
 
             <div className="mt-2 mb-2">
                 {(selectedFunction.parameters || []).map((param, index) => (
-                    <div key={`${param.name}-${index}`} className="mb-2">
-                        <label className="block mb-1">
+                    <div key={`${param.name}-${index}`} className="mb-2 flex items-center">
+                        <label className="mr-2 whitespace-nowrap">
                             {param.name}
                             {!param.has_default && <span className="text-red-500">*</span>}
                             {param.has_default && <span className="text-gray-500"> (optional)</span>}
@@ -321,20 +321,17 @@ const FunctionDialog = ({
                             value={functionArgs[param.name] || ''}
                             onChange={(e) => handleArgumentChange(param.name, e.target.value)}
                             onFocus={() => handleFocus(param.name)}
-                            onClick={() => handleFocus(param.name)}
                             data-param={param.name}
-                            className={`w-full px-2 py-1 border rounded ${activeField === param.name ? 'border-blue-500 border-2' :
-                                !param.has_default && isFieldEmpty(param.name, functionArgs[param.name]) ? 'border-red-500' : ''
-                                }`}
-                            placeholder="Click here, then select range in sheet"
+                            className={`flex-1 px-2 py-1 border rounded ${activeField === param.name ? 'border-blue-500 border-2' : ''}`}
+                            placeholder="Click, then select range"
                         />
                     </div>
                 ))}
             </div>
 
-            <div className="mb-2">
-                <label className="block mb-1">
-                    Insert function into cell:
+            <div className="mb-2 flex items-center">
+                <label className="mr-2 whitespace-nowrap">
+                    Insert into cell:
                     <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -343,11 +340,8 @@ const FunctionDialog = ({
                     value={selectedCell}
                     onChange={(e) => handleCellChange(e.target.value)}
                     onFocus={() => handleFocus('targetCell')}
-                    onClick={() => handleFocus('targetCell')}
-                    className={`w-full px-2 py-1 border rounded ${activeField === 'targetCell' ? 'border-blue-500 border-2' :
-                        isFieldEmpty('targetCell', selectedCell) ? 'border-red-500' : ''
-                        }`}
-                    placeholder="Click here, then select cell"
+                    className={`flex-1 px-2 py-1 border rounded ${activeField === 'targetCell' ? 'border-blue-500 border-2' : ''}`}
+                    placeholder="Click, then select cell"
                 />
             </div>
 
@@ -359,7 +353,7 @@ const FunctionDialog = ({
                         onChange={(e) => setInsertResult(e.target.checked)}
                         className="rounded"
                     />
-                    <span>Insert function result only,  will not recalculate.</span>
+                    <span>Insert result, not formula.</span>
                 </label>
             </div>
 
@@ -371,7 +365,7 @@ const FunctionDialog = ({
                         onChange={(e) => setSaveArgs(e.target.checked)}
                         className="rounded"
                     />
-                    <span>Save function arguments for next time</span>
+                    <span>Save function arguments.</span>
                 </label>
             </div>
 
