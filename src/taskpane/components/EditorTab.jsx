@@ -99,20 +99,20 @@ const EditorTab = ({
         try {
             const code = editorRef.current.getValue();
             const parsedFunction = await parsePython(code);
+            const updatedFunction = {
+                ...selectedFunction,
+                ...parsedFunction
+            };
 
-            if (selectedFunction.prompt) {
-                parsedFunction.prompt = selectedFunction.prompt;
-            }
-
-            await saveWorkbookOnly(parsedFunction);  // Use saveWorkbookOnly instead
-            showNotification(`${parsedFunction.signature} saved!`, "success");
+            await saveWorkbookOnly(updatedFunction);
+            showNotification(`${updatedFunction.signature} saved!`, "success");
             await loadFunctions();
             setSelectedFunction({
-                ...parsedFunction,
+                ...updatedFunction,
                 source: 'workbook'
             });
-            setUnsavedCode(null); // Clear unsaved code after successful save
-            setIsSaveOpen(true); // New: open Save modal after save completes
+            setUnsavedCode(null);
+            setIsSaveOpen(true);
         } catch (err) {
             if (!(err instanceof TokenExpiredError)) {
                 showNotification(err.message, "error");
