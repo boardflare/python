@@ -1,5 +1,6 @@
 import * as React from "react";
 import { execPython } from "../../functions/exec/controller";
+import { saveFunctionToSettings, getFunctionFromSettings } from "../utils/workbookSettings";
 
 const FunctionDialog = ({
     isOpen,
@@ -12,6 +13,7 @@ const FunctionDialog = ({
     const [error, setError] = React.useState("");
     const [insertResult, setInsertResult] = React.useState(false);
     const [activeField, setActiveField] = React.useState(null); // Track which field is waiting for range selection
+    const [saveArgs, setSaveArgs] = React.useState(false);
 
     // Reference to store the event handler for cleanup
     const selectionHandlerRef = React.useRef(null);
@@ -138,15 +140,28 @@ const FunctionDialog = ({
     React.useEffect(() => {
         if (isOpen && selectedFunction) {
             setError("");
-            setFunctionArgs({});
             setActiveField(null);
 
-            // Initialize arguments with empty strings or default values
-            const newArgs = {};
-            selectedFunction.parameters?.forEach(param => {
-                newArgs[param.name] = "";
-            });
-            setFunctionArgs(newArgs);
+            // Try to load saved args
+            const loadSavedArgs = async () => {
+                try {
+                    const savedFunction = await getFunctionFromSettings(selectedFunction.name);
+                    if (savedFunction?.args) {
+                        setFunctionArgs(savedFunction.args);
+                    } else {
+                        // Initialize arguments with empty strings or default values
+                        const newArgs = {};
+                        selectedFunction.parameters?.forEach(param => {
+                            newArgs[param.name] = "";
+                        });
+                        setFunctionArgs(newArgs);
+                    }
+                } catch (error) {
+                    console.error("Error loading saved args:", error);
+                }
+            };
+
+            loadSavedArgs();
         }
     }, [isOpen, selectedFunction]);
 
@@ -248,6 +263,13 @@ const FunctionDialog = ({
                 await context.sync();
             });
 
+            if (saveArgs) {
+                await saveFunctionToSettings({
+                    ...selectedFunction,
+                    args: functionArgs
+                });
+            }
+
             onClose();
         } catch (error) {
             setError(error.message);
@@ -329,7 +351,7 @@ const FunctionDialog = ({
                 />
             </div>
 
-            <div className="mb-4">
+            <div className="mb-1">
                 <label className="flex items-center space-x-2">
                     <input
                         type="checkbox"
@@ -338,6 +360,18 @@ const FunctionDialog = ({
                         className="rounded"
                     />
                     <span>Insert function result only,  will not recalculate.</span>
+                </label>
+            </div>
+
+            <div className="mb-4">
+                <label className="flex items-center space-x-2">
+                    <input
+                        type="checkbox"
+                        checked={saveArgs}
+                        onChange={(e) => setSaveArgs(e.target.checked)}
+                        className="rounded"
+                    />
+                    <span>Save function arguments for next time</span>
                 </label>
             </div>
 
