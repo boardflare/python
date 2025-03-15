@@ -177,15 +177,13 @@ if (!window.__flushLoopStarted) {
 
 export async function pyLogs(data) {
     try {
-        // Skip logging of codeparser python executions.
-        if (data.code && data.code.includes("parse_python_code(code):")) {
-            return true;
-        }
+
+        const execMapped = CustomFunctions?._association?.mappings?.EXEC?.length?.toString();
 
         if (!browserData || !uid) await initialize();
         const logEntity = {
             Timestamp: new Date().toISOString(),
-            Data: data
+            Data: { ...data, execMapped },
         };
         await saveLogToIndexedDB(logEntity);
         return true;
