@@ -14,6 +14,7 @@ const FunctionDialog = ({
     const [insertResult, setInsertResult] = React.useState(false);
     const [activeField, setActiveField] = React.useState(null); // Track which field is waiting for range selection
     const [saveArgs, setSaveArgs] = React.useState(false);
+    const [rangeValues, setRangeValues] = React.useState({});
 
     // Reference to store the event handler for cleanup
     const selectionHandlerRef = React.useRef(null);
@@ -165,12 +166,45 @@ const FunctionDialog = ({
         }
     }, [isOpen, selectedFunction]);
 
-    const handleArgumentChange = (paramName, value) => {
+    // Update fetchRangeValues to return the values
+    const fetchRangeValues = async (range) => {
+        try {
+            const values = await Excel.run(async (context) => {
+                const rangeObj = context.workbook.worksheets.getActiveWorksheet().getRange(range);
+                rangeObj.load("values");
+                await context.sync();
+                return rangeObj.values;
+            });
+            return values;
+        } catch (error) {
+            console.error("Error fetching range values:", error);
+            return null;
+        }
+    };
+
+    const handleArgumentChange = async (paramName, value) => {
         setFunctionArgs(prev => ({
             ...prev,
             [paramName]: value
         }));
         setError("");
+
+        // If value is a valid cell reference, fetch and store its values
+        if (isValidCellReference(value)) {
+            const values = await fetchRangeValues(value);
+            if (values) {
+                setRangeValues(prev => ({
+                    ...prev,
+                    [paramName]: values
+                }));
+            }
+        } else {
+            setRangeValues(prev => {
+                const newValues = { ...prev };
+                delete newValues[paramName];
+                return newValues;
+            });
+        }
     };
 
     // Activate range selection for a specific field
@@ -180,19 +214,11 @@ const FunctionDialog = ({
     };
 
     const handleSubmit = async () => {
-        // Deactivate range selection when submitting
         setActiveField(null);
-
         if (!selectedFunction) return;
 
-        // Add validation for targetCell
-        if (!selectedCell) {
-            setError("Target cell is required");
-            return;
-        }
-
-        if (!isValidCellReference(selectedCell)) {
-            setError("Invalid cell reference format");
+        if (!selectedCell || !isValidCellReference(selectedCell)) {
+            setError("Invalid target cell reference");
             return;
         }
 
@@ -205,39 +231,29 @@ const FunctionDialog = ({
                 return;
             }
 
+            // Prepare arguments as matrices
+            const argMatrices = await Promise.all((selectedFunction.parameters || []).map(async param => {
+                const value = functionArgs[param.name];
+                if (!value && param.has_default) {
+                    return [["__OMITTED__"]];
+                }
+
+                if (isValidCellReference(value)) {
+                    const values = await fetchRangeValues(value);
+                    return values || [[value || "__OMITTED__"]];
+                }
+                return [[value || "__OMITTED__"]];
+            }));
+
             await Excel.run(async (context) => {
                 const range = context.workbook.worksheets.getActiveWorksheet().getRange(selectedCell);
 
                 if (insertResult) {
-                    // Prepare arguments as matrices
-                    const argMatrices = [];
-                    for (const param of selectedFunction.parameters || []) {
-                        const value = functionArgs[param.name];
-                        if (!value && param.has_default) {
-                            argMatrices.push([["__OMITTED__"]]);
-                            continue;
-                        }
-
-                        const isCellRef = isValidCellReference(value);
-
-                        if (isCellRef) {
-                            // Get values from the referenced range
-                            const argRange = context.workbook.worksheets.getActiveWorksheet().getRange(value);
-                            argRange.load("values");
-                            await context.sync();
-                            argMatrices.push(argRange.values);
-                        } else {
-                            // Convert scalar value to single-element matrix
-                            argMatrices.push([[value || "__OMITTED__"]]);
-                        }
-                    }
-
                     const result = await execPython({
                         code: selectedFunction.name,
                         arg1: argMatrices
                     });
 
-                    // Resize range if result is a 2D matrix
                     if (Array.isArray(result) && Array.isArray(result[0])) {
                         const numRows = result.length;
                         const numCols = result[0].length;
@@ -247,18 +263,14 @@ const FunctionDialog = ({
                         range.values = result;
                     }
                 } else {
-                    // Original formula insertion code
-                    const args = (selectedFunction.parameters || []).map(param => {
+                    const args = (selectedFunction.parameters || []).map((param, index) => {
                         const value = functionArgs[param.name];
                         if (!value && param.has_default) return '"__OMITTED__"';
                         if (!value) return '"__OMITTED__"';
-
-                        const isCellRef = isValidCellReference(value);
-                        return isCellRef ? value : `"${value}"`;
+                        return isValidCellReference(value) ? value : `"${value}"`;
                     }).join(",");
 
-                    const formula = `=${selectedFunction.name.toUpperCase()}(${args})`;
-                    range.formulas = [[formula]];
+                    range.formulas = [[`=${selectedFunction.name.toUpperCase()}(${args})`]];
                 }
                 await context.sync();
             });
@@ -310,21 +322,43 @@ const FunctionDialog = ({
 
             <div className="mt-2 mb-2">
                 {(selectedFunction.parameters || []).map((param, index) => (
-                    <div key={`${param.name}-${index}`} className="mb-2 flex items-center">
-                        <label className="mr-2 whitespace-nowrap">
-                            {param.name}
-                            {!param.has_default && <span className="text-red-500">*</span>}
-                            {param.has_default && <span className="text-gray-500"> (optional)</span>}
-                        </label>
-                        <input
-                            type="text"
-                            value={functionArgs[param.name] || ''}
-                            onChange={(e) => handleArgumentChange(param.name, e.target.value)}
-                            onFocus={() => handleFocus(param.name)}
-                            data-param={param.name}
-                            className={`flex-1 px-2 py-1 border rounded ${activeField === param.name ? 'border-blue-500 border-2' : ''}`}
-                            placeholder="Click, then select range"
-                        />
+                    <div key={`${param.name}-${index}`} className="mb-2">
+                        <div className="flex items-center">
+                            <label className="mr-2 whitespace-nowrap">
+                                {param.name}
+                                {!param.has_default && <span className="text-red-500">*</span>}
+                                {param.has_default && <span className="text-gray-500"> (optional)</span>}
+                            </label>
+                            <input
+                                type="text"
+                                value={functionArgs[param.name] || ''}
+                                onChange={(e) => handleArgumentChange(param.name, e.target.value)}
+                                onFocus={() => handleFocus(param.name)}
+                                data-param={param.name}
+                                className={`flex-1 px-2 py-1 border rounded ${activeField === param.name ? 'border-blue-500 border-2' : ''}`}
+                                placeholder="Click, then select range"
+                            />
+                        </div>
+                        {rangeValues[param.name] && (
+                            <details className="mt-1 ml-4 text-sm">
+                                <summary className="cursor-pointer text-blue-600">Show range values</summary>
+                                <div className="mt-1 p-2 bg-gray-50 rounded overflow-auto max-h-32">
+                                    <table className="border-collapse">
+                                        <tbody>
+                                            {rangeValues[param.name].map((row, i) => (
+                                                <tr key={i}>
+                                                    {row.map((cell, j) => (
+                                                        <td key={j} className="border border-gray-300 p-1">
+                                                            {cell}
+                                                        </td>
+                                                    ))}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+                        )}
                     </div>
                 ))}
             </div>
