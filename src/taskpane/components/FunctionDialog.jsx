@@ -327,7 +327,6 @@ const FunctionDialog = ({
                             <label className="mr-2 whitespace-nowrap">
                                 {param.name}
                                 {!param.has_default && <span className="text-red-500">*</span>}
-                                {param.has_default && <span className="text-gray-500"> (optional)</span>}
                             </label>
                             <input
                                 type="text"
@@ -364,7 +363,7 @@ const FunctionDialog = ({
             </div>
 
             <div className="mb-2 flex items-center">
-                <label className="mr-2 whitespace-nowrap">
+                <label className="mr-2 whitespace-nowrap font-semibold">
                     Insert into cell:
                     <span className="text-red-500">*</span>
                 </label>
@@ -387,7 +386,7 @@ const FunctionDialog = ({
                         onChange={(e) => setInsertResult(e.target.checked)}
                         className="rounded"
                     />
-                    <span>Insert result, not formula.</span>
+                    <span>Insert result, not formula</span>
                 </label>
             </div>
 
@@ -399,7 +398,7 @@ const FunctionDialog = ({
                         onChange={(e) => setSaveArgs(e.target.checked)}
                         className="rounded"
                     />
-                    <span>Save function arguments.</span>
+                    <span>Save function arguments</span>
                 </label>
             </div>
 
