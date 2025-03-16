@@ -1,6 +1,7 @@
 import * as React from "react";
 import { MonacoEditor } from "./MonacoEditor";
 import LLM from "./LLM";
+import FunctionDialog from "./FunctionDialog";
 import { DEFAULT_CODE } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
 import { EventTypes } from "../utils/constants";
@@ -18,7 +19,7 @@ const EditorTab = ({
     functionsCache,
     workbookFunctions,
     onedriveFunctions,
-    loadFunctions,  // Changed from onFunctionSaved
+    loadFunctions,
     unsavedCode,
     setUnsavedCode
 }) => {
@@ -26,6 +27,8 @@ const EditorTab = ({
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const [showConfirmModal, setShowConfirmModal] = React.useState(false);
     const [pendingFunction, setPendingFunction] = React.useState(null);
+    const [showFunctionDialog, setShowFunctionDialog] = React.useState(false);
+    const [savedFunction, setSavedFunction] = React.useState(null);
     const notificationTimeoutRef = React.useRef();
     const editorRef = React.useRef(null);
 
@@ -36,7 +39,8 @@ const EditorTab = ({
         setNotification({ message, type });
         notificationTimeoutRef.current = setTimeout(() => {
             setNotification("");
-        }, 10000);
+            setSavedFunction(null); // This removes the success banner
+        }, 5000);
     };
 
     React.useEffect(() => {
@@ -96,19 +100,21 @@ const EditorTab = ({
         try {
             const code = editorRef.current.getValue();
             const parsedFunction = await parsePython(code);
+            const updatedFunction = {
+                ...selectedFunction,
+                ...parsedFunction
+            };
 
-            if (selectedFunction.prompt) {
-                parsedFunction.prompt = selectedFunction.prompt;
-            }
-
-            await saveWorkbookOnly(parsedFunction);  // Use saveWorkbookOnly instead
-            showNotification(`${parsedFunction.signature} saved!`, "success");
+            await saveWorkbookOnly(updatedFunction);
             await loadFunctions();
             setSelectedFunction({
-                ...parsedFunction,
+                ...updatedFunction,
                 source: 'workbook'
             });
-            setUnsavedCode(null); // Clear unsaved code after successful save
+            setUnsavedCode(null);
+            // Show notification and set saved function in one place
+            setSavedFunction(updatedFunction);
+            showNotification(`${updatedFunction.signature} saved!`, "success");
         } catch (err) {
             if (!(err instanceof TokenExpiredError)) {
                 showNotification(err.message, "error");
@@ -169,16 +175,26 @@ const EditorTab = ({
                     value={selectedFunction?.code || DEFAULT_CODE}
                     onMount={handleEditorDidMount}
                     onChange={(value) => {
-                        setUnsavedCode(value); // Only track unsaved changes, don't update selectedFunction
+                        setUnsavedCode(value);
                     }}
                 />
             </div>
+
             {notification && (
-                <div className={`mt-2 p-2 rounded ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"}`}>
-                    {notification.message}
+                <div className={`mt-2 p-4 rounded ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"} flex justify-between items-center`}>
+                    <span>{notification.message}</span>
+                    {notification.type === "success" && savedFunction && (
+                        <button
+                            onClick={() => setShowFunctionDialog(true)}
+                            className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-700"
+                        >
+                            Run Function
+                        </button>
+                    )}
                 </div>
             )}
-            {selectedFunction.name === "" && (
+
+            {/* {selectedFunction.name === "" && (
                 <div className="mt-2 p-2 bg-yellow-100 rounded">
                     <h2 className="font-semibold"> ⬅️ Drag task pane open for more room.</h2>
                     <ul className="list-disc pl-5">
@@ -187,7 +203,8 @@ const EditorTab = ({
                         <li>See <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a> for details.</li>
                     </ul>
                 </div>
-            )}
+            )} */}
+
             <div className="flex justify-between items-center py-2">
                 <select
                     value={selectedFunction ? selectedFunction.name : ""}
@@ -209,9 +226,9 @@ const EditorTab = ({
                         </option>
                     ))}
                 </select>
-                <div className="space-x-2">
-                    <button onClick={handleTest} className="px-2 py-1 bg-green-500 text-white rounded">Test</button>
+                <div className="space-x-1">
                     <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
+                    <button onClick={handleTest} className="px-2 py-1 bg-gray-500 text-white rounded">Test</button>
                     <button onClick={() => setIsLLMOpen(true)} className="px-2 py-1 bg-purple-500 text-white rounded">AI✨</button>
                 </div>
             </div>
@@ -246,6 +263,16 @@ const EditorTab = ({
                 onSuccess={handleLLMSuccess}
                 prompt={selectedFunction.prompt}
                 loadFunctions={loadFunctions} // NEW: pass loadFunctions for refreshing functions list
+            />
+
+            <FunctionDialog
+                isOpen={showFunctionDialog}
+                onClose={() => {
+                    setShowFunctionDialog(false);
+                    setSavedFunction(null); // Clear the saved function when dialog is closed
+                }}
+                selectedFunction={savedFunction || selectedFunction}
+                loadFunctions={loadFunctions}
             />
         </div>
     );

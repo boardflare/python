@@ -5,15 +5,11 @@ export const DISPLAY_CODE = `def hello(name):
 export const DEFAULT_CODE = `def hello(name):
     """ Returns a greeting. """
     return f"Hello {name}!"
-    
-# Arguments to test the function.
-test_cases = [
-    ["Nancy"],
-    ["Ming"]
-]
-    
-# Excel usage: =HELLO("Nancy")
-`;
+
+# ⬅️ Drag task pane open for more room.
+# ⚠️ Code MUST BE A FUNCTION!
+# Range args are converted to 2D lists.
+# Return value must be a 2D list or scalar.`;
 
 export const EventTypes = {
     LOG: 'console:log',
@@ -34,3 +30,14 @@ export const ConsoleEvents = {
         window.removeEventListener(type, callback);
     }
 };
+
+export function getExecEnv() {
+    if (window.location.hostname === 'localhost') {
+        return 'LOCAL.EXEC';
+    } else if (window.location.pathname.toLowerCase().includes('preview')) {
+        return 'PREVIEW.EXEC';
+    } else if (window.location.hostname === 'python-insider.boardflare.com') {
+        return 'BFINSIDER.EXEC';
+    }
+    return 'BOARDFLARE.EXEC';
+}

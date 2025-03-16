@@ -6,6 +6,7 @@ import Notebooks from "./Notebooks";
 import OneDrive from "./OneDrive";
 import { saveToOneDriveOnly } from "../utils/save";
 import { pyLogs } from "../utils/logs";  // Add this import
+import FunctionDialog from "./FunctionDialog";  // Add this import
 
 const FunctionsTab = ({
     onEdit,
@@ -21,6 +22,8 @@ const FunctionsTab = ({
 }) => {
     const [deleteConfirm, setDeleteConfirm] = React.useState(null);
     const [localError, setError] = React.useState(error || null);
+    const [dialogOpen, setDialogOpen] = React.useState(false);
+    const [selectedFunction, setSelectedFunction] = React.useState(null);
 
     // Use effect to sync error prop with local state
     React.useEffect(() => {
@@ -84,6 +87,20 @@ const FunctionsTab = ({
                             </td>
                             <td className="py-0 px-2 border-b w-fit">
                                 <div className="flex gap-2 justify-end">
+                                    <button
+                                        className="text-blue-500 hover:text-blue-700"
+                                        onClick={() => {
+                                            const cacheKey = `workbook-${func.name}`;
+                                            const cachedFunc = functionsCache.current.get(cacheKey);
+                                            if (cachedFunc) {
+                                                setSelectedFunction(cachedFunc);
+                                                setDialogOpen(true);
+                                            }
+                                        }}
+                                        title="Run function"
+                                    >
+                                        ▶️
+                                    </button>
                                     {folderUrl && (
                                         <button
                                             className="text-blue-500 hover:text-blue-700"
@@ -192,6 +209,15 @@ const FunctionsTab = ({
                     </div>
                 </div>
             )}
+
+            <FunctionDialog
+                isOpen={dialogOpen}
+                onClose={() => {
+                    setDialogOpen(false);
+                    setSelectedFunction(null);
+                }}
+                selectedFunction={selectedFunction}
+            />
         </div>
     );
 };

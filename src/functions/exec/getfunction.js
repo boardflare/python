@@ -17,22 +17,21 @@ async function getFunctionFromSettings(name) {
     }
 }
 
-export async function getFunction(func) {
-    if (!func.startsWith('workbook-settings:')) {
-        return func;
-    }
+export async function getFunction(code) {
 
-    const name = func.replace('workbook-settings:', '').trim();
+    const name = code.replace('workbook-settings:', '').trim();
+
     if (!name) {
-        const error = new Error('Function name not found in settings reference');
-        pyLogs({ errorMessage: '[GetFunction] Function name not found in settings reference', ref: 'get_function_name_error', code: func });
+        const error = new Error('Function name not defined');
+        pyLogs({ errorMessage: '[GetFunction] Function name not defined', ref: 'get_function_name_error', code: code });
         throw error;
     }
 
     const functionData = await getFunctionFromSettings(name);
+
     if (!functionData) {
         const error = new Error(`Function "${name}" not found in workbook settings.  Try saving it again.`);
-        pyLogs({ errorMessage: `[GetFunction] Function "${name}" not found in workbook settings`, ref: 'get_function_data_error', code: func });
+        pyLogs({ errorMessage: `[GetFunction] Function "${name}" not found in workbook settings`, ref: 'get_function_data_error', code: code });
         throw error;
     }
 

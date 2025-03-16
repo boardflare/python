@@ -1,9 +1,50 @@
 import { execPython } from "../../functions/exec/controller";
 import { pyLogs } from './logs';
+import { getExecEnv } from './constants';
 import astParserCode from './astParser.py';
+
+async function testSeparator(context) {
+    const separatorTestName = "SEPARATORTEST";
+    let separator = null;
+    let namedItem;
+
+    try {
+        const worksheet = context.workbook.worksheets.getActiveWorksheet();
+        namedItem = worksheet.names.getItemOrNullObject(separatorTestName);
+        await context.sync();
+
+        if (!namedItem.isNullObject) {
+            namedItem.delete();
+            await context.sync();
+        }
+
+        try {
+            const refersToFormula = "=SUM(1,2)";
+            namedItem = worksheet.names.add(separatorTestName, refersToFormula);
+            await context.sync();
+            separator = ",";
+        } catch {
+            separator = ";";
+        } finally {
+            if (namedItem) {
+                namedItem.delete();
+                await context.sync();
+            }
+        }
+        return separator;
+    } catch (error) {
+        console.error("[Separator Logger]", error);
+        return ","; // Default to comma if test fails
+    }
+}
 
 export async function parsePython(rawCode) {
     try {
+        // Test for correct separator at the start
+        const separator = await Excel.run(async context => {
+            return await testSeparator(context);
+        });
+
         // Safely encode the Python code to avoid issues with triple quotes
         const encodedCode = btoa(
             String.fromCharCode.apply(null, new TextEncoder().encode(rawCode))
@@ -17,8 +58,13 @@ ${astParserCode}
 result = parse_python_code_safe("${encodedCode}")
 `;
 
-        const rawResult = await execPython({ code: parseCode, arg1: null });
-        const pyResult = JSON.parse(rawResult);
+        const rawResult = await execPython({ code: parseCode, arg1: null }, false);
+        let pyResult;
+        try {
+            pyResult = JSON.parse(rawResult);
+        } catch (e) {
+            throw new Error(`Failed to parse JSON: ${e.message}, rawResult: ${rawResult}`);
+        }
 
         if (!pyResult || pyResult.error) {
             throw new Error(pyResult.error || "Failed to parse Python code");
@@ -36,40 +82,47 @@ result = parse_python_code_safe("${encodedCode}")
         const code = rawCode.trim();
 
         // Determine which EXEC environment to use
-        let execEnv = 'BOARDFLARE.EXEC';
-        if (window.location.hostname === 'localhost') {
-            execEnv = 'LOCAL.EXEC';
-        } else if (window.location.pathname.toLowerCase().includes('preview')) {
-            execEnv = 'PREVIEW.EXEC';
-        } else if (window.location.hostname === 'python-insider.boardflare.com') {
-            execEnv = 'BFINSIDER.EXEC';
-        }
+        const execEnv = getExecEnv();
 
         // Excel named lambda signature with optional parameters
         const signature = parameters.length > 0
             ? `${name.toUpperCase()}(${parameters.map(p => p.has_default ? `[${p.name}]` : p.name).join(', ')})`
             : `${name.toUpperCase()}()`;
 
-        // Excel named lambda formula with ISOMITTED handling
+        // Excel named lambda formula with ISOMITTED handling - now using detected separator
         const paramFormula = parameters.map((param, index) => {
             if (param.has_default) {
-                return `IF(ISOMITTED(${param.name}), "__OMITTED__", ${param.name})`
+                return `IF(ISOMITTED(${param.name})${separator} "__OMITTED__"${separator} ${param.name})`
             }
             return param.name;
-        }).join(', ');
+        }).join(separator);
 
         const timestamp = new Date().toISOString();
         const uid = "anonymous";
-        const codeRef = `"workbook-settings:${name}"`;
+        const codeRef = `"${name}"`;
         const formula = parameters.length > 0
-            ? `=LAMBDA(${parameters.map(p => p.has_default ? `[${p.name}]` : p.name).join(', ')}, ${execEnv}(${codeRef}, ${paramFormula}))`
+            ? `=LAMBDA(${parameters.map(p => p.has_default ? `[${p.name}]` : p.name).join(separator)} ${separator} ${execEnv}(${codeRef}${separator} ${paramFormula}))`
             : `=LAMBDA(${execEnv}(${codeRef}))`;
+
+        // Build the execFormula for direct EXEC usage
+        const execFormula = parameters.length > 0
+            ? `=${execEnv}(${codeRef}${separator} ${parameters.map((_, i) => `arg${i + 1}`).join(separator)})`
+            : `=${execEnv}(${codeRef})`;
 
         // Extract Excel demo
         const excelDemoMatch = rawCode.match(/^# Excel usage:\s*(.+?)$/m);
         const excelExample = excelDemoMatch
-            ? excelDemoMatch[1].trim()
+            ? excelDemoMatch[1].trim().replace(/,/g, separator)
             : null;
+
+        // Build execExample by converting any existing example to use EXEC format
+        let execExample = null;
+        if (excelExample) {
+            execExample = excelExample.replace(
+                new RegExp(`=${name.toUpperCase()}\\((.*?)\\)`, 'i'),
+                (match, args) => `=${execEnv}(${codeRef}${separator}${args})`
+            );
+        }
 
         const result = {
             name,
@@ -77,10 +130,12 @@ result = parse_python_code_safe("${encodedCode}")
             description,
             code,
             resultLine,
-            formula,
+            formula,         // Named lambda formula
+            execFormula,     // Direct EXEC formula
+            execExample,     // Example using EXEC format
             timestamp,
             uid,
-            excelExample,
+            excelExample,    // Original example
             parameters  // Add parameters to the result
         };
 
