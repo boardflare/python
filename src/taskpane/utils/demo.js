@@ -80,7 +80,6 @@ export async function singleDemo(parsedCode) {
 
             // Set column widths
             sheet.getRange("A:A").format.columnWidth = 70;
-            // sheet.getRange("B:B").format.columnWidth = 300;
 
             // Activate the sheet
             sheet.activate();

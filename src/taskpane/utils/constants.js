@@ -6,9 +6,10 @@ export const DEFAULT_CODE = `def hello(name):
     """ Returns a greeting. """
     return f"Hello {name}!"
 
-# code must be a function.
-# args must be 2D list or scalar.
-# return must be 2D list or scalar.`;
+# ⬅️ Drag task pane open for more room.
+# ⚠️ Code MUST BE A FUNCTION!
+# Ranges are converted 2D lists.
+# Return must be 2D list or scalar.`;
 
 export const EventTypes = {
     LOG: 'console:log',

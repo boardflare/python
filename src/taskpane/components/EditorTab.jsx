@@ -194,7 +194,7 @@ const EditorTab = ({
                 </div>
             )}
 
-            {selectedFunction.name === "" && (
+            {/* {selectedFunction.name === "" && (
                 <div className="mt-2 p-2 bg-yellow-100 rounded">
                     <h2 className="font-semibold"> ⬅️ Drag task pane open for more room.</h2>
                     <ul className="list-disc pl-5">
@@ -203,7 +203,8 @@ const EditorTab = ({
                         <li>See <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a> for details.</li>
                     </ul>
                 </div>
-            )}
+            )} */}
+
             <div className="flex justify-between items-center py-2">
                 <select
                     value={selectedFunction ? selectedFunction.name : ""}

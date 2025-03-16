@@ -386,7 +386,7 @@ const FunctionDialog = ({
                 </label>
             </div>
 
-            <div className="mb-4">
+            {/* <div className="mb-4">
                 <label className="flex items-center space-x-2">
                     <input
                         type="checkbox"
@@ -396,7 +396,7 @@ const FunctionDialog = ({
                     />
                     <span>Save function arguments</span>
                 </label>
-            </div>
+            </div> */}
 
             {error && (
                 <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
@@ -404,20 +404,25 @@ const FunctionDialog = ({
                 </div>
             )}
 
-            <div className="flex justify-end space-x-2">
-                <button
-                    onClick={() => { setActiveField(null); onClose(); }}
-                    className="px-4 py-2 border rounded hover:bg-gray-100"
-                >
-                    Cancel
-                </button>
-                <button
-                    onClick={handleSubmit}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    disabled={!selectedCell}
-                >
-                    OK
-                </button>
+            <div className="flex justify-between items-center mb-1">
+                <div>
+                    Only ranges in the active worksheet are currently supported.
+                </div>
+                <div className="flex space-x-2">
+                    <button
+                        onClick={() => { setActiveField(null); onClose(); }}
+                        className="px-4 py-2 border rounded hover:bg-gray-100"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleSubmit}
+                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        disabled={!selectedCell}
+                    >
+                        OK
+                    </button>
+                </div>
             </div>
         </div>
     );

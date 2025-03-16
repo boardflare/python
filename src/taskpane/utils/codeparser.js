@@ -112,7 +112,7 @@ result = parse_python_code_safe("${encodedCode}")
         // Extract Excel demo
         const excelDemoMatch = rawCode.match(/^# Excel usage:\s*(.+?)$/m);
         const excelExample = excelDemoMatch
-            ? excelDemoMatch[1].trim()
+            ? excelDemoMatch[1].trim().replace(/,/g, separator)
             : null;
 
         // Build execExample by converting any existing example to use EXEC format
@@ -120,7 +120,7 @@ result = parse_python_code_safe("${encodedCode}")
         if (excelExample) {
             execExample = excelExample.replace(
                 new RegExp(`=${name.toUpperCase()}\\((.*?)\\)`, 'i'),
-                `=${execEnv}(${codeRef},$1)`
+                (match, args) => `=${execEnv}(${codeRef}${separator}${args})`
             );
         }
 
