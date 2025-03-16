@@ -9,7 +9,6 @@ import { runTests } from "../utils/testRunner";
 import { TokenExpiredError } from "../utils/drive";
 import { saveWorkbookOnly } from "../utils/save";  // Change import
 import { pyLogs } from "../utils/logs";
-import Save from "./Save";
 
 const EditorTab = ({
     selectedFunction,
@@ -28,7 +27,8 @@ const EditorTab = ({
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const [showConfirmModal, setShowConfirmModal] = React.useState(false);
     const [pendingFunction, setPendingFunction] = React.useState(null);
-    const [isSaveOpen, setIsSaveOpen] = React.useState(false);
+    const [showFunctionDialog, setShowFunctionDialog] = React.useState(false);
+    const [savedFunction, setSavedFunction] = React.useState(null);
     const notificationTimeoutRef = React.useRef();
     const editorRef = React.useRef(null);
 
@@ -112,22 +112,11 @@ const EditorTab = ({
                 source: 'workbook'
             });
             setUnsavedCode(null);
-            setIsSaveOpen(true);
+            setSavedFunction(updatedFunction); // Store the saved function to show the run button
         } catch (err) {
             if (!(err instanceof TokenExpiredError)) {
                 showNotification(err.message, "error");
             }
-        }
-    };
-
-    const handleRun = async () => {
-        const currentCode = editorRef.current.getValue();
-        setUnsavedCode(currentCode);
-        try {
-            setIsSaveOpen(true); // Open save dialog instead
-        } catch (err) {
-            showNotification(err.message, "error");
-            window.dispatchEvent(new CustomEvent(EventTypes.ERROR, { detail: err.message }));
         }
     };
 
@@ -188,6 +177,20 @@ const EditorTab = ({
                     }}
                 />
             </div>
+
+            {/* Success banner with Run button */}
+            {savedFunction && (
+                <div className="mt-2 p-2 bg-green-50 text-green-900 rounded flex justify-between items-center">
+                    <span>Function saved successfully!</span>
+                    <button
+                        onClick={() => setShowFunctionDialog(true)}
+                        className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                    >
+                        Run your saved function
+                    </button>
+                </div>
+            )}
+
             {notification && (
                 <div className={`mt-2 p-2 rounded ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"}`}>
                     {notification.message}
@@ -264,10 +267,13 @@ const EditorTab = ({
                 loadFunctions={loadFunctions} // NEW: pass loadFunctions for refreshing functions list
             />
 
-            <Save
-                isOpen={isSaveOpen}
-                selectedFunction={selectedFunction}
-                onDismiss={() => setIsSaveOpen(false)}
+            <FunctionDialog
+                isOpen={showFunctionDialog}
+                onClose={() => {
+                    setShowFunctionDialog(false);
+                    setSavedFunction(null); // Clear the saved function when dialog is closed
+                }}
+                selectedFunction={savedFunction || selectedFunction}
             />
         </div>
     );

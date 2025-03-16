@@ -53,7 +53,7 @@ else:
 
     let pyResult;
     try {
-        pyResult = await execPython({ code: testCode, arg1: null });
+        pyResult = await execPython({ code: testCode, arg1: null }, false);
     } catch (error) {
         console.error("Python test error:", error);
         await pyLogs({
