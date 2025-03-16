@@ -19,7 +19,7 @@ const EditorTab = ({
     functionsCache,
     workbookFunctions,
     onedriveFunctions,
-    loadFunctions,  // Changed from onFunctionSaved
+    loadFunctions,
     unsavedCode,
     setUnsavedCode
 }) => {
@@ -39,7 +39,8 @@ const EditorTab = ({
         setNotification({ message, type });
         notificationTimeoutRef.current = setTimeout(() => {
             setNotification("");
-        }, 10000);
+            setSavedFunction(null); // This removes the success banner
+        }, 5000);
     };
 
     React.useEffect(() => {
@@ -105,14 +106,15 @@ const EditorTab = ({
             };
 
             await saveWorkbookOnly(updatedFunction);
-            showNotification(`${updatedFunction.signature} saved!`, "success");
             await loadFunctions();
             setSelectedFunction({
                 ...updatedFunction,
                 source: 'workbook'
             });
             setUnsavedCode(null);
-            setSavedFunction(updatedFunction); // Store the saved function to show the run button
+            // Show notification and set saved function in one place
+            setSavedFunction(updatedFunction);
+            showNotification(`${updatedFunction.signature} saved!`, "success");
         } catch (err) {
             if (!(err instanceof TokenExpiredError)) {
                 showNotification(err.message, "error");
@@ -173,29 +175,25 @@ const EditorTab = ({
                     value={selectedFunction?.code || DEFAULT_CODE}
                     onMount={handleEditorDidMount}
                     onChange={(value) => {
-                        setUnsavedCode(value); // Only track unsaved changes, don't update selectedFunction
+                        setUnsavedCode(value);
                     }}
                 />
             </div>
 
-            {/* Success banner with Run button */}
-            {savedFunction && (
-                <div className="mt-2 p-2 bg-green-50 text-green-900 rounded flex justify-between items-center">
-                    <span>Function saved successfully!</span>
-                    <button
-                        onClick={() => setShowFunctionDialog(true)}
-                        className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-                    >
-                        Run your saved function
-                    </button>
+            {notification && (
+                <div className={`mt-2 p-4 rounded ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"} flex justify-between items-center`}>
+                    <span>{notification.message}</span>
+                    {notification.type === "success" && savedFunction && (
+                        <button
+                            onClick={() => setShowFunctionDialog(true)}
+                            className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-700"
+                        >
+                            Run Function
+                        </button>
+                    )}
                 </div>
             )}
 
-            {notification && (
-                <div className={`mt-2 p-2 rounded ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"}`}>
-                    {notification.message}
-                </div>
-            )}
             {selectedFunction.name === "" && (
                 <div className="mt-2 p-2 bg-yellow-100 rounded">
                     <h2 className="font-semibold"> ⬅️ Drag task pane open for more room.</h2>
@@ -229,8 +227,7 @@ const EditorTab = ({
                 </select>
                 <div className="space-x-1">
                     <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
-                    {/* <button onClick={handleRun} className="px-2 py-1 bg-orange-500 text-white rounded">Run</button> */}
-                    <button onClick={handleTest} className="px-2 py-1 bg-green-500 text-white rounded">Test</button>
+                    <button onClick={handleTest} className="px-2 py-1 bg-gray-500 text-white rounded">Test</button>
                     <button onClick={() => setIsLLMOpen(true)} className="px-2 py-1 bg-purple-500 text-white rounded">AI✨</button>
                 </div>
             </div>
@@ -274,6 +271,7 @@ const EditorTab = ({
                     setSavedFunction(null); // Clear the saved function when dialog is closed
                 }}
                 selectedFunction={savedFunction || selectedFunction}
+                loadFunctions={loadFunctions}
             />
         </div>
     );

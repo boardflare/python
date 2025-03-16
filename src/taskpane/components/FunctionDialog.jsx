@@ -6,7 +6,8 @@ const FunctionDialog = ({
     isOpen,
     onClose,
     selectedFunction,
-    embedded = false
+    embedded = false,
+    loadFunctions
 }) => {
     const [selectedCell, setSelectedCell] = React.useState("");
     const [functionArgs, setFunctionArgs] = React.useState({});
@@ -272,6 +273,7 @@ const FunctionDialog = ({
                     ...selectedFunction,
                     args: functionArgs
                 });
+                if (loadFunctions) await loadFunctions();
             }
 
             onClose();
