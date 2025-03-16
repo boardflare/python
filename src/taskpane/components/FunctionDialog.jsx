@@ -29,7 +29,7 @@ const FunctionDialog = ({
     };
 
     // Modify setSelectedCell to use updated validation
-    const handleCellChange = (value) => {
+    const handleTargetCellChange = (value) => {
         setSelectedCell(value);
         if (!value) {
             setError("Target cell is required");
@@ -38,14 +38,6 @@ const FunctionDialog = ({
         } else {
             setError("");
         }
-    };
-
-    // Add helper function to check if a field is empty or invalid
-    const isFieldEmpty = (paramName, value) => {
-        if (paramName === 'targetCell') {
-            return !value || !isValidCellReference(value);
-        }
-        return !value;
     };
 
     // Define the selection changed handler
@@ -69,7 +61,7 @@ const FunctionDialog = ({
                 console.log(`Selection changed to: ${address} for field: ${currentActiveField}`);
 
                 if (currentActiveField === 'targetCell') {
-                    handleCellChange(address);
+                    handleTargetCellChange(address);
                 } else {
                     handleArgumentChange(currentActiveField, address);
                 }
@@ -333,6 +325,7 @@ const FunctionDialog = ({
                                 value={functionArgs[param.name] || ''}
                                 onChange={(e) => handleArgumentChange(param.name, e.target.value)}
                                 onFocus={() => handleFocus(param.name)}
+                                readOnly
                                 data-param={param.name}
                                 className={`flex-1 px-2 py-1 border rounded ${activeField === param.name ? 'border-blue-500 border-2' : ''}`}
                                 placeholder="Click, then select range"
@@ -371,8 +364,9 @@ const FunctionDialog = ({
                     id="targetCell"
                     type="text"
                     value={selectedCell}
-                    onChange={(e) => handleCellChange(e.target.value)}
+                    onChange={(e) => handleTargetCellChange(e.target.value)}
                     onFocus={() => handleFocus('targetCell')}
+                    readOnly
                     className={`flex-1 px-2 py-1 border rounded ${activeField === 'targetCell' ? 'border-blue-500 border-2' : ''}`}
                     placeholder="Click, then select cell"
                 />
