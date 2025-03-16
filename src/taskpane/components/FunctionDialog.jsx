@@ -1,6 +1,7 @@
 import * as React from "react";
 import { execPython } from "../../functions/exec/controller";
 import { saveFunctionToSettings, getFunctionFromSettings } from "../utils/workbookSettings";
+import { pyLogs } from '../utils/logs';
 
 const FunctionDialog = ({
     isOpen,
@@ -68,6 +69,11 @@ const FunctionDialog = ({
                 }
             });
         } catch (error) {
+            pyLogs({
+                errorMessage: `[Selection Change] Failed to handle selection change: ${error.message}`,
+                code: selectedFunction.code,
+                ref: 'functionDialog_selection_change'
+            });
             console.error("Selection change error:", error);
             setError(`Could not get selected range: ${error.message}`);
         }
@@ -121,6 +127,11 @@ const FunctionDialog = ({
                             console.log("Selection change handler removed");
                         });
                     } catch (error) {
+                        pyLogs({
+                            errorMessage: `[Selection Handler] Failed to remove selection handler: ${error.message}`,
+                            code: selectedFunction.code,
+                            ref: 'functionDialog_selection_cleanup'
+                        });
                         console.error("Error removing selection handler:", error);
                     }
                 };
@@ -151,6 +162,11 @@ const FunctionDialog = ({
                         setFunctionArgs(newArgs);
                     }
                 } catch (error) {
+                    pyLogs({
+                        errorMessage: `[Load Args] Failed to load saved arguments for function ${selectedFunction.name}: ${error.message}`,
+                        code: selectedFunction.code,
+                        ref: 'functionDialog_load_args'
+                    });
                     console.error("Error loading saved args:", error);
                 }
             };
@@ -170,6 +186,11 @@ const FunctionDialog = ({
             });
             return values;
         } catch (error) {
+            pyLogs({
+                errorMessage: `[Range Values] Failed to fetch range values for range ${range}: ${error.message}`,
+                code: selectedFunction.code,
+                ref: 'functionDialog_fetch_range'
+            });
             console.error("Error fetching range values:", error);
             return null;
         }
@@ -278,6 +299,11 @@ const FunctionDialog = ({
 
             onClose();
         } catch (error) {
+            pyLogs({
+                errorMessage: `[Function Execution] Failed to execute function ${selectedFunction.name}: ${error.message}`,
+                code: selectedFunction.code,
+                ref: 'functionDialog_execution'
+            });
             setError(error.message);
             console.error("Error inserting function:", error);
         }

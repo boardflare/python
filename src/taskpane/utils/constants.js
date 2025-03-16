@@ -8,8 +8,8 @@ export const DEFAULT_CODE = `def hello(name):
 
 # ⬅️ Drag task pane open for more room.
 # ⚠️ Code MUST BE A FUNCTION!
-# Ranges are converted 2D lists.
-# Return must be 2D list or scalar.`;
+# Range args are converted to 2D lists.
+# Return value must be a 2D list or scalar.`;
 
 export const EventTypes = {
     LOG: 'console:log',
