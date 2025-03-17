@@ -146,6 +146,7 @@ const FunctionDialog = ({
         if (isOpen && selectedFunction) {
             setError("");
             setActiveField(null);
+            setRangeValues({}); // Reset range values when dialog opens
 
             // Try to load saved args
             const loadSavedArgs = async () => {
