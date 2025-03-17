@@ -15,6 +15,16 @@ const AddFunctions = ({ loadFunctions }) => {
         loadExampleFunctions();
     }, []);
 
+    // Add error timeout effect
+    React.useEffect(() => {
+        if (error) {
+            const timer = setTimeout(() => {
+                setError(null);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [error]);
+
     const loadExampleFunctions = async () => {
         try {
             setLoading(true);
@@ -50,7 +60,7 @@ const AddFunctions = ({ loadFunctions }) => {
             });
         } catch (error) {
             console.error("Error importing function:", error);
-            setError("Failed to import function");
+            setError("Failed to import function. Please try again. If the problem persists, please contact support.");
             pyLogs({
                 code: func.name,
                 ref: 'import_example_function_error',

@@ -22,19 +22,20 @@ async function testSeparator(context) {
             const refersToFormula = "=SUM(1,2)";
             namedItem = worksheet.names.add(separatorTestName, refersToFormula);
             await context.sync();
+            namedItem.delete();
+            await context.sync();
             separator = ",";
         } catch {
             separator = ";";
-        } finally {
-            if (namedItem) {
-                namedItem.delete();
-                await context.sync();
-            }
         }
+
         return separator;
     } catch (error) {
-        console.error("[Separator Logger]", error);
-        return ","; // Default to comma if test fails
+        pyLogs({
+            errorMessage: error.message,
+            ref: 'separator_test_error'
+        });
+        return ",";  // Default to comma if test fails
     }
 }
 
@@ -109,10 +110,10 @@ result = parse_python_code_safe("${encodedCode}")
             ? `=${execEnv}(${codeRef}${separator} ${parameters.map((_, i) => `arg${i + 1}`).join(separator)})`
             : `=${execEnv}(${codeRef})`;
 
-        // Extract Excel demo
+        // Extract Excel demo.  Strangely, when global separator is ";", and formula contains an array constant as a parameter, the formula must use commas!  WTF?
         const excelDemoMatch = rawCode.match(/^# Excel usage:\s*(.+?)$/m);
         const excelExample = excelDemoMatch
-            ? excelDemoMatch[1].trim().replace(/,/g, separator)
+            ? excelDemoMatch[1].trim()
             : null;
 
         // Build execExample by converting any existing example to use EXEC format
