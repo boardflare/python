@@ -28,9 +28,14 @@ const EditorTab = ({
     const [showConfirmModal, setShowConfirmModal] = React.useState(false);
     const [pendingFunction, setPendingFunction] = React.useState(null);
     const [showFunctionDialog, setShowFunctionDialog] = React.useState(false);
-    const [savedFunction, setSavedFunction] = React.useState(null);
     const notificationTimeoutRef = React.useRef();
     const editorRef = React.useRef(null);
+    const functionDialogOpenRef = React.useRef(false);
+
+    // Update the ref whenever dialog state changes
+    React.useEffect(() => {
+        functionDialogOpenRef.current = showFunctionDialog;
+    }, [showFunctionDialog]);
 
     const showNotification = (message, type = "success") => {
         if (notificationTimeoutRef.current) {
@@ -39,7 +44,6 @@ const EditorTab = ({
         setNotification({ message, type });
         notificationTimeoutRef.current = setTimeout(() => {
             setNotification("");
-            setSavedFunction(null); // This removes the success banner
         }, 5000);
     };
 
@@ -112,8 +116,6 @@ const EditorTab = ({
                 source: 'workbook'
             });
             setUnsavedCode(null);
-            // Show notification and set saved function in one place
-            setSavedFunction(updatedFunction);
             showNotification(`${updatedFunction.signature} saved!`, "success");
         } catch (err) {
             if (!(err instanceof TokenExpiredError)) {
@@ -183,7 +185,7 @@ const EditorTab = ({
             {notification && (
                 <div className={`mt-2 p-4 rounded ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"} flex justify-between items-center`}>
                     <span>{notification.message}</span>
-                    {notification.type === "success" && savedFunction && (
+                    {notification.type === "success" && selectedFunction && selectedFunction.name && (
                         <button
                             onClick={() => setShowFunctionDialog(true)}
                             className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-700"
@@ -193,17 +195,6 @@ const EditorTab = ({
                     )}
                 </div>
             )}
-
-            {/* {selectedFunction.name === "" && (
-                <div className="mt-2 p-2 bg-yellow-100 rounded">
-                    <h2 className="font-semibold"> ⬅️ Drag task pane open for more room.</h2>
-                    <ul className="list-disc pl-5">
-                        <li>Your code MUST BE A FUNCTION!</li>
-                        <li>Save will update code if function already exists.</li>
-                        <li>See <a href="https://www.boardflare.com/apps/excel/python/documentation" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a> for details.</li>
-                    </ul>
-                </div>
-            )} */}
 
             <div className="flex justify-between items-center py-2">
                 <select
@@ -233,7 +224,6 @@ const EditorTab = ({
                 </div>
             </div>
 
-            {/* Add modal UI */}
             {showConfirmModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-4 rounded-lg shadow-lg max-w-sm w-full mx-4">
@@ -269,9 +259,8 @@ const EditorTab = ({
                 isOpen={showFunctionDialog}
                 onClose={() => {
                     setShowFunctionDialog(false);
-                    setSavedFunction(null); // Clear the saved function when dialog is closed
                 }}
-                selectedFunction={savedFunction || selectedFunction}
+                selectedFunction={selectedFunction}
                 loadFunctions={loadFunctions}
             />
         </div>
