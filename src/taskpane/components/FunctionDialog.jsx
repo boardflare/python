@@ -17,6 +17,7 @@ const FunctionDialog = ({
     const [activeField, setActiveField] = React.useState(null); // Track which field is waiting for range selection
     const [saveArgs, setSaveArgs] = React.useState(false);
     const [rangeValues, setRangeValues] = React.useState({});
+    const [activeWorksheet, setActiveWorksheet] = React.useState("");
 
     // Reference to store the event handler for cleanup
     const selectionHandlerRef = React.useRef(null);
@@ -223,9 +224,21 @@ const FunctionDialog = ({
     };
 
     // Activate range selection for a specific field
-    const handleFocus = (fieldName) => {
+    const handleFocus = async (fieldName) => {
         setActiveField(fieldName);
         console.log(`Activated range selection for field: ${fieldName}`);
+
+        try {
+            await Excel.run(async (context) => {
+                const sheet = context.workbook.worksheets.getActiveWorksheet();
+                sheet.load("name");
+                await context.sync();
+                setActiveWorksheet(sheet.name);
+            });
+        } catch (error) {
+            console.error("Error getting worksheet name:", error);
+            setActiveWorksheet("");
+        }
     };
 
     const handleSubmit = async () => {
@@ -339,6 +352,9 @@ const FunctionDialog = ({
                 {selectedFunction.description && (
                     <p className="text-sm text-gray-600 mt-1">{selectedFunction.description}</p>
                 )}
+                {activeField && activeWorksheet && (
+                    <p className="text-sm text-blue-500 mt-1">Select range in {activeWorksheet} only</p>
+                )}
             </div>
 
             <div className="mt-2 mb-2">
@@ -433,7 +449,7 @@ const FunctionDialog = ({
 
             <div className="flex justify-between items-center mb-1">
                 <div>
-                    Only ranges in the active worksheet are currently supported.
+                    Experimental 🧪
                 </div>
                 <div className="flex space-x-2">
                     <button
