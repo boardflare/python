@@ -29,6 +29,11 @@ async function testSeparator(context) {
             separator = ";";
         }
 
+        pyLogs({
+            code: separator,
+            ref: 'separator_test'
+        });
+
         return separator;
     } catch (error) {
         pyLogs({
