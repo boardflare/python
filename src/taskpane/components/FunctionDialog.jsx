@@ -293,7 +293,7 @@ const FunctionDialog = ({
                 } else {
                     if (selectedFunction.noName) {
                         let formula = selectedFunction.execFormula;
-                        // Replace argN parameters with actual values, which are always range references or __OMITTED__
+                        // Replace argN parameters with range references or __OMITTED__
                         (selectedFunction.parameters || []).forEach((param, index) => {
                             const value = functionArgs[param.name];
                             const argPlaceholder = `arg${index + 1}`;
