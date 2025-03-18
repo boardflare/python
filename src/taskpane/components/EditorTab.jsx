@@ -109,14 +109,19 @@ const EditorTab = ({
                 ...parsedFunction
             };
 
-            await saveWorkbookOnly(updatedFunction);
+            const savedFunction = await saveWorkbookOnly(updatedFunction);
             await loadFunctions();
             setSelectedFunction({
-                ...updatedFunction,
+                ...savedFunction,
                 source: 'workbook'
             });
             setUnsavedCode(null);
-            showNotification(`${updatedFunction.signature} saved!`, "success");
+
+            if (savedFunction.noName) {
+                showNotification(`${savedFunction.name} saved! We were not able to register it as a custom function, however you can use it as follows: ${savedFunction.execFormula}`, "warning");
+            } else {
+                showNotification(`${savedFunction.signature} saved!`, "success");
+            }
         } catch (err) {
             if (!(err instanceof TokenExpiredError)) {
                 showNotification(err.message, "error");
