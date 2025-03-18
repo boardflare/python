@@ -118,7 +118,7 @@ const EditorTab = ({
             setUnsavedCode(null);
 
             if (savedFunction.noName) {
-                showNotification(`${savedFunction.name} saved! We were not able to register it as a custom function, however you can use it as follows: ${savedFunction.execFormula}`, "warning");
+                showNotification(`Saved! Click "Run Function" to insert in a cell.`, "success");
             } else {
                 showNotification(`${savedFunction.signature} saved!`, "success");
             }

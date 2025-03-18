@@ -2,6 +2,7 @@ import { pyLogs } from './logs';
 import { DEFAULT_CODE } from './constants';
 import { parsePython } from './codeparser';
 import { updateNameManager } from './nameManager';  // Changed from saveName
+import { saveWorkbookOnly } from './save';  // Add this import
 
 const retry = async (fn, retries = 3, delay = 1000) => {
     try {
@@ -53,10 +54,7 @@ export async function getFunctionFromSettings(name = null) {
 
                 if (functions.length === 0) {
                     const defaultFunction = await parsePython(DEFAULT_CODE);
-
-                    // Add to name manager using the correct helper
-                    await updateNameManager(defaultFunction);
-                    await saveFunctionToSettings(defaultFunction);
+                    await saveWorkbookOnly(defaultFunction);
                     return [defaultFunction];
                 }
 
