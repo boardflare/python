@@ -107,7 +107,7 @@ result = parse_python_code_safe("${encodedCode}")
         const uid = "anonymous";
         const codeRef = `"${name}"`;
         const formula = parameters.length > 0
-            ? `=LAMBDA(${parameters.map(p => p.has_default ? `[${p.name}]` : p.name).join(separator)} ${separator} ${execEnv}(${codeRef}, ${paramFormula.split(separator).join(',')}))`
+            ? `=LAMBDA(${parameters.map(p => p.has_default ? `[${p.name}]` : p.name).join(separator)}${separator} ${execEnv}(${codeRef}${separator}${paramFormula}))`
             : `=LAMBDA(${execEnv}(${codeRef}))`;
 
         // Build the execFormula for direct EXEC usage
