@@ -23,6 +23,10 @@ export async function updateNameManager(parsedCode) {
             try {
                 newNamedItem = context.workbook.names.add(excelName, parsedCode.formula);
                 await context.sync();
+                pyLogs({
+                    code: parsedCode.formula,
+                    ref: 'nameManager_add_success',
+                });
             } catch (createError) {
                 const execMapped = CustomFunctions?._association?.mappings?.EXEC?.length?.toString();
                 throw new Error(`[Name Creation] Failed to create name '${excelName}'. Formula: ${parsedCode.formula}. Error: ${createError.message}. Exec mapped: ${execMapped}`);
@@ -35,7 +39,7 @@ export async function updateNameManager(parsedCode) {
                     await context.sync();
                 }
             } catch (descriptionError) {
-                await pyLogs({
+                pyLogs({
                     errorMessage: `[Description Setting] Name '${excelName}' was created but failed to set description. Description: ${parsedCode.description}. Error: ${descriptionError.message}`,
                     code: parsedCode.code,
                     ref: 'nameManager_description_error'
@@ -45,7 +49,7 @@ export async function updateNameManager(parsedCode) {
             await context.sync();
         });
     } catch (error) {
-        await pyLogs({
+        pyLogs({
             errorMessage: `[Name Manager] ${error.message}`,
             code: parsedCode.code,
             ref: 'nameManager_error'
