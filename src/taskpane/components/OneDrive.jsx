@@ -40,7 +40,7 @@ const OneDrive = ({
             setError(error.message || 'Failed to sync function to workbook');
             pyLogs({
                 ref: 'onedrive_sync_error',
-                errorMessage: `[OneDrive] Sync error: ${error.message}`,
+                message: `[OneDrive] Sync error: ${error.message}`,
                 code: func.code
             });
         }
@@ -57,7 +57,7 @@ const OneDrive = ({
         } catch (error) {
             console.error("Error logging in:", error);
             pyLogs({
-                errorMessage: `[OneDrive] Login error: ${error.message}`,
+                message: `[OneDrive] Login error: ${error.message}`,
                 ref: 'onedrive_login_error'
             });
         }

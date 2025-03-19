@@ -57,7 +57,7 @@ else:
     } catch (error) {
         console.error("Python test error:", error);
         await pyLogs({
-            errorMessage: error.message,
+            message: error.message,
             code: testCode,
             ref: 'test_run_error'
         });
@@ -71,7 +71,7 @@ else:
         } catch (error) {
             console.error("Excel demo error:", error);
             await pyLogs({
-                errorMessage: error.message,
+                message: error.message,
                 code: parsedFunction,
                 ref: 'excel_demo_error'
             });

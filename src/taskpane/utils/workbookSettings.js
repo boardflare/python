@@ -32,7 +32,7 @@ export async function saveFunctionToSettings(functionData) {
             return result;
         } catch (error) {
             console.error('Failed to save to settings:', error);
-            pyLogs({ errorMessage: error.message, code: functionData?.name || null, ref: "saveFunctionToSettingsError" });
+            pyLogs({ message: error.message, code: functionData?.name || null, ref: "saveFunctionToSettingsError" });
             throw error;
         }
     });
@@ -59,7 +59,7 @@ export async function getFunctionFromSettings(name = null) {
                         return [defaultFunction];
                     } catch (error) {
                         pyLogs({
-                            errorMessage: error.message,
+                            message: error.message,
                             ref: "createDefaultFunctionError"
                         });
                         return [];
@@ -72,7 +72,7 @@ export async function getFunctionFromSettings(name = null) {
     } catch (error) {
         console.error('Failed to get from settings:', error);
         pyLogs({
-            errorMessage: error.message,
+            message: error.message,
             code: name || null,
             ref: "getFunctionFromSettingsError"
         });
@@ -102,7 +102,7 @@ export async function deleteFunctionFromSettings(name) {
     } catch (error) {
         console.error('Failed to delete from settings:', error);
         pyLogs({
-            errorMessage: error.message,
+            message: error.message,
             code: name,
             ref: "deleteFunctionFromSettingsError"
         });

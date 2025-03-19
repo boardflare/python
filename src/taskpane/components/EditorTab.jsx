@@ -146,7 +146,7 @@ const EditorTab = ({
             showNotification(err.message, "error");
             window.dispatchEvent(new CustomEvent(EventTypes.ERROR, { detail: err.message }));
             pyLogs({
-                errorMessage: `[Test] Error: ${err.message}`,
+                message: `[Test] Error: ${err.message}`,
                 code: editorRef.current.getValue(),
                 ref: 'test_error'
             });

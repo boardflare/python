@@ -37,7 +37,7 @@ async function testSeparator(context) {
         return separator;
     } catch (error) {
         pyLogs({
-            errorMessage: error.message,
+            message: error.message,
             ref: 'separator_test_error'
         });
         return ",";  // Default to comma if test fails
@@ -148,7 +148,7 @@ result = parse_python_code_safe("${encodedCode}")
         return result;
     } catch (error) {
         pyLogs({
-            errorMessage: error.message,
+            message: error.message,
             code: rawCode,
             ref: 'codeparser_error'
         })

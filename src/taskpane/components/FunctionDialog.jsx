@@ -71,7 +71,7 @@ const FunctionDialog = ({
             });
         } catch (error) {
             pyLogs({
-                errorMessage: `[Selection Change] Failed to handle selection change: ${error.message}`,
+                message: `[Selection Change] Failed to handle selection change: ${error.message}`,
                 code: selectedFunction.code,
                 ref: 'functionDialog_selection_change'
             });
@@ -129,7 +129,7 @@ const FunctionDialog = ({
                         });
                     } catch (error) {
                         pyLogs({
-                            errorMessage: `[Selection Handler] Failed to remove selection handler: ${error.message}`,
+                            message: `[Selection Handler] Failed to remove selection handler: ${error.message}`,
                             code: selectedFunction.code,
                             ref: 'functionDialog_selection_cleanup'
                         });
@@ -165,7 +165,7 @@ const FunctionDialog = ({
                     }
                 } catch (error) {
                     pyLogs({
-                        errorMessage: `[Load Args] Failed to load saved arguments for function ${selectedFunction.name}: ${error.message}`,
+                        message: `[Load Args] Failed to load saved arguments for function ${selectedFunction.name}: ${error.message}`,
                         code: selectedFunction.code,
                         ref: 'functionDialog_load_args'
                     });
@@ -189,7 +189,7 @@ const FunctionDialog = ({
             return values;
         } catch (error) {
             pyLogs({
-                errorMessage: `[Range Values] Failed to fetch range values for range ${range}: ${error.message}`,
+                message: `[Range Values] Failed to fetch range values for range ${range}: ${error.message}`,
                 code: selectedFunction.code,
                 ref: 'functionDialog_fetch_range'
             });
@@ -329,7 +329,7 @@ const FunctionDialog = ({
             onClose();
         } catch (error) {
             pyLogs({
-                errorMessage: error.message,
+                message: error.message,
                 code: selectedFunction.code,
                 ref: 'functionDialog_error'
             });

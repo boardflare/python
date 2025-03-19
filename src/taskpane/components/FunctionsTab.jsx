@@ -69,7 +69,7 @@ const FunctionsTab = ({
             setError(error.message);
             pyLogs({
                 ref: 'save_to_onedrive_error',
-                errorMessage: `Save to OneDrive error: ${error.message}`,
+                message: `Save to OneDrive error: ${error.message}`,
                 code: func.code
             });
         }

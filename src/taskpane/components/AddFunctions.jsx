@@ -64,7 +64,7 @@ const AddFunctions = ({ loadFunctions }) => {
             pyLogs({
                 code: func.name,
                 ref: 'import_example_function_error',
-                errorMessage: error.message
+                message: error.message
             });
         }
     };

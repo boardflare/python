@@ -56,7 +56,7 @@ export async function updateNameManager(parsedCode) {
                 }
             } catch (descriptionError) {
                 pyLogs({
-                    errorMessage: `[Description Setting] Name '${excelName}' was created but failed to set description. Description: ${parsedCode.description}. Error: ${descriptionError.message}`,
+                    message: `[Description Setting] Name '${excelName}' was created but failed to set description. Description: ${parsedCode.description}. Error: ${descriptionError.message}`,
                     code: parsedCode.code,
                     ref: 'nameManager_description_error'
                 });

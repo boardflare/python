@@ -11,7 +11,7 @@ export const fetchDemoNotebooks = async () => {
         demoNotebooks = await response.json();
         return demoNotebooks;
     } catch (error) {
-        await pyLogs({ errorMessage: error.message, code: null, ref: 'fetchDemoNotebooks_error' });
+        await pyLogs({ message: error.message, code: null, ref: 'fetchDemoNotebooks_error' });
         console.error('Failed to fetch demo notebooks:', error);
         return {};
     }
@@ -31,7 +31,7 @@ const fetchGistContent = async (url) => {
             fileName
         };
     } catch (error) {
-        await pyLogs({ errorMessage: error.message, code: url, ref: 'fetchGistContent_error' });
+        await pyLogs({ message: error.message, code: url, ref: 'fetchGistContent_error' });
         throw error;
     }
 };
@@ -149,7 +149,7 @@ export const parseNotebook = async (notebook) => {
             validFunctions.push(parsedFunction);
         } catch (error) {
             await pyLogs({
-                errorMessage: error.message,
+                message: error.message,
                 code: cell.source.join(''),
                 ref: 'parseNotebook_cell_error'
             });
@@ -179,7 +179,7 @@ export const fetchNotebookUrl = async (url = DEFAULT_NOTEBOOK) => {
         return { functions };
     } catch (error) {
         await pyLogs({
-            errorMessage: error.message,
+            message: error.message,
             code: url,
             ref: 'fetchNotebookUrl_error'
         });

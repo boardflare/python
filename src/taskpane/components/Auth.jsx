@@ -116,7 +116,7 @@ export function SignInButton({ loadFunctions }) {
             setIsSignedIn(true);
         } catch (error) {
             console.error("Error checking auth status:", error);
-            await pyLogs({ errorMessage: error.message, ref: "auth_checkAuthStatus_error" });
+            await pyLogs({ message: error.message, ref: "auth_checkAuthStatus_error" });
             setIsSignedIn(false);
         }
     };
@@ -146,7 +146,7 @@ export function SignInButton({ loadFunctions }) {
             return tokenObj;
         } catch (error) {
             console.error("Error refreshing token:", error);
-            await pyLogs({ errorMessage: error.message, ref: "auth_refreshToken_error" });
+            await pyLogs({ message: error.message, ref: "auth_refreshToken_error" });
             return null;
         }
     };
@@ -160,7 +160,7 @@ export function SignInButton({ loadFunctions }) {
         } catch (error) {
             console.error("Detailed sign in error:", error);
             await pyLogs({
-                errorMessage: error.message,
+                message: error.message,
                 ref: "auth_signIn_error"
             });
             setError(error.message);
@@ -175,7 +175,7 @@ export function SignInButton({ loadFunctions }) {
             loadFunctions?.(); // This will now trigger the clearFunctions first
         } catch (error) {
             console.error("Error signing out:", error);
-            await pyLogs({ errorMessage: error.message, ref: "auth_signOut_error" });
+            await pyLogs({ message: error.message, ref: "auth_signOut_error" });
         }
     };
 
@@ -248,7 +248,7 @@ async function isTokenValid(token) {
         return payload.exp > currentTime;
     } catch (error) {
         console.error("Error validating token:", error);
-        await pyLogs({ errorMessage: error.message, ref: "auth_validateToken_error" });
+        await pyLogs({ message: error.message, ref: "auth_validateToken_error" });
         return false;
     }
 }
@@ -298,7 +298,7 @@ async function getStoredToken() {
         });
     } catch (error) {
         console.error('Failed to get token:', error);
-        await pyLogs({ errorMessage: error.message, ref: "auth_getStoredToken_error" });
+        await pyLogs({ message: error.message, ref: "auth_getStoredToken_error" });
         return null;
     }
 }
@@ -334,7 +334,7 @@ export async function storeToken(tokenObj) {
         });
     } catch (error) {
         console.error('DB initialization error:', error);
-        await pyLogs({ errorMessage: error.message, ref: "auth_storeToken_error" });
+        await pyLogs({ message: error.message, ref: "auth_storeToken_error" });
         throw error;
     }
 }
@@ -360,7 +360,7 @@ async function removeToken() {
         });
     } catch (error) {
         console.error('DB initialization error during sign out:', error);
-        await pyLogs({ errorMessage: error.message, ref: "auth_removeToken_error" });
+        await pyLogs({ message: error.message, ref: "auth_removeToken_error" });
         throw error;
     }
 }
@@ -384,7 +384,7 @@ export async function storeScopes(scopes) {
         });
     } catch (error) {
         console.error('DB initialization error:', error);
-        await pyLogs({ errorMessage: error.message, ref: "auth_storeScopes_error" });
+        await pyLogs({ message: error.message, ref: "auth_storeScopes_error" });
         throw error;
     }
 }
@@ -408,7 +408,7 @@ export async function getScopes() {
         });
     } catch (error) {
         console.error('Failed to get scopes:', error);
-        await pyLogs({ errorMessage: error.message, ref: "auth_getScopes_error" });
+        await pyLogs({ message: error.message, ref: "auth_getScopes_error" });
         return ["User.Read", "offline_access"];
     }
 }
