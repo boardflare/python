@@ -91,7 +91,8 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt, loadFunctions }) => { // NEW:
                 LLM: {
                     prompt: input,
                     content: generatedCode
-                }
+                },
+                ref: "LLM"
             });
 
             // NEW: Associate the prompt with the parsed function
