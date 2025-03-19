@@ -434,7 +434,7 @@ const FunctionDialog = ({
                 />
             </div>
 
-            <div className="mb-1">
+            {/* <div className="mb-1">
                 <label className="flex items-center space-x-2">
                     <input
                         type="checkbox"
@@ -444,7 +444,7 @@ const FunctionDialog = ({
                     />
                     <span>Insert result, not formula</span>
                 </label>
-            </div>
+            </div> */}
 
             {/* <div className="mb-4">
                 <label className="flex items-center space-x-2">
