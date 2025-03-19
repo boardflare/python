@@ -88,11 +88,9 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt, loadFunctions }) => { // NEW:
             }
 
             pyLogs({
-                LLM: {
-                    prompt: input,
-                    content: generatedCode
-                },
-                ref: "LLM"
+                message: `Prompt: ${input}`,
+                code: generatedCode,
+                ref: "ai_codegen_success"
             });
 
             // NEW: Associate the prompt with the parsed function
