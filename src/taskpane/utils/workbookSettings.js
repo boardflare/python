@@ -53,9 +53,17 @@ export async function getFunctionFromSettings(name = null) {
                 const functions = items.items.map(item => item.value);
 
                 if (functions.length === 0) {
-                    const defaultFunction = await parsePython(DEFAULT_CODE);
-                    await saveWorkbookOnly(defaultFunction);
-                    return [defaultFunction];
+                    try {
+                        const defaultFunction = await parsePython(DEFAULT_CODE);
+                        await saveWorkbookOnly(defaultFunction);
+                        return [defaultFunction];
+                    } catch (error) {
+                        pyLogs({
+                            errorMessage: error.message,
+                            ref: "createDefaultFunctionError"
+                        });
+                        return [];
+                    }
                 }
 
                 return functions;
