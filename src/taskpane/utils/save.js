@@ -8,6 +8,7 @@ export async function saveWorkbookOnly(parsedFunction) {
         await saveFunctionToSettings(parsedFunction);
         try {
             await updateNameManager(parsedFunction);
+            parsedFunction.noName = false; // Reset noName flag if name is updated successfully
         } catch (nameErr) {
             parsedFunction.noName = true;
             await saveFunctionToSettings(parsedFunction); // Update settings with noName flag
