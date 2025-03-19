@@ -313,6 +313,11 @@ const FunctionDialog = ({
                 await context.sync();
             });
 
+            pyLogs({
+                code: selectedFunction.code,
+                ref: 'functionDialog_success'
+            });
+
             if (saveArgs) {
                 await saveFunctionToSettings({
                     ...selectedFunction,
@@ -324,9 +329,9 @@ const FunctionDialog = ({
             onClose();
         } catch (error) {
             pyLogs({
-                errorMessage: `[Function Execution] Failed to execute function ${selectedFunction.name}: ${error.message}`,
+                errorMessage: error.message,
                 code: selectedFunction.code,
-                ref: 'functionDialog_execution'
+                ref: 'functionDialog_error'
             });
             setError(error.message);
             console.error("Error inserting function:", error);
