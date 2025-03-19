@@ -6,8 +6,23 @@ import { saveFile, formatAsNotebook, TokenExpiredError } from './drive';
 export async function saveWorkbookOnly(parsedFunction) {
     try {
         await saveFunctionToSettings(parsedFunction);
-        await updateNameManager(parsedFunction);
-        pyLogs({ message: `[Save] Function ${parsedFunction.name} saved to workbook`, code: parsedFunction.code, ref: 'save_workbook_success' });
+        try {
+            await updateNameManager(parsedFunction);
+            parsedFunction.noName = false; // Reset noName flag if name is updated successfully
+        } catch (nameErr) {
+            parsedFunction.noName = true;
+            await saveFunctionToSettings(parsedFunction); // Update settings with noName flag
+            pyLogs({
+                errorMessage: `[NameManager] Error: ${nameErr.message}`,
+                code: parsedFunction.code,
+                ref: 'saved_as_noname'
+            });
+        }
+        pyLogs({
+            message: `[Save] Function ${parsedFunction.name} saved to workbook`,
+            code: parsedFunction.code,
+            ref: 'save_workbook_success'
+        });
     } catch (err) {
         pyLogs({ errorMessage: `[Save] Error saving to workbook: ${err.message}`, code: parsedFunction.code, ref: 'save_workbook_error' });
         throw err;

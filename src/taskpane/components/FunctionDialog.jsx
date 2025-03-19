@@ -291,14 +291,24 @@ const FunctionDialog = ({
                         range.values = result;
                     }
                 } else {
-                    const args = (selectedFunction.parameters || []).map((param, index) => {
-                        const value = functionArgs[param.name];
-                        if (!value && param.has_default) return '"__OMITTED__"';
-                        if (!value) return '"__OMITTED__"';
-                        return isValidCellReference(value) ? value : `"${value}"`;
-                    }).join(",");
-
-                    range.formulas = [[`=${selectedFunction.name.toUpperCase()}(${args})`]];
+                    if (selectedFunction.noName) {
+                        let formula = selectedFunction.execFormula;
+                        // Replace argN parameters with range references or __OMITTED__
+                        (selectedFunction.parameters || []).forEach((param, index) => {
+                            const value = functionArgs[param.name];
+                            const argPlaceholder = `arg${index + 1}`;
+                            formula = formula.replace(
+                                argPlaceholder,
+                                value || '"__OMITTED__"'
+                            );
+                        });
+                        range.formulas = [[formula]];
+                    } else {
+                        const args = (selectedFunction.parameters || [])
+                            .map(param => functionArgs[param.name] || '"__OMITTED__"')
+                            .join(",");
+                        range.formulas = [[`=${selectedFunction.name.toUpperCase()}(${args})`]];
+                    }
                 }
                 await context.sync();
             });
@@ -347,8 +357,15 @@ const FunctionDialog = ({
     // For embedded mode, return just the form content without modal wrapper
     const content = (
         <div className="p-2">
-            <div className=" bg-gray-50 rounded">
-                <h3 className="font-bold">{selectedFunction.signature}</h3>
+            <div className="bg-gray-50 rounded">
+                <div className="flex justify-between items-center">
+                    <h3 className="font-bold">{selectedFunction.signature}</h3>
+                    {selectedFunction.noName && (
+                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                            EXEC mode
+                        </span>
+                    )}
+                </div>
                 {selectedFunction.description && (
                     <p className="text-sm text-gray-600 mt-1">{selectedFunction.description}</p>
                 )}

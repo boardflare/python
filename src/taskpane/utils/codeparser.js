@@ -107,12 +107,12 @@ result = parse_python_code_safe("${encodedCode}")
         const uid = "anonymous";
         const codeRef = `"${name}"`;
         const formula = parameters.length > 0
-            ? `=LAMBDA(${parameters.map(p => p.has_default ? `[${p.name}]` : p.name).join(separator)} ${separator} ${execEnv}(${codeRef}${separator} ${paramFormula}))`
+            ? `=LAMBDA(${parameters.map(p => p.has_default ? `[${p.name}]` : p.name).join(separator)}${separator} ${execEnv}(${codeRef}${separator}${paramFormula}))`
             : `=LAMBDA(${execEnv}(${codeRef}))`;
 
         // Build the execFormula for direct EXEC usage
         const execFormula = parameters.length > 0
-            ? `=${execEnv}(${codeRef}${separator} ${parameters.map((_, i) => `arg${i + 1}`).join(separator)})`
+            ? `=${execEnv}(${codeRef}, ${parameters.map((_, i) => `arg${i + 1}`).join(',')})`
             : `=${execEnv}(${codeRef})`;
 
         // Extract Excel demo.  Strangely, when global separator is ";", and formula contains an array constant as a parameter, the formula must use commas!  WTF?
@@ -126,7 +126,7 @@ result = parse_python_code_safe("${encodedCode}")
         if (excelExample) {
             execExample = excelExample.replace(
                 new RegExp(`=${name.toUpperCase()}\\((.*?)\\)`, 'i'),
-                (match, args) => `=${execEnv}(${codeRef}${separator}${args})`
+                (match, args) => `=${execEnv}(${codeRef}, ${args.split(separator).join(',')})`
             );
         }
 

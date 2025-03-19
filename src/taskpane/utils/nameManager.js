@@ -1,7 +1,13 @@
 import { pyLogs } from './logs';
+import { DEBUG_FLAGS } from './constants';
 
 export async function updateNameManager(parsedCode) {
     try {
+        // Simulate failure if debug flag is set
+        if (DEBUG_FLAGS.FORCE_NAME_MANAGER_FAIL) {
+            throw new Error("Simulated name manager failure for testing");
+        }
+
         const excelName = parsedCode.name.toUpperCase();
 
         return await Excel.run(async (context) => {

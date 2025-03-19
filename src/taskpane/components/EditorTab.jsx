@@ -109,14 +109,19 @@ const EditorTab = ({
                 ...parsedFunction
             };
 
-            await saveWorkbookOnly(updatedFunction);
+            const savedFunction = await saveWorkbookOnly(updatedFunction);
             await loadFunctions();
             setSelectedFunction({
-                ...updatedFunction,
+                ...savedFunction,
                 source: 'workbook'
             });
             setUnsavedCode(null);
-            showNotification(`${updatedFunction.signature} saved!`, "success");
+
+            if (savedFunction.noName) {
+                showNotification(`Saved! Click "Run Function" to insert in a cell.`, "success");
+            } else {
+                showNotification(`${savedFunction.signature} saved!`, "success");
+            }
         } catch (err) {
             if (!(err instanceof TokenExpiredError)) {
                 showNotification(err.message, "error");

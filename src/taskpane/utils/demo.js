@@ -19,8 +19,6 @@ export function sanitizeSheetName(name) {
     return sanitized;
 }
 
-// Remove the insertWorksheetFromBase64 function from here
-
 export async function singleDemo(parsedCode) {
     return Excel.run(async (context) => {
         let sheet;
@@ -45,7 +43,7 @@ export async function singleDemo(parsedCode) {
             functionLabelRange.values = [["Function:"]];
             functionLabelRange.format.font.bold = true;
 
-            // Add function signature in B1
+            // Add function signature or exec formula in B1 based on noName flag
             const signatureRange = sheet.getRangeByIndexes(0, 1, 1, 1);
             signatureRange.values = [[parsedCode.signature]];
             signatureRange.format.verticalAlignment = 'Top';
@@ -66,12 +64,11 @@ export async function singleDemo(parsedCode) {
             exampleLabelRange.format.font.bold = true;
 
             try {
-                // Add excelExample code to cell B4
+                // Add example code based on noName flag
                 const codeRange = sheet.getRangeByIndexes(3, 1, 1, 1);
-                codeRange.values = [[parsedCode.excelExample]];
+                codeRange.values = [[parsedCode.noName ? parsedCode.execExample : parsedCode.excelExample]];
                 await context.sync();
             } catch (exampleError) {
-                // If example fails, write error message to B4
                 const errorRange = sheet.getRangeByIndexes(3, 1, 1, 1);
                 errorRange.values = [[`Error in example code: ${exampleError.message}`]];
                 errorRange.format.fill.color = "#FFE0E0";
