@@ -14,7 +14,7 @@ export async function saveWorkbookOnly(parsedFunction) {
             await saveFunctionToSettings(parsedFunction); // Update settings with noName flag
             pyLogs({
                 errorMessage: `[NameManager] Error: ${nameErr.message}`,
-                code: parsedFunction.code,
+                code: parsedFunction.formula,
                 ref: 'saved_as_noname'
             });
         }

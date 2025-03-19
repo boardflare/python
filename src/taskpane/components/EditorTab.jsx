@@ -44,7 +44,7 @@ const EditorTab = ({
         setNotification({ message, type });
         notificationTimeoutRef.current = setTimeout(() => {
             setNotification("");
-        }, 5000);
+        }, 10000);
     };
 
     React.useEffect(() => {

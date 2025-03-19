@@ -34,8 +34,18 @@ export async function updateNameManager(parsedCode) {
                     ref: 'nameManager_add_success',
                 });
             } catch (createError) {
-                const execMapped = CustomFunctions?._association?.mappings?.EXEC?.length?.toString();
-                throw new Error(`[Name Creation] Failed to create name '${excelName}'. Formula: ${parsedCode.formula}. Error: ${createError.message}. Exec mapped: ${execMapped}`);
+                // Retry with semicolons instead of commas
+                try {
+                    const modifiedFormula = parsedCode.formula.replace(/,/g, ';');
+                    newNamedItem = context.workbook.names.add(excelName, modifiedFormula);
+                    await context.sync();
+                    pyLogs({
+                        code: modifiedFormula,
+                        ref: 'nameManager_add_success_retry',
+                    });
+                } catch (retryError) {
+                    throw new Error(`Failed to create name with retry. Formula: ${parsedCode.formula}. Error: ${retryError.message}.`);
+                }
             }
 
             try {
@@ -55,11 +65,6 @@ export async function updateNameManager(parsedCode) {
             await context.sync();
         });
     } catch (error) {
-        pyLogs({
-            errorMessage: `[Name Manager] ${error.message}`,
-            code: parsedCode.code,
-            ref: 'nameManager_error'
-        });
         throw new Error(`Unable to add ${parsedCode.name.toUpperCase()} as named function. This sometimes occurs due to an issue with Excel. You can try the following: 1. Copy your code from the editor. 2. Close and reopen the workbook. 3. Paste the code and then click save again. If the issue persists, please contact support.`);
     }
 }
