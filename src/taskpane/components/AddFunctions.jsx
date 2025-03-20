@@ -49,6 +49,9 @@ const AddFunctions = ({ loadFunctions }) => {
 
             // Parse the function code to get formula and metadata
             const funcToSave = await parsePython(func.code);
+            // Include the excelExample from the original function
+            funcToSave.excelExample = func.excelExample;
+
             await saveWorkbookOnly(funcToSave);
             await singleDemo(funcToSave);
             await loadFunctions();
