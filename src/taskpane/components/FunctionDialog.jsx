@@ -15,7 +15,7 @@ const FunctionDialog = ({
     const [error, setError] = React.useState("");
     const [insertResult, setInsertResult] = React.useState(false);
     const [activeField, setActiveField] = React.useState(null); // Track which field is waiting for range selection
-    const [saveArgs, setSaveArgs] = React.useState(false);
+    const [saveArgs, setSaveArgs] = React.useState(true);
     const [rangeValues, setRangeValues] = React.useState({});
     const [activeWorksheet, setActiveWorksheet] = React.useState("");
 

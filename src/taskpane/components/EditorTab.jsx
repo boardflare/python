@@ -64,24 +64,22 @@ const EditorTab = ({
             return;
         }
 
-        if (unsavedCode !== null) {
-            editorRef.current.setValue(unsavedCode);
-            return;
-        }
-
         const source = selectedFunction?.source || 'workbook';
         const id = source === 'workbook' ? selectedFunction?.name : selectedFunction?.fileName;
         const cacheKey = `${source}-${id}`;
         const cachedFunc = functionsCache.current.get(cacheKey);
 
-        if (cachedFunc?.code && editorRef.current?.setValue) {
+        // First check unsavedCode, then cached/selected function code
+        if (unsavedCode !== null) {
+            editorRef.current.setValue(unsavedCode);
+        } else if (cachedFunc?.code && editorRef.current?.setValue) {
             editorRef.current.setValue(cachedFunc.code);
         } else if (selectedFunction?.code && editorRef.current?.setValue) {
             editorRef.current.setValue(selectedFunction.code);
         } else if (editorRef.current?.setValue) {
             editorRef.current.setValue(DEFAULT_CODE);
         }
-    }, [selectedFunction?.name, selectedFunction?.fileName, generatedCode]); // Remove unsavedCode dependency
+    }, [selectedFunction, generatedCode, unsavedCode]);
 
     // Add cleanup
     React.useEffect(() => {
@@ -97,7 +95,9 @@ const EditorTab = ({
 
     const handleEditorDidMount = (editor, monaco) => {
         editorRef.current = editor;
-        if (selectedFunction?.code) {
+        if (unsavedCode !== null) {
+            editor.setValue(unsavedCode);
+        } else if (selectedFunction?.code) {
             editor.setValue(selectedFunction.code);
         } else {
             editor.setValue(DEFAULT_CODE);
@@ -228,7 +228,7 @@ const EditorTab = ({
                 </select>
                 <div className="space-x-1">
                     <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
-                    <button onClick={handleTest} className="px-2 py-1 bg-gray-500 text-white rounded">Test</button>
+                    {/* <button onClick={handleTest} className="px-2 py-1 bg-gray-500 text-white rounded">Test</button> */}
                     <button onClick={() => setIsLLMOpen(true)} className="px-2 py-1 bg-purple-500 text-white rounded">AI✨</button>
                 </div>
             </div>
