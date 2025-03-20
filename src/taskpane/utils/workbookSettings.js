@@ -1,8 +1,7 @@
 import { pyLogs } from './logs';
 import { DEFAULT_CODE } from './constants';
 import { parsePython } from './codeparser';
-import { updateNameManager } from './nameManager';  // Changed from saveName
-import { saveWorkbookOnly } from './save';  // Add this import
+import { saveWorkbookOnly } from './save';
 
 const retry = async (fn, retries = 3, delay = 1000) => {
     try {
@@ -19,8 +18,8 @@ export async function saveFunctionToSettings(functionData) {
         throw new Error('Invalid function data');
     }
 
-    return retry(async () => {
-        try {
+    try {
+        return await retry(async () => {
             const result = await Excel.run(async (context) => {
                 const settings = context.workbook.settings;
                 const key = functionData.name;
@@ -30,12 +29,11 @@ export async function saveFunctionToSettings(functionData) {
                 await context.sync();
             });
             return result;
-        } catch (error) {
-            console.error('Failed to save to settings:', error);
-            pyLogs({ message: error.message, code: functionData?.name || null, ref: "saveFunctionToSettingsError" });
-            throw error;
-        }
-    });
+        });
+    } catch (error) {
+        pyLogs({ message: `Failed to save after three tries. Error: ${error.message}`, code: functionData?.name || null, ref: "saveFunctionToSettingsError" });
+        throw error;
+    }
 }
 
 export async function getFunctionFromSettings(name = null) {
