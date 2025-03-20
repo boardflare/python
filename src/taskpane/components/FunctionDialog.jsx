@@ -27,8 +27,9 @@ const FunctionDialog = ({
         if (!ref) return false;
         // Remove $ signs before validation
         const normalizedRef = ref.replace(/\$/g, '');
-        // Match both single cells (A1) and ranges (A1:B2) in one pattern
-        return /^[A-Za-z]+\d+(?::[A-Za-z]+\d+)?$/.test(normalizedRef);
+        // Match both single cells (A1) and ranges (A1:B2), with optional sheet name
+        // Sheet names can contain spaces and special characters when quoted
+        return /^(?:'?[^!]+?'?!)?[A-Za-z]+\d+(?::[A-Za-z]+\d+)?$/.test(normalizedRef);
     };
 
     // Modify setSelectedCell to use updated validation
@@ -45,21 +46,17 @@ const FunctionDialog = ({
 
     // Define the selection changed handler
     const handleSelectionChange = React.useCallback(async (event) => {
-        // Get the current activeField value from a ref to avoid stale closure
         const currentActiveField = activeFieldRef.current;
         if (!currentActiveField) return;
 
         try {
             await Excel.run(async (context) => {
                 const range = context.workbook.getSelectedRange();
-                range.load("address");
+                range.load(["address", "worksheet"]);
                 await context.sync();
 
-                // Extract the cell reference without the sheet name
+                // Keep the full address including sheet name
                 let address = range.address;
-                if (address.includes('!')) {
-                    address = address.split('!')[1];
-                }
 
                 console.log(`Selection changed to: ${address} for field: ${currentActiveField}`);
 
@@ -94,16 +91,15 @@ const FunctionDialog = ({
             const setupSelectionHandler = async () => {
                 try {
                     await Excel.run(async (context) => {
-                        const sheet = context.workbook.worksheets.getActiveWorksheet();
-
-                        // Register the selection changed event handler
-                        sheet.onSelectionChanged.add(handleSelectionChange);
+                        // Register the event at workbook level instead of worksheet
+                        Office.context.document.addHandlerAsync(
+                            Office.EventType.DocumentSelectionChanged,
+                            handleSelectionChange
+                        );
 
                         // Store reference to the current handler for cleanup
                         selectionHandlerRef.current = handleSelectionChange;
-
-                        await context.sync();
-                        console.log("Selection change handler registered");
+                        console.log("Selection change handler registered at workbook level");
                     });
                 } catch (error) {
                     console.error("Error setting up selection handler:", error);
@@ -116,17 +112,16 @@ const FunctionDialog = ({
                 // Remove the selection handler on cleanup
                 const removeSelectionHandler = async () => {
                     try {
-                        await Excel.run(async (context) => {
-                            const sheet = context.workbook.worksheets.getActiveWorksheet();
-
-                            if (selectionHandlerRef.current) {
-                                sheet.onSelectionChanged.remove(selectionHandlerRef.current);
-                                selectionHandlerRef.current = null;
-                            }
-
-                            await context.sync();
-                            console.log("Selection change handler removed");
-                        });
+                        if (selectionHandlerRef.current) {
+                            Office.context.document.removeHandlerAsync(
+                                Office.EventType.DocumentSelectionChanged,
+                                { handler: selectionHandlerRef.current },
+                                (result) => {
+                                    console.log("Selection change handler removed");
+                                }
+                            );
+                            selectionHandlerRef.current = null;
+                        }
                     } catch (error) {
                         pyLogs({
                             message: `[Selection Handler] Failed to remove selection handler: ${error.message}`,
@@ -177,11 +172,12 @@ const FunctionDialog = ({
         }
     }, [isOpen, selectedFunction]);
 
-    // Update fetchRangeValues to return the values
+    // Update fetchRangeValues to work with sheet-qualified ranges
     const fetchRangeValues = async (range) => {
         try {
             const values = await Excel.run(async (context) => {
-                const rangeObj = context.workbook.worksheets.getActiveWorksheet().getRange(range);
+                // Use getRangeByReference to support ranges from any worksheet
+                const rangeObj = context.workbook.getRangeByReference(range);
                 rangeObj.load("values");
                 await context.sync();
                 return rangeObj.values;
@@ -224,21 +220,9 @@ const FunctionDialog = ({
     };
 
     // Activate range selection for a specific field
-    const handleFocus = async (fieldName) => {
+    const handleFocus = (fieldName) => {
         setActiveField(fieldName);
         console.log(`Activated range selection for field: ${fieldName}`);
-
-        try {
-            await Excel.run(async (context) => {
-                const sheet = context.workbook.worksheets.getActiveWorksheet();
-                sheet.load("name");
-                await context.sync();
-                setActiveWorksheet(sheet.name);
-            });
-        } catch (error) {
-            console.error("Error getting worksheet name:", error);
-            setActiveWorksheet("");
-        }
     };
 
     const handleSubmit = async () => {
