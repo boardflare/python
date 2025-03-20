@@ -45,6 +45,17 @@ async function testSeparator() {
     }
 }
 
+/*
+ * Separator notes:
+ * - Custom functions inserted in a cell always use invariant comma.
+ * - Named Lambda functions inserted in a cell always use invariant comma.
+ * - Formulas added to name manager must use device separator.
+ * - Separator testing returns different results for the same user!
+ *
+ */
+
+
+
 export async function parsePython(rawCode) {
     try {
         // Set separator to comma by default, replace with semicolon if error with named item.
@@ -114,18 +125,18 @@ result = parse_python_code_safe("${encodedCode}")
             ? `=${execEnv}(${codeRef}, ${parameters.map((_, i) => `arg${i + 1}`).join(',')})`
             : `=${execEnv}(${codeRef})`;
 
-        // Extract Excel demo.  Strangely, when global separator is ";", and formula contains an array constant as a parameter, the formula must use commas!  WTF?
+        // Extract Excel demo, no need to change from invariant comma to device separator
         const excelDemoMatch = rawCode.match(/^# Excel usage:\s*(.+?)$/m);
         const excelExample = excelDemoMatch
             ? excelDemoMatch[1].trim()
             : null;
 
-        // Build execExample by converting any existing example to use EXEC format
+        // Custom functions must use comma separators, regardless of the global separator.
         let execExample = null;
         if (excelExample) {
             execExample = excelExample.replace(
                 new RegExp(`=${name.toUpperCase()}\\((.*?)\\)`, 'i'),
-                (match, args) => `=${execEnv}(${codeRef}, ${args.split(separator).join(',')})`
+                (match, args) => `=${execEnv}(${codeRef}, ${args})`
             );
         }
 
