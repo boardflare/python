@@ -47,8 +47,8 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
                         <p><span className="font-bold">Step 2:</span> Save it to create a custom function.</p>
                         <div className="bg-white"><code>=HELLO("Annie")</code> <br />
                             {isWebPlatform && (
-                                <p className="mt-1 text-orange-600">
-                                    Autocomplete does not work in Excel for Web for LAMBDA functions, but they are there!
+                                <p className="mt-1">
+                                    Note: Autocomplete does not work in Excel for Web.
                                 </p>
                             )}
                         </div>

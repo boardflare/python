@@ -3,38 +3,39 @@ import { pyLogs } from './logs';
 import { getExecEnv } from './constants';
 import astParserCode from './astParser.py';
 
-async function testSeparator(context) {
+async function testSeparator() {
     const separatorTestName = "SEPARATORTEST";
     let separator = null;
-    let namedItem;
 
     try {
-        const worksheet = context.workbook.worksheets.getActiveWorksheet();
-        namedItem = worksheet.names.getItemOrNullObject(separatorTestName);
-        await context.sync();
-
-        if (!namedItem.isNullObject) {
-            namedItem.delete();
+        return await Excel.run(async context => {
+            const worksheet = context.workbook.worksheets.getActiveWorksheet();
+            let namedItem = worksheet.names.getItemOrNullObject(separatorTestName);
             await context.sync();
-        }
 
-        try {
-            const refersToFormula = "=SUM(1,2)";
-            namedItem = worksheet.names.add(separatorTestName, refersToFormula);
-            await context.sync();
-            namedItem.delete();
-            await context.sync();
-            separator = ",";
-        } catch {
-            separator = ";";
-        }
+            if (!namedItem.isNullObject) {
+                namedItem.delete();
+                await context.sync();
+            }
 
-        pyLogs({
-            code: separator,
-            ref: 'separator_test'
+            try {
+                const refersToFormula = "=SUM(1,2)";
+                namedItem = worksheet.names.add(separatorTestName, refersToFormula);
+                await context.sync();
+                namedItem.delete();
+                await context.sync();
+                separator = ",";
+            } catch {
+                separator = ";";
+            }
+
+            pyLogs({
+                code: separator,
+                ref: 'separator_test'
+            });
+
+            return separator;
         });
-
-        return separator;
     } catch (error) {
         pyLogs({
             message: error.message,
@@ -46,10 +47,8 @@ async function testSeparator(context) {
 
 export async function parsePython(rawCode) {
     try {
-        // Test for correct separator at the start
-        const separator = await Excel.run(async context => {
-            return await testSeparator(context);
-        });
+        // Set separator to comma by default, replace with semicolon if error with named item.
+        const separator = ","; // await testSeparator();
 
         // Safely encode the Python code to avoid issues with triple quotes
         const encodedCode = btoa(
@@ -95,7 +94,7 @@ result = parse_python_code_safe("${encodedCode}")
             ? `${name.toUpperCase()}(${parameters.map(p => p.has_default ? `[${p.name}]` : p.name).join(', ')})`
             : `${name.toUpperCase()}()`;
 
-        // Excel named lambda formula with ISOMITTED handling - now using detected separator
+        // Excel named lambda formula with ISOMITTED handling.
         const paramFormula = parameters.map((param, index) => {
             if (param.has_default) {
                 return `IF(ISOMITTED(${param.name})${separator} "__OMITTED__"${separator} ${param.name})`
