@@ -30,6 +30,10 @@ const FunctionsTab = ({
         setError(error);
     }, [error]);
 
+    React.useEffect(() => {
+        loadFunctions();
+    }, []);
+
     const handleDelete = async (functionName, source, fileName) => {
         try {
             if (source === 'workbook') {

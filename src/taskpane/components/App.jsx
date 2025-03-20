@@ -140,10 +140,6 @@ const App = ({ title }) => {
     }
   };
 
-  React.useEffect(() => {
-    loadFunctions();
-  }, []); // This should only run once on mount
-
   return (
     <div className="h-screen flex flex-col overflow-hidden"> {/* Ensure full screen and hidden overflow */}
       <main className="flex-1 flex flex-col overflow-hidden min-h-0 text-sm bg-white"> {/* Allow shrinking */}

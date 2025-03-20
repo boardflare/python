@@ -91,6 +91,10 @@ const EditorTab = ({
         };
     }, []);
 
+    React.useEffect(() => {
+        loadFunctions();
+    }, []);
+
     const handleEditorDidMount = (editor, monaco) => {
         editorRef.current = editor;
         if (selectedFunction?.code) {
