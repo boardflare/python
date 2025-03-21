@@ -47,9 +47,9 @@ const AddFunctions = ({ loadFunctions }) => {
                 throw new Error("Function code missing");
             }
 
-            // Parse the function code to get formula and metadata
+            // Parse the function code for all metadata except excelExample
             const funcToSave = await parsePython(func.code);
-            // Include the excelExample from the original function
+            // Add excelExample from the notebook metadata
             funcToSave.excelExample = func.excelExample;
 
             await saveWorkbookOnly(funcToSave);
