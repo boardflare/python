@@ -133,28 +133,10 @@ const EditorTab = ({
         }
     };
 
-    const handleTest = async () => {
+    const handleRun = async () => {
         const currentCode = editorRef.current.getValue();
         setUnsavedCode(currentCode);
-        onTest();
-        try {
-            const parsedFunction = await parsePython(currentCode);
-            await runTests(parsedFunction);
-            showNotification("Tests completed successfully!", "success");
-            pyLogs({
-                message: `[Test] Function ${parsedFunction.name} tested successfully`,
-                code: parsedFunction.code,
-                ref: 'test_success'
-            });
-        } catch (err) {
-            showNotification(err.message, "error");
-            window.dispatchEvent(new CustomEvent(EventTypes.ERROR, { detail: err.message }));
-            pyLogs({
-                message: `[Test] Error: ${err.message}`,
-                code: editorRef.current.getValue(),
-                ref: 'test_error'
-            });
-        }
+        setShowFunctionDialog(true);
     };
 
     // Updated onSuccess callback from LLM – now only updates the UI.
@@ -228,7 +210,7 @@ const EditorTab = ({
                 </select>
                 <div className="space-x-1">
                     <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
-                    {/* <button onClick={handleTest} className="px-2 py-1 bg-gray-500 text-white rounded">Test</button> */}
+                    <button onClick={handleRun} className="px-2 py-1 bg-green-500 text-white rounded">Run</button>
                     <button onClick={() => setIsLLMOpen(true)} className="px-2 py-1 bg-purple-500 text-white rounded">AI✨</button>
                 </div>
             </div>
@@ -271,6 +253,7 @@ const EditorTab = ({
                 }}
                 selectedFunction={selectedFunction}
                 loadFunctions={loadFunctions}
+                functionsCache={functionsCache}
             />
         </div>
     );
