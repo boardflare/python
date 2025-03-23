@@ -62,12 +62,11 @@ const EditorTab = ({
             return;
         }
 
-        // First check unsavedCode, then selected function code
-        if (unsavedCode !== null) {
-            editorRef.current.setValue(unsavedCode);
-        } else if (selectedFunction?.code && editorRef.current?.setValue) {
+        // Only update editor from selectedFunction or default code, not from unsavedCode
+        // since unsavedCode is already set by the editor itself via onChange
+        if (selectedFunction?.code && editorRef.current?.setValue && unsavedCode === null) {
             editorRef.current.setValue(selectedFunction.code);
-        } else if (editorRef.current?.setValue) {
+        } else if (editorRef.current?.setValue && unsavedCode === null) {
             editorRef.current.setValue(DEFAULT_CODE);
         }
     }, [selectedFunction, generatedCode, unsavedCode]);
