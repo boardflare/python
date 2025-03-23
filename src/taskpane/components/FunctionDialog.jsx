@@ -70,7 +70,7 @@ const FunctionDialog = ({
         } catch (error) {
             pyLogs({
                 message: `[Selection Change] Failed to handle selection change: ${error.message}`,
-                code: selectedFunction.code,
+                code: selectedFunction?.code || 'unknown_function', // Add null check
                 ref: 'functionDialog_selection_change'
             });
             console.error("Selection change error:", error);
@@ -187,7 +187,7 @@ const FunctionDialog = ({
         } catch (error) {
             pyLogs({
                 message: `[Range Values] Failed to fetch range values for range ${range}: ${error.message}`,
-                code: selectedFunction.code,
+                code: selectedFunction?.code || 'unknown_function', // Add null check
                 ref: 'functionDialog_fetch_range'
             });
             console.error("Error fetching range values:", error);

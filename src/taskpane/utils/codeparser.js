@@ -3,48 +3,6 @@ import { pyLogs } from './logs';
 import { getExecEnv } from './constants';
 import astParserCode from './astParser.py';
 
-async function testSeparator() {
-    const separatorTestName = "SEPARATORTEST";
-    let separator = null;
-
-    try {
-        return await Excel.run(async context => {
-            const worksheet = context.workbook.worksheets.getActiveWorksheet();
-            let namedItem = worksheet.names.getItemOrNullObject(separatorTestName);
-            await context.sync();
-
-            if (!namedItem.isNullObject) {
-                namedItem.delete();
-                await context.sync();
-            }
-
-            try {
-                const refersToFormula = "=SUM(1,2)";
-                namedItem = worksheet.names.add(separatorTestName, refersToFormula);
-                await context.sync();
-                namedItem.delete();
-                await context.sync();
-                separator = ",";
-            } catch {
-                separator = ";";
-            }
-
-            pyLogs({
-                code: separator,
-                ref: 'separator_test'
-            });
-
-            return separator;
-        });
-    } catch (error) {
-        pyLogs({
-            message: error.message,
-            ref: 'separator_test_error'
-        });
-        return ",";  // Default to comma if test fails
-    }
-}
-
 /*
  * Separator notes:
  * - Custom functions inserted in a cell always use invariant comma.
@@ -53,8 +11,6 @@ async function testSeparator() {
  * - Separator testing returns different results for the same user!
  *
  */
-
-
 
 export async function parsePython(rawCode) {
     try {
@@ -125,21 +81,6 @@ result = parse_python_code_safe("${encodedCode}")
             ? `=${execEnv}(${codeRef}, ${parameters.map((_, i) => `arg${i + 1}`).join(',')})`
             : `=${execEnv}(${codeRef})`;
 
-        // Extract Excel demo, no need to change from invariant comma to device separator
-        const excelDemoMatch = rawCode.match(/^# Excel usage:\s*(.+?)$/m);
-        const excelExample = excelDemoMatch
-            ? excelDemoMatch[1].trim()
-            : null;
-
-        // Custom functions must use comma separators, regardless of the global separator.
-        let execExample = null;
-        if (excelExample) {
-            execExample = excelExample.replace(
-                new RegExp(`=${name.toUpperCase()}\\((.*?)\\)`, 'i'),
-                (match, args) => `=${execEnv}(${codeRef}, ${args})`
-            );
-        }
-
         const result = {
             name,
             signature,
@@ -148,10 +89,8 @@ result = parse_python_code_safe("${encodedCode}")
             resultLine,
             formula,         // Named lambda formula
             execFormula,     // Direct EXEC formula
-            execExample,     // Example using EXEC format
             timestamp,
             uid,
-            excelExample,    // Original example
             parameters  // Add parameters to the result
         };
 
