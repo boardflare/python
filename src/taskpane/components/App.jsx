@@ -6,6 +6,7 @@ import FunctionsTab from "./FunctionsTab";
 import SettingsTab from "./SettingsTab";
 import { EventTypes } from "../utils/constants";
 import { getFunctionFromSettings } from "../utils/workbookSettings";
+import { pyLogs } from "../utils/logs";
 
 const App = ({ title }) => {
   const [selectedTab, setSelectedTab] = React.useState("home");
@@ -82,6 +83,7 @@ const App = ({ title }) => {
       }
     } catch (error) {
       console.error('Error loading functions:', error);
+      await pyLogs({ message: error.message, ref: "app_loadFunctions_error" });
       setWorkbookFunctions([]);
       setError('Failed to load workbook functions');
     } finally {
