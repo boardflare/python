@@ -32,7 +32,7 @@ export const ConsoleEvents = {
 };
 
 export const DEBUG_FLAGS = {
-    FORCE_NAME_MANAGER_FAIL: true  // Set to true to simulate name manager failures
+    FORCE_NAME_MANAGER_FAIL: false  // Set to true to simulate name manager failures
 };
 
 export function getExecEnv() {
