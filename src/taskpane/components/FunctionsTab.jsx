@@ -30,9 +30,10 @@ const FunctionsTab = ({
         setError(error);
     }, [error]);
 
-    React.useEffect(() => {
-        loadFunctions();
-    }, []);
+    // Remove this useEffect as functions are now loaded by App
+    // React.useEffect(() => {
+    //     loadFunctions();
+    // }, []);
 
     const handleDelete = async (functionName, source, fileName) => {
         try {

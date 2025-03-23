@@ -27,6 +27,7 @@ const App = ({ title }) => {
       window.location.pathname.toLowerCase().includes('preview') ||
       window.location.hostname === 'localhost'
     );
+    loadFunctions(); // Load functions when App loads
   }, []);
 
   const clearFunctions = () => {

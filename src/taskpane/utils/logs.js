@@ -143,7 +143,7 @@ async function flushLogs() {
             };
             try {
                 // Send logs to server
-                await fetch("https://boardflare.table.core.windows.net/PylogsMar16?sv=2019-02-02&st=2025-03-17T02%3A55%3A17Z&se=2035-03-18T02%3A55%3A00Z&sp=a&sig=pEFZYq0Dgi1e6j5biBKA0M1E0ngavzeHvZYU35SgjtQ%3D&tn=PylogsMar16", { method: 'POST', headers, body });
+                await fetch("https://boardflare.table.core.windows.net/PylogsMar23?sv=2019-02-02&st=2025-03-23T02%3A44%3A59Z&se=2035-03-24T02%3A44%3A00Z&sp=a&sig=ZSigr8C%2BvsYBvC2y7%2Bhw0sh57VBj7fyGz7uH1Jn%2Fm3c%3D&tn=PylogsMar23", { method: 'POST', headers, body });
                 // Clear the logs store
                 await new Promise((resolve, reject) => {
                     const clearTx = db.transaction('Logs', 'readwrite');
