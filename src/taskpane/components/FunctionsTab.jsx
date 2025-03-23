@@ -20,6 +20,7 @@ const FunctionsTab = ({
     const [localError, setError] = React.useState(error || null);
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const [selectedFunction, setSelectedFunction] = React.useState(null);
+    const [oneDriveLoaded, setOneDriveLoaded] = React.useState(false);
 
     // Use effect to sync error prop with local state
     React.useEffect(() => {
@@ -87,13 +88,15 @@ const FunctionsTab = ({
                                             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                         </svg>
                                     </button>
-                                    <button
-                                        className="text-blue-500 hover:text-blue-700"
-                                        onClick={() => handleSaveToOneDrive(func)}
-                                        title="Save to OneDrive"
-                                    >
-                                        ⬇️
-                                    </button>
+                                    {oneDriveLoaded && (
+                                        <button
+                                            className="text-blue-500 hover:text-blue-700"
+                                            onClick={() => handleSaveToOneDrive(func)}
+                                            title="Save to OneDrive"
+                                        >
+                                            ⬇️
+                                        </button>
+                                    )}
                                     <button
                                         className="text-red-500 hover:text-red-700 text-lg"
                                         onClick={() => setDeleteConfirm({ name: func.name })}
@@ -123,7 +126,11 @@ const FunctionsTab = ({
                     <WorkbookFunctionTable functions={workbookFunctions} />
                 )}
 
-                <OneDrive onEdit={onEdit} isPreview={isPreview} />
+                <OneDrive
+                    onEdit={onEdit}
+                    isPreview={isPreview}
+                    onLoadComplete={setOneDriveLoaded}
+                />
 
                 {!isLoading && workbookFunctions.length === 0 && (
                     <div className="flex flex-col items-center justify-center p-5 text-center text-gray-600">

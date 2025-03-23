@@ -6,7 +6,7 @@ import { storeScopes } from "../utils/indexedDB";
 import { authenticateWithDialog } from "./Auth";
 import { pyLogs } from "../utils/logs";
 
-const OneDrive = ({ onEdit, isPreview }) => {
+const OneDrive = ({ onEdit, isPreview, onLoadComplete }) => {
     const [error, setError] = React.useState(null);
     const [isLoading, setIsLoading] = React.useState(false);
     const [onedriveFunctions, setOnedriveFunctions] = React.useState([]);
@@ -22,12 +22,14 @@ const OneDrive = ({ onEdit, isPreview }) => {
             setOnedriveFunctions(driveFunctions || []);
             setFolderUrl(folderUrl);
             setError(null);
+            onLoadComplete?.(true); // Signal successful load
         } catch (error) {
             console.error('Error loading OneDrive functions:', error);
             setOnedriveFunctions([]);
             if (!(error instanceof TokenExpiredError)) {
                 setError('Failed to load OneDrive functions');
             }
+            onLoadComplete?.(false); // Signal failed load
         } finally {
             setIsLoading(false);
         }
