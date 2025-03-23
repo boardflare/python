@@ -1,4 +1,4 @@
-import { getStoredToken } from "../../functions/utils/auth";
+import { getStoredToken } from "./indexedDB";
 
 class TokenExpiredError extends Error {
     constructor(message = 'Sign in on Home tab to access OneDrive functions.') {
@@ -10,6 +10,16 @@ class TokenExpiredError extends Error {
 const DRIVE_APPROOT = 'https://graph.microsoft.com/v1.0/me/drive/special/approot:';
 const BATCH_SIZE_LIMIT = 20;
 
+// Gets the Graph API token from stored credentials
+// @throws {TokenExpiredError} If token is not available or invalid
+async function getGraphToken() {
+    const tokenObj = await getStoredToken();
+    if (!tokenObj?.graphToken) {
+        throw new TokenExpiredError();
+    }
+    return tokenObj.graphToken;
+}
+
 async function handleResponse(response) {
     if (response.status === 401) {
         throw new TokenExpiredError();
@@ -20,13 +30,9 @@ async function handleResponse(response) {
     return response;
 }
 
-/**
- * Makes batch requests to Graph API with size limit handling
- * @param {Array} requests - Array of request objects with url, method, and file reference
- * @returns {Promise<Array>} Combined responses from all batches with file references
- */
+// Makes batch requests to Graph API with size limit handling
 async function makeBatchRequests(requests) {
-    const accessToken = await getStoredToken();
+    const accessToken = await getGraphToken();
     const chunks = [];
     for (let i = 0; i < requests.length; i += BATCH_SIZE_LIMIT) {
         chunks.push(requests.slice(i, i + BATCH_SIZE_LIMIT));
@@ -56,11 +62,7 @@ async function makeBatchRequests(requests) {
     return allResponses;
 }
 
-/**
- * Fetches content from a redirect URL
- * @param {string} redirectUrl - The URL to fetch content from
- * @returns {Promise<Object>} The parsed JSON response
- */
+// Fetches content from a redirect URL
 async function fetchRedirectContent(redirectUrl) {
     try {
         const response = await fetch(redirectUrl, {
@@ -78,13 +80,9 @@ async function fetchRedirectContent(redirectUrl) {
     }
 }
 
-/**
- * Creates or updates a file in the app's special folder
- * @param {Object|string} content - Content to store
- * @param {string} fileName - Name of the file
- */
+// Creates or updates a file in the app's special folder
 export async function saveFile(content, fileName) {
-    const accessToken = await getStoredToken();
+    const accessToken = await getGraphToken();
     try {
         const response = await fetch(`${DRIVE_APPROOT}/${fileName}:/content`, {
             method: 'PUT',
@@ -103,12 +101,9 @@ export async function saveFile(content, fileName) {
     }
 }
 
-/**
- * Reads a file from the app's special folder
- * @param {string} fileName - Name of the file
- */
+// Reads a file from the app's special folder
 export async function readFile(fileName) {
-    const accessToken = await getStoredToken();
+    const accessToken = await getGraphToken();
     try {
         const response = await fetch(`${DRIVE_APPROOT}/${fileName}:/content`, {
             method: 'GET',
@@ -125,12 +120,9 @@ export async function readFile(fileName) {
     }
 }
 
-/**
- * Deletes a file from the app's special folder
- * @param {string} fileName - Name of the file
- */
+// Deletes a file from the app's special folder
 export async function deleteFile(fileName) {
-    const accessToken = await getStoredToken();
+    const accessToken = await getGraphToken();
     try {
         const response = await fetch(`${DRIVE_APPROOT}/${fileName}`, {
             method: 'DELETE',
@@ -147,12 +139,9 @@ export async function deleteFile(fileName) {
     }
 }
 
-/**
- * Lists all files in the app's special folder
- * @returns {Promise<{files: Array, folderUrl: string}>} List of files and folder URL
- */
+// Lists all files in the app's special folder
 export async function listFiles() {
-    const accessToken = await getStoredToken();
+    const accessToken = await getGraphToken();
     try {
         const response = await fetch(`https://graph.microsoft.com/v1.0/me/drive/special/approot/children`, {
             method: 'GET',
@@ -174,10 +163,7 @@ export async function listFiles() {
     }
 }
 
-/**
- * Loads all function files from OneDrive and their contents
- * @returns {Promise<{functions: Array, folderUrl: string}>} Array of function objects with their contents and folder URL
- */
+// Loads all function files from OneDrive and their contents
 export async function loadFunctionFiles() {
     try {
         const { files, folderUrl } = await listFiles();
@@ -290,11 +276,7 @@ export async function loadFunctionFiles() {
     }
 }
 
-/**
- * Formats a Python function and its metadata into an IPython notebook format
- * @param {Object} parsedFunction - Function metadata containing code and other properties
- * @returns {Object} Notebook formatted object
- */
+// Formats a Python function and its metadata into an IPython notebook format
 export function formatAsNotebook(parsedFunction) {
     return {
         cells: [{

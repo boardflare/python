@@ -1,5 +1,5 @@
 import * as React from "react";
-import { loadFunctionFiles, deleteFile } from "../utils/drive";
+import { loadFunctionFiles, deleteFile, TokenExpiredError } from "../utils/drive";
 import { saveWorkbookOnly } from "../utils/save";
 import { parsePython } from "../utils/codeparser";
 import { storeScopes } from "../utils/indexedDB";
