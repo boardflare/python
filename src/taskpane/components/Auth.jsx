@@ -86,6 +86,8 @@ export async function authenticateWithDialog() {
     return token;
 }
 
+const defaultScopes = ["User.Read", "offline_access"];
+
 export function SignInButton({ loadFunctions }) {
     const [isSignedIn, setIsSignedIn] = React.useState(false);
     const [error, setError] = React.useState(null);
@@ -153,6 +155,7 @@ export function SignInButton({ loadFunctions }) {
 
     const signIn = async () => {
         try {
+            await storeScopes(["User.Read", "offline_access"]);  // Store default scopes before auth
             await authenticateWithDialog();
             pyLogs({ message: "Sign in successful", ref: "auth_signin_success" });
             setIsSignedIn(true);
@@ -217,7 +220,9 @@ function initializeDB() {
         request.onupgradeneeded = (event) => {
             const db = event.target.result;
             if (!db.objectStoreNames.contains(storeName)) {
-                db.createObjectStore(storeName);
+                const store = db.createObjectStore(storeName);
+                // Initialize with default scopes
+                store.put(defaultScopes, 'scopes');
             }
         };
         request.onerror = () => {
@@ -365,17 +370,23 @@ async function removeToken() {
     }
 }
 
-export async function storeScopes(scopes) {
+export async function storeScopes(newScopes) {
     const storeName = 'User';
     const scopesKey = 'scopes';
 
     try {
+        // Retrieve existing scopes
+        const existingScopes = await getScopes();
+
+        // Merge new scopes with existing ones, avoiding duplicates
+        const combinedScopes = [...new Set([...existingScopes, ...newScopes])];
+
         const db = await initializeDB();
         return new Promise((resolve, reject) => {
             try {
                 const transaction = db.transaction(storeName, 'readwrite');
                 const store = transaction.objectStore(storeName);
-                const request = store.put(scopes, scopesKey);
+                const request = store.put(combinedScopes, scopesKey);
                 transaction.oncomplete = () => resolve();
                 transaction.onerror = () => reject(transaction.error);
             } catch (error) {
@@ -400,7 +411,7 @@ export async function getScopes() {
                 const transaction = db.transaction(storeName, 'readonly');
                 const store = transaction.objectStore(storeName);
                 const request = store.get(scopesKey);
-                request.onsuccess = () => resolve(request.result || ["User.Read", "offline_access"]);
+                request.onsuccess = () => resolve(request.result || defaultScopes);
                 request.onerror = () => reject(request.error);
             } catch (error) {
                 reject(error);
@@ -409,6 +420,6 @@ export async function getScopes() {
     } catch (error) {
         console.error('Failed to get scopes:', error);
         await pyLogs({ message: error.message, ref: "auth_getScopes_error" });
-        return ["User.Read", "offline_access"];
+        return defaultScopes;
     }
 }

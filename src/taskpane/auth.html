@@ -8,6 +8,8 @@
     <script type="module">
         import { PublicClientApplication } from "https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.17.0/+esm";
 
+        const defaultScopes = ["User.Read", "offline_access"];
+
         async function getScopesFromDB() {
             const dbName = 'Boardflare';
             const storeName = 'User';
@@ -15,20 +17,6 @@
             return new Promise((resolve, reject) => {
                 const request = indexedDB.open(dbName, 1);
                 
-                request.onupgradeneeded = (event) => {
-                    const db = event.target.result;
-                    try {
-                        if (!db.objectStoreNames.contains(storeName)) {
-                            const store = db.createObjectStore(storeName);
-                            // Initialize with default scopes
-                            store.put(["User.Read", "offline_access"], scopesKey);
-                        }
-                    } catch (error) {
-                        console.error('Error creating store:', error);
-                        reject(error);
-                    }
-                };
-
                 request.onsuccess = (event) => {
                     try {
                         const db = event.target.result;
@@ -37,20 +25,19 @@
                         const getRequest = store.get(scopesKey);
                         
                         getRequest.onsuccess = () => {
-                            const result = getRequest.result || ["User.Read", "offline_access"];
-                            resolve(result);
+                            resolve(getRequest.result || defaultScopes);
                         };
                         
-                        getRequest.onerror = () => reject(getRequest.error);
+                        getRequest.onerror = () => resolve(defaultScopes);
                     } catch (error) {
                         console.error('Error accessing store:', error);
-                        resolve(["User.Read", "offline_access"]); // Fallback to default scopes
+                        resolve(defaultScopes);
                     }
                 };
                 
                 request.onerror = () => {
                     console.error('Database error:', request.error);
-                    resolve(["User.Read", "offline_access"]); // Fallback to default scopes
+                    resolve(defaultScopes);
                 };
             });
         }
