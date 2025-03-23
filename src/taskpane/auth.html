@@ -17,22 +17,41 @@
                 
                 request.onupgradeneeded = (event) => {
                     const db = event.target.result;
-                    if (!db.objectStoreNames.contains(storeName)) {
-                        db.createObjectStore(storeName);
+                    try {
+                        if (!db.objectStoreNames.contains(storeName)) {
+                            const store = db.createObjectStore(storeName);
+                            // Initialize with default scopes
+                            store.put(["User.Read", "offline_access"], scopesKey);
+                        }
+                    } catch (error) {
+                        console.error('Error creating store:', error);
+                        reject(error);
                     }
                 };
 
                 request.onsuccess = (event) => {
-                    const db = event.target.result;
-                    const transaction = db.transaction(storeName, 'readonly');
-                    const store = transaction.objectStore(storeName);
-                    const getRequest = store.get(scopesKey);
-                    getRequest.onsuccess = () => {
-                        resolve(getRequest.result || ["User.Read", "offline_access"]);
-                    };
-                    getRequest.onerror = () => reject(getRequest.error);
+                    try {
+                        const db = event.target.result;
+                        const transaction = db.transaction(storeName, 'readonly');
+                        const store = transaction.objectStore(storeName);
+                        const getRequest = store.get(scopesKey);
+                        
+                        getRequest.onsuccess = () => {
+                            const result = getRequest.result || ["User.Read", "offline_access"];
+                            resolve(result);
+                        };
+                        
+                        getRequest.onerror = () => reject(getRequest.error);
+                    } catch (error) {
+                        console.error('Error accessing store:', error);
+                        resolve(["User.Read", "offline_access"]); // Fallback to default scopes
+                    }
                 };
-                request.onerror = () => reject(request.error);
+                
+                request.onerror = () => {
+                    console.error('Database error:', request.error);
+                    resolve(["User.Read", "offline_access"]); // Fallback to default scopes
+                };
             });
         }
 
