@@ -94,8 +94,6 @@ export async function authenticateWithDialog() {
     return token;
 }
 
-const defaultScopes = ["User.Read", "offline_access"];
-
 export function SignInButton({ loadFunctions }) {
     const [isSignedIn, setIsSignedIn] = React.useState(false);
     const [error, setError] = React.useState(null);
