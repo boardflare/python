@@ -361,7 +361,7 @@ const FunctionDialog = ({
                     <h3 className="font-bold">{selectedFunction.signature}</h3>
                     {selectedFunction.noName && (
                         <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                            EXEC mode
+                            NO LAMBDA
                         </span>
                     )}
                 </div>

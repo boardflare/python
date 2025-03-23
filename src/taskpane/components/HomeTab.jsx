@@ -7,7 +7,7 @@ import pdfUrl from "../../../assets/Python-v1.3.pdf";
 import AddFunctions from "./AddFunctions";
 import { pyLogs } from "../utils/logs";
 
-const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFunctions }) => {
+const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFunctions, selectedFunction }) => {
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const [isWebPlatform, setIsWebPlatform] = React.useState(false);
 
@@ -47,8 +47,13 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
                         <p><span className="font-bold">Step 2:</span> Save it to create a custom function.</p>
                         <div className="bg-white"><code>=HELLO("Annie")</code> <br />
                             {isWebPlatform && (
-                                <p className="mt-1">
-                                    Note: Autocomplete does not work in Excel for Web.
+                                <p className="mt-1 text-yellow-600">
+                                    LAMBDA autocomplete unsupported in Excel for Web, however they work when typed in.
+                                </p>
+                            )}
+                            {selectedFunction?.noName && (
+                                <p className="mt-1 text-yellow-600">
+                                    LAMBDA unsupported on this version of Excel.  Use <code>=BOARDFLARE.EXEC("hello", "Annie")</code> instead.
                                 </p>
                             )}
                         </div>

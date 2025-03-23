@@ -158,6 +158,7 @@ const App = ({ title }) => {
               setGeneratedCode={setGeneratedCode}
               setSelectedFunction={setSelectedFunction}
               loadFunctions={loadFunctions}
+              selectedFunction={selectedFunction}
             />
           )}
           {selectedTab === "editor" && (
