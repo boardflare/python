@@ -2,7 +2,8 @@ import * as React from "react";
 import { loadFunctionFiles } from "../utils/drive";
 import { saveWorkbookOnly } from "../utils/save";
 import { parsePython } from "../utils/codeparser";
-import { storeScopes, authenticateWithDialog } from "./Auth";
+import { storeScopes } from "../utils/indexedDB";
+import { authenticateWithDialog } from "./Auth";
 import { pyLogs } from "../utils/logs";
 
 const OneDrive = ({

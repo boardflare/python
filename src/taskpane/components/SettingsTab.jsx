@@ -1,5 +1,6 @@
 import * as React from "react";
-import { getScopes, storeScopes, authenticateWithDialog } from "./Auth";
+import { getScopes, storeScopes } from "../utils/indexedDB";
+import { authenticateWithDialog } from "./Auth";
 
 const SettingsTab = ({ loadFunctions }) => {
     const [scopes, setScopes] = React.useState([]);

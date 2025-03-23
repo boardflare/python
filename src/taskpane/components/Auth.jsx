@@ -1,6 +1,14 @@
 import * as React from "react";
 import { pyLogs } from "../utils/logs";
 import { PublicClientApplication } from "@azure/msal-browser";
+import {
+    initializeDB,
+    getStoredToken,
+    storeToken,
+    removeToken,
+    storeScopes,
+    getScopes
+} from "../utils/indexedDB";
 
 // Initialize MSAL configuration
 const msalConfig = {
@@ -93,7 +101,13 @@ export function SignInButton({ loadFunctions }) {
     const [error, setError] = React.useState(null);
 
     React.useEffect(() => {
-        checkAuthStatus();
+        // Initialize DB before checking auth status
+        initializeDB().then(() => {
+            checkAuthStatus();
+        }).catch(error => {
+            console.error("Failed to initialize database:", error);
+            pyLogs({ message: error.message, ref: "auth_dbInit_error" });
+        });
     }, []);
 
     const checkAuthStatus = async () => {
@@ -208,33 +222,6 @@ export function SignInButton({ loadFunctions }) {
     );
 }
 
-function initializeDB() {
-    const dbName = 'Boardflare';
-    const storeName = 'User';
-    const dbVersion = 1;
-    return new Promise((resolve, reject) => {
-        if (!window.indexedDB) {
-            return reject(new Error('IndexedDB is not supported in this browser'));
-        }
-        const request = indexedDB.open(dbName, dbVersion);
-        request.onupgradeneeded = (event) => {
-            const db = event.target.result;
-            if (!db.objectStoreNames.contains(storeName)) {
-                const store = db.createObjectStore(storeName);
-                // Initialize with default scopes
-                store.put(defaultScopes, 'scopes');
-            }
-        };
-        request.onerror = () => {
-            console.error("IndexedDB error:", request.error);
-            reject(request.error);
-        };
-        request.onsuccess = (event) => {
-            resolve(event.target.result);
-        };
-    });
-}
-
 async function isTokenValid(token) {
     if (!token) return false;
     try {
@@ -255,171 +242,5 @@ async function isTokenValid(token) {
         console.error("Error validating token:", error);
         await pyLogs({ message: error.message, ref: "auth_validateToken_error" });
         return false;
-    }
-}
-
-async function getStoredToken() {
-    const storeName = 'User';
-    const tokenKey = 'auth_token';
-    const graphKey = 'graphToken';
-    const claimsKey = 'tokenClaims';
-
-    try {
-        const db = await initializeDB();
-        return new Promise((resolve, reject) => {
-            try {
-                const transaction = db.transaction(storeName, 'readonly');
-                const store = transaction.objectStore(storeName);
-                const authRequest = store.get(tokenKey);
-                const graphRequest = store.get(graphKey);
-                const claimsRequest = store.get(claimsKey);
-
-                let tokens = {};
-
-                authRequest.onsuccess = () => {
-                    tokens.auth_token = authRequest.result;
-                };
-
-                graphRequest.onsuccess = () => {
-                    tokens.graphToken = graphRequest.result;
-                };
-
-                claimsRequest.onsuccess = () => {
-                    tokens.tokenClaims = claimsRequest.result;
-                };
-
-                transaction.oncomplete = () => {
-                    if (!tokens.auth_token || !tokens.graphToken) {
-                        resolve(null);
-                        return;
-                    }
-                    resolve(tokens);
-                };
-
-                transaction.onerror = () => reject(transaction.error);
-            } catch (error) {
-                reject(error);
-            }
-        });
-    } catch (error) {
-        console.error('Failed to get token:', error);
-        await pyLogs({ message: error.message, ref: "auth_getStoredToken_error" });
-        return null;
-    }
-}
-
-export async function storeToken(tokenObj) {
-    const storeName = 'User';
-    const authKey = 'auth_token';
-    const graphKey = 'graphToken';
-    const claimsKey = 'tokenClaims';
-
-    try {
-        const db = await initializeDB();
-        return new Promise((resolve, reject) => {
-            try {
-                const transaction = db.transaction(storeName, 'readwrite');
-                const store = transaction.objectStore(storeName);
-
-                const authRequest = store.put(tokenObj.auth_token, authKey);
-                const graphRequest = store.put(tokenObj.graphToken, graphKey);
-                const claimsRequest = store.put(tokenObj.tokenClaims, claimsKey);
-
-                transaction.oncomplete = () => {
-                    resolve();
-                };
-                transaction.onerror = (error) => {
-                    console.error('Transaction error:', error);
-                    reject(transaction.error);
-                };
-            } catch (error) {
-                console.error('Store operation error:', error);
-                reject(error);
-            }
-        });
-    } catch (error) {
-        console.error('DB initialization error:', error);
-        await pyLogs({ message: error.message, ref: "auth_storeToken_error" });
-        throw error;
-    }
-}
-
-async function removeToken() {
-    const storeName = 'User';
-    const authKey = 'auth_token';
-    const graphKey = 'graphToken';
-
-    try {
-        const db = await initializeDB();
-        return new Promise((resolve, reject) => {
-            try {
-                const transaction = db.transaction(storeName, 'readwrite');
-                const store = transaction.objectStore(storeName);
-                store.delete(authKey);
-                store.delete(graphKey);
-                transaction.oncomplete = () => resolve();
-                transaction.onerror = () => reject(transaction.error);
-            } catch (error) {
-                reject(error);
-            }
-        });
-    } catch (error) {
-        console.error('DB initialization error during sign out:', error);
-        await pyLogs({ message: error.message, ref: "auth_removeToken_error" });
-        throw error;
-    }
-}
-
-export async function storeScopes(newScopes) {
-    const storeName = 'User';
-    const scopesKey = 'scopes';
-
-    try {
-        // Retrieve existing scopes
-        const existingScopes = await getScopes();
-
-        // Merge new scopes with existing ones, avoiding duplicates
-        const combinedScopes = [...new Set([...existingScopes, ...newScopes])];
-
-        const db = await initializeDB();
-        return new Promise((resolve, reject) => {
-            try {
-                const transaction = db.transaction(storeName, 'readwrite');
-                const store = transaction.objectStore(storeName);
-                const request = store.put(combinedScopes, scopesKey);
-                transaction.oncomplete = () => resolve();
-                transaction.onerror = () => reject(transaction.error);
-            } catch (error) {
-                reject(error);
-            }
-        });
-    } catch (error) {
-        console.error('DB initialization error:', error);
-        await pyLogs({ message: error.message, ref: "auth_storeScopes_error" });
-        throw error;
-    }
-}
-
-export async function getScopes() {
-    const storeName = 'User';
-    const scopesKey = 'scopes';
-
-    try {
-        const db = await initializeDB();
-        return new Promise((resolve, reject) => {
-            try {
-                const transaction = db.transaction(storeName, 'readonly');
-                const store = transaction.objectStore(storeName);
-                const request = store.get(scopesKey);
-                request.onsuccess = () => resolve(request.result || defaultScopes);
-                request.onerror = () => reject(request.error);
-            } catch (error) {
-                reject(error);
-            }
-        });
-    } catch (error) {
-        console.error('Failed to get scopes:', error);
-        await pyLogs({ message: error.message, ref: "auth_getScopes_error" });
-        return defaultScopes;
     }
 }
