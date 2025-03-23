@@ -1,25 +1,41 @@
 import * as React from "react";
-import { loadFunctionFiles } from "../utils/drive";
+import { loadFunctionFiles, deleteFile } from "../utils/drive";
 import { saveWorkbookOnly } from "../utils/save";
 import { parsePython } from "../utils/codeparser";
 import { storeScopes } from "../utils/indexedDB";
 import { authenticateWithDialog } from "./Auth";
 import { pyLogs } from "../utils/logs";
 
-const OneDrive = ({
-    onedriveFunctions,
-    isLoading,
-    folderUrl,
-    loadFunctions,
-    onDelete,
-    error: parentError,
-    isPreview
-}) => {
-    const [error, setError] = React.useState(parentError);
+const OneDrive = ({ onEdit, isPreview }) => {
+    const [error, setError] = React.useState(null);
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [onedriveFunctions, setOnedriveFunctions] = React.useState([]);
+    const [folderUrl, setFolderUrl] = React.useState(null);
+    const [deleteConfirm, setDeleteConfirm] = React.useState(null);
+
+    const loadOnedriveFunctions = async () => {
+        try {
+            setIsLoading(true);
+            setOnedriveFunctions([]); // Clear first
+
+            const { driveFunctions, folderUrl } = await loadFunctionFiles();
+            setOnedriveFunctions(driveFunctions || []);
+            setFolderUrl(folderUrl);
+            setError(null);
+        } catch (error) {
+            console.error('Error loading OneDrive functions:', error);
+            setOnedriveFunctions([]);
+            if (!(error instanceof TokenExpiredError)) {
+                setError('Failed to load OneDrive functions');
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     React.useEffect(() => {
-        setError(parentError);
-    }, [parentError]);
+        loadOnedriveFunctions();
+    }, []);
 
     const handleSync = async (func) => {
         try {
@@ -30,7 +46,7 @@ const OneDrive = ({
             }
             const reparsedFunc = await parsePython(freshFunc.code); // Needed to ensure environment is set correctly for local, preview, etc.
             await saveWorkbookOnly(reparsedFunc);
-            await loadFunctions();
+            await loadOnedriveFunctions();
             setError(null);
             pyLogs({
                 ref: 'onedrive_sync_success',
@@ -47,11 +63,31 @@ const OneDrive = ({
         }
     };
 
+    const handleDelete = async (func) => {
+        try {
+            await deleteFile(func.fileName);
+            await loadOnedriveFunctions();
+            setDeleteConfirm(null);
+            pyLogs({
+                ref: 'onedrive_delete_success',
+                code: func.code
+            });
+        } catch (error) {
+            console.error('Error deleting function:', error);
+            setError(error.message || 'Failed to delete function');
+            pyLogs({
+                ref: 'onedrive_delete_error',
+                message: `[OneDrive] Delete error: ${error.message}`,
+                code: func.code
+            });
+        }
+    };
+
     const handleLogin = async () => {
         try {
             await storeScopes(["Files.ReadWrite"]);
             await authenticateWithDialog();
-            loadFunctions?.();
+            loadOnedriveFunctions?.();
             pyLogs({
                 ref: 'onedrive_login_success'
             });
@@ -75,7 +111,7 @@ const OneDrive = ({
                         </a>
                     </div>
                     {folderUrl && isPreview && (
-                        <button onClick={loadFunctions} className="text-blue-500 hover:text-blue-700"
+                        <button onClick={loadOnedriveFunctions} className="text-blue-500 hover:text-blue-700"
                             title="Refresh OneDrive functions">
                             🔄
                         </button>
@@ -143,7 +179,7 @@ const OneDrive = ({
                                             ⬆️
                                         </button>
                                         <button className="text-red-500 hover:text-red-700 text-lg"
-                                            onClick={() => onDelete(func)}
+                                            onClick={() => setDeleteConfirm(func)}
                                             title="Delete function">
                                             ❌
                                         </button>
@@ -159,6 +195,29 @@ const OneDrive = ({
                     Saving updates a function with the same name.
                 </div>
             </div>
+
+            {deleteConfirm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                    <div className="bg-white p-6 rounded-lg max-w-sm w-full">
+                        <h3 className="text-lg font-semibold mb-4">Delete Function</h3>
+                        <p className="mb-4">Are you sure you want to delete "{deleteConfirm.name}"?</p>
+                        <div className="flex justify-end gap-2">
+                            <button
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                                onClick={() => setDeleteConfirm(null)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                onClick={() => handleDelete(deleteConfirm)}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 };

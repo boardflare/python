@@ -16,9 +16,7 @@ const EditorTab = ({
     onTest,
     generatedCode,
     setGeneratedCode,
-    functionsCache,
     workbookFunctions,
-    onedriveFunctions,
     loadFunctions,
     unsavedCode,
     setUnsavedCode
@@ -64,16 +62,9 @@ const EditorTab = ({
             return;
         }
 
-        const source = selectedFunction?.source || 'workbook';
-        const id = source === 'workbook' ? selectedFunction?.name : selectedFunction?.fileName;
-        const cacheKey = `${source}-${id}`;
-        const cachedFunc = functionsCache.current.get(cacheKey);
-
-        // First check unsavedCode, then cached/selected function code
+        // First check unsavedCode, then selected function code
         if (unsavedCode !== null) {
             editorRef.current.setValue(unsavedCode);
-        } else if (cachedFunc?.code && editorRef.current?.setValue) {
-            editorRef.current.setValue(cachedFunc.code);
         } else if (selectedFunction?.code && editorRef.current?.setValue) {
             editorRef.current.setValue(selectedFunction.code);
         } else if (editorRef.current?.setValue) {
@@ -249,7 +240,6 @@ const EditorTab = ({
                 }}
                 selectedFunction={selectedFunction}
                 loadFunctions={loadFunctions}
-                functionsCache={functionsCache}
             />
         </div>
     );
