@@ -4,8 +4,6 @@ import LLM from "./LLM";
 import FunctionDialog from "./FunctionDialog";
 import { DEFAULT_CODE } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
-import { EventTypes } from "../utils/constants";
-import { runTests } from "../utils/testRunner";
 import { saveWorkbookOnly } from "../utils/save";  // Change import
 import { pyLogs } from "../utils/logs";
 
