@@ -158,7 +158,7 @@ export async function storeScopes(newScopes) {
             const transaction = db.transaction(storeName, 'readwrite');
             const store = transaction.objectStore(storeName);
             store.put(combinedScopes, scopesKey);
-            transaction.oncomplete = () => resolve();
+            transaction.oncomplete = () => resolve(combinedScopes); // Return combined scopes
             transaction.onerror = () => reject(transaction.error);
         });
     } catch (error) {

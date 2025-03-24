@@ -89,7 +89,8 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
 
     const handleLogin = async () => {
         try {
-            await storeScopes(["Files.ReadWrite"]);
+            const updatedScopes = await storeScopes(["Files.ReadWrite"]); // Capture returned scopes
+            console.log('Updated scopes:', updatedScopes);
             await authenticateWithDialog();
             loadOnedriveFunctions?.();
             pyLogs({
