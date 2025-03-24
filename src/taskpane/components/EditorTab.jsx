@@ -94,6 +94,8 @@ const EditorTab = ({
         try {
             const code = editorRef.current.getValue();
             const parsedFunction = await parsePython(code);
+
+            // selectedFunction will have added metadata like prompt, function dialog args, etc.
             const updatedFunction = {
                 ...selectedFunction,
                 ...parsedFunction
@@ -101,10 +103,7 @@ const EditorTab = ({
 
             const savedFunction = await saveWorkbookOnly(updatedFunction);
             await loadFunctions();
-            setSelectedFunction({
-                ...savedFunction,
-                source: 'workbook'
-            });
+            setSelectedFunction(savedFunction); // removed source property
             setUnsavedCode(null);
 
             if (savedFunction.noName) {
@@ -128,16 +127,13 @@ const EditorTab = ({
     // Updated onSuccess callback from LLM – now only updates the UI.
     const handleLLMSuccess = (savedFunction, prompt) => {
         editorRef.current.setValue(savedFunction.code);
-        setSelectedFunction({ ...savedFunction, source: 'workbook' });
+        setSelectedFunction(savedFunction); // removed source property
         showNotification(`Function saved successfully!`, "success");
     };
 
     const handleFunctionChange = (func) => {
         if (func) {
-            setSelectedFunction({
-                ...func,
-                source: 'workbook'
-            });
+            setSelectedFunction(func); // removed source property
             setUnsavedCode(null);
         } else {
             setSelectedFunction({ name: "", code: DEFAULT_CODE });
