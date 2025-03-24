@@ -6,7 +6,6 @@ import { DEFAULT_CODE } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
 import { EventTypes } from "../utils/constants";
 import { runTests } from "../utils/testRunner";
-import { TokenExpiredError } from "../utils/drive";
 import { saveWorkbookOnly } from "../utils/save";  // Change import
 import { pyLogs } from "../utils/logs";
 
@@ -112,9 +111,8 @@ const EditorTab = ({
                 showNotification(`${savedFunction.signature} saved!`, "success");
             }
         } catch (err) {
-            if (!(err instanceof TokenExpiredError)) {
-                showNotification(err.message, "error");
-            }
+            await pyLogs({ message: err.message, ref: "handleSave_error" });
+            showNotification(err.message, "error");
         }
     };
 
