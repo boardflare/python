@@ -35,7 +35,7 @@ const HomeTab = ({ handleTabSelect, setGeneratedCode, setSelectedFunction, loadF
                     <div className="border-gray-300 rounded-lg py-0">
                         <p>
                             <span className="font-bold">Step 1:</span> Write a Python function in the
-                            <span className="text-blue-500 underline cursor-pointer" onClick={() => handleTabSelect({ target: { value: 'editor' } })}>
+                            <span className="ml-1 text-blue-500 underline cursor-pointer" onClick={() => handleTabSelect({ target: { value: 'editor' } })}>
                                 editor
                             </span>.
                         </p>
