@@ -9,12 +9,12 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.5.2",
-    "vitest": "2.0.5",
-    "wrangler": "^3.60.3"
+    "@cloudflare/vitest-pool-workers": "^0.8.4",
+    "vitest": "3.0.9",
+    "wrangler": "^4.4.0"
   },
   "dependencies": {
-    "@ai-sdk/mistral": "^1.0.3",
-    "ai": "^4.0.11"
+    "@ai-sdk/mistral": "^1.2.1",
+    "ai": "^4.2.2"
   }
 }

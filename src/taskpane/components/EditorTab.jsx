@@ -4,21 +4,15 @@ import LLM from "./LLM";
 import FunctionDialog from "./FunctionDialog";
 import { DEFAULT_CODE } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
-import { EventTypes } from "../utils/constants";
-import { runTests } from "../utils/testRunner";
-import { TokenExpiredError } from "../utils/drive";
 import { saveWorkbookOnly } from "../utils/save";  // Change import
 import { pyLogs } from "../utils/logs";
 
 const EditorTab = ({
     selectedFunction,
     setSelectedFunction,
-    onTest,
     generatedCode,
     setGeneratedCode,
-    functionsCache,
     workbookFunctions,
-    onedriveFunctions,
     loadFunctions,
     unsavedCode,
     setUnsavedCode
@@ -44,7 +38,7 @@ const EditorTab = ({
         setNotification({ message, type });
         notificationTimeoutRef.current = setTimeout(() => {
             setNotification("");
-        }, 10000);
+        }, 7000);
     };
 
     React.useEffect(() => {
@@ -64,24 +58,14 @@ const EditorTab = ({
             return;
         }
 
-        if (unsavedCode !== null) {
-            editorRef.current.setValue(unsavedCode);
-            return;
-        }
-
-        const source = selectedFunction?.source || 'workbook';
-        const id = source === 'workbook' ? selectedFunction?.name : selectedFunction?.fileName;
-        const cacheKey = `${source}-${id}`;
-        const cachedFunc = functionsCache.current.get(cacheKey);
-
-        if (cachedFunc?.code && editorRef.current?.setValue) {
-            editorRef.current.setValue(cachedFunc.code);
-        } else if (selectedFunction?.code && editorRef.current?.setValue) {
+        // Only update editor from selectedFunction or default code, not from unsavedCode
+        // since unsavedCode is already set by the editor itself via onChange
+        if (selectedFunction?.code && editorRef.current?.setValue && unsavedCode === null) {
             editorRef.current.setValue(selectedFunction.code);
-        } else if (editorRef.current?.setValue) {
+        } else if (editorRef.current?.setValue && unsavedCode === null) {
             editorRef.current.setValue(DEFAULT_CODE);
         }
-    }, [selectedFunction?.name, selectedFunction?.fileName, generatedCode]); // Remove unsavedCode dependency
+    }, [selectedFunction, generatedCode, unsavedCode]);
 
     // Add cleanup
     React.useEffect(() => {
@@ -93,7 +77,9 @@ const EditorTab = ({
 
     const handleEditorDidMount = (editor, monaco) => {
         editorRef.current = editor;
-        if (selectedFunction?.code) {
+        if (unsavedCode !== null) {
+            editor.setValue(unsavedCode);
+        } else if (selectedFunction?.code) {
             editor.setValue(selectedFunction.code);
         } else {
             editor.setValue(DEFAULT_CODE);
@@ -104,6 +90,8 @@ const EditorTab = ({
         try {
             const code = editorRef.current.getValue();
             const parsedFunction = await parsePython(code);
+
+            // selectedFunction will have added metadata like prompt, function dialog args, etc.
             const updatedFunction = {
                 ...selectedFunction,
                 ...parsedFunction
@@ -111,10 +99,7 @@ const EditorTab = ({
 
             const savedFunction = await saveWorkbookOnly(updatedFunction);
             await loadFunctions();
-            setSelectedFunction({
-                ...savedFunction,
-                source: 'workbook'
-            });
+            setSelectedFunction(savedFunction); // removed source property
             setUnsavedCode(null);
 
             if (savedFunction.noName) {
@@ -123,49 +108,27 @@ const EditorTab = ({
                 showNotification(`${savedFunction.signature} saved!`, "success");
             }
         } catch (err) {
-            if (!(err instanceof TokenExpiredError)) {
-                showNotification(err.message, "error");
-            }
+            await pyLogs({ message: err.message, ref: "handleSave_error" });
+            showNotification(err.message, "error");
         }
     };
 
-    const handleTest = async () => {
+    const handleRun = async () => {
         const currentCode = editorRef.current.getValue();
         setUnsavedCode(currentCode);
-        onTest();
-        try {
-            const parsedFunction = await parsePython(currentCode);
-            await runTests(parsedFunction);
-            showNotification("Tests completed successfully!", "success");
-            pyLogs({
-                message: `[Test] Function ${parsedFunction.name} tested successfully`,
-                code: parsedFunction.code,
-                ref: 'test_success'
-            });
-        } catch (err) {
-            showNotification(err.message, "error");
-            window.dispatchEvent(new CustomEvent(EventTypes.ERROR, { detail: err.message }));
-            pyLogs({
-                errorMessage: `[Test] Error: ${err.message}`,
-                code: editorRef.current.getValue(),
-                ref: 'test_error'
-            });
-        }
+        setShowFunctionDialog(true);
     };
 
     // Updated onSuccess callback from LLM – now only updates the UI.
     const handleLLMSuccess = (savedFunction, prompt) => {
         editorRef.current.setValue(savedFunction.code);
-        setSelectedFunction({ ...savedFunction, source: 'workbook' });
+        setSelectedFunction(savedFunction); // removed source property
         showNotification(`Function saved successfully!`, "success");
     };
 
     const handleFunctionChange = (func) => {
         if (func) {
-            setSelectedFunction({
-                ...func,
-                source: 'workbook'
-            });
+            setSelectedFunction(func); // removed source property
             setUnsavedCode(null);
         } else {
             setSelectedFunction({ name: "", code: DEFAULT_CODE });
@@ -224,7 +187,7 @@ const EditorTab = ({
                 </select>
                 <div className="space-x-1">
                     <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
-                    <button onClick={handleTest} className="px-2 py-1 bg-gray-500 text-white rounded">Test</button>
+                    <button onClick={handleRun} className="px-2 py-1 bg-green-500 text-white rounded">Run</button>
                     <button onClick={() => setIsLLMOpen(true)} className="px-2 py-1 bg-purple-500 text-white rounded">AI✨</button>
                 </div>
             </div>

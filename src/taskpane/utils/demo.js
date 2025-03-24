@@ -64,9 +64,9 @@ export async function singleDemo(parsedCode) {
             exampleLabelRange.format.font.bold = true;
 
             try {
-                // Add example code based on noName flag
+                // Add example code
                 const codeRange = sheet.getRangeByIndexes(3, 1, 1, 1);
-                codeRange.values = [[parsedCode.noName ? parsedCode.execExample : parsedCode.excelExample]];
+                codeRange.values = [[parsedCode.excelExample]];
                 await context.sync();
             } catch (exampleError) {
                 const errorRange = sheet.getRangeByIndexes(3, 1, 1, 1);

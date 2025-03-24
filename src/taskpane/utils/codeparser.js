@@ -3,53 +3,19 @@ import { pyLogs } from './logs';
 import { getExecEnv } from './constants';
 import astParserCode from './astParser.py';
 
-async function testSeparator(context) {
-    const separatorTestName = "SEPARATORTEST";
-    let separator = null;
-    let namedItem;
-
-    try {
-        const worksheet = context.workbook.worksheets.getActiveWorksheet();
-        namedItem = worksheet.names.getItemOrNullObject(separatorTestName);
-        await context.sync();
-
-        if (!namedItem.isNullObject) {
-            namedItem.delete();
-            await context.sync();
-        }
-
-        try {
-            const refersToFormula = "=SUM(1,2)";
-            namedItem = worksheet.names.add(separatorTestName, refersToFormula);
-            await context.sync();
-            namedItem.delete();
-            await context.sync();
-            separator = ",";
-        } catch {
-            separator = ";";
-        }
-
-        pyLogs({
-            code: separator,
-            ref: 'separator_test'
-        });
-
-        return separator;
-    } catch (error) {
-        pyLogs({
-            errorMessage: error.message,
-            ref: 'separator_test_error'
-        });
-        return ",";  // Default to comma if test fails
-    }
-}
+/*
+ * Separator notes:
+ * - Custom functions inserted in a cell always use invariant comma.
+ * - Named Lambda functions inserted in a cell always use invariant comma.
+ * - Formulas added to name manager must use device separator.
+ * - Separator testing returns different results for the same user!
+ *
+ */
 
 export async function parsePython(rawCode) {
     try {
-        // Test for correct separator at the start
-        const separator = await Excel.run(async context => {
-            return await testSeparator(context);
-        });
+        // Set separator to comma by default, replace with semicolon if error with named item.
+        const separator = ","; // await testSeparator();
 
         // Safely encode the Python code to avoid issues with triple quotes
         const encodedCode = btoa(
@@ -95,7 +61,7 @@ result = parse_python_code_safe("${encodedCode}")
             ? `${name.toUpperCase()}(${parameters.map(p => p.has_default ? `[${p.name}]` : p.name).join(', ')})`
             : `${name.toUpperCase()}()`;
 
-        // Excel named lambda formula with ISOMITTED handling - now using detected separator
+        // Excel named lambda formula with ISOMITTED handling.
         const paramFormula = parameters.map((param, index) => {
             if (param.has_default) {
                 return `IF(ISOMITTED(${param.name})${separator} "__OMITTED__"${separator} ${param.name})`
@@ -115,21 +81,6 @@ result = parse_python_code_safe("${encodedCode}")
             ? `=${execEnv}(${codeRef}, ${parameters.map((_, i) => `arg${i + 1}`).join(',')})`
             : `=${execEnv}(${codeRef})`;
 
-        // Extract Excel demo.  Strangely, when global separator is ";", and formula contains an array constant as a parameter, the formula must use commas!  WTF?
-        const excelDemoMatch = rawCode.match(/^# Excel usage:\s*(.+?)$/m);
-        const excelExample = excelDemoMatch
-            ? excelDemoMatch[1].trim()
-            : null;
-
-        // Build execExample by converting any existing example to use EXEC format
-        let execExample = null;
-        if (excelExample) {
-            execExample = excelExample.replace(
-                new RegExp(`=${name.toUpperCase()}\\((.*?)\\)`, 'i'),
-                (match, args) => `=${execEnv}(${codeRef}, ${args.split(separator).join(',')})`
-            );
-        }
-
         const result = {
             name,
             signature,
@@ -138,17 +89,15 @@ result = parse_python_code_safe("${encodedCode}")
             resultLine,
             formula,         // Named lambda formula
             execFormula,     // Direct EXEC formula
-            execExample,     // Example using EXEC format
             timestamp,
             uid,
-            excelExample,    // Original example
             parameters  // Add parameters to the result
         };
 
         return result;
     } catch (error) {
         pyLogs({
-            errorMessage: error.message,
+            message: error.message,
             code: rawCode,
             ref: 'codeparser_error'
         })

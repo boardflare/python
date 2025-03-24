@@ -3,6 +3,7 @@ import { saveWorkbookOnly } from "../utils/save";
 import { singleDemo } from "../utils/demo";
 import { pyLogs } from "../utils/logs";
 import { parsePython } from "../utils/codeparser";
+import { getExecEnv } from "../utils/constants";
 // Import the example functions directly from assets
 import exampleFunctions from '../../../assets/example_functions.json';
 
@@ -47,14 +48,27 @@ const AddFunctions = ({ loadFunctions }) => {
                 throw new Error("Function code missing");
             }
 
-            // Parse the function code to get formula and metadata
+            // Parse the function code for all metadata except excelExample
             const funcToSave = await parsePython(func.code);
-            await saveWorkbookOnly(funcToSave);
-            await singleDemo(funcToSave);
+
+            // Save workbook first and use returned function with noName set
+            const savedFunction = await saveWorkbookOnly(funcToSave);
+
+            // Create execExample if noName is true
+            if (savedFunction.noName && func.excelExample) {
+                savedFunction.excelExample = func.excelExample.replace(
+                    new RegExp(`=${func.name.toUpperCase()}\\((.*?)\\)`, 'i'),
+                    (match, args) => `=${getExecEnv()}("${func.name}", ${args})`
+                );
+            } else {
+                savedFunction.excelExample = func.excelExample;
+            }
+
+            await singleDemo(savedFunction);
             await loadFunctions();
 
             pyLogs({
-                code: func.name,
+                code: savedFunction.name,
                 ref: 'imported_example_function',
                 source: 'example'
             });
@@ -64,7 +78,7 @@ const AddFunctions = ({ loadFunctions }) => {
             pyLogs({
                 code: func.name,
                 ref: 'import_example_function_error',
-                errorMessage: error.message
+                message: error.message
             });
         }
     };

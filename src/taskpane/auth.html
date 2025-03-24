@@ -8,23 +8,37 @@
     <script type="module">
         import { PublicClientApplication } from "https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.17.0/+esm";
 
+        const defaultScopes = ["User.Read", "offline_access"];
+
         async function getScopesFromDB() {
             const dbName = 'Boardflare';
             const storeName = 'User';
             const scopesKey = 'scopes';
             return new Promise((resolve, reject) => {
                 const request = indexedDB.open(dbName, 1);
+                
                 request.onsuccess = (event) => {
-                    const db = event.target.result;
-                    const transaction = db.transaction(storeName, 'readonly');
-                    const store = transaction.objectStore(storeName);
-                    const getRequest = store.get(scopesKey);
-                    getRequest.onsuccess = () => {
-                        resolve(getRequest.result || ["User.Read", "offline_access"]);
-                    };
-                    getRequest.onerror = () => reject(getRequest.error);
+                    try {
+                        const db = event.target.result;
+                        const transaction = db.transaction(storeName, 'readonly');
+                        const store = transaction.objectStore(storeName);
+                        const getRequest = store.get(scopesKey);
+                        
+                        getRequest.onsuccess = () => {
+                            resolve(getRequest.result || defaultScopes);
+                        };
+                        
+                        getRequest.onerror = () => resolve(defaultScopes);
+                    } catch (error) {
+                        console.error('Error accessing store:', error);
+                        resolve(defaultScopes);
+                    }
                 };
-                request.onerror = () => reject(request.error);
+                
+                request.onerror = () => {
+                    console.error('Database error:', request.error);
+                    resolve(defaultScopes);
+                };
             });
         }
 
@@ -73,7 +87,7 @@
                 }));
             } catch (error) {
                 const errorData = {
-                    errorMessage: error.errorCode,
+                    message: error.errorCode,
                     message: error.errorMessage,
                     errorCode: error.stack
                 };

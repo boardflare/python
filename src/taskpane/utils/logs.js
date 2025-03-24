@@ -1,19 +1,15 @@
+import {
+    initializeDB,
+    getTokenClaims,
+    getUserId,
+    saveLogToIndexedDB,
+    getAllLogs,
+    clearLogs
+} from "./indexedDB";
+
 let browserData = null;
 let uid = null;
 let isFlushing = false;
-
-// Helper to open IndexedDB; used for both 'User' and 'BoardflareLogs' stores.
-function openDatabase(dbName, version, upgradeCallback) {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(dbName, version);
-        request.onupgradeneeded = (event) => {
-            const db = event.target.result;
-            upgradeCallback && upgradeCallback(db);
-        };
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
-}
 
 export async function initialize() {
     const adapter = await navigator.gpu.requestAdapter();
@@ -25,87 +21,17 @@ export async function initialize() {
     uid = await getUserId();
 }
 
-async function getUserId() {
-    const db = await openDatabase('Boardflare', 1, (db) => {
-        if (!db.objectStoreNames.contains('User')) {
-            db.createObjectStore('User');
-        }
-    });
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction('User', 'readwrite');
-        const store = tx.objectStore('User');
-        const storageKey = 'anonymous_id';
-        const request = store.get(storageKey);
-        request.onsuccess = () => {
-            let userId = request.result;
-            if (!userId) {
-                userId = crypto.randomUUID();
-                store.put(userId, storageKey);
-            }
-            resolve(userId);
-        };
-        request.onerror = () => reject(request.error);
-    });
-}
-
-async function getTokenClaims() {
-    const db = await openDatabase('Boardflare', 1, (db) => {
-        if (!db.objectStoreNames.contains('User')) {
-            db.createObjectStore('User');
-        }
-    });
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction('User', 'readonly');
-        const store = tx.objectStore('User');
-        const request = store.get('tokenClaims');
-        request.onsuccess = () => resolve(request.result || null);
-        request.onerror = () => reject(request.error);
-    });
-}
-
-async function saveLogToIndexedDB(logEntity) {
-    const db = await openDatabase('BoardflareLogs', 1, (db) => {
-        if (!db.objectStoreNames.contains('Logs')) {
-            db.createObjectStore('Logs', { autoIncrement: true });
-        }
-    });
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction('Logs', 'readwrite');
-        const store = tx.objectStore('Logs');
-        const request = store.add(logEntity);
-        request.onsuccess = () => {
-            tx.oncomplete = () => resolve();
-            tx.onerror = () => reject(tx.error);
-        };
-        request.onerror = () => reject(request.error);
-    });
-}
+// Remove getUserId, getTokenClaims, and saveLogToIndexedDB functions
+// Keep the rest of the file as is, but update to use imported functions
 
 async function flushLogs() {
-    if (isFlushing) {
-        return;
-    }
+    if (isFlushing) return;
     isFlushing = true;
     if (!uid) await initialize();
 
     try {
-        const db = await openDatabase('BoardflareLogs', 1, (db) => {
-            if (!db.objectStoreNames.contains('Logs')) {
-                db.createObjectStore('Logs', { autoIncrement: true });
-            }
-        });
-        const tx = db.transaction('Logs', 'readwrite');
-        const store = tx.objectStore('Logs');
-
-        // Retrieve all logs
-        const allLogs = await new Promise((resolve, reject) => {
-            const request = store.getAll();
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
-
+        const allLogs = await getAllLogs();
         if (allLogs.length) {
-            // Only take the first 100 logs
             const logsToFlush = allLogs.slice(0, 100);
             const tokenClaims = await getTokenClaims();
 
@@ -120,7 +46,6 @@ async function flushLogs() {
                 })
             };
 
-            // Add individual logs
             logsToFlush.forEach((log, index) => {
                 aggregatedLogs["Log" + index] = JSON.stringify({
                     Timestamp: log.Timestamp,
@@ -142,16 +67,8 @@ async function flushLogs() {
                 'Content-Length': body.length.toString()
             };
             try {
-                // Send logs to server
-                await fetch("https://boardflare.table.core.windows.net/PylogsMar16?sv=2019-02-02&st=2025-03-17T02%3A55%3A17Z&se=2035-03-18T02%3A55%3A00Z&sp=a&sig=pEFZYq0Dgi1e6j5biBKA0M1E0ngavzeHvZYU35SgjtQ%3D&tn=PylogsMar16", { method: 'POST', headers, body });
-                // Clear the logs store
-                await new Promise((resolve, reject) => {
-                    const clearTx = db.transaction('Logs', 'readwrite');
-                    const clearStore = clearTx.objectStore('Logs');
-                    const req = clearStore.clear();
-                    req.onsuccess = () => resolve();
-                    req.onerror = () => reject(req.error);
-                });
+                await fetch("https://boardflare.table.core.windows.net/PylogsMar23?sv=2019-02-02&st=2025-03-23T02%3A44%3A59Z&se=2035-03-24T02%3A44%3A00Z&sp=a&sig=ZSigr8C%2BvsYBvC2y7%2Bhw0sh57VBj7fyGz7uH1Jn%2Fm3c%3D&tn=PylogsMar23", { method: 'POST', headers, body });
+                await clearLogs();
             } catch (err) {
             }
         } else {

@@ -1,75 +1,65 @@
 import * as React from "react";
 import { deleteFunctionFromSettings } from "../utils/workbookSettings";
-import { TokenExpiredError, deleteFile } from "../utils/drive";
-import { runTests } from "../utils/testRunner";
-import Notebooks from "./Notebooks";
 import OneDrive from "./OneDrive";
-import { saveToOneDriveOnly } from "../utils/save";
-import { pyLogs } from "../utils/logs";  // Add this import
-import FunctionDialog from "./FunctionDialog";  // Add this import
+import { pyLogs } from "../utils/logs";
+import FunctionDialog from "./FunctionDialog";
+import { saveToOneDriveOnly } from "../utils/save";  // Add back import
 
+// Add new state variable for refreshing OneDrive
 const FunctionsTab = ({
     onEdit,
-    onTest,
-    functionsCache,
     workbookFunctions,
-    onedriveFunctions,
     isLoading,
     error,
     loadFunctions,
-    folderUrl,
     isPreview
 }) => {
     const [deleteConfirm, setDeleteConfirm] = React.useState(null);
     const [localError, setError] = React.useState(error || null);
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const [selectedFunction, setSelectedFunction] = React.useState(null);
+    const [oneDriveLoaded, setOneDriveLoaded] = React.useState(false);
+    const [refreshOneDriveKey, setRefreshOneDriveKey] = React.useState(0);
+    // Add state for platform detection
+    const [isWebPlatform, setIsWebPlatform] = React.useState(false);
 
     // Use effect to sync error prop with local state
     React.useEffect(() => {
         setError(error);
     }, [error]);
 
-    const handleDelete = async (functionName, source, fileName) => {
+    // useEffect to detect Office Online platform
+    React.useEffect(() => {
+        setIsWebPlatform(Office?.context?.diagnostics?.platform === 'OfficeOnline');
+    }, []);
+
+    const handleDelete = async (functionName) => {
         try {
-            if (source === 'workbook') {
-                await deleteFunctionFromSettings(functionName);
-            } else {
-                await deleteFile(fileName);
-            }
+            await deleteFunctionFromSettings(functionName);
             await loadFunctions();
             setDeleteConfirm(null);
         } catch (error) {
             console.error('Error deleting function:', error);
-            setError(error instanceof TokenExpiredError ? error.message : 'Failed to delete function');
-        }
-    };
-
-    const handleTest = async (func) => {
-        onTest(); // Switch to output tab
-        try {
-            await runTests(func);
-        } catch (error) {
-            console.error('Error running tests:', error);
-            setError('Failed to run tests. Please try again.');
+            setError('Failed to delete function');
         }
     };
 
     const handleSaveToOneDrive = async (func) => {
         try {
             await saveToOneDriveOnly(func);
-            await loadFunctions();
             setError(null);
             pyLogs({
                 ref: 'save_to_onedrive_success',
                 code: func.code
             });
+            // Refresh OneDrive functions
+            setRefreshOneDriveKey(prev => prev + 1);
         } catch (error) {
             console.error('Error saving to OneDrive:', error);
             setError(error.message);
             pyLogs({
                 ref: 'save_to_onedrive_error',
-                errorMessage: `Save to OneDrive error: ${error.message}`,
+                message: `Save to OneDrive error: ${error.message}`,
                 code: func.code
             });
         }
@@ -90,53 +80,34 @@ const FunctionsTab = ({
                                     <button
                                         className="text-blue-500 hover:text-blue-700"
                                         onClick={() => {
-                                            const cacheKey = `workbook-${func.name}`;
-                                            const cachedFunc = functionsCache.current.get(cacheKey);
-                                            if (cachedFunc) {
-                                                setSelectedFunction(cachedFunc);
-                                                setDialogOpen(true);
-                                            }
+                                            setSelectedFunction(func);
+                                            setDialogOpen(true);
                                         }}
                                         title="Run function"
                                     >
                                         ▶️
                                     </button>
-                                    {folderUrl && (
-                                        <button
-                                            className="text-blue-500 hover:text-blue-700"
-                                            onClick={async () => {
-                                                const cacheKey = `workbook-${func.name}`;
-                                                const cachedFunc = functionsCache.current.get(cacheKey);
-                                                if (cachedFunc) {
-                                                    await handleSaveToOneDrive(cachedFunc);
-                                                }
-                                            }}
-                                            title="Save to OneDrive"
-                                        >
-                                            ⬇️
-                                        </button>
-                                    )}
                                     <button
                                         className="text-blue-500 hover:text-blue-700"
-                                        onClick={() => {
-                                            const cacheKey = `workbook-${func.name}`;
-                                            const cachedFunc = functionsCache.current.get(cacheKey);
-                                            if (cachedFunc) {
-                                                onEdit({
-                                                    ...cachedFunc,
-                                                    source: 'workbook'
-                                                });
-                                            }
-                                        }}
+                                        onClick={() => onEdit({ ...func, source: 'workbook' })}
                                         title="Edit function"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                         </svg>
                                     </button>
+                                    {oneDriveLoaded && (
+                                        <button
+                                            className="text-blue-500 hover:text-blue-700"
+                                            onClick={() => handleSaveToOneDrive(func)}
+                                            title="Save to OneDrive"
+                                        >
+                                            ⬇️
+                                        </button>
+                                    )}
                                     <button
                                         className="text-red-500 hover:text-red-700 text-lg"
-                                        onClick={() => setDeleteConfirm({ name: func.name, source: 'workbook' })}
+                                        onClick={() => setDeleteConfirm({ name: func.name })}
                                         title="Delete function"
                                     >
                                         ❌
@@ -163,29 +134,24 @@ const FunctionsTab = ({
                     <WorkbookFunctionTable functions={workbookFunctions} />
                 )}
 
-                <OneDrive
-                    onedriveFunctions={onedriveFunctions}
-                    isLoading={isLoading}
-                    folderUrl={folderUrl}
-                    loadFunctions={loadFunctions}
-                    onEdit={onEdit}
-                    onTest={handleTest}
-                    functionsCache={functionsCache}
-                    error={localError}
-                    onDelete={(func) => setDeleteConfirm({ name: func.name, source: 'onedrive', fileName: func.fileName })}
-                    isPreview={isPreview}
-                />
+                {!isWebPlatform && (
+                    <OneDrive
+                        onEdit={onEdit}
+                        isPreview={isPreview}
+                        onLoadComplete={setOneDriveLoaded}
+                        refreshKey={refreshOneDriveKey} // pass refresh key to OneDrive
+                        onWorkbookRefresh={loadFunctions} // new prop for refreshing workbook functions
+                    />
+                )}
 
-                {!isLoading && workbookFunctions.length === 0 && onedriveFunctions.length === 0 && (
+                {!isLoading && workbookFunctions.length === 0 && (
                     <div className="flex flex-col items-center justify-center p-5 text-center text-gray-600">
                         <div className="text-4xl mb-4">📝</div>
-                        <div className="text-base mb-2">No functions found</div>
-                        <div>Create a function using the <button onClick={() => onEdit("")} className="text-blue-500 hover:text-blue-700 hover:underline">Editor</button>, or select a notebook below to import example functions.  Check out the <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">tutorial video</a> and <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>.</div>
+                        <div className="text-base mb-2">No workbook functions found</div>
+                        <div>Create a function using the <button onClick={() => onEdit("")} className="text-blue-500 hover:text-blue-700 hover:underline">Editor</button>, or select a notebook below.</div>
                     </div>
                 )}
             </div>
-
-            <Notebooks onImportComplete={() => loadFunctions()} />
 
             {deleteConfirm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
@@ -201,7 +167,7 @@ const FunctionsTab = ({
                             </button>
                             <button
                                 className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                                onClick={() => handleDelete(deleteConfirm.name, deleteConfirm.source, deleteConfirm.fileName)}
+                                onClick={() => handleDelete(deleteConfirm.name)}
                             >
                                 Delete
                             </button>

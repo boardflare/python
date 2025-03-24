@@ -53,10 +53,10 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt, loadFunctions }) => { // NEW:
         const genText = {
             model: 'mistral-large-2411',
             messages: [
-                { role: 'system', content: `Create a single Python function that fulfills the user's request. If the user's request is not suitable for a function or requires accessing cells in spreadsheet, simply reply with only "Not a suitable request for a function" and no further explanation.  The function args must be Python types float, str, bool, None or a 2D list of those types. Parameter names cannot contain numbers. Variable length arguments (e.g. *args or **kwargs) are not allowed. Do not include any print statements, example usage, type hints, or explanations.  The function should have a docstring.  Define a test_cases variable that is a list with nested lists of example args.  e.g. test_cases = [["hello"],[[["hello", "world"]]]] includes a case with a str arg, and a case with a 2D list arg.` },
+                { role: 'system', content: `Create a single Python function that fulfills the user's request. If the user's request is not suitable for a function or requires accessing cells in spreadsheet, simply reply with only "Not a suitable request for a function" and no further explanation.  The function args must be Python types float, str, bool, None or a 2D list of those types. Parameter names cannot contain numbers. Variable length arguments (e.g. *args or **kwargs) are not allowed. Do not include any print statements, example usage, type hints, or explanations.  The function should have a docstring.` },
                 { role: 'user', content: promptText },
             ],
-            max_tokens: 800,
+            max_tokens: 1000,
             temperature: 0.1
         };
 
@@ -88,11 +88,9 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt, loadFunctions }) => { // NEW:
             }
 
             pyLogs({
-                LLM: {
-                    prompt: input,
-                    content: generatedCode
-                },
-                ref: "LLM"
+                message: `Prompt: ${input}`,
+                code: generatedCode,
+                ref: "ai_codegen_success"
             });
 
             // NEW: Associate the prompt with the parsed function

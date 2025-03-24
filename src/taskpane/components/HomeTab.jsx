@@ -3,11 +3,11 @@ import { MonacoEditor } from "./MonacoEditor";
 import { DISPLAY_CODE } from "../utils/constants";
 import LLM from "./LLM";
 import { SignInButton } from "./Auth";
-import pdfUrl from "../../../assets/Python-v1.3.pdf";
+import pdfUrl from "../../../assets/Python-v1.3.5.pdf";
 import AddFunctions from "./AddFunctions";
 import { pyLogs } from "../utils/logs";
 
-const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFunctions }) => {
+const HomeTab = ({ handleTabSelect, setGeneratedCode, setSelectedFunction, loadFunctions, selectedFunction }) => {
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const [isWebPlatform, setIsWebPlatform] = React.useState(false);
 
@@ -22,7 +22,7 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
 
     const handleLLMSuccess = (savedFunction, prompt) => {
         setSelectedFunction({ ...savedFunction, source: 'workbook', prompt });
-        onTabClick('editor');
+        handleTabSelect('editor');
     };
 
     return (
@@ -33,7 +33,12 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
                 </div>
                 <div className="p-2">
                     <div className="border-gray-300 rounded-lg py-0">
-                        <p><span className="font-bold">Step 1:</span> Write a Python function in the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('editor')}>editor</span>.</p>
+                        <p>
+                            <span className="font-bold">Step 1:</span> Write a Python function in the
+                            <span className="ml-1 text-blue-500 underline cursor-pointer" onClick={() => handleTabSelect({ target: { value: 'editor' } })}>
+                                editor
+                            </span>.
+                        </p>
                         <div className="py-1 h-16">
                             <MonacoEditor
                                 value={DISPLAY_CODE}
@@ -47,8 +52,13 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
                         <p><span className="font-bold">Step 2:</span> Save it to create a custom function.</p>
                         <div className="bg-white"><code>=HELLO("Annie")</code> <br />
                             {isWebPlatform && (
-                                <p className="mt-1 text-orange-600">
-                                    Autocomplete does not work in Excel for Web for LAMBDA functions, but they are there!
+                                <p className="mt-1 text-yellow-600">
+                                    Autocomplete is not available in Excel for Web, but typing in the function name will work.
+                                </p>
+                            )}
+                            {selectedFunction?.noName && (
+                                <p className="mt-1 text-yellow-600">
+                                    Named functions are not supported on this version of Excel.  Use <code>=BOARDFLARE.EXEC("hello", "Annie")</code> instead.
                                 </p>
                             )}
                         </div>
@@ -69,7 +79,7 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
             />
             <div className="fixed bottom-3 w-full flex justify-between items-center mt-2 px-3">
                 <a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener" className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">Email Us!🛟</a>
-                <SignInButton loadFunctions={loadFunctions} />
+                {!isWebPlatform && <SignInButton loadFunctions={loadFunctions} />}
             </div>
         </div>
     );
