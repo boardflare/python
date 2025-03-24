@@ -48,7 +48,7 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
                         <div className="bg-white"><code>=HELLO("Annie")</code> <br />
                             {isWebPlatform && (
                                 <p className="mt-1 text-yellow-600">
-                                    Function autocomplete is not supported in Excel for Web.
+                                    Autocomplete is not available in Excel for Web, but typing in the function name will work.
                                 </p>
                             )}
                             {selectedFunction?.noName && (
@@ -74,7 +74,7 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
             />
             <div className="fixed bottom-3 w-full flex justify-between items-center mt-2 px-3">
                 <a href="https://www.boardflare.com/company/support" target="_blank" rel="noopener" className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">Email Us!🛟</a>
-                <SignInButton loadFunctions={loadFunctions} />
+                {!isWebPlatform && <SignInButton loadFunctions={loadFunctions} />}
             </div>
         </div>
     );
