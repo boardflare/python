@@ -131,7 +131,7 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
             <div className="flex flex-col items-center">
                 <OneDriveFunctionsHeader />
                 <div className="text-gray-500 px-2 mb-2">
-                    Login to OneDrive to save functions to OneDrive and use them with other workbooks.
+                    Login to OneDrive to save functions to OneDrive and use them with other workbooks.  On each use, you will need to login again.  This will be improved in the future.
                 </div>
                 <button
                     onClick={handleLogin}
