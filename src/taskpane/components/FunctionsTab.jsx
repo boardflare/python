@@ -1,7 +1,5 @@
 import * as React from "react";
 import { deleteFunctionFromSettings } from "../utils/workbookSettings";
-import { runTests } from "../utils/testRunner";
-import Notebooks from "./Notebooks";
 import OneDrive from "./OneDrive";
 import { pyLogs } from "../utils/logs";
 import FunctionDialog from "./FunctionDialog";
@@ -146,8 +144,6 @@ const FunctionsTab = ({
                     </div>
                 )}
             </div>
-
-            <Notebooks onImportComplete={() => loadFunctions()} />
 
             {deleteConfirm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
