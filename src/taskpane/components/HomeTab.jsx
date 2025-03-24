@@ -48,12 +48,12 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
                         <div className="bg-white"><code>=HELLO("Annie")</code> <br />
                             {isWebPlatform && (
                                 <p className="mt-1 text-yellow-600">
-                                    LAMBDA autocomplete unsupported in Excel for Web, however they work when typed in.
+                                    Function autocomplete is not supported in Excel for Web.
                                 </p>
                             )}
                             {selectedFunction?.noName && (
                                 <p className="mt-1 text-yellow-600">
-                                    LAMBDA unsupported on this version of Excel.  Use <code>=BOARDFLARE.EXEC("hello", "Annie")</code> instead.
+                                    Named functions are not supported on this version of Excel.  Use <code>=BOARDFLARE.EXEC("hello", "Annie")</code> instead.
                                 </p>
                             )}
                         </div>
