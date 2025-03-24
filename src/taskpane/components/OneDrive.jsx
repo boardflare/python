@@ -16,10 +16,7 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
     const loadOnedriveFunctions = async () => {
         try {
             setIsLoading(true);
-            setOnedriveFunctions([]); // Clear first
-
-            // First try to refresh the token
-            await refreshToken();
+            setOnedriveFunctions([]);
 
             const { driveFunctions, folderUrl } = await loadFunctionFiles();
             setOnedriveFunctions(driveFunctions || []);

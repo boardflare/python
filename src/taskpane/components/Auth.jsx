@@ -141,8 +141,6 @@ export function SignInButton({ loadFunctions }) {
 
     const checkAuthStatus = async () => {
         try {
-            // Try to refresh and store a new token first
-            await refreshToken();
 
             // Now check stored token (either fresh or existing)
             const tokenObj = await getStoredToken();
