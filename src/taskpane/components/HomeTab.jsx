@@ -3,7 +3,7 @@ import { MonacoEditor } from "./MonacoEditor";
 import { DISPLAY_CODE } from "../utils/constants";
 import LLM from "./LLM";
 import { SignInButton } from "./Auth";
-import pdfUrl from "../../../assets/Python-v1.3.pdf";
+import pdfUrl from "../../../assets/Python-v1.3.5.pdf";
 import AddFunctions from "./AddFunctions";
 import { pyLogs } from "../utils/logs";
 
