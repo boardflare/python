@@ -7,7 +7,7 @@ import pdfUrl from "../../../assets/Python-v1.3.5.pdf";
 import AddFunctions from "./AddFunctions";
 import { pyLogs } from "../utils/logs";
 
-const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFunctions, selectedFunction }) => {
+const HomeTab = ({ handleTabSelect, setGeneratedCode, setSelectedFunction, loadFunctions, selectedFunction }) => {
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const [isWebPlatform, setIsWebPlatform] = React.useState(false);
 
@@ -22,7 +22,7 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
 
     const handleLLMSuccess = (savedFunction, prompt) => {
         setSelectedFunction({ ...savedFunction, source: 'workbook', prompt });
-        onTabClick('editor');
+        handleTabSelect('editor');
     };
 
     return (
@@ -33,7 +33,12 @@ const HomeTab = ({ onTabClick, setGeneratedCode, setSelectedFunction, loadFuncti
                 </div>
                 <div className="p-2">
                     <div className="border-gray-300 rounded-lg py-0">
-                        <p><span className="font-bold">Step 1:</span> Write a Python function in the <span className="text-blue-500 underline cursor-pointer" onClick={() => onTabClick('editor')}>editor</span>.</p>
+                        <p>
+                            <span className="font-bold">Step 1:</span> Write a Python function in the
+                            <span className="text-blue-500 underline cursor-pointer" onClick={() => handleTabSelect({ target: { value: 'editor' } })}>
+                                editor
+                            </span>.
+                        </p>
                         <div className="py-1 h-16">
                             <MonacoEditor
                                 value={DISPLAY_CODE}

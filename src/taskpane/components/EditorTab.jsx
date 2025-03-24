@@ -12,7 +12,6 @@ import { pyLogs } from "../utils/logs";
 const EditorTab = ({
     selectedFunction,
     setSelectedFunction,
-    onTest,
     generatedCode,
     setGeneratedCode,
     workbookFunctions,

@@ -58,16 +58,8 @@ const App = ({ title }) => {
 
   const handleFunctionEdit = (func) => {
     setSelectedFunction(func);
-    setUnsavedCode(null); // Only clear unsaved code when explicitly selecting a new function
+    setUnsavedCode(null);
     setSelectedTab("editor");
-  };
-
-  const handleTest = () => {
-    setSelectedTab("output");
-  };
-
-  const handleTabClick = (tab) => {
-    setSelectedTab(tab);
   };
 
   const loadFunctions = async () => {
@@ -76,16 +68,15 @@ const App = ({ title }) => {
       const workbookData = await getFunctionFromSettings();
       setWorkbookFunctions(workbookData || []);
 
-      // Only set hello function if found
+      // Set hello function if found
       const helloFunc = workbookData?.find(f => f.name.toLowerCase() === 'hello');
       if (helloFunc) {
-        setSelectedFunction({ ...helloFunc, source: 'workbook' });
+        setSelectedFunction(helloFunc);
       }
     } catch (error) {
-      console.error('Error loading functions:', error);
       await pyLogs({ message: error.message, ref: "app_loadFunctions_error" });
       setWorkbookFunctions([]);
-      setError('Failed to load workbook functions');
+      setError('Add-in failed to initialize.  Try closing and reopening your workbook, as this may be due to a temporary network issue.  Also, try Excel on web, as your desktop version may be unsupported.');
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +95,7 @@ const App = ({ title }) => {
         <div className="flex-1 overflow-hidden">
           {selectedTab === "home" && (
             <HomeTab
-              onTabClick={handleTabClick}
+              handleTabSelect={handleTabSelect}
               setGeneratedCode={setGeneratedCode}
               setSelectedFunction={setSelectedFunction}
               loadFunctions={loadFunctions}
@@ -115,7 +106,6 @@ const App = ({ title }) => {
             <EditorTab
               selectedFunction={selectedFunction}
               setSelectedFunction={setSelectedFunction}
-              onTest={handleTest}
               generatedCode={generatedCode}
               setGeneratedCode={setGeneratedCode}
               workbookFunctions={workbookFunctions}
@@ -128,7 +118,6 @@ const App = ({ title }) => {
           {selectedTab === "functions" && (
             <FunctionsTab
               onEdit={handleFunctionEdit}
-              onTest={handleTest}
               workbookFunctions={workbookFunctions}
               isLoading={isLoading}
               error={error}

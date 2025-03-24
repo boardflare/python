@@ -8,7 +8,6 @@ import { saveToOneDriveOnly } from "../utils/save";  // Add back import
 // Add new state variable for refreshing OneDrive
 const FunctionsTab = ({
     onEdit,
-    onTest,
     workbookFunctions,
     isLoading,
     error,
