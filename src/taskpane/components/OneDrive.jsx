@@ -6,7 +6,7 @@ import { storeScopes } from "../utils/indexedDB";
 import { authenticateWithDialog } from "./Auth";
 import { pyLogs } from "../utils/logs";
 
-const OneDrive = ({ onEdit, isPreview, onLoadComplete }) => {
+const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRefresh }) => {
     const [error, setError] = React.useState(null);
     const [isLoading, setIsLoading] = React.useState(false);
     const [onedriveFunctions, setOnedriveFunctions] = React.useState([]);
@@ -35,9 +35,10 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete }) => {
         }
     };
 
+    // Run loadOnedriveFunctions when refreshKey changes (also on mount)
     React.useEffect(() => {
         loadOnedriveFunctions();
-    }, []);
+    }, [refreshKey]);
 
     const handleSync = async (func) => {
         try {
@@ -48,6 +49,7 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete }) => {
             }
             const reparsedFunc = await parsePython(freshFunc.code); // Needed to ensure environment is set correctly for local, preview, etc.
             await saveWorkbookOnly(reparsedFunc);
+            if (onWorkbookRefresh) await onWorkbookRefresh(); // refresh workbook functions
             await loadOnedriveFunctions();
             setError(null);
             pyLogs({

@@ -7,6 +7,7 @@ import { pyLogs } from "../utils/logs";
 import FunctionDialog from "./FunctionDialog";
 import { saveToOneDriveOnly } from "../utils/save";  // Add back import
 
+// Add new state variable for refreshing OneDrive
 const FunctionsTab = ({
     onEdit,
     onTest,
@@ -21,6 +22,7 @@ const FunctionsTab = ({
     const [dialogOpen, setDialogOpen] = React.useState(false);
     const [selectedFunction, setSelectedFunction] = React.useState(null);
     const [oneDriveLoaded, setOneDriveLoaded] = React.useState(false);
+    const [refreshOneDriveKey, setRefreshOneDriveKey] = React.useState(0);
 
     // Use effect to sync error prop with local state
     React.useEffect(() => {
@@ -46,6 +48,8 @@ const FunctionsTab = ({
                 ref: 'save_to_onedrive_success',
                 code: func.code
             });
+            // Refresh OneDrive functions
+            setRefreshOneDriveKey(prev => prev + 1);
         } catch (error) {
             console.error('Error saving to OneDrive:', error);
             setError(error.message);
@@ -130,6 +134,8 @@ const FunctionsTab = ({
                     onEdit={onEdit}
                     isPreview={isPreview}
                     onLoadComplete={setOneDriveLoaded}
+                    refreshKey={refreshOneDriveKey} // pass refresh key to OneDrive
+                    onWorkbookRefresh={loadFunctions} // new prop for refreshing workbook functions
                 />
 
                 {!isLoading && workbookFunctions.length === 0 && (
