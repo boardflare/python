@@ -18,7 +18,7 @@ export default {
 			const genText = await request.json();
 			console.log(genText);
 
-			genText.max_tokens = 250;
+			genText.max_tokens = 1500;
 
 			const response = await fetch('https://gateway.ai.cloudflare.com/v1/92d55664b831823cc914de02c9a0d0ae/llm_proxy/mistral/v1/chat/completions', {
 				method: 'POST',
