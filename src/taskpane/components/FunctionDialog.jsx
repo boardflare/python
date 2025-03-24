@@ -310,6 +310,15 @@ const FunctionDialog = ({
                                 className={`flex-1 px-2 py-1 border rounded ${activeField === param.name ? 'border-blue-500 border-2' : ''}`}
                                 placeholder="Click, then select range"
                             />
+                            {param.has_default && (
+                                <button
+                                    type="button"
+                                    onClick={() => handleArgumentChange(param.name, "")}
+                                    className="ml-2 text-red-500 hover:text-red-700"
+                                >
+                                    🗑️
+                                </button>
+                            )}
                         </div>
                     </div>
                 ))}
