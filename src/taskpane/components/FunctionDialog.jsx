@@ -10,37 +10,20 @@ const FunctionDialog = ({
     loadFunctions,
     functionsCache // Add functionsCache as a prop
 }) => {
-    const [selectedCell, setSelectedCell] = React.useState("");
+    const [targetCell, setTargetCell] = React.useState("");
     const [functionArgs, setFunctionArgs] = React.useState({});
     const [error, setError] = React.useState("");
     const [activeField, setActiveField] = React.useState(null);
     const [saveArgs, setSaveArgs] = React.useState(true);
     const [rangeValues, setRangeValues] = React.useState({});
-    const [activeWorksheet, setActiveWorksheet] = React.useState("");
 
     // Reference to store the event handler for cleanup
     const selectionHandlerRef = React.useRef(null);
 
-    // Strip $ signs and validate cell references
-    const isValidCellReference = (ref) => {
-        if (!ref) return false;
-        // Remove $ signs before validation
-        const normalizedRef = ref.replace(/\$/g, '');
-        // Match both single cells (A1) and ranges (A1:B2), with optional sheet name
-        // Sheet names can contain spaces and special characters when quoted
-        return /^(?:'?[^!]+?'?!)?[A-Za-z]+\d+(?::[A-Za-z]+\d+)?$/.test(normalizedRef);
-    };
-
     // Modify setSelectedCell to use updated validation
     const handleTargetCellChange = (value) => {
-        setSelectedCell(value);
-        if (!value) {
-            setError("Target cell is required");
-        } else if (!isValidCellReference(value)) {
-            setError("Invalid cell reference format");
-        } else {
-            setError("");
-        }
+        setTargetCell(value);
+        setError("");
     };
 
     // Define the selection changed handler
@@ -189,8 +172,9 @@ const FunctionDialog = ({
         setActiveField(null);
         if (!selectedFunction) return;
 
-        if (!selectedCell || !isValidCellReference(selectedCell)) {
-            setError("Invalid target cell reference");
+        // Check for target cell defined
+        if (!targetCell) {
+            setError("Target cell is required");
             return;
         }
 
@@ -204,8 +188,12 @@ const FunctionDialog = ({
             }
 
             await Excel.run(async (context) => {
-                const range = context.workbook.worksheets.getActiveWorksheet().getRange(selectedCell);
+                // Assumes targetCell is always sheet-qualified (e.g., "Sheet1!A1")
+                const [sheetName, cellAddress] = targetCell.split("!");
+                const worksheet = context.workbook.worksheets.getItem(sheetName);
+                const range = worksheet.getRange(cellAddress);
 
+                // Handle case where EXEC mode is used
                 if (selectedFunction.noName) {
                     let formula = selectedFunction.execFormula;
                     // Replace argN parameters with range references or __OMITTED__
@@ -218,6 +206,8 @@ const FunctionDialog = ({
                         );
                     });
                     range.formulas = [[formula]];
+
+                    // Handle case where function name is used
                 } else {
                     const args = (selectedFunction.parameters || [])
                         .map(param => functionArgs[param.name] || '"__OMITTED__"')
@@ -297,8 +287,8 @@ const FunctionDialog = ({
                 {selectedFunction.description && (
                     <p className="text-sm text-gray-600 mt-1">{selectedFunction.description}</p>
                 )}
-                {activeField && activeWorksheet && (
-                    <p className="text-sm text-blue-500 mt-1">Select range in {activeWorksheet} only</p>
+                {activeField && (
+                    <p className="text-sm text-blue-500 mt-1">Select range in worksheet to populate the input field.</p>
                 )}
             </div>
 
@@ -333,7 +323,7 @@ const FunctionDialog = ({
                 <input
                     id="targetCell"
                     type="text"
-                    value={selectedCell}
+                    value={targetCell}
                     onChange={(e) => handleTargetCellChange(e.target.value)}
                     onFocus={() => handleFocus('targetCell')}
                     readOnly
@@ -362,7 +352,7 @@ const FunctionDialog = ({
                     <button
                         onClick={handleSubmit}
                         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                        disabled={!selectedCell}
+                        disabled={!targetCell}
                     >
                         OK
                     </button>
