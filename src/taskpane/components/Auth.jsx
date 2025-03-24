@@ -94,6 +94,37 @@ export async function authenticateWithDialog() {
     return token;
 }
 
+// Move refreshToken function here, outside of any component
+export async function refreshToken() {
+    try {
+        const accounts = pca.getAllAccounts();
+
+        // If no accounts, return null immediately
+        if (accounts.length === 0) {
+            return null;
+        }
+
+        const tokenRequest = {
+            scopes: await getScopes(),
+            account: accounts[0] // Always use first account if available
+        };
+
+        const response = await pca.acquireTokenSilent(tokenRequest);
+        const tokenObj = {
+            auth_token: response.accessToken,
+            graphToken: response.accessToken,
+            tokenClaims: parseTokenClaims(response.accessToken)
+        };
+
+        await storeToken(tokenObj);
+        return tokenObj;
+    } catch (error) {
+        console.error("Error refreshing token:", error);
+        await pyLogs({ message: error.message, ref: "auth_refreshToken_error" });
+        return null;
+    }
+}
+
 export function SignInButton({ loadFunctions }) {
     const [isSignedIn, setIsSignedIn] = React.useState(false);
     const [error, setError] = React.useState(null);
@@ -111,7 +142,7 @@ export function SignInButton({ loadFunctions }) {
     const checkAuthStatus = async () => {
         try {
             // Try to refresh and store a new token first
-            // await refreshToken();
+            await refreshToken();
 
             // Now check stored token (either fresh or existing)
             const tokenObj = await getStoredToken();
@@ -132,36 +163,6 @@ export function SignInButton({ loadFunctions }) {
             console.error("Error checking auth status:", error);
             await pyLogs({ message: error.message, ref: "auth_checkAuthStatus_error" });
             setIsSignedIn(false);
-        }
-    };
-
-    const refreshToken = async () => {
-        try {
-            const accounts = pca.getAllAccounts();
-
-            // If no accounts, return null immediately
-            if (accounts.length === 0) {
-                return null;
-            }
-
-            const tokenRequest = {
-                scopes: await getScopes(),
-                account: accounts[0] // Always use first account if available
-            };
-
-            const response = await pca.acquireTokenSilent(tokenRequest);
-            const tokenObj = {
-                auth_token: response.accessToken,
-                graphToken: response.accessToken,
-                tokenClaims: parseTokenClaims(response.accessToken)
-            };
-
-            await storeToken(tokenObj);
-            return tokenObj;
-        } catch (error) {
-            console.error("Error refreshing token:", error);
-            await pyLogs({ message: error.message, ref: "auth_refreshToken_error" });
-            return null;
         }
     };
 

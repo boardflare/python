@@ -3,7 +3,7 @@ import { loadFunctionFiles, deleteFile, TokenExpiredError } from "../utils/drive
 import { saveWorkbookOnly } from "../utils/save";
 import { parsePython } from "../utils/codeparser";
 import { storeScopes } from "../utils/indexedDB";
-import { authenticateWithDialog } from "./Auth";
+import { authenticateWithDialog, refreshToken } from "./Auth";
 import { pyLogs } from "../utils/logs";
 
 const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRefresh }) => {
@@ -17,6 +17,9 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
         try {
             setIsLoading(true);
             setOnedriveFunctions([]); // Clear first
+
+            // First try to refresh the token
+            await refreshToken();
 
             const { driveFunctions, folderUrl } = await loadFunctionFiles();
             setOnedriveFunctions(driveFunctions || []);
