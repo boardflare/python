@@ -21,11 +21,18 @@ const FunctionsTab = ({
     const [selectedFunction, setSelectedFunction] = React.useState(null);
     const [oneDriveLoaded, setOneDriveLoaded] = React.useState(false);
     const [refreshOneDriveKey, setRefreshOneDriveKey] = React.useState(0);
+    // Add state for platform detection
+    const [isWebPlatform, setIsWebPlatform] = React.useState(false);
 
     // Use effect to sync error prop with local state
     React.useEffect(() => {
         setError(error);
     }, [error]);
+
+    // useEffect to detect Office Online platform
+    React.useEffect(() => {
+        setIsWebPlatform(Office?.context?.diagnostics?.platform === 'OfficeOnline');
+    }, []);
 
     const handleDelete = async (functionName) => {
         try {
@@ -128,13 +135,15 @@ const FunctionsTab = ({
                     <WorkbookFunctionTable functions={workbookFunctions} />
                 )}
 
-                <OneDrive
-                    onEdit={onEdit}
-                    isPreview={isPreview}
-                    onLoadComplete={setOneDriveLoaded}
-                    refreshKey={refreshOneDriveKey} // pass refresh key to OneDrive
-                    onWorkbookRefresh={loadFunctions} // new prop for refreshing workbook functions
-                />
+                {!isWebPlatform && (
+                    <OneDrive
+                        onEdit={onEdit}
+                        isPreview={isPreview}
+                        onLoadComplete={setOneDriveLoaded}
+                        refreshKey={refreshOneDriveKey} // pass refresh key to OneDrive
+                        onWorkbookRefresh={loadFunctions} // new prop for refreshing workbook functions
+                    />
+                )}
 
                 {!isLoading && workbookFunctions.length === 0 && (
                     <div className="flex flex-col items-center justify-center p-5 text-center text-gray-600">
