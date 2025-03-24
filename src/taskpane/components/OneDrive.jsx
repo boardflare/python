@@ -194,7 +194,7 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
                         ))}
                     </tbody>
                 </table>
-                <div className="text-gray-500 px-2 mb-2">
+                <div className="text-gray-500 px-2 mb-2 text-center">
                     ⬇️ to save from Workbook to OneDrive<br />
                     ⬆️ to save from OneDrive to Workbook<br />
                     Saving updates a function with the same name.

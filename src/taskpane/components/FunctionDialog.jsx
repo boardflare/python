@@ -1,5 +1,4 @@
 import * as React from "react";
-import { execPython } from "../../functions/exec/controller";
 import { saveFunctionToSettings, getFunctionFromSettings } from "../utils/workbookSettings";
 import { pyLogs } from '../utils/logs';
 
@@ -14,8 +13,7 @@ const FunctionDialog = ({
     const [selectedCell, setSelectedCell] = React.useState("");
     const [functionArgs, setFunctionArgs] = React.useState({});
     const [error, setError] = React.useState("");
-    const [insertResult, setInsertResult] = React.useState(false);
-    const [activeField, setActiveField] = React.useState(null); // Track which field is waiting for range selection
+    const [activeField, setActiveField] = React.useState(null);
     const [saveArgs, setSaveArgs] = React.useState(true);
     const [rangeValues, setRangeValues] = React.useState({});
     const [activeWorksheet, setActiveWorksheet] = React.useState("");
@@ -173,51 +171,12 @@ const FunctionDialog = ({
         }
     }, [isOpen, selectedFunction]);
 
-    // Update fetchRangeValues to work with sheet-qualified ranges
-    // const fetchRangeValues = async (range) => {
-    //     try {
-    //         const values = await Excel.run(async (context) => {
-    //             // Use getRangeByReference to support ranges from any worksheet
-    //             const rangeObj = context.workbook.getRangeByReference(range);
-    //             rangeObj.load("values");
-    //             await context.sync();
-    //             return rangeObj.values;
-    //         });
-    //         return values;
-    //     } catch (error) {
-    //         pyLogs({
-    //             message: `[Range Values] Failed to fetch range values for range ${range}: ${error.message}`,
-    //             code: selectedFunction?.code || 'unknown_function', // Add null check
-    //             ref: 'functionDialog_fetch_range'
-    //         });
-    //         console.error("Error fetching range values:", error);
-    //         return null;
-    //     }
-    // };
-
     const handleArgumentChange = async (paramName, value) => {
         setFunctionArgs(prev => ({
             ...prev,
             [paramName]: value
         }));
         setError("");
-
-        // If value is a valid cell reference, fetch and store its values
-        // if (isValidCellReference(value)) {
-        //     const values = await fetchRangeValues(value);
-        //     if (values) {
-        //         setRangeValues(prev => ({
-        //             ...prev,
-        //             [paramName]: values
-        //         }));
-        //     }
-        // } else {
-        //     setRangeValues(prev => {
-        //         const newValues = { ...prev };
-        //         delete newValues[paramName];
-        //         return newValues;
-        //     });
-        // }
     };
 
     // Activate range selection for a specific field
@@ -244,56 +203,26 @@ const FunctionDialog = ({
                 return;
             }
 
-            // Prepare arguments as matrices
-            // const argMatrices = await Promise.all((selectedFunction.parameters || []).map(async param => {
-            //     const value = functionArgs[param.name];
-            //     if (!value && param.has_default) {
-            //         return [["__OMITTED__"]];
-            //     }
-
-            //     if (isValidCellReference(value)) {
-            //         const values = await fetchRangeValues(value);
-            //         return values || [[value || "__OMITTED__"]];
-            //     }
-            //     return [[value || "__OMITTED__"]];
-            // }));
-
             await Excel.run(async (context) => {
                 const range = context.workbook.worksheets.getActiveWorksheet().getRange(selectedCell);
 
-                if (insertResult) {
-                    const result = await execPython({
-                        code: selectedFunction.name,
-                        arg1: argMatrices
+                if (selectedFunction.noName) {
+                    let formula = selectedFunction.execFormula;
+                    // Replace argN parameters with range references or __OMITTED__
+                    (selectedFunction.parameters || []).forEach((param, index) => {
+                        const value = functionArgs[param.name];
+                        const argPlaceholder = `arg${index + 1}`;
+                        formula = formula.replace(
+                            argPlaceholder,
+                            value || '"__OMITTED__"'
+                        );
                     });
-
-                    if (Array.isArray(result) && Array.isArray(result[0])) {
-                        const numRows = result.length;
-                        const numCols = result[0].length;
-                        const newRange = range.getResizedRange(numRows - 1, numCols - 1);
-                        newRange.values = result;
-                    } else {
-                        range.values = result;
-                    }
+                    range.formulas = [[formula]];
                 } else {
-                    if (selectedFunction.noName) {
-                        let formula = selectedFunction.execFormula;
-                        // Replace argN parameters with range references or __OMITTED__
-                        (selectedFunction.parameters || []).forEach((param, index) => {
-                            const value = functionArgs[param.name];
-                            const argPlaceholder = `arg${index + 1}`;
-                            formula = formula.replace(
-                                argPlaceholder,
-                                value || '"__OMITTED__"'
-                            );
-                        });
-                        range.formulas = [[formula]];
-                    } else {
-                        const args = (selectedFunction.parameters || [])
-                            .map(param => functionArgs[param.name] || '"__OMITTED__"')
-                            .join(",");
-                        range.formulas = [[`=${selectedFunction.name.toUpperCase()}(${args})`]];
-                    }
+                    const args = (selectedFunction.parameters || [])
+                        .map(param => functionArgs[param.name] || '"__OMITTED__"')
+                        .join(",");
+                    range.formulas = [[`=${selectedFunction.name.toUpperCase()}(${args})`]];
                 }
                 await context.sync();
             });
@@ -392,26 +321,6 @@ const FunctionDialog = ({
                                 placeholder="Click, then select range"
                             />
                         </div>
-                        {/* {rangeValues[param.name] && (
-                            <details className="mt-1 ml-4 text-sm">
-                                <summary className="cursor-pointer text-blue-600">Show range values</summary>
-                                <div className="mt-1 p-2 bg-gray-50 rounded overflow-auto max-h-32">
-                                    <table className="border-collapse">
-                                        <tbody>
-                                            {rangeValues[param.name].map((row, i) => (
-                                                <tr key={i}>
-                                                    {row.map((cell, j) => (
-                                                        <td key={j} className="border border-gray-300 p-1">
-                                                            {cell}
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </details>
-                        )} */}
                     </div>
                 ))}
             </div>
@@ -432,30 +341,6 @@ const FunctionDialog = ({
                     placeholder="Click, then select cell"
                 />
             </div>
-
-            {/* <div className="mb-1">
-                <label className="flex items-center space-x-2">
-                    <input
-                        type="checkbox"
-                        checked={insertResult}
-                        onChange={(e) => setInsertResult(e.target.checked)}
-                        className="rounded"
-                    />
-                    <span>Insert result, not formula</span>
-                </label>
-            </div> */}
-
-            {/* <div className="mb-4">
-                <label className="flex items-center space-x-2">
-                    <input
-                        type="checkbox"
-                        checked={saveArgs}
-                        onChange={(e) => setSaveArgs(e.target.checked)}
-                        className="rounded"
-                    />
-                    <span>Save function arguments</span>
-                </label>
-            </div> */}
 
             {error && (
                 <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
