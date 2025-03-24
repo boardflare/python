@@ -11,7 +11,7 @@ export function initializeDB() {
         }
 
         const dbName = 'Boardflare';
-        const dbVersion = 1;
+        const dbVersion = 2;
         const request = indexedDB.open(dbName, dbVersion);
 
         request.onupgradeneeded = (event) => {
