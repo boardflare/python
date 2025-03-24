@@ -174,26 +174,26 @@ const FunctionDialog = ({
     }, [isOpen, selectedFunction]);
 
     // Update fetchRangeValues to work with sheet-qualified ranges
-    const fetchRangeValues = async (range) => {
-        try {
-            const values = await Excel.run(async (context) => {
-                // Use getRangeByReference to support ranges from any worksheet
-                const rangeObj = context.workbook.getRangeByReference(range);
-                rangeObj.load("values");
-                await context.sync();
-                return rangeObj.values;
-            });
-            return values;
-        } catch (error) {
-            pyLogs({
-                message: `[Range Values] Failed to fetch range values for range ${range}: ${error.message}`,
-                code: selectedFunction?.code || 'unknown_function', // Add null check
-                ref: 'functionDialog_fetch_range'
-            });
-            console.error("Error fetching range values:", error);
-            return null;
-        }
-    };
+    // const fetchRangeValues = async (range) => {
+    //     try {
+    //         const values = await Excel.run(async (context) => {
+    //             // Use getRangeByReference to support ranges from any worksheet
+    //             const rangeObj = context.workbook.getRangeByReference(range);
+    //             rangeObj.load("values");
+    //             await context.sync();
+    //             return rangeObj.values;
+    //         });
+    //         return values;
+    //     } catch (error) {
+    //         pyLogs({
+    //             message: `[Range Values] Failed to fetch range values for range ${range}: ${error.message}`,
+    //             code: selectedFunction?.code || 'unknown_function', // Add null check
+    //             ref: 'functionDialog_fetch_range'
+    //         });
+    //         console.error("Error fetching range values:", error);
+    //         return null;
+    //     }
+    // };
 
     const handleArgumentChange = async (paramName, value) => {
         setFunctionArgs(prev => ({
@@ -203,21 +203,21 @@ const FunctionDialog = ({
         setError("");
 
         // If value is a valid cell reference, fetch and store its values
-        if (isValidCellReference(value)) {
-            const values = await fetchRangeValues(value);
-            if (values) {
-                setRangeValues(prev => ({
-                    ...prev,
-                    [paramName]: values
-                }));
-            }
-        } else {
-            setRangeValues(prev => {
-                const newValues = { ...prev };
-                delete newValues[paramName];
-                return newValues;
-            });
-        }
+        // if (isValidCellReference(value)) {
+        //     const values = await fetchRangeValues(value);
+        //     if (values) {
+        //         setRangeValues(prev => ({
+        //             ...prev,
+        //             [paramName]: values
+        //         }));
+        //     }
+        // } else {
+        //     setRangeValues(prev => {
+        //         const newValues = { ...prev };
+        //         delete newValues[paramName];
+        //         return newValues;
+        //     });
+        // }
     };
 
     // Activate range selection for a specific field
@@ -245,18 +245,18 @@ const FunctionDialog = ({
             }
 
             // Prepare arguments as matrices
-            const argMatrices = await Promise.all((selectedFunction.parameters || []).map(async param => {
-                const value = functionArgs[param.name];
-                if (!value && param.has_default) {
-                    return [["__OMITTED__"]];
-                }
+            // const argMatrices = await Promise.all((selectedFunction.parameters || []).map(async param => {
+            //     const value = functionArgs[param.name];
+            //     if (!value && param.has_default) {
+            //         return [["__OMITTED__"]];
+            //     }
 
-                if (isValidCellReference(value)) {
-                    const values = await fetchRangeValues(value);
-                    return values || [[value || "__OMITTED__"]];
-                }
-                return [[value || "__OMITTED__"]];
-            }));
+            //     if (isValidCellReference(value)) {
+            //         const values = await fetchRangeValues(value);
+            //         return values || [[value || "__OMITTED__"]];
+            //     }
+            //     return [[value || "__OMITTED__"]];
+            // }));
 
             await Excel.run(async (context) => {
                 const range = context.workbook.worksheets.getActiveWorksheet().getRange(selectedCell);
@@ -392,7 +392,7 @@ const FunctionDialog = ({
                                 placeholder="Click, then select range"
                             />
                         </div>
-                        {rangeValues[param.name] && (
+                        {/* {rangeValues[param.name] && (
                             <details className="mt-1 ml-4 text-sm">
                                 <summary className="cursor-pointer text-blue-600">Show range values</summary>
                                 <div className="mt-1 p-2 bg-gray-50 rounded overflow-auto max-h-32">
@@ -411,7 +411,7 @@ const FunctionDialog = ({
                                     </table>
                                 </div>
                             </details>
-                        )}
+                        )} */}
                     </div>
                 ))}
             </div>
