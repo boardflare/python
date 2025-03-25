@@ -74,12 +74,13 @@ const App = ({ title }) => {
         setSelectedFunction(defaultFunc);
       } else {
         setWorkbookFunctions(workbookData);
-        setSelectedFunction(workbookData[0]); // Select the first function by default
+        setSelectedFunction(workbookData[0]);
       }
+
     } catch (error) {
-      await pyLogs({ message: error.message, ref: "app_loadFunctions_error" });
       setWorkbookFunctions([]);
-      setError('Add-in failed to initialize. Try closing and reopening your workbook. You can also try Excel on web, as your desktop version may be unsupported.');
+      pyLogs({ message: error.message, ref: "app_loadFunctions_error" });
+      setError(error.message);
     } finally {
       setIsLoading(false);
     }

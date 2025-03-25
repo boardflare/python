@@ -51,7 +51,7 @@ export async function getFunctions() {
             message: error.message,
             ref: "getFunctionsError"
         });
-        return [];
+        throw error;
     }
 }
 
@@ -65,7 +65,7 @@ export async function createDefaultFunction() {
             message: error.message,
             ref: "createDefaultFunctionError"
         });
-        throw new Error('Failed to create default function: ' + error.message);
+        throw error;
     }
 }
 
