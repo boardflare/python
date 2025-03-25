@@ -124,9 +124,8 @@ const FunctionDialog = ({
             // Try to load saved args
             const loadSavedArgs = async () => {
                 try {
-                    const savedFunction = await getFunctionFromSettings(selectedFunction.name);
-                    if (savedFunction?.args) {
-                        setFunctionArgs(savedFunction.args);
+                    if (selectedFunction?.args) {
+                        setFunctionArgs(selectedFunction.args);
                     } else {
                         // Initialize arguments with empty strings or default values
                         const newArgs = {};
@@ -137,11 +136,11 @@ const FunctionDialog = ({
                     }
                 } catch (error) {
                     pyLogs({
-                        message: `[Load Args] Failed to load saved arguments for function ${selectedFunction.name}: ${error.message}`,
+                        message: `Failed to load arguments: ${error.message}`,
                         code: selectedFunction.code,
                         ref: 'functionDialog_load_args'
                     });
-                    console.error("Error loading saved args:", error);
+                    console.error("Error loading args:", error);
                 }
             };
 
