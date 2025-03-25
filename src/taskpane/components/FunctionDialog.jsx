@@ -182,33 +182,52 @@ const FunctionDialog = ({
             }
 
             await Excel.run(async (context) => {
-                // Assumes targetCell is always sheet-qualified (e.g., "Sheet1!A1")
-                const [sheetName, cellAddress] = targetCell.split("!");
-                const worksheet = context.workbook.worksheets.getItem(sheetName);
-                const range = worksheet.getRange(cellAddress);
+                let worksheet, range, formula;
 
-                // Handle case where EXEC mode is used
-                if (selectedFunction.noName) {
-                    let formula = selectedFunction.execFormula;
-                    // Replace argN parameters with range references or __OMITTED__
-                    (selectedFunction.parameters || []).forEach((param, index) => {
-                        const value = functionArgs[param.name];
-                        const argPlaceholder = `arg${index + 1}`;
-                        formula = formula.replace(
-                            argPlaceholder,
-                            value || '"__OMITTED__"'
-                        );
-                    });
-                    range.formulas = [[formula]];
-
-                    // Handle case where function name is used
-                } else {
-                    const args = (selectedFunction.parameters || [])
-                        .map(param => functionArgs[param.name] || '"__OMITTED__"')
-                        .join(",");
-                    range.formulas = [[`=${selectedFunction.name.toUpperCase()}(${args})`]];
+                try {
+                    // Assumes targetCell is always sheet-qualified (e.g., "Sheet1!A1")
+                    const [sheetName, cellAddress] = targetCell.split("!");
+                    worksheet = context.workbook.worksheets.getItem(sheetName);
+                    range = worksheet.getRange(cellAddress);
+                } catch (error) {
+                    throw new Error(`Failed to get worksheet or range: ${error.message}`);
                 }
-                await context.sync();
+
+                try {
+                    if (selectedFunction.noName) {
+                        formula = selectedFunction.execFormula;
+                        // Replace argN parameters with range references or __OMITTED__
+                        (selectedFunction.parameters || []).forEach((param, index) => {
+                            const value = functionArgs[param.name];
+                            const argPlaceholder = `arg${index + 1}`;
+                            formula = formula.replace(
+                                argPlaceholder,
+                                value || '"__OMITTED__"'
+                            );
+                        });
+
+                        try {
+                            range.formulas = [[formula]];
+                            await context.sync();
+                        } catch (error) {
+                            throw new Error(`Failed to set formula for no-name function: ${formula}. Error: ${error.message}`);
+                        }
+                    } else {
+                        const args = (selectedFunction.parameters || [])
+                            .map(param => functionArgs[param.name] || '"__OMITTED__"')
+                            .join(",");
+                        formula = `=${selectedFunction.name.toUpperCase()}(${args})`;
+
+                        try {
+                            range.formulas = [[formula]];
+                            await context.sync();
+                        } catch (error) {
+                            throw new Error(`Failed to set formula for named function: ${formula}. Error: ${error.message}`);
+                        }
+                    }
+                } catch (error) {
+                    throw new Error(`Failed to set formula in range: ${error.message}`);
+                }
             });
 
             pyLogs({
@@ -217,11 +236,15 @@ const FunctionDialog = ({
             });
 
             if (saveArgs) {
-                const updatedFunction = {
-                    ...selectedFunction,
-                    args: functionArgs
-                };
-                await saveFunctionToSettings(updatedFunction);
+                try {
+                    const updatedFunction = {
+                        ...selectedFunction,
+                        args: functionArgs
+                    };
+                    await saveFunctionToSettings(updatedFunction);
+                } catch (error) {
+                    throw new Error(`Failed to save function arguments: ${error.message}`);
+                }
             }
 
             onClose();
