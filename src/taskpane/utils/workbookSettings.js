@@ -36,45 +36,36 @@ export async function saveFunctionToSettings(functionData) {
     }
 }
 
-export async function getFunctionFromSettings(name = null) {
+export async function getFunctions() {
     try {
         return await Excel.run(async (context) => {
             const settings = context.workbook.settings;
-            if (name) {
-                const setting = settings.getItem(name);
-                setting.load("value");
-                await context.sync();
-                return setting.value;
-            } else {
-                const items = settings.load("items");
-                await context.sync();
-                const functions = items.items.map(item => item.value);
-
-                if (functions.length === 0) {
-                    try {
-                        const defaultFunction = await parsePython(DEFAULT_CODE);
-                        await saveWorkbookOnly(defaultFunction);
-                        return [defaultFunction];
-                    } catch (error) {
-                        pyLogs({
-                            message: error.message,
-                            ref: "createDefaultFunctionError"
-                        });
-                        return [];
-                    }
-                }
-
-                return functions;
-            }
+            const items = settings.load("items");
+            await context.sync();
+            const functions = items.items.map(item => item.value);
+            return functions;
         });
     } catch (error) {
-        console.error('Failed to get from settings:', error);
+        console.error('Failed to get functions from settings:', error);
         pyLogs({
             message: error.message,
-            code: name || null,
-            ref: "getFunctionFromSettingsError"
+            ref: "getFunctionsError"
         });
-        return name ? null : [];
+        return [];
+    }
+}
+
+export async function createDefaultFunction() {
+    try {
+        const defaultFunction = await parsePython(DEFAULT_CODE);
+        await saveWorkbookOnly(defaultFunction);
+        return defaultFunction;
+    } catch (error) {
+        pyLogs({
+            message: error.message,
+            ref: "createDefaultFunctionError"
+        });
+        throw new Error('Failed to create default function: ' + error.message);
     }
 }
 

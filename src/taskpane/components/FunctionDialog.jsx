@@ -1,5 +1,5 @@
 import * as React from "react";
-import { saveFunctionToSettings, getFunctionFromSettings } from "../utils/workbookSettings";
+import { saveFunctionToSettings } from "../utils/workbookSettings";
 import { pyLogs } from '../utils/logs';
 
 const FunctionDialog = ({
