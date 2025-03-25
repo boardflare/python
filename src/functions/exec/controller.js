@@ -24,16 +24,33 @@ async function messageWorker(worker, message) {
 
 export async function execPython({ code, arg1 }, isName = true) {
     try {
+
+        // If the code is a function name, retrieve the function code from workbook settings
         if (isName) {
-            code = await getFunction(code);
+            try {
+                code = await getFunction(code);
+            } catch (error) {
+                return [[error.message || 'Error loading function code from workbook settings.']];
+            }
         }
-        const tokens = await getStoredToken();
-        const graphToken = tokens?.graphToken;
+
+        // If graph token retrieval fails, log a warning but continue execution
+        let graphToken = null;
+        try {
+            const tokens = await getStoredToken();
+            graphToken = tokens?.graphToken;
+        } catch (tokenError) {
+            ConsoleEvents.emit(EventTypes.LOG, 'Warning: Failed to retrieve graph token.');
+        }
+
+        // Proceed with executing the Python code
         const { result, stdout } = await messageWorker(execPyWorker, {
             code,
             arg1,
             graphToken
         });
+
+        // Log the execution details
         try {
             if (window.isChromiumOrEdge) {
                 window.gtag('event', 'py', { code_length: code.length });
@@ -42,21 +59,23 @@ export async function execPython({ code, arg1 }, isName = true) {
         } catch (logError) {
             console.error('Logging error in execPython:', logError);
         }
+
+        // Emit stdout messages to the output tab
         if (stdout.trim()) {
             ConsoleEvents.emit(EventTypes.LOG, stdout.trim());
         }
+
+        // Return the result
         return result;
 
     } catch (error) {
-        const errorMessage = error.error || error.message;
+        const message = error.error || error.message;
         const stdout = error.stdout || '';
-        pyLogs({ errorMessage, stdout, code, ref: "execPythonError" });
-        console.error('Error in execPython:', errorMessage);
-        // Log any stdout before error message
+        pyLogs({ message, stdout, code, ref: "execPythonError" });
         if (stdout.trim()) {
             ConsoleEvents.emit(EventTypes.LOG, stdout.trim());
         }
-        ConsoleEvents.emit(EventTypes.ERROR, errorMessage);
+        ConsoleEvents.emit(EventTypes.ERROR, message);
         return [[`Error, see Output tab for details.`]];
     }
 }
