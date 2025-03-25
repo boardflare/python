@@ -7,8 +7,7 @@ const FunctionDialog = ({
     onClose,
     selectedFunction,
     embedded = false,
-    loadFunctions,
-    functionsCache // Add functionsCache as a prop
+    loadFunctions
 }) => {
     const [targetCell, setTargetCell] = React.useState("");
     const [functionArgs, setFunctionArgs] = React.useState({});
@@ -228,15 +227,6 @@ const FunctionDialog = ({
                     args: functionArgs
                 };
                 await saveFunctionToSettings(updatedFunction);
-
-                // Instead of reloading all functions, just update the cache
-                if (functionsCache && typeof functionsCache.current?.set === 'function') {
-                    const cacheKey = `workbook-${updatedFunction.name}`;
-                    functionsCache.current.set(cacheKey, {
-                        ...updatedFunction,
-                        source: 'workbook'
-                    });
-                }
             }
 
             onClose();
