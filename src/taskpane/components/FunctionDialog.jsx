@@ -39,8 +39,6 @@ const FunctionDialog = ({
                 // Keep the full address including sheet name
                 let address = range.address;
 
-                console.log(`Selection changed to: ${address} for field: ${currentActiveField}`);
-
                 if (currentActiveField === 'targetCell') {
                     handleTargetCellChange(address);
                 } else {
@@ -80,7 +78,6 @@ const FunctionDialog = ({
 
                         // Store reference to the current handler for cleanup
                         selectionHandlerRef.current = handleSelectionChange;
-                        console.log("Selection change handler registered at workbook level");
                     });
                 } catch (error) {
                     console.error("Error setting up selection handler:", error);
@@ -98,7 +95,6 @@ const FunctionDialog = ({
                                 Office.EventType.DocumentSelectionChanged,
                                 { handler: selectionHandlerRef.current },
                                 (result) => {
-                                    console.log("Selection change handler removed");
                                 }
                             );
                             selectionHandlerRef.current = null;
@@ -164,7 +160,6 @@ const FunctionDialog = ({
     // Activate range selection for a specific field
     const handleFocus = (fieldName) => {
         setActiveField(fieldName);
-        console.log(`Activated range selection for field: ${fieldName}`);
     };
 
     const handleSubmit = async () => {
