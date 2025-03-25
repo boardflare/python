@@ -69,7 +69,7 @@ const App = ({ title }) => {
       setWorkbookFunctions(workbookData || []);
 
       // Set hello function if found
-      const helloFunc = workbookData?.find(f => f.name.toLowerCase() === 'hello');
+      const helloFunc = workbookData?.find(f => f?.name?.toLowerCase() === 'hello');
       if (helloFunc) {
         setSelectedFunction(helloFunc);
       }
