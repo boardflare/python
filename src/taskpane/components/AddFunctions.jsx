@@ -68,9 +68,8 @@ const AddFunctions = ({ loadFunctions }) => {
             await loadFunctions();
 
             pyLogs({
-                code: savedFunction.name,
-                ref: 'imported_example_function',
-                source: 'example'
+                message: savedFunction.name,
+                ref: 'imported_example_function'
             });
         } catch (error) {
             console.error("Error importing function:", error);

@@ -5,7 +5,7 @@ import HomeTab from "./HomeTab";
 import FunctionsTab from "./FunctionsTab";
 import SettingsTab from "./SettingsTab";
 import { EventTypes } from "../utils/constants";
-import { getFunctionFromSettings } from "../utils/workbookSettings";
+import { getFunctions, createDefaultFunction } from "../utils/workbookSettings";
 import { pyLogs } from "../utils/logs";
 
 const App = ({ title }) => {
@@ -65,18 +65,22 @@ const App = ({ title }) => {
   const loadFunctions = async () => {
     try {
       setIsLoading(true);
-      const workbookData = await getFunctionFromSettings();
-      setWorkbookFunctions(workbookData || []);
+      const workbookData = await getFunctions();
 
-      // Set hello function if found
-      const helloFunc = workbookData?.find(f => f.name.toLowerCase() === 'hello');
-      if (helloFunc) {
-        setSelectedFunction(helloFunc);
+      if (!workbookData || workbookData.length === 0) {
+        // No functions found, create a default function
+        const defaultFunc = await createDefaultFunction();
+        setWorkbookFunctions([defaultFunc]);
+        setSelectedFunction(defaultFunc);
+      } else {
+        setWorkbookFunctions(workbookData);
+        setSelectedFunction(workbookData[0]);
       }
+
     } catch (error) {
-      await pyLogs({ message: error.message, ref: "app_loadFunctions_error" });
       setWorkbookFunctions([]);
-      setError('Add-in failed to initialize.  Try closing and reopening your workbook, as this may be due to a temporary network issue.  Also, try Excel on web, as your desktop version may be unsupported.');
+      pyLogs({ message: error.message, ref: "app_loadFunctions_error" });
+      setError(error.message);
     } finally {
       setIsLoading(false);
     }
