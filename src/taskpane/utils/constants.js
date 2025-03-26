@@ -6,6 +6,12 @@ export const DEFAULT_CODE = `def hello(name):
     """ Returns a greeting. """
     return f"Hello {name}!"
 
+
+
+
+
+
+    
 # Quick tips, see website for details.
 
 # ⬅️ Drag task pane open for more room.
