@@ -21,9 +21,6 @@ export async function initialize() {
     uid = await getUserId();
 }
 
-// Remove getUserId, getTokenClaims, and saveLogToIndexedDB functions
-// Keep the rest of the file as is, but update to use imported functions
-
 async function flushLogs() {
     if (isFlushing) return;
     isFlushing = true;
@@ -67,7 +64,7 @@ async function flushLogs() {
                 'Content-Length': body.length.toString()
             };
             try {
-                await fetch("https://boardflare.table.core.windows.net/PylogsMar23?sv=2019-02-02&st=2025-03-23T02%3A44%3A59Z&se=2035-03-24T02%3A44%3A00Z&sp=a&sig=ZSigr8C%2BvsYBvC2y7%2Bhw0sh57VBj7fyGz7uH1Jn%2Fm3c%3D&tn=PylogsMar23", { method: 'POST', headers, body });
+                await fetch("https://boardflare.table.core.windows.net/PylogsMar26?sv=2019-02-02&st=2025-03-26T16%3A09%3A41Z&se=2035-03-27T16%3A09%3A00Z&sp=a&sig=64GgwXn%2BdsAem%2FU%2FfyMcIoRVUSWb2AGGVYXMHahI32E%3D&tn=PylogsMar26", { method: 'POST', headers, body });
                 await clearLogs();
             } catch (err) {
             }
@@ -104,32 +101,6 @@ export async function pyLogs(data) {
         };
         await saveLogToIndexedDB(logEntity);
         return true;
-    } catch (error) {
-        return false;
-    }
-}
-
-export async function feedback(data) {
-    if (!browserData || !uid) await initialize();
-    const feedbackEntity = {
-        PartitionKey: new Date().toISOString(),
-        RowKey: "Python",
-        BrowserData: JSON.stringify(browserData),
-        uid,
-        ...data
-    };
-    const body = JSON.stringify(feedbackEntity);
-    const headers = {
-        'Accept': 'application/json;odata=nometadata',
-        'Content-Type': 'application/json',
-        'Content-Length': body.length.toString(),
-        'x-ms-date': new Date().toUTCString(),
-        'x-ms-version': '2024-05-04',
-        'Prefer': 'return-no-content'
-    };
-    try {
-        const response = await fetch("https://boardflare.table.core.windows.net/Feedback?sv=2019-02-02&st=2025-01-10T13%3A55%3A06Z&se=2035-01-11T13%3A55%3A00Z&sp=a&sig=u%2F%2BYYEe17NGq1MhnWJYfk3P2wwxTwSY4Xsps9HsHUxA%3D&tn=Feedback", { method: 'POST', headers, body });
-        return response.ok;
     } catch (error) {
         return false;
     }
