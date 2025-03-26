@@ -1,20 +1,16 @@
 import * as React from "react";
-import { saveFunctionToSettings } from "../utils/workbookSettings";
 import { pyLogs } from '../utils/logs';
 
-const FunctionDialog = ({
+export default function FunctionDialog({
     isOpen,
     onClose,
     selectedFunction,
-    embedded = false,
     loadFunctions
-}) => {
+}) {
     const [targetCell, setTargetCell] = React.useState("");
     const [functionArgs, setFunctionArgs] = React.useState({});
     const [error, setError] = React.useState("");
     const [activeField, setActiveField] = React.useState(null);
-    const [saveArgs, setSaveArgs] = React.useState(true);
-    const [rangeValues, setRangeValues] = React.useState({});
 
     // Reference to store the event handler for cleanup
     const selectionHandlerRef = React.useRef(null);
@@ -119,32 +115,13 @@ const FunctionDialog = ({
         if (isOpen && selectedFunction) {
             setError("");
             setActiveField(null);
-            setRangeValues({}); // Reset range values when dialog opens
 
-            // Try to load saved args
-            const loadSavedArgs = async () => {
-                try {
-                    if (selectedFunction?.args) {
-                        setFunctionArgs(selectedFunction.args);
-                    } else {
-                        // Initialize arguments with empty strings or default values
-                        const newArgs = {};
-                        selectedFunction.parameters?.forEach(param => {
-                            newArgs[param.name] = "";
-                        });
-                        setFunctionArgs(newArgs);
-                    }
-                } catch (error) {
-                    pyLogs({
-                        message: `Failed to load arguments: ${error.message}`,
-                        code: selectedFunction.code,
-                        ref: 'functionDialog_load_args'
-                    });
-                    console.error("Error loading args:", error);
-                }
-            };
-
-            loadSavedArgs();
+            // Initialize arguments with empty strings or default values
+            const newArgs = {};
+            selectedFunction.parameters?.forEach(param => {
+                newArgs[param.name] = "";
+            });
+            setFunctionArgs(newArgs);
         }
     }, [isOpen, selectedFunction]);
 
@@ -234,18 +211,6 @@ const FunctionDialog = ({
                 ref: 'functionDialog_success'
             });
 
-            if (saveArgs) {
-                try {
-                    const updatedFunction = {
-                        ...selectedFunction,
-                        args: functionArgs
-                    };
-                    await saveFunctionToSettings(updatedFunction);
-                } catch (error) {
-                    throw new Error(`Failed to save function arguments: ${error.message}`);
-                }
-            }
-
             onClose();
         } catch (error) {
             pyLogs({
@@ -279,115 +244,104 @@ const FunctionDialog = ({
         );
     }
 
-    // For embedded mode, return just the form content without modal wrapper
-    const content = (
-        <div className="p-2">
-            <div className="bg-gray-50 rounded">
-                <div className="flex justify-between items-center">
-                    <h3 className="font-bold">{selectedFunction.signature}</h3>
-                    {selectedFunction.noName && (
-                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                            EXEC MODE
-                        </span>
-                    )}
-                </div>
-                {selectedFunction.description && (
-                    <p className="text-sm text-gray-600 mt-1">{selectedFunction.description}</p>
-                )}
-                {activeField && (
-                    <p className="text-sm text-blue-500 mt-1">Select range in worksheet to populate the input field.</p>
-                )}
-            </div>
-
-            <div className="mt-2 mb-2">
-                {(selectedFunction.parameters || []).map((param, index) => (
-                    <div key={`${param.name}-${index}`} className="mb-2">
-                        <div className="flex items-center">
-                            <label className="mr-2 whitespace-nowrap">
-                                {param.name}
-                                {!param.has_default && <span className="text-red-500">*</span>}
-                            </label>
-                            <input
-                                type="text"
-                                value={functionArgs[param.name] || ''}
-                                onChange={(e) => handleArgumentChange(param.name, e.target.value)}
-                                onFocus={() => handleFocus(param.name)}
-                                readOnly
-                                data-param={param.name}
-                                className={`flex-1 px-2 py-1 border rounded ${activeField === param.name ? 'border-blue-500 border-2' : ''}`}
-                                placeholder="Click, then select range"
-                            />
-                            {param.has_default && (
-                                <button
-                                    type="button"
-                                    onClick={() => handleArgumentChange(param.name, "")}
-                                    className="ml-2 text-red-500 hover:text-red-700"
-                                >
-                                    🗑️
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            <div className="mb-2 flex items-center">
-                <label className="mr-2 whitespace-nowrap font-semibold">
-                    Insert into cell:
-                    <span className="text-red-500">*</span>
-                </label>
-                <input
-                    id="targetCell"
-                    type="text"
-                    value={targetCell}
-                    onChange={(e) => handleTargetCellChange(e.target.value)}
-                    onFocus={() => handleFocus('targetCell')}
-                    readOnly
-                    className={`flex-1 px-2 py-1 border rounded ${activeField === 'targetCell' ? 'border-blue-500 border-2' : ''}`}
-                    placeholder="Click, then select cell"
-                />
-            </div>
-
-            {error && (
-                <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
-                    {error}
-                </div>
-            )}
-
-            <div className="flex justify-between items-center mb-1">
-                <div>
-                    Experimental 🧪
-                </div>
-                <div className="flex space-x-2">
-                    <button
-                        onClick={() => { setActiveField(null); onClose(); }}
-                        className="px-4 py-2 border rounded hover:bg-gray-100"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleSubmit}
-                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                        disabled={!targetCell}
-                    >
-                        OK
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-
-    if (embedded) {
-        return content;
-    }
-
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
             <div className="bg-white m-1 rounded-lg shadow-lg w-96">
-                {content}
+                <div className="p-2">
+                    <div className="bg-gray-50 rounded">
+                        <div className="flex justify-between items-center">
+                            <h3 className="font-bold">{selectedFunction.signature}</h3>
+                            {selectedFunction.noName && (
+                                <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                                    EXEC MODE
+                                </span>
+                            )}
+                        </div>
+                        {selectedFunction.description && (
+                            <p className="text-sm text-gray-600 mt-1">{selectedFunction.description}</p>
+                        )}
+                        {activeField && (
+                            <p className="text-sm text-blue-500 mt-1">Select range in worksheet to populate the input field.</p>
+                        )}
+                    </div>
+
+                    <div className="mt-2 mb-2">
+                        {(selectedFunction.parameters || []).map((param, index) => (
+                            <div key={`${param.name}-${index}`} className="mb-2">
+                                <div className="flex items-center">
+                                    <label className="mr-2 whitespace-nowrap">
+                                        {param.name}
+                                        {!param.has_default && <span className="text-red-500">*</span>}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={functionArgs[param.name] || ''}
+                                        onChange={(e) => handleArgumentChange(param.name, e.target.value)}
+                                        onFocus={() => handleFocus(param.name)}
+                                        readOnly
+                                        data-param={param.name}
+                                        className={`flex-1 px-2 py-1 border rounded ${activeField === param.name ? 'border-blue-500 border-2' : ''}`}
+                                        placeholder="Click, then select range"
+                                    />
+                                    {param.has_default && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleArgumentChange(param.name, "")}
+                                            className="ml-2 text-red-500 hover:text-red-700"
+                                        >
+                                            🗑️
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mb-2 flex items-center">
+                        <label className="mr-2 whitespace-nowrap font-semibold">
+                            Insert into cell:
+                            <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            id="targetCell"
+                            type="text"
+                            value={targetCell}
+                            onChange={(e) => handleTargetCellChange(e.target.value)}
+                            onFocus={() => handleFocus('targetCell')}
+                            readOnly
+                            className={`flex-1 px-2 py-1 border rounded ${activeField === 'targetCell' ? 'border-blue-500 border-2' : ''}`}
+                            placeholder="Click, then select cell"
+                        />
+                    </div>
+
+                    {error && (
+                        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="flex justify-between items-center mb-1">
+                        <div>
+                            Experimental 🧪
+                        </div>
+                        <div className="flex space-x-2">
+                            <button
+                                onClick={() => { setActiveField(null); onClose(); }}
+                                className="px-4 py-2 border rounded hover:bg-gray-100"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSubmit}
+                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                disabled={!targetCell}
+                            >
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );
-};
-
-export default FunctionDialog;
+}
