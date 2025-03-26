@@ -2,69 +2,49 @@ import { pyLogs } from './logs';
 import { DEBUG_FLAGS } from './constants';
 
 export async function updateNameManager(parsedCode) {
-    try {
-        // Simulate failure if debug flag is set
-        if (DEBUG_FLAGS.FORCE_NAME_MANAGER_FAIL) {
-            throw new Error("Simulated name manager failure for testing");
+    // Simulate failure if debug flag is set
+    if (DEBUG_FLAGS.FORCE_NAME_MANAGER_FAIL) {
+        throw new Error("Simulated name manager failure for testing");
+    }
+
+    const excelName = parsedCode.name.toUpperCase();
+
+    return await Excel.run(async (context) => {
+        const namedItem = context.workbook.names.getItemOrNullObject(excelName);
+        namedItem.load(['isNullObject']);
+        await context.sync();
+
+        // Delete existing name if it exists
+        if (!namedItem.isNullObject) {
+            try {
+                namedItem.delete();
+                await context.sync();
+            } catch (deleteError) {
+                throw new Error(`[Name Deletion] Failed to delete existing name '${excelName}'. Error: ${deleteError.message}`);
+            }
         }
 
-        const excelName = parsedCode.name.toUpperCase();
-
-        return await Excel.run(async (context) => {
-            const namedItem = context.workbook.names.getItemOrNullObject(excelName);
-            namedItem.load(['isNullObject']);
+        let newNamedItem;
+        try {
+            newNamedItem = context.workbook.names.add(excelName, parsedCode.formula, parsedCode.description);
             await context.sync();
-
-            // Delete existing name if it exists
-            if (!namedItem.isNullObject) {
-                try {
-                    namedItem.delete();
-                    await context.sync();
-                } catch (deleteError) {
-                    throw new Error(`[Name Deletion] Failed to delete existing name '${excelName}'. Error: ${deleteError.message}`);
-                }
-            }
-
-            let newNamedItem;
+            pyLogs({
+                code: parsedCode.formula,
+                ref: 'nameManager_add_success',
+            });
+        } catch (createError) {
+            // Retry with semicolons instead of commas
             try {
-                newNamedItem = context.workbook.names.add(excelName, parsedCode.formula);
+                const modifiedFormula = parsedCode.formula.replace(/,/g, ';');
+                newNamedItem = context.workbook.names.add(excelName, modifiedFormula, parsedCode.description);
                 await context.sync();
                 pyLogs({
-                    code: parsedCode.formula,
-                    ref: 'nameManager_add_success',
+                    code: modifiedFormula,
+                    ref: 'nameManager_add_success_retry',
                 });
-            } catch (createError) {
-                // Retry with semicolons instead of commas
-                try {
-                    const modifiedFormula = parsedCode.formula.replace(/,/g, ';');
-                    newNamedItem = context.workbook.names.add(excelName, modifiedFormula);
-                    await context.sync();
-                    pyLogs({
-                        code: modifiedFormula,
-                        ref: 'nameManager_add_success_retry',
-                    });
-                } catch (retryError) {
-                    throw new Error(`Failed to create name with retry. Formula: ${parsedCode.formula}. Error: ${retryError.message}.`);
-                }
+            } catch (retryError) {
+                throw new Error(`Failed to create name with retry. Formula: ${parsedCode.formula}. Error: ${retryError.message}.`);
             }
-
-            try {
-                newNamedItem.visible = true;
-                if (parsedCode.description) {
-                    newNamedItem.comment = parsedCode.description;
-                    await context.sync();
-                }
-            } catch (descriptionError) {
-                pyLogs({
-                    message: `[Description Setting] Name '${excelName}' was created but failed to set description. Description: ${parsedCode.description}. Error: ${descriptionError.message}`,
-                    code: parsedCode.code,
-                    ref: 'nameManager_description_error'
-                });
-            }
-
-            await context.sync();
-        });
-    } catch (error) {
-        throw new Error(`Unable to add ${parsedCode.name.toUpperCase()} as named function. This sometimes occurs due to an issue with Excel. You can try the following: 1. Copy your code from the editor. 2. Close and reopen the workbook. 3. Paste the code and then click save again. If the issue persists, please contact support.`);
-    }
+        }
+    });
 }
