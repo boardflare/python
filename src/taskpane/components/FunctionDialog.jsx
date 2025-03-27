@@ -36,6 +36,10 @@ export default function FunctionDialog({
                 let address = range.address;
 
                 if (currentActiveField === 'targetCell') {
+                    // If range contains a colon, take only the first cell
+                    if (address.includes(':')) {
+                        address = address.split(':')[0];
+                    }
                     handleTargetCellChange(address);
                 } else {
                     handleArgumentChange(currentActiveField, address);
