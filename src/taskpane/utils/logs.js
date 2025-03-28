@@ -15,8 +15,9 @@ export async function initialize() {
     const adapter = await navigator.gpu.requestAdapter();
     browserData = {
         gpuF16: adapter?.features.has('shader-f16'),
-        memory: navigator.deviceMemory,
-        cores: navigator.hardwareConcurrency
+        memory: navigator?.deviceMemory,
+        cores: navigator?.hardwareConcurrency,
+        brands: navigator?.userAgentData?.brands
     };
     uid = await getUserId();
 }

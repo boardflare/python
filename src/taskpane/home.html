@@ -22,11 +22,10 @@
         React container div. 
     -->
     <div id="tridentmessage" style="display: none; padding: 10;">
-        This add-in will not run in your version of Office. Please upgrade either to perpetual Office 2021 (or later) 
-        or to a Microsoft 365 account.
+        This add-in will not run in your version of Office. Please upgrade either to perpetual Office 2021 (or later) or to a Microsoft 365 account.
     </div>
     <script>
-        if ((navigator.userAgent.indexOf("Trident") !== -1) || (navigator.userAgent.indexOf("Edge") !== -1)) {
+        if ((navigator?.userAgent.indexOf("Trident") !== -1) || (navigator?.userAgent.indexOf("Edge") !== -1)) {
             var tridentMessage = document.getElementById("tridentmessage");
             var normalContainer = document.getElementById("container");
             tridentMessage.style.display = "block";
