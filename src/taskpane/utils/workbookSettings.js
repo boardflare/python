@@ -59,6 +59,25 @@ export async function getFunctions() {
     }
 }
 
+export async function getFunctionsWithDelay() {
+    try {
+        return await Excel.run({ delayForCellEdit: true }, async (ctx) => {
+            const settings = ctx.workbook.settings;
+            const items = settings.load("items");
+            await ctx.sync();
+            const functions = items.items.map(item => item.value);
+            return functions;
+        });
+    } catch (error) {
+        console.error('Fallback method also failed:', error);
+        pyLogs({
+            message: error.message,
+            ref: "getFunctionsWithDelayError"
+        });
+        throw error;
+    }
+}
+
 export async function createDefaultFunction() {
     try {
         const defaultFunction = await parsePython(DEFAULT_CODE);
@@ -89,7 +108,6 @@ export async function deleteFunctionFromSettings(name) {
                 namedItem.delete();
             }
 
-            await context.sync();
             return true;
         });
     } catch (error) {

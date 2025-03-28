@@ -52,7 +52,7 @@ export const ConsoleEvents = {
 
 export const DEBUG_FLAGS = {
     FORCE_NAME_MANAGER_FAIL: false,  // Set to true to simulate name manager failures
-    FORCE_GET_FUNCTIONS_FAIL: true  // Set to true to simulate failures when retrieving functions
+    FORCE_GET_FUNCTIONS_FAIL: false  // Set to true to simulate failures when retrieving functions
 };
 
 export function getExecEnv() {
