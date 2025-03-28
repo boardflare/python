@@ -40,6 +40,7 @@ async function flushLogs() {
                     lang: Office?.context?.displayLanguage,
                     docUrl: Office?.context?.document?.url,
                     test: !window.location.pathname.includes('prod'),
+                    license: Office?.context?.license,
                     tokenClaims
                 })
             };
