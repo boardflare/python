@@ -104,6 +104,7 @@ const App = ({ title }) => {
               setSelectedFunction={setSelectedFunction}
               loadFunctions={loadFunctions}
               selectedFunction={selectedFunction}
+              error={error}
             />
           )}
           {selectedTab === "editor" && (

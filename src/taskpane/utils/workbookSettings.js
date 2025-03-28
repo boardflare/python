@@ -1,5 +1,5 @@
 import { pyLogs } from './logs';
-import { DEFAULT_CODE } from './constants';
+import { DEFAULT_CODE, DEBUG_FLAGS } from './constants';
 import { parsePython } from './codeparser';
 import { saveWorkbookOnly } from './save';
 
@@ -38,6 +38,10 @@ export async function saveFunctionToSettings(functionData) {
 
 export async function getFunctions() {
     try {
+        if (DEBUG_FLAGS.FORCE_GET_FUNCTIONS_FAIL) {
+            throw new Error('Simulated failure when retrieving functions');
+        }
+
         return await Excel.run(async (context) => {
             const settings = context.workbook.settings;
             const items = settings.load("items");
