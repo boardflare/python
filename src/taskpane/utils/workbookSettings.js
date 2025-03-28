@@ -31,7 +31,7 @@ export async function saveFunctionToSettings(functionData) {
             return result;
         });
     } catch (error) {
-        pyLogs({ message: `Failed to save after three tries. Error: ${error.message}`, code: functionData?.name || null, ref: "saveFunctionToSettingsError" });
+        pyLogs({ message: `Message: ${error.message}  Code:${error?.code}`, code: functionData?.name || null, ref: "saveFunctionToSettingsError" });
         throw error;
     }
 }
@@ -52,7 +52,7 @@ export async function getFunctions() {
     } catch (error) {
         console.error('Failed to get functions from settings:', error);
         pyLogs({
-            message: error.message,
+            message: `Message: ${error.message}  Code:${error?.code}`,
             ref: "getFunctionsError"
         });
         throw error;
@@ -71,7 +71,7 @@ export async function getFunctionsWithDelay() {
     } catch (error) {
         console.error('Fallback method also failed:', error);
         pyLogs({
-            message: error.message,
+            message: `Message: ${error.message}  Code:${error?.code}`,
             ref: "getFunctionsWithDelayError"
         });
         throw error;
@@ -85,7 +85,7 @@ export async function createDefaultFunction() {
         return defaultFunction;
     } catch (error) {
         pyLogs({
-            message: error.message,
+            message: `Message: ${error.message}  Code:${error?.code}`,
             ref: "createDefaultFunctionError"
         });
         throw error;
@@ -113,7 +113,7 @@ export async function deleteFunctionFromSettings(name) {
     } catch (error) {
         console.error('Failed to delete from settings:', error);
         pyLogs({
-            message: error.message,
+            message: `Message: ${error.message}  Code:${error?.code}`,
             code: name,
             ref: "deleteFunctionFromSettingsError"
         });

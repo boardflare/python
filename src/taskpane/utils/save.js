@@ -23,9 +23,9 @@ export async function saveWorkbookOnly(parsedFunction) {
             code: parsedFunction.code,
             ref: 'save_workbook_success'
         });
-    } catch (err) {
-        pyLogs({ message: `[Save] Error saving to workbook: ${err.message}`, code: parsedFunction.code, ref: 'save_workbook_error' });
-        throw err;
+    } catch (error) {
+        pyLogs({ message: `[Save] Error saving to workbook. Message: ${error.message}  Code:${error?.code}`, code: parsedFunction.code, ref: 'save_workbook_error' });
+        throw error;
     }
     return parsedFunction;
 }
@@ -35,12 +35,12 @@ export async function saveToOneDriveOnly(parsedFunction) {
     try {
         await saveFile(notebook, `${parsedFunction.name}.ipynb`);
         pyLogs({ message: `[OneDrive] Successfully saved ${parsedFunction.name}.ipynb`, code: parsedFunction.code, ref: 'onedrive_save_success' });
-    } catch (err) {
-        if (!(err instanceof TokenExpiredError)) {
-            pyLogs({ message: `[OneDrive] Error saving file: ${err.message}`, code: JSON.stringify(err), ref: 'onedrive_save_error' });
-            throw new Error(`There was an error saving to OneDrive. Try saving again. Error: ${err.message}`);
+    } catch (error) {
+        if (!(error instanceof TokenExpiredError)) {
+            pyLogs({ message: `[OneDrive] Error saving file: ${error.message},  Code:${error?.code}`, code: JSON.stringify(error), ref: 'onedrive_save_error' });
+            throw new Error(`There was an error saving to OneDrive. Try saving again. Error: ${error.message}`);
         }
-        throw err;
+        throw error;
     }
     return parsedFunction;
 }
