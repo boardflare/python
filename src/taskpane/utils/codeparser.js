@@ -35,7 +35,7 @@ result = parse_python_code_safe("${encodedCode}")
         try {
             pyResult = JSON.parse(rawResult);
         } catch (e) {
-            throw new Error(`Failed to parse JSON: ${e.message}, rawResult: ${rawResult}`);
+            throw new Error(`AST parser code error: ${rawResult}`);
         }
 
         if (!pyResult || pyResult.error) {
