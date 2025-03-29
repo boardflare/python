@@ -5,7 +5,7 @@ import HomeTab from "./HomeTab";
 import FunctionsTab from "./FunctionsTab";
 import SettingsTab from "./SettingsTab";
 import { EventTypes } from "../utils/constants";
-import { getFunctions, createDefaultFunction } from "../utils/workbookSettings";
+import { getFunctions, getFunctionsWithDelay, createDefaultFunction } from "../utils/workbookSettings";
 import { pyLogs } from "../utils/logs";
 
 const App = ({ title }) => {
@@ -36,14 +36,24 @@ const App = ({ title }) => {
       setLogs([]);
     };
 
+    const handleSaveStatus = (event) => {
+      if (event.detail.type === "error") {
+        setError(event.detail.message);
+      } else if (event.detail.type === "clear") {
+        setError(null);
+      }
+    };
+
     window.addEventListener(EventTypes.LOG, handleLog);
     window.addEventListener(EventTypes.ERROR, handleLog);
     window.addEventListener(EventTypes.CLEAR, handleClearConsole);
+    window.addEventListener(EventTypes.SAVE, handleSaveStatus);
 
     return () => {
       window.removeEventListener(EventTypes.LOG, handleLog);
       window.removeEventListener(EventTypes.ERROR, handleLog);
       window.removeEventListener(EventTypes.CLEAR, handleClearConsole);
+      window.removeEventListener(EventTypes.SAVE, handleSaveStatus);
     };
   }, []);
 
@@ -65,7 +75,34 @@ const App = ({ title }) => {
   const loadFunctions = async () => {
     try {
       setIsLoading(true);
-      const workbookData = await getFunctions();
+      setError(null); // Clear any previous errors
+      let workbookData;
+
+      try {
+        // First try the standard method
+        workbookData = await getFunctions();
+      } catch (error) {
+        // Set error message for user
+        setError(error.message);
+
+        // Only retry with delay if we have the specific cell edit mode error code
+        if (error?.code === "InvalidOperationInCellEditMode") {
+          try {
+            // Then try the method with delayForCellEdit
+            workbookData = await getFunctionsWithDelay();
+
+            // If we get here, the delayed function worked - clear the cell editing message
+            setError(null);
+          } catch (delayError) {
+            // Both methods failed, set a more descriptive error
+            pyLogs({ message: delayError.message, ref: "getFunctionsWithDelay_failed" });
+            throw delayError; // Re-throw to be caught by outer catch
+          }
+        } else {
+          // For other errors, don't try the delay method
+          throw error; // Re-throw to be caught by outer catch
+        }
+      }
 
       if (!workbookData || workbookData.length === 0) {
         // No functions found, create a default function
@@ -76,11 +113,10 @@ const App = ({ title }) => {
         setWorkbookFunctions(workbookData);
         setSelectedFunction(workbookData[0]);
       }
-
     } catch (error) {
       setWorkbookFunctions([]);
-      pyLogs({ message: error.message, ref: "app_loadFunctions_error" });
-      setError(error.message);
+      pyLogs({ message: `Message: ${error.message}  Code:${error?.code}`, ref: "app_loadFunctions_error" });
+      setError(`Failed to load functions: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -104,6 +140,7 @@ const App = ({ title }) => {
               setSelectedFunction={setSelectedFunction}
               loadFunctions={loadFunctions}
               selectedFunction={selectedFunction}
+              error={error}
             />
           )}
           {selectedTab === "editor" && (
@@ -116,6 +153,7 @@ const App = ({ title }) => {
               loadFunctions={loadFunctions}
               unsavedCode={unsavedCode}
               setUnsavedCode={setUnsavedCode}
+              error={error}
             />
           )}
           {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} unsavedCode={unsavedCode} />}

@@ -7,9 +7,14 @@ import pdfUrl from "../../../assets/Python-v1.3.5.pdf";
 import AddFunctions from "./AddFunctions";
 import { pyLogs } from "../utils/logs";
 
-const HomeTab = ({ handleTabSelect, setGeneratedCode, setSelectedFunction, loadFunctions, selectedFunction }) => {
+const HomeTab = ({ handleTabSelect, setGeneratedCode, setSelectedFunction, loadFunctions, selectedFunction, error }) => {
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const [isWebPlatform, setIsWebPlatform] = React.useState(false);
+    const [localError, setLocalError] = React.useState(error || null);
+
+    React.useEffect(() => {
+        setLocalError(error);
+    }, [error]);
 
     React.useEffect(() => {
         try {
@@ -27,6 +32,12 @@ const HomeTab = ({ handleTabSelect, setGeneratedCode, setSelectedFunction, loadF
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
+            {localError && (
+                <div className="p-2 text-red-600 bg-red-50 mb-2 text-center">
+                    {localError}
+                </div>
+            )}
+
             <div className="shrink-0">
                 <div className="px-4 py-2 bg-gray-100 font-bold text-center">
                     Create Functions

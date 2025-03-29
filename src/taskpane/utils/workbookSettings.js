@@ -1,5 +1,5 @@
 import { pyLogs } from './logs';
-import { DEFAULT_CODE } from './constants';
+import { DEFAULT_CODE, DEBUG_FLAGS } from './constants';
 import { parsePython } from './codeparser';
 import { saveWorkbookOnly } from './save';
 
@@ -20,6 +20,13 @@ export async function saveFunctionToSettings(functionData) {
 
     try {
         return await retry(async () => {
+            // Simulate InvalidOperationInCellEditMode error if debug flag is set
+            if (DEBUG_FLAGS.FORCE_CELL_EDIT_MODE_ERROR) {
+                const error = new Error("Cannot perform this operation while the cell is in edit mode.");
+                error.code = "InvalidOperationInCellEditMode";
+                throw error;
+            }
+
             const result = await Excel.run(async (context) => {
                 const settings = context.workbook.settings;
                 const key = functionData.name;
@@ -31,13 +38,44 @@ export async function saveFunctionToSettings(functionData) {
             return result;
         });
     } catch (error) {
-        pyLogs({ message: `Failed to save after three tries. Error: ${error.message}`, code: functionData?.name || null, ref: "saveFunctionToSettingsError" });
+        pyLogs({ message: `Message: ${error.message}  Code:${error?.code}`, code: functionData?.name || null, ref: "saveFunctionToSettingsError" });
+        throw error;
+    }
+}
+
+export async function saveFunctionWithDelay(functionData) {
+    if (!functionData?.code) {
+        throw new Error('Invalid function data');
+    }
+
+    try {
+        return await Excel.run({ delayForCellEdit: true }, async (context) => {
+            const settings = context.workbook.settings;
+            const key = functionData.name;
+            const value = functionData;
+
+            settings.add(key, value);
+            await context.sync();
+        });
+    } catch (error) {
+        console.error('Delayed save also failed:', error);
+        pyLogs({
+            message: `Message: ${error.message}  Code:${error?.code}`,
+            code: functionData?.name || null,
+            ref: "saveFunctionWithDelayError"
+        });
         throw error;
     }
 }
 
 export async function getFunctions() {
     try {
+        if (DEBUG_FLAGS.FORCE_CELL_EDIT_MODE_ERROR) {
+            const error = new Error("Cannot perform this operation while the cell is in edit mode.");
+            error.code = "InvalidOperationInCellEditMode";
+            throw error;
+        }
+
         return await Excel.run(async (context) => {
             const settings = context.workbook.settings;
             const items = settings.load("items");
@@ -48,8 +86,27 @@ export async function getFunctions() {
     } catch (error) {
         console.error('Failed to get functions from settings:', error);
         pyLogs({
-            message: error.message,
+            message: `Message: ${error.message}  Code:${error?.code}`,
             ref: "getFunctionsError"
+        });
+        throw error;
+    }
+}
+
+export async function getFunctionsWithDelay() {
+    try {
+        return await Excel.run({ delayForCellEdit: true }, async (ctx) => {
+            const settings = ctx.workbook.settings;
+            const items = settings.load("items");
+            await ctx.sync();
+            const functions = items.items.map(item => item.value);
+            return functions;
+        });
+    } catch (error) {
+        console.error('Fallback method also failed:', error);
+        pyLogs({
+            message: `Message: ${error.message}  Code:${error?.code}`,
+            ref: "getFunctionsWithDelayError"
         });
         throw error;
     }
@@ -62,7 +119,7 @@ export async function createDefaultFunction() {
         return defaultFunction;
     } catch (error) {
         pyLogs({
-            message: error.message,
+            message: `Message: ${error.message}  Code:${error?.code}`,
             ref: "createDefaultFunctionError"
         });
         throw error;
@@ -83,15 +140,15 @@ export async function deleteFunctionFromSettings(name) {
 
             if (!namedItem.isNullObject) {
                 namedItem.delete();
+                await context.sync();
             }
 
-            await context.sync();
             return true;
         });
     } catch (error) {
         console.error('Failed to delete from settings:', error);
         pyLogs({
-            message: error.message,
+            message: `Message: ${error.message}  Code:${error?.code}`,
             code: name,
             ref: "deleteFunctionFromSettingsError"
         });

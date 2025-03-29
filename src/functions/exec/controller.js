@@ -76,6 +76,6 @@ export async function execPython({ code, arg1 }, isName = true) {
             ConsoleEvents.emit(EventTypes.LOG, stdout.trim());
         }
         ConsoleEvents.emit(EventTypes.ERROR, message);
-        return [[`Error, see Output tab for details.`]];
+        return [[`Error, also displayed in Output tab: ${message} \n${stdout}`]];
     }
 }

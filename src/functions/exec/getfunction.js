@@ -21,8 +21,8 @@ export async function getFunction(code) {
 
         const functionData = await getFunctionFromSettings(name);
 
-        if (!functionData) {
-            throw new Error(`Function returned null.  Try saving it again.`);
+        if (!functionData?.code) {
+            throw new Error(`Function does not have code defined.`);
         }
 
         return functionData.code + (functionData.resultLine || '');
