@@ -126,6 +126,33 @@ export default function FunctionDialog({
                 newArgs[param.name] = "";
             });
             setFunctionArgs(newArgs);
+
+            // Get the currently selected cell when dialog opens
+            const getInitialCell = async () => {
+                try {
+                    await Excel.run(async (context) => {
+                        const range = context.workbook.getSelectedRange();
+                        range.load(["address"]);
+                        await context.sync();
+
+                        let address = range.address;
+                        // If range contains a colon, take only the first cell
+                        if (address.includes(':')) {
+                            address = address.split(':')[0];
+                        }
+                        handleTargetCellChange(address);
+                    });
+                } catch (error) {
+                    console.error("Error getting initial cell:", error);
+                    pyLogs({
+                        message: `Failed to get initial cell: ${error.message}`,
+                        code: selectedFunction?.code || 'unknown_function',
+                        ref: 'functionDialog_initial_cell'
+                    });
+                }
+            };
+
+            getInitialCell();
         }
     }, [isOpen, selectedFunction]);
 
