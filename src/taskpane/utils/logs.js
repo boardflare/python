@@ -13,11 +13,21 @@ let isFlushing = false;
 
 export async function initialize() {
     const adapter = await navigator.gpu.requestAdapter();
+
+    // Helper function to check if WebView2 is present and return its version
+    const getWebView2Version = () => {
+        if (!navigator?.userAgentData?.brands) return null;
+        const webView2Brand = navigator.userAgentData.brands.find(
+            brand => brand.brand === "Microsoft Edge WebView2"
+        );
+        return webView2Brand ? webView2Brand.version : null;
+    };
+
     browserData = {
         gpuF16: adapter?.features.has('shader-f16'),
         memory: navigator?.deviceMemory,
         cores: navigator?.hardwareConcurrency,
-        brands: navigator?.userAgentData?.brands
+        webview2: getWebView2Version()
     };
     uid = await getUserId();
 }
