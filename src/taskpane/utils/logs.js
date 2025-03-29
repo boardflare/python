@@ -66,7 +66,7 @@ async function flushLogs() {
                 'Content-Length': body.length.toString()
             };
             try {
-                await fetch("https://boardflare.table.core.windows.net/PylogsMar26?sv=2019-02-02&st=2025-03-26T16%3A09%3A41Z&se=2035-03-27T16%3A09%3A00Z&sp=a&sig=64GgwXn%2BdsAem%2FU%2FfyMcIoRVUSWb2AGGVYXMHahI32E%3D&tn=PylogsMar26", { method: 'POST', headers, body });
+                await fetch("https://boardflare.table.core.windows.net/PylogsMar29?sv=2019-02-02&st=2025-03-29T02%3A24%3A33Z&se=2035-03-30T02%3A24%3A00Z&sp=a&sig=ksRmh6uSUcA20Xg3wTSgWMnW0bjBrss5gi8DAZ%2Ff68c%3D&tn=PylogsMar29", { method: 'POST', headers, body });
                 await clearLogs();
             } catch (err) {
             }
