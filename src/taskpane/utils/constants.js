@@ -5,30 +5,23 @@ export const DISPLAY_CODE = `def hello(name):
 export const DEFAULT_CODE = `def hello(name):
     """ Returns a greeting. """
     return f"Hello {name}!"
-
-
-
-
-
-
     
-# Quick tips, see website for details.
+# Quick tips:
 
 # ⬅️ Drag task pane open for more room.
 # ⚠️ Code MUST BE A FUNCTION!
 # 💻 NO local file system access.
 # Pass data as args, not xl("B3") refs.
-# Use in Excel like a regular function.
 
-# Range args are converted to 2D lists.
-# e.g. a single cell is 1
-# e.g. a row of two cells is [[1, 2]]
-# e.g. a column of two cells is [[1], [2]]
+# Range args are converted as follows:
+# - Single cell is a scalar.
+# - Row of two cells is [[1, 2]]
+# - Column of two cells is [[1], [2]]
 
 # Return value must be a 2D list or scalar.
-# e.g. 24 returns a single cell
-# e.g. [["age", 24]] returns a row
-# e.g. [["age"], [24]] returns a column`;
+# - 24 returns a single cell
+# - [["age", 24]] returns a row
+# - [["age"], [24]] returns a column`;
 
 export const EventTypes = {
     LOG: 'console:log',
