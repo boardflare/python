@@ -4,7 +4,7 @@ import LLM from "./LLM";
 import FunctionDialog from "./FunctionDialog";
 import { DEFAULT_CODE } from "../utils/constants";
 import { parsePython } from "../utils/codeparser";
-import { saveWorkbookOnly } from "../utils/save";  // Change import
+import { saveWorkbookOnly } from "../utils/save";
 import { pyLogs } from "../utils/logs";
 
 const EditorTab = ({
@@ -15,16 +15,23 @@ const EditorTab = ({
     workbookFunctions,
     loadFunctions,
     unsavedCode,
-    setUnsavedCode
+    setUnsavedCode,
+    error
 }) => {
     const [notification, setNotification] = React.useState("");
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const [showConfirmModal, setShowConfirmModal] = React.useState(false);
     const [pendingFunction, setPendingFunction] = React.useState(null);
     const [showFunctionDialog, setShowFunctionDialog] = React.useState(false);
+    const [localError, setLocalError] = React.useState(error || null);
     const notificationTimeoutRef = React.useRef();
     const editorRef = React.useRef(null);
     const functionDialogOpenRef = React.useRef(false);
+
+    // Update localError when prop changes
+    React.useEffect(() => {
+        setLocalError(error);
+    }, [error]);
 
     // Update the ref whenever dialog state changes
     React.useEffect(() => {
@@ -88,6 +95,7 @@ const EditorTab = ({
 
     const handleSave = async () => {
         try {
+            setLocalError(null); // Clear any previous errors
             const code = editorRef.current.getValue();
             const parsedFunction = await parsePython(code);
 
@@ -102,6 +110,7 @@ const EditorTab = ({
             setSelectedFunction(savedFunction); // removed source property
             setUnsavedCode(null);
 
+            // Custom message if the save used the delay method
             if (savedFunction.noName) {
                 showNotification(`Saved! Click "Run Function" to insert in a cell.`, "success");
             } else {
@@ -140,15 +149,11 @@ const EditorTab = ({
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
-            <div className="flex-1 overflow-hidden mt-2">
-                <MonacoEditor
-                    value={selectedFunction?.code || DEFAULT_CODE}
-                    onMount={handleEditorDidMount}
-                    onChange={(value) => {
-                        setUnsavedCode(value);
-                    }}
-                />
-            </div>
+            {localError && (
+                <div className="p-2 text-red-600 bg-red-50 mb-2 text-center">
+                    {localError}
+                </div>
+            )}
 
             {notification && (
                 <div className={`mt-2 p-4 rounded ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"} flex justify-between items-center`}>
@@ -163,6 +168,16 @@ const EditorTab = ({
                     )}
                 </div>
             )}
+
+            <div className="flex-1 overflow-hidden mt-2">
+                <MonacoEditor
+                    value={selectedFunction?.code || DEFAULT_CODE}
+                    onMount={handleEditorDidMount}
+                    onChange={(value) => {
+                        setUnsavedCode(value);
+                    }}
+                />
+            </div>
 
             <div className="flex justify-between items-center py-2">
                 <select

@@ -20,6 +20,13 @@ export async function saveFunctionToSettings(functionData) {
 
     try {
         return await retry(async () => {
+            // Simulate InvalidOperationInCellEditMode error if debug flag is set
+            if (DEBUG_FLAGS.FORCE_CELL_EDIT_MODE_ERROR) {
+                const error = new Error("Cannot perform this operation while the cell is in edit mode.");
+                error.code = "InvalidOperationInCellEditMode";
+                throw error;
+            }
+
             const result = await Excel.run(async (context) => {
                 const settings = context.workbook.settings;
                 const key = functionData.name;
@@ -36,10 +43,37 @@ export async function saveFunctionToSettings(functionData) {
     }
 }
 
+export async function saveFunctionWithDelay(functionData) {
+    if (!functionData?.code) {
+        throw new Error('Invalid function data');
+    }
+
+    try {
+        return await Excel.run({ delayForCellEdit: true }, async (context) => {
+            const settings = context.workbook.settings;
+            const key = functionData.name;
+            const value = functionData;
+
+            settings.add(key, value);
+            await context.sync();
+        });
+    } catch (error) {
+        console.error('Delayed save also failed:', error);
+        pyLogs({
+            message: `Message: ${error.message}  Code:${error?.code}`,
+            code: functionData?.name || null,
+            ref: "saveFunctionWithDelayError"
+        });
+        throw error;
+    }
+}
+
 export async function getFunctions() {
     try {
-        if (DEBUG_FLAGS.FORCE_GET_FUNCTIONS_FAIL) {
-            throw new Error('Simulated failure when retrieving functions');
+        if (DEBUG_FLAGS.FORCE_CELL_EDIT_MODE_ERROR) {
+            const error = new Error("Cannot perform this operation while the cell is in edit mode.");
+            error.code = "InvalidOperationInCellEditMode";
+            throw error;
         }
 
         return await Excel.run(async (context) => {

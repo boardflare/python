@@ -33,7 +33,8 @@ export const DEFAULT_CODE = `def hello(name):
 export const EventTypes = {
     LOG: 'console:log',
     ERROR: 'console:error',
-    CLEAR: 'console:clear'
+    CLEAR: 'console:clear',
+    SAVE: 'SAVE_STATUS_EVENT'
 };
 
 export const ConsoleEvents = {
@@ -51,8 +52,8 @@ export const ConsoleEvents = {
 };
 
 export const DEBUG_FLAGS = {
-    FORCE_NAME_MANAGER_FAIL: false,  // Set to true to simulate name manager failures
-    FORCE_GET_FUNCTIONS_FAIL: false  // Set to true to simulate failures when retrieving functions
+    FORCE_NAME_MANAGER_FAIL: false,  // Simulate name manager failures
+    FORCE_CELL_EDIT_MODE_ERROR: false,  // Simulate InvalidOperationInCellEditMode errors
 };
 
 export function getExecEnv() {

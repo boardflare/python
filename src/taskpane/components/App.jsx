@@ -36,14 +36,24 @@ const App = ({ title }) => {
       setLogs([]);
     };
 
+    const handleSaveStatus = (event) => {
+      if (event.detail.type === "error") {
+        setError(event.detail.message);
+      } else if (event.detail.type === "clear") {
+        setError(null);
+      }
+    };
+
     window.addEventListener(EventTypes.LOG, handleLog);
     window.addEventListener(EventTypes.ERROR, handleLog);
     window.addEventListener(EventTypes.CLEAR, handleClearConsole);
+    window.addEventListener(EventTypes.SAVE, handleSaveStatus);
 
     return () => {
       window.removeEventListener(EventTypes.LOG, handleLog);
       window.removeEventListener(EventTypes.ERROR, handleLog);
       window.removeEventListener(EventTypes.CLEAR, handleClearConsole);
+      window.removeEventListener(EventTypes.SAVE, handleSaveStatus);
     };
   }, []);
 
@@ -143,6 +153,7 @@ const App = ({ title }) => {
               loadFunctions={loadFunctions}
               unsavedCode={unsavedCode}
               setUnsavedCode={setUnsavedCode}
+              error={error}
             />
           )}
           {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} unsavedCode={unsavedCode} />}
