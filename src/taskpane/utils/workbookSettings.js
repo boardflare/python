@@ -140,6 +140,7 @@ export async function deleteFunctionFromSettings(name) {
 
             if (!namedItem.isNullObject) {
                 namedItem.delete();
+                await context.sync();
             }
 
             return true;

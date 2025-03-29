@@ -86,7 +86,7 @@ const App = ({ title }) => {
         setError(error.message);
 
         // Only retry with delay if we have the specific cell edit mode error code
-        if (error.code === "InvalidOperationInCellEditMode") {
+        if (error?.code === "InvalidOperationInCellEditMode") {
           try {
             // Then try the method with delayForCellEdit
             workbookData = await getFunctionsWithDelay();
