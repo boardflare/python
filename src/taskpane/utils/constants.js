@@ -49,6 +49,8 @@ export const DEBUG_FLAGS = {
     FORCE_CELL_EDIT_MODE_ERROR: false,  // Simulate InvalidOperationInCellEditMode errors
 };
 
+export const LLM_ENDPOINT = "https://codepy.boardflare.workers.dev";
+
 export function getExecEnv() {
     if (window.location.hostname === 'localhost') {
         return 'LOCAL.EXEC';
