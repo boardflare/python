@@ -82,11 +82,11 @@ const App = ({ title }) => {
         // First try the standard method
         workbookData = await getFunctions();
       } catch (error) {
-        // Set error message for user
-        setError(error.message);
 
-        // Only retry with delay if we have the specific cell edit mode error code
+        // If cell edit mode error code, try the delayed method
         if (error?.code === "InvalidOperationInCellEditMode") {
+          // Set raw error message as it is localized.
+          setError(error.message);
           try {
             // Then try the method with delayForCellEdit
             workbookData = await getFunctionsWithDelay();
@@ -98,9 +98,13 @@ const App = ({ title }) => {
             pyLogs({ message: delayError.message, ref: "getFunctionsWithDelay_failed" });
             throw delayError; // Re-throw to be caught by outer catch
           }
-        } else {
-          // For other errors, don't try the delay method
-          throw error; // Re-throw to be caught by outer catch
+          // If the error is a general exception, set a specific error message
+        } else if (error?.code === "GeneralException") {
+          setError(`${error.message} - Your workbook is out of sync with server, this blocks the Excel APIs used by the add-in.  Please try closing and reopening the workbook.`);
+        }
+        else {
+          setError(error.message);
+          throw error;
         }
       }
 
@@ -116,7 +120,6 @@ const App = ({ title }) => {
     } catch (error) {
       setWorkbookFunctions([]);
       pyLogs({ message: `Message: ${error.message}  Code:${error?.code}`, ref: "app_loadFunctions_error" });
-      setError(`Failed to load functions: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
