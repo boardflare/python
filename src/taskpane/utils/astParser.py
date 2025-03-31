@@ -25,6 +25,15 @@ def parse_python_code_safe(encoded_code):
 def parse_python_code(code):
     try:
         code = textwrap.dedent(code)
+        
+        # Check for Excel PY range references like xl("A1") but not ixl("A1")
+        xl_match = re.search(r'\bxl\(["\'][^"\']*["\']\)', code)
+        if xl_match:
+            matched_reference = xl_match.group(0)
+            return json.dumps({
+                "error": f"Excel PY range references are not supported: {matched_reference}"
+            })
+            
         tree = ast.parse(code)
         
         for node in ast.walk(tree):
@@ -34,10 +43,6 @@ def parse_python_code(code):
                 # Check for *args and **kwargs
                 if node.args.vararg or node.args.kwarg:
                     return json.dumps({
-                        "name": name,
-                        "parameters": [],
-                        "docstring": "",
-                        "description": "",
                         "error": "Variable arguments (*args/**kwargs) are not supported"
                     })
                 
@@ -53,10 +58,6 @@ def parse_python_code(code):
                         # Check for numbers in parameter names
                         if re.search(r'\d', param_name):
                             return json.dumps({
-                                "name": name,
-                                "parameters": [],
-                                "docstring": "",
-                                "description": "",
                                 "error": f"Parameter names cannot contain numbers. Issue causing error: {param_name}"
                             })
                         
@@ -87,19 +88,11 @@ def parse_python_code(code):
                 })
         
         return json.dumps({
-            "name": "",
-            "parameters": [],
-            "docstring": "",
-            "description": "",
             "error": "No function definition found. Your code must be wrapped in a function, e.g. def my_function(first, second):"
         })
         
     except Exception as e:
         return json.dumps({
-            "name": "",
-            "parameters": [],
-            "docstring": "",
-            "description": "",
             "error": str(e)
         })
 

@@ -101,6 +101,6 @@ result = parse_python_code_safe("${encodedCode}")
             code: rawCode,
             ref: 'codeparser_error'
         });
-        throw new Error(`CodeParser Error: ${error.message}`);
+        throw error;
     }
 }
