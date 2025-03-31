@@ -45,6 +45,7 @@ result = parse_python_code_safe("${encodedCode}")
         const name = pyResult.name.toLowerCase();
         const parameters = pyResult.parameters;
         const description = pyResult.description;
+        const imports = pyResult.imports || []; // Extract imports array with fallback to empty array
 
         // Generate resultLine to call function with kwargs for non-omitted parameters
         const argList = parameters.length > 0 ? parameters.map((param, index) => {
@@ -91,7 +92,8 @@ result = parse_python_code_safe("${encodedCode}")
             execFormula,     // Direct EXEC formula
             timestamp,
             uid,
-            parameters  // Add parameters to the result
+            parameters,      // Add parameters to the result
+            imports          // Add imports to the result
         };
 
         return result;

@@ -10,8 +10,6 @@ export const DEFAULT_CODE = `def hello(name):
 
 # ⬅️ Drag task pane open for more room.
 # ⚠️ Code MUST BE A FUNCTION!
-# 💻 NO local file system access.
-# Pass data as args, not xl("B3") refs.
 
 # Range args are converted as follows:
 # - Single cell is a scalar.

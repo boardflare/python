@@ -3,6 +3,7 @@ import textwrap
 import re
 import json
 import base64
+import pyodide
 
 def parse_python_code_safe(encoded_code):
     """
@@ -33,6 +34,9 @@ def parse_python_code(code):
             return json.dumps({
                 "error": f"Excel PY range references are not supported: {matched_reference}"
             })
+        
+        # Extract imports using Pyodide's find_imports functionality
+        imports = pyodide.code.find_imports(code)
             
         tree = ast.parse(code)
         
@@ -84,11 +88,13 @@ def parse_python_code(code):
                     "docstring": docstring or "",
                     "description": description,
                     "error": None,
-                    "has_params": len(parameters) > 0
+                    "has_params": len(parameters) > 0,
+                    "imports": imports
                 })
         
         return json.dumps({
-            "error": "No function definition found. Your code must be wrapped in a function, e.g. def my_function(first, second):"
+            "error": "No function definition found. Your code must be wrapped in a function, e.g. def my_function(first, second):",
+            "imports": imports
         })
         
     except Exception as e:
