@@ -100,7 +100,8 @@ const App = ({ title }) => {
           }
           // If the error is a general exception, set a specific error message
         } else if (error?.code === "GeneralException") {
-          setError(`${error.message} - Your workbook is out of sync with server, this blocks the Excel APIs used by the add-in.  Please try closing and reopening the workbook.`);
+          setError(`${error.message} - Your workbook is out of sync with server, which blocks the Excel APIs used by the add-in.  Please try saving the workbook, and if that doesn't work, try closing and reopening the workbook.`);
+          throw error;
         }
         else {
           setError(error.message);
