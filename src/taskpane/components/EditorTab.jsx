@@ -123,9 +123,22 @@ const EditorTab = ({
     };
 
     const handleRun = async () => {
-        const currentCode = editorRef.current.getValue();
-        setUnsavedCode(currentCode);
-        setShowFunctionDialog(true);
+        try {
+            const currentCode = editorRef.current.getValue();
+            setUnsavedCode(currentCode);
+
+            // Check if we need to create a function first
+            if (!selectedFunction.name) {
+                // Use the existing handleSave method to save the function first
+                await handleSave();
+            }
+
+            // Now open the function dialog - handleSave will have created the function if needed
+            setShowFunctionDialog(true);
+        } catch (err) {
+            await pyLogs({ message: err.message, ref: "handleRun_error" });
+            showNotification(err.message, "error");
+        }
     };
 
     // Updated onSuccess callback from LLM – now only updates the UI.

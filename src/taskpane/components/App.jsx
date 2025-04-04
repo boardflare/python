@@ -5,7 +5,7 @@ import HomeTab from "./HomeTab";
 import FunctionsTab from "./FunctionsTab";
 import SettingsTab from "./SettingsTab";
 import { EventTypes } from "../utils/constants";
-import { getFunctions, getFunctionsWithDelay, createDefaultFunction } from "../utils/workbookSettings";
+import { getFunctions, getFunctionsWithDelay } from "../utils/workbookSettings";
 import { pyLogs } from "../utils/logs";
 
 const App = ({ title }) => {
@@ -110,10 +110,9 @@ const App = ({ title }) => {
       }
 
       if (!workbookData || workbookData.length === 0) {
-        // No functions found, create a default function
-        const defaultFunc = await createDefaultFunction();
-        setWorkbookFunctions([defaultFunc]);
-        setSelectedFunction(defaultFunc);
+        // No functions found, but we won't create a default function automatically
+        setWorkbookFunctions([]);
+        setSelectedFunction({ name: "", code: "" });
       } else {
         setWorkbookFunctions(workbookData);
         setSelectedFunction(workbookData[0]);
