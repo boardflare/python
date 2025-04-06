@@ -6,6 +6,7 @@ import {
     getAllLogs,
     clearLogs
 } from "./indexedDB";
+import { release } from "./constants";
 
 let browserData = null;
 let uid = null;
@@ -51,6 +52,7 @@ async function flushLogs() {
                     docUrl: Office?.context?.document?.url,
                     test: !window.location.pathname.includes('prod'),
                     license: Office?.context?.license,
+                    release,
                     tokenClaims
                 })
             };

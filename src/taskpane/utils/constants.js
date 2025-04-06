@@ -1,3 +1,5 @@
+export const release = "1.3.8";
+
 export const DISPLAY_CODE = `def hello(name):
     """ Returns a greeting. """
     return f"Hello {name}!"`;
