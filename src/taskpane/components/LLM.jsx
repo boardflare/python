@@ -3,10 +3,7 @@ import { pyLogs } from "../utils/logs";
 // New imports for saving inside LLM:
 import { parsePython } from "../utils/codeparser";
 import { saveWorkbookOnly } from "../utils/save";
-
-const LLM_URL = process.env.NODE_ENV === 'development'
-    ? 'https://codepy.boardflare.workers.dev' //'http://127.0.0.1:8787'
-    : 'https://codepy.boardflare.workers.dev';
+import { LLM_ENDPOINT } from "../utils/constants";
 
 const LLM = ({ isOpen, onClose, onSuccess, prompt, loadFunctions }) => { // NEW: added loadFunctions prop
     const [input, setInput] = useState(prompt || "");
@@ -61,7 +58,7 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt, loadFunctions }) => { // NEW:
         };
 
         try {
-            const response = await fetch(LLM_URL, {
+            const response = await fetch(LLM_ENDPOINT, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ genText }),

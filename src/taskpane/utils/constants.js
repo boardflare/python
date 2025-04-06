@@ -1,3 +1,5 @@
+export const release = "1.3.8";
+
 export const DISPLAY_CODE = `def hello(name):
     """ Returns a greeting. """
     return f"Hello {name}!"`;
@@ -10,8 +12,6 @@ export const DEFAULT_CODE = `def hello(name):
 
 # ⬅️ Drag task pane open for more room.
 # ⚠️ Code MUST BE A FUNCTION!
-# 💻 NO local file system access.
-# Pass data as args, not xl("B3") refs.
 
 # Range args are converted as follows:
 # - Single cell is a scalar.
@@ -48,6 +48,8 @@ export const DEBUG_FLAGS = {
     FORCE_NAME_MANAGER_FAIL: false,  // Simulate name manager failures
     FORCE_CELL_EDIT_MODE_ERROR: false,  // Simulate InvalidOperationInCellEditMode errors
 };
+
+export const LLM_ENDPOINT = "https://codepy.boardflare.workers.dev";
 
 export function getExecEnv() {
     if (window.location.hostname === 'localhost') {

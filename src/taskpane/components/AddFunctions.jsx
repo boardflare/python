@@ -67,14 +67,14 @@ const AddFunctions = ({ loadFunctions }) => {
             await singleDemo(savedFunction);
             await loadFunctions();
 
-            pyLogs({
+            await pyLogs({
                 message: savedFunction.name,
                 ref: 'imported_example_function'
             });
         } catch (error) {
             console.error("Error importing function:", error);
             setError("Failed to import function. Please try again. If the problem persists, please contact support.");
-            pyLogs({
+            await pyLogs({
                 code: func.name,
                 ref: 'import_example_function_error',
                 message: error.message

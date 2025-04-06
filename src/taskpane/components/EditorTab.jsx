@@ -49,14 +49,6 @@ const EditorTab = ({
     };
 
     React.useEffect(() => {
-        return () => {
-            if (notificationTimeoutRef.current) {
-                clearTimeout(notificationTimeoutRef.current);
-            }
-        };
-    }, []);
-
-    React.useEffect(() => {
         if (!editorRef.current) return;
 
         if (generatedCode) {
@@ -74,11 +66,18 @@ const EditorTab = ({
         }
     }, [selectedFunction, generatedCode, unsavedCode]);
 
-    // Add cleanup
+    // Combined cleanup effect
     React.useEffect(() => {
         return () => {
+            // Clear any pending notification timeouts
+            if (notificationTimeoutRef.current) {
+                clearTimeout(notificationTimeoutRef.current);
+            }
+            // Clean up component resources
             editorRef.current = null;
             setNotification("");
+            // Log component mounting
+            pyLogs({ message: "Editor mounted.", ref: "editor_mounted" });
         };
     }, []);
 
@@ -123,9 +122,22 @@ const EditorTab = ({
     };
 
     const handleRun = async () => {
-        const currentCode = editorRef.current.getValue();
-        setUnsavedCode(currentCode);
-        setShowFunctionDialog(true);
+        try {
+            const currentCode = editorRef.current.getValue();
+            setUnsavedCode(currentCode);
+
+            // Check if we need to create a function first
+            if (!selectedFunction.name) {
+                // Use the existing handleSave method to save the function first
+                await handleSave();
+            }
+
+            // Now open the function dialog - handleSave will have created the function if needed
+            setShowFunctionDialog(true);
+        } catch (err) {
+            await pyLogs({ message: err.message, ref: "handleRun_error" });
+            showNotification(err.message, "error");
+        }
     };
 
     // Updated onSuccess callback from LLM – now only updates the UI.

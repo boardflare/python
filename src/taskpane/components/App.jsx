@@ -5,7 +5,7 @@ import HomeTab from "./HomeTab";
 import FunctionsTab from "./FunctionsTab";
 import SettingsTab from "./SettingsTab";
 import { EventTypes } from "../utils/constants";
-import { getFunctions, getFunctionsWithDelay, createDefaultFunction } from "../utils/workbookSettings";
+import { getFunctions, getFunctionsWithDelay } from "../utils/workbookSettings";
 import { pyLogs } from "../utils/logs";
 
 const App = ({ title }) => {
@@ -24,7 +24,8 @@ const App = ({ title }) => {
       window.location.pathname.toLowerCase().includes('preview') ||
       window.location.hostname === 'localhost'
     );
-    loadFunctions(); // Load functions when App loads, so any errors should be handled here.
+    loadFunctions();
+    pyLogs({ message: "App loaded without error from loadfunctions.", ref: "app_loaded" });
   }, []);
 
   React.useEffect(() => {
@@ -82,11 +83,11 @@ const App = ({ title }) => {
         // First try the standard method
         workbookData = await getFunctions();
       } catch (error) {
-        // Set error message for user
-        setError(error.message);
 
-        // Only retry with delay if we have the specific cell edit mode error code
+        // If cell edit mode error code, try the delayed method
         if (error?.code === "InvalidOperationInCellEditMode") {
+          // Set raw error message as it is localized.
+          setError(error.message);
           try {
             // Then try the method with delayForCellEdit
             workbookData = await getFunctionsWithDelay();
@@ -98,17 +99,21 @@ const App = ({ title }) => {
             pyLogs({ message: delayError.message, ref: "getFunctionsWithDelay_failed" });
             throw delayError; // Re-throw to be caught by outer catch
           }
-        } else {
-          // For other errors, don't try the delay method
-          throw error; // Re-throw to be caught by outer catch
+          // If the error is a general exception, set a specific error message
+        } else if (error?.code === "GeneralException") {
+          setError(`${error.message} - Your workbook is out of sync with server, which blocks the Excel APIs used by the add-in.  Please try saving the workbook, and if that doesn't work, try closing and reopening the workbook.`);
+          throw error;
+        }
+        else {
+          setError(error.message);
+          throw error;
         }
       }
 
       if (!workbookData || workbookData.length === 0) {
-        // No functions found, create a default function
-        const defaultFunc = await createDefaultFunction();
-        setWorkbookFunctions([defaultFunc]);
-        setSelectedFunction(defaultFunc);
+        // No functions found, but we won't create a default function automatically
+        setWorkbookFunctions([]);
+        setSelectedFunction({ name: "", code: "" });
       } else {
         setWorkbookFunctions(workbookData);
         setSelectedFunction(workbookData[0]);
@@ -116,7 +121,6 @@ const App = ({ title }) => {
     } catch (error) {
       setWorkbookFunctions([]);
       pyLogs({ message: `Message: ${error.message}  Code:${error?.code}`, ref: "app_loadFunctions_error" });
-      setError(`Failed to load functions: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
