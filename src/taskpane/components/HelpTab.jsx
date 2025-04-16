@@ -5,8 +5,46 @@ import LLM from "./LLM";
 import { SignInButton } from "./Auth";
 import pdfUrl from "../../../assets/Python-v1.3.5.pdf";
 import { pyLogs } from "../utils/logs";
+import { abortController } from "../../functions/utils/queue";
 
-const HelpTab = ({ handleTabSelect, setGeneratedCode, setSelectedFunction, loadFunctions, selectedFunction, error }) => {
+const Output = ({ logs, onClear, setLogs }) => {
+    const handleCancel = () => {
+        abortController.abort();
+        setLogs([...logs, "Operation cancelled"]);
+    };
+
+    return (
+        <div className="p-2 h-full flex flex-col gap-4">
+            <div className="p-0 font-mono flex-1 min-h-40 max-h-96 overflow-auto">
+                {logs.map((log, index) => (
+                    <React.Fragment key={index}>
+                        {log.split('\n').map((line, lineIndex) => (
+                            <div key={`${index}-${lineIndex}`} className="break-words">{line}</div>
+                        ))}
+                    </React.Fragment>
+                ))}
+            </div>
+            <div>
+                <button
+                    onClick={handleCancel}
+                    className="mr-2 px-2 py-1 bg-gray-500 text-white rounded"
+                    title="Cancel stops the current operation."
+                >
+                    Cancel
+                </button>
+                <button
+                    onClick={onClear}
+                    className="px-2 py-1 bg-blue-500 text-white rounded"
+                    title="Clear removes all messages."
+                >
+                    Clear
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const HelpTab = ({ handleTabSelect, setGeneratedCode, setSelectedFunction, loadFunctions, selectedFunction, error, logs, onClear, setLogs }) => {
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const [isWebPlatform, setIsWebPlatform] = React.useState(false);
     const [localError, setLocalError] = React.useState(error || null);
@@ -39,7 +77,7 @@ const HelpTab = ({ handleTabSelect, setGeneratedCode, setSelectedFunction, loadF
 
             <div className="shrink-0">
                 <div className="px-4 py-2 bg-gray-100 font-bold text-center">
-                    Create Functions
+                    How it works
                 </div>
                 <div className="p-2">
                     <div className="border-gray-300 rounded-lg py-0">
@@ -77,6 +115,11 @@ const HelpTab = ({ handleTabSelect, setGeneratedCode, setSelectedFunction, loadF
                         </p>
                     </div>
                 </div>
+            </div>
+            {/* Output Section */}
+            <div className="mt-0">
+                <div className="px-4 py-2 bg-gray-100 font-bold text-center">Output Logs</div>
+                <Output logs={logs} onClear={onClear} setLogs={setLogs} />
             </div>
             <LLM
                 isOpen={isLLMOpen}
