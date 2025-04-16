@@ -1,9 +1,9 @@
 import * as React from "react";
 import EditorTab from "./EditorTab";
 import OutputTab from "./OutputTab";
-import HomeTab from "./HomeTab";
 import FunctionsTab from "./FunctionsTab";
 import SettingsTab from "./SettingsTab";
+import HelpTab from "./HelpTab";
 import { EventTypes } from "../utils/constants";
 import { getFunctions, getFunctionsWithDelay } from "../utils/workbookSettings";
 import { pyLogs } from "../utils/logs";
@@ -134,7 +134,7 @@ const App = ({ title }) => {
           <button className={`flex-grow px-2 py-2 ${selectedTab === "editor" ? "border-b-2 border-blue-500" : ""}`} value="editor" onClick={handleTabSelect}>Editor</button>
           <button className={`flex-grow px-2 py-2 ${selectedTab === "functions" ? "border-b-2 border-blue-500" : ""}`} value="functions" onClick={handleTabSelect}>Functions</button>
           <button className={`flex-grow px-2 py-2 ${selectedTab === "output" ? "border-b-2 border-blue-500" : ""}`} value="output" onClick={handleTabSelect}>Output</button>
-          {/* {isPreview && <button className={`flex-grow px-2 py-2 mr-2 ${selectedTab === "settings" ? "border-b-2 border-blue-500" : ""}`} value="settings" onClick={handleTabSelect}>⚙️</button>} */}
+          <button className={`flex-grow px-2 py-2 ${selectedTab === "help" ? "border-b-2 border-blue-500" : ""}`} value="help" onClick={handleTabSelect}>🛟</button>
         </div>
         <div className="flex-1 overflow-hidden">
           {/* {selectedTab === "home" && (
@@ -169,6 +169,16 @@ const App = ({ title }) => {
               error={error}
               loadFunctions={loadFunctions}
               isPreview={isPreview}
+            />
+          )}
+          {selectedTab === "help" && (
+            <HelpTab
+              handleTabSelect={handleTabSelect}
+              setGeneratedCode={setGeneratedCode}
+              setSelectedFunction={setSelectedFunction}
+              loadFunctions={loadFunctions}
+              selectedFunction={selectedFunction}
+              error={error}
             />
           )}
           {/* {isPreview && selectedTab === "settings" && <SettingsTab loadFunctions={loadFunctions} />} */}

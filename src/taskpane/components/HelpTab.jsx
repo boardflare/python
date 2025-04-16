@@ -4,10 +4,9 @@ import { DISPLAY_CODE } from "../utils/constants";
 import LLM from "./LLM";
 import { SignInButton } from "./Auth";
 import pdfUrl from "../../../assets/Python-v1.3.5.pdf";
-import AddFunctions from "./AddFunctions";
 import { pyLogs } from "../utils/logs";
 
-const HomeTab = ({ handleTabSelect, setGeneratedCode, setSelectedFunction, loadFunctions, selectedFunction, error }) => {
+const HelpTab = ({ handleTabSelect, setGeneratedCode, setSelectedFunction, loadFunctions, selectedFunction, error }) => {
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const [isWebPlatform, setIsWebPlatform] = React.useState(false);
     const [localError, setLocalError] = React.useState(error || null);
@@ -79,9 +78,6 @@ const HomeTab = ({ handleTabSelect, setGeneratedCode, setSelectedFunction, loadF
                     </div>
                 </div>
             </div>
-            <div className="flex-1 min-h-0">
-                <AddFunctions loadFunctions={loadFunctions} />
-            </div>
             <LLM
                 isOpen={isLLMOpen}
                 onClose={() => setIsLLMOpen(false)}
@@ -96,4 +92,4 @@ const HomeTab = ({ handleTabSelect, setGeneratedCode, setSelectedFunction, loadF
     );
 };
 
-export default HomeTab;
+export default HelpTab;
