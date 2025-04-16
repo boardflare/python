@@ -105,78 +105,25 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
         }
     };
 
-    const OneDriveFunctionsHeader = () => {
-        return (
-            <div className="mb-1">
-                <h3 className="font-semibold text-center flex items-center justify-center gap-2">
-                    <div className="flex items-center">
-                        <a href={folderUrl} target="_blank" rel="noopener noreferrer"
-                            className="hover:text-blue-500" title="Open in OneDrive">
-                            OneDrive Functions
-                        </a>
-                    </div>
-                    {folderUrl && isPreview && (
-                        <button onClick={loadOnedriveFunctions} className="text-blue-500 hover:text-blue-700"
-                            title="Refresh OneDrive functions">
-                            🔄
-                        </button>
-                    )}
-                </h3>
-            </div>
-        );
-    };
-
-    if (!folderUrl) {
-        return (
-            <div className="flex flex-col items-center">
-                <OneDriveFunctionsHeader />
-                <div className="text-gray-500 px-2 mb-2">
-                    Login to OneDrive to save functions to OneDrive and use them with other workbooks.  On each use, you will need to login again.
-                </div>
-                <button
-                    onClick={handleLogin}
-                    className="px-2 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-normal"
-                >
-                    Login to OneDrive
-                </button>
-            </div>
-        );
-    }
-
-    if (isLoading) {
-        return (
-            <>
-                <OneDriveFunctionsHeader />
-                <div className="p-4 text-gray-900 text-center">
-                    Loading OneDrive functions...
-                </div>
-            </>
-        );
-    }
-
-    if (onedriveFunctions.length === 0 && folderUrl) {
-        return (
-            <div>
-                <OneDriveFunctionsHeader />
-                <div className="text-center text-sm text-gray-500 mb-4">
-                    No OneDrive functions found
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <>
-            <div className="overflow-x-auto">
-                <OneDriveFunctionsHeader />
-                <table className="min-w-full bg-white mb-2">
+    // Styled table for OneDrive Functions
+    const OneDriveFunctionTable = ({ functions }) => (
+        <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 overflow-y-auto">
+                <table className="min-w-full bg-white">
                     <tbody>
-                        {onedriveFunctions.map((func) => (
+                        {functions.map((func) => (
                             <tr key={func.fileName}>
-                                <td className="py-0 px-2 border-b">
-                                    <code className="font-mono text-sm">{func.name.toUpperCase()}</code>
+                                <td className="py-1 px-2 border-b w-full">
+                                    <div className="relative group w-full">
+                                        <span className="font-mono cursor-help text-left block w-full">={func.name.toUpperCase()}</span>
+                                        {func.description && (
+                                            <div className="absolute left-0 top-full mt-2 w-64 p-2 bg-blue-50 text-black text-sm rounded shadow-lg hidden group-hover:block z-10">
+                                                {func.description}
+                                            </div>
+                                        )}
+                                    </div>
                                 </td>
-                                <td className="py-0 px-2 border-b w-fit">
+                                <td className="py-1 px-2 border-b w-24 text-center">
                                     <div className="flex gap-2 justify-end">
                                         <button className="text-blue-500 hover:text-blue-700"
                                             onClick={() => handleSync(func)}
@@ -194,10 +141,81 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
                         ))}
                     </tbody>
                 </table>
-                <div className="text-gray-500 px-2 mb-2 text-center">
-                    ⬇️ to save from Workbook to OneDrive<br />
-                    ⬆️ to save from OneDrive to Workbook<br />
-                    Saving updates a function with the same name.
+            </div>
+        </div>
+    );
+
+    if (!folderUrl) {
+        return (
+            <div className="flex flex-col items-center w-full">
+                <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center w-full">
+                    OneDrive Functions
+                </div>
+                <div className="relative flex flex-col items-center w-full mt-2">
+                    <button
+                        onClick={handleLogin}
+                        className="px-2 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-normal relative group"
+                    >
+                        Login to OneDrive
+                        <span className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-72 p-2 bg-blue-50 text-black text-sm rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity">
+                            Login to OneDrive to save functions to OneDrive and use them with other workbooks. On each use, you will need to login again.
+                        </span>
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (isLoading) {
+        return (
+            <>
+                <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center w-full">
+                    OneDrive Functions
+                </div>
+                <div className="p-4 text-gray-900 text-center">
+                    Loading OneDrive functions...
+                </div>
+            </>
+        );
+    }
+
+    if (onedriveFunctions.length === 0 && folderUrl) {
+        return (
+            <div className="w-full">
+                <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center w-full">
+                    OneDrive Functions
+                </div>
+                <div className="text-center text-sm text-gray-500 mb-4">
+                    No functions
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <>
+            <div className="overflow-x-auto w-full">
+                <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center w-full flex items-center justify-center gap-2">
+                    <div className="flex items-center">
+                        {folderUrl ? (
+                            <a href={folderUrl} target="_blank" rel="noopener noreferrer"
+                                className="hover:text-blue-500" title="Open in OneDrive">
+                                OneDrive Functions
+                            </a>
+                        ) : (
+                            'OneDrive Functions'
+                        )}
+                    </div>
+                    {folderUrl && isPreview && (
+                        <button onClick={loadOnedriveFunctions} className="text-blue-500 hover:text-blue-700"
+                            title="Refresh OneDrive functions">
+                            🔄
+                        </button>
+                    )}
+                </div>
+                <OneDriveFunctionTable functions={onedriveFunctions} />
+                <div className="text-gray-500 p-1 text-center">
+                    Use ⬆️ or ⬇️to save between Workbook and OneDrive
                 </div>
             </div>
 
