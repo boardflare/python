@@ -11,15 +11,23 @@ export const DEFAULT_CODE = `def hello(name):
 
    
 """
-⬅️ Drag task pane open for more room.
+Overview:
+✅ Excel functions using Python!
+🆓 Unlimited free use.
+🌐 Code has internet access.
+
+How to use:
+⬅️ Drag task pane open for space.
+🧑‍💻 Write a Python function.
+💾 Save to create Excel function.
+▶️ Run function e.g. =HELLO("World").
+
+Help:
 📄 https://www.boardflare.com/apps/excel/python
+🛟 https://www.boardflare.com/company/support
 
-How it works:
-- Write a Python function, e.g. hello(name).
-- Save to create an Excel custom function.
-- e.g. =HELLO("World") returns "Hello World!".
 
-🚀Click Save to try it now!
+🚀 Click Save below to try!
 """`;
 
 export const EventTypes = {

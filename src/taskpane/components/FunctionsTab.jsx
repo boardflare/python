@@ -149,7 +149,7 @@ const FunctionsTab = ({
                 )}
 
                 {!isLoading && workbookFunctions.length === 0 && (
-                    <div className="text-center mb-2">No functions.</div>
+                    <div className="text-center mb-2 mt-1">Try adding an example function below.</div>
                 )}
 
                 {!isWebPlatform && (
