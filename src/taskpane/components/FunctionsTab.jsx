@@ -153,7 +153,7 @@ const FunctionsTab = ({
                 )}
 
                 {!isWebPlatform && (
-                    <div className="mt-4">
+                    <div className="mt-0">
                         <OneDrive
                             onEdit={onEdit}
                             isPreview={isPreview}
@@ -164,7 +164,7 @@ const FunctionsTab = ({
                     </div>
                 )}
 
-                <div className="mt-4">
+                <div className="mt-2">
                     <AddFunctions loadFunctions={loadFunctions} />
                 </div>
             </div>

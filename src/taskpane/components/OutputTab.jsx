@@ -8,7 +8,7 @@ const OutputTab = ({ logs, onClear, setLogs }) => {
     };
 
     return (
-        <div className="p-4 h-full flex flex-col gap-4">
+        <div className="p-2 h-full flex flex-col gap-2">
             <p>
                 STDOUT and STDERR will be shown here.
             </p>

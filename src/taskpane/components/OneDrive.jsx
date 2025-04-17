@@ -156,9 +156,9 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
                         onClick={handleLogin}
                         className="px-2 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-normal relative group"
                     >
-                        Login to OneDrive
+                        Login
                         <span className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-72 p-2 bg-blue-50 text-black text-sm rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity">
-                            Login to OneDrive to save functions to OneDrive and use them with other workbooks. On each use, you will need to login again.
+                            Login to save functions to OneDrive.
                         </span>
                     </button>
                 </div>
