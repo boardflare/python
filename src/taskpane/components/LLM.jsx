@@ -100,6 +100,9 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt, loadFunctions }) => { // NEW:
             }
             setSavedFunction(parsedFunction);
             setIsSaved(true);
+            // Immediately take user to editor after saving
+            onSuccess(parsedFunction, input);
+            onClose();
 
         } catch (err) {
             if (err.name === "AbortError") {
@@ -111,26 +114,6 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt, loadFunctions }) => { // NEW:
             setIsLoading(false);
         }
     };
-
-    // If successfully saved, show success message with a button to continue to editor.
-    if (isSaved) {
-        return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center px-2">
-                <div className="bg-white rounded-lg p-3 w-full">
-                    <h2 className="text-xl mb-2">Your function was created successfully!</h2>
-                    <p className="mb-4">Use your function in Excel as follows:</p>
-                    <p className="mb-4">={savedFunction.signature}</p>
-                    <p className="mb-4">Click continue to return to the code editor.</p>
-                    <button
-                        onClick={() => { onSuccess(savedFunction, input); onClose(); }}
-                        className="px-4 py-2 bg-blue-500 text-white rounded"
-                    >
-                        Continue
-                    </button>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center px-2">
