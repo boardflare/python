@@ -329,7 +329,7 @@ export default function FunctionDialog({
 
                     <div className="mb-2 flex items-center">
                         <label className="mr-2 whitespace-nowrap font-semibold">
-                            Insert into cell:
+                            Insert formula:
                             <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -352,11 +352,9 @@ export default function FunctionDialog({
                     )}
 
                     <div className="flex justify-between items-center mb-1">
-                        {!selectedFunction.noName && (
-                            <div>
-                                Insert ={selectedFunction.signature} into {targetCell}?.
-                            </div>
-                        )}
+                        <div>
+                            Insert formula into {targetCell}?.
+                        </div>
                         <div className="flex space-x-2">
                             <button
                                 onClick={() => { setActiveField(null); onClose(); }}

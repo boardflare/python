@@ -135,7 +135,7 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt, loadFunctions }) => { // NEW:
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center px-2">
             <div className="bg-white rounded-lg p-3 w-full">
-                <h2 className="text-xl mb-2">Create Function with AI</h2>
+                <h2 className="text-xl mb-2">Create Function with AI✨</h2>
                 {error && (
                     <div className="mb-4 p-2 bg-red-100 text-red-800 rounded">
                         {error}
@@ -157,7 +157,7 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt, loadFunctions }) => { // NEW:
                     className="w-full h-60 p-2 border rounded mb-2 placeholder-gray-600"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Describe what your custom function should do, and the AI will try to create one like =EXTRACT_EMAILS or =CALCULATE_AVERAGE that you can save and use in your workbook.  You can't' ask it general questions, it can only create functions."
+                    placeholder="Describe a function for AI to build, or use an example above to see how it works."
                     disabled={isLoading}
                 />
                 <div className="flex justify-end space-x-2">

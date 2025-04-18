@@ -184,7 +184,7 @@ const EditorTab = ({
                                 onClick={() => setShowFunctionDialog(true)}
                                 className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-700"
                             >
-                                Run
+                                Run▶️
                             </button>
                         )}
                     </div>
