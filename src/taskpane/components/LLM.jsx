@@ -120,7 +120,7 @@ const LLM = ({ isOpen, onClose, onSuccess, prompt, loadFunctions }) => { // NEW:
                     <h2 className="text-xl mb-2">Your function was created successfully!</h2>
                     <p className="mb-4">Use your function in Excel as follows:</p>
                     <p className="mb-4">={savedFunction.signature}</p>
-                    <p className="mb-4">Next, you will be taken to the code editor where you can edit the code further and test the function.</p>
+                    <p className="mb-4">Click continue to return to the code editor.</p>
                     <button
                         onClick={() => { onSuccess(savedFunction, input); onClose(); }}
                         className="px-4 py-2 bg-blue-500 text-white rounded"

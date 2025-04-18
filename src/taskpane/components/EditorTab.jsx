@@ -142,6 +142,7 @@ const EditorTab = ({
         editorRef.current.setValue(savedFunction.code);
         setSelectedFunction(savedFunction); // removed source property
         showNotification(`Function saved successfully!`, "success");
+        setIsLLMOpen(false); // Close the LLM dialog after success
     };
 
     const handleFunctionChange = (func) => {
