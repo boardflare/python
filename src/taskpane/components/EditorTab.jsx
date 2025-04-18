@@ -191,7 +191,7 @@ const EditorTab = ({
                 </div>
             )}
 
-            <div className="flex justify-between items-center py-1">
+            <div className="flex justify-between items-center p-1">
                 <select
                     value={selectedFunction ? selectedFunction.name : ""}
                     onChange={(e) => {
