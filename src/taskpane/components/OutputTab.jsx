@@ -10,7 +10,15 @@ const OutputTab = ({ logs, onClear, setLogs }) => {
     return (
         <div className="p-2 h-full flex flex-col gap-2">
             <p>
-                STDOUT and STDERR will be shown here.
+                STDOUT and STDERR will be shown here.{' '}
+                See <a
+                    href="https://www.boardflare.com/apps/excel/python"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                >
+                    documentation
+                </a> for more details.
             </p>
             <div>
                 <button onClick={handleCancel} className="mr-2 px-2 py-1 bg-gray-500 text-white rounded">Cancel</button>

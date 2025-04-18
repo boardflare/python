@@ -12,9 +12,10 @@ export const DEFAULT_CODE = `def hello(name):
    
 """
 Overview:
-✅ Excel functions using Python!
+🚀 Excel functions using Python!
 🆓 Unlimited free use.
 🌐 Code has internet access.
+📦 Import custom packages.
 📖 https://www.boardflare.com/apps/excel/python
 
 How to use:
@@ -24,7 +25,7 @@ How to use:
 ▶️ Run function e.g. =HELLO("World").
 
 
-🚀 Click Run▶️ below to try =HELLO!
+Click Run▶️ below to try =HELLO!
 """`;
 
 export const EventTypes = {
