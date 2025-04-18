@@ -1,4 +1,4 @@
-export const release = "1.3.8";
+export const release = "1.3.9";
 
 export const DISPLAY_CODE = `def hello(name):
     """ Returns a greeting. """
@@ -7,21 +7,26 @@ export const DISPLAY_CODE = `def hello(name):
 export const DEFAULT_CODE = `def hello(name):
     """ Returns a greeting. """
     return f"Hello {name}!"
-    
-# Quick tips:
 
-# ⬅️ Drag task pane open for more room.
-# ⚠️ Code MUST BE A FUNCTION!
 
-# Range args are converted as follows:
-# - Single cell is a scalar.
-# - Row of two cells is [[1, 2]]
-# - Column of two cells is [[1], [2]]
+   
+"""
+Overview:
+🚀 Excel functions using Python!
+🆓 Unlimited free use.
+🌐 Code has internet access.
+📦 Import custom packages.
+📖 https://www.boardflare.com/apps/excel/python
 
-# Return value must be a 2D list or scalar.
-# - 24 returns a single cell
-# - [["age", 24]] returns a row
-# - [["age"], [24]] returns a column`;
+How to use:
+⬅️ Drag task pane open for space.
+🧑‍💻 Write a Python function.
+💾 Save to create Excel function.
+▶️ Run function e.g. =HELLO("World").
+
+
+Click Run▶️ below to try =HELLO!
+"""`;
 
 export const EventTypes = {
     LOG: 'console:log',

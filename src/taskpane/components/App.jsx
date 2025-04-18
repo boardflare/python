@@ -1,15 +1,15 @@
 import * as React from "react";
 import EditorTab from "./EditorTab";
 import OutputTab from "./OutputTab";
-import HomeTab from "./HomeTab";
 import FunctionsTab from "./FunctionsTab";
 import SettingsTab from "./SettingsTab";
+import HelpTab from "./HelpTab";
 import { EventTypes } from "../utils/constants";
 import { getFunctions, getFunctionsWithDelay } from "../utils/workbookSettings";
 import { pyLogs } from "../utils/logs";
 
 const App = ({ title }) => {
-  const [selectedTab, setSelectedTab] = React.useState("home");
+  const [selectedTab, setSelectedTab] = React.useState("editor");
   const [selectedFunction, setSelectedFunction] = React.useState({ name: "", code: "" });
   const [logs, setLogs] = React.useState([]);
   const [generatedCode, setGeneratedCode] = React.useState(null);
@@ -130,14 +130,14 @@ const App = ({ title }) => {
     <div className="h-screen flex flex-col overflow-hidden"> {/* Ensure full screen and hidden overflow */}
       <main className="flex-1 flex flex-col overflow-hidden min-h-0 text-sm bg-white"> {/* Allow shrinking */}
         <div className="flex space p-0 border-b">
-          <button className={`flex-grow px-2 py-2 ${selectedTab === "home" ? "border-b-2 border-blue-500" : ""}`} value="home" onClick={handleTabSelect}>Home</button>
+          {/* <button className={`flex-grow px-2 py-2 ${selectedTab === "home" ? "border-b-2 border-blue-500" : ""}`} value="home" onClick={handleTabSelect}>Home</button> */}
           <button className={`flex-grow px-2 py-2 ${selectedTab === "editor" ? "border-b-2 border-blue-500" : ""}`} value="editor" onClick={handleTabSelect}>Editor</button>
           <button className={`flex-grow px-2 py-2 ${selectedTab === "functions" ? "border-b-2 border-blue-500" : ""}`} value="functions" onClick={handleTabSelect}>Functions</button>
           <button className={`flex-grow px-2 py-2 ${selectedTab === "output" ? "border-b-2 border-blue-500" : ""}`} value="output" onClick={handleTabSelect}>Output</button>
-          {/* {isPreview && <button className={`flex-grow px-2 py-2 mr-2 ${selectedTab === "settings" ? "border-b-2 border-blue-500" : ""}`} value="settings" onClick={handleTabSelect}>⚙️</button>} */}
+          {/* <button className={`flex-grow px-2 py-2 ${selectedTab === "help" ? "border-b-2 border-blue-500" : ""}`} value="help" onClick={handleTabSelect}>Help</button> */}
         </div>
         <div className="flex-1 overflow-hidden">
-          {selectedTab === "home" && (
+          {/* {selectedTab === "home" && (
             <HomeTab
               handleTabSelect={handleTabSelect}
               setGeneratedCode={setGeneratedCode}
@@ -146,7 +146,7 @@ const App = ({ title }) => {
               selectedFunction={selectedFunction}
               error={error}
             />
-          )}
+          )} */}
           {selectedTab === "editor" && (
             <EditorTab
               selectedFunction={selectedFunction}
@@ -171,6 +171,19 @@ const App = ({ title }) => {
               isPreview={isPreview}
             />
           )}
+          {/* {selectedTab === "help" && (
+            <HelpTab
+              handleTabSelect={handleTabSelect}
+              setGeneratedCode={setGeneratedCode}
+              setSelectedFunction={setSelectedFunction}
+              loadFunctions={loadFunctions}
+              selectedFunction={selectedFunction}
+              error={error}
+              logs={logs}
+              onClear={handleClear}
+              setLogs={setLogs}
+            />
+          )} */}
           {/* {isPreview && selectedTab === "settings" && <SettingsTab loadFunctions={loadFunctions} />} */}
         </div>
       </main>

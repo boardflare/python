@@ -111,9 +111,9 @@ const EditorTab = ({
 
             // Custom message if the save used the delay method
             if (savedFunction.noName) {
-                showNotification(`Saved! Click "Run Function" to insert in a cell.`, "success");
+                showNotification(`Saved! Click "Run" to insert in a cell.`, "success");
             } else {
-                showNotification(`${savedFunction.signature} saved!`, "success");
+                showNotification(`=${savedFunction.signature} saved!`, "success");
             }
         } catch (err) {
             await pyLogs({ message: err.message, ref: "handleSave_error" });
@@ -126,13 +126,10 @@ const EditorTab = ({
             const currentCode = editorRef.current.getValue();
             setUnsavedCode(currentCode);
 
-            // Check if we need to create a function first
-            if (!selectedFunction.name) {
-                // Use the existing handleSave method to save the function first
-                await handleSave();
-            }
+            // Always save before running
+            await handleSave();
 
-            // Now open the function dialog - handleSave will have created the function if needed
+            // Now open the function dialog
             setShowFunctionDialog(true);
         } catch (err) {
             await pyLogs({ message: err.message, ref: "handleRun_error" });
@@ -145,6 +142,7 @@ const EditorTab = ({
         editorRef.current.setValue(savedFunction.code);
         setSelectedFunction(savedFunction); // removed source property
         showNotification(`Function saved successfully!`, "success");
+        setIsLLMOpen(false); // Close the LLM dialog after success
     };
 
     const handleFunctionChange = (func) => {
@@ -167,20 +165,6 @@ const EditorTab = ({
                 </div>
             )}
 
-            {notification && (
-                <div className={`mt-2 p-4 rounded ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"} flex justify-between items-center`}>
-                    <span>{notification.message}</span>
-                    {notification.type === "success" && selectedFunction && selectedFunction.name && (
-                        <button
-                            onClick={() => setShowFunctionDialog(true)}
-                            className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-700"
-                        >
-                            Run Function
-                        </button>
-                    )}
-                </div>
-            )}
-
             <div className="flex-1 overflow-hidden mt-2">
                 <MonacoEditor
                     value={selectedFunction?.code || DEFAULT_CODE}
@@ -191,7 +175,24 @@ const EditorTab = ({
                 />
             </div>
 
-            <div className="flex justify-between items-center py-2">
+            {/* Notification banner above the buttons */}
+            {notification && (
+                <div className="mb-2 px-0">
+                    <div className={`p-4 rounded ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"} flex justify-between items-center`}>
+                        <span>{notification.message}</span>
+                        {notification.type === "success" && selectedFunction && selectedFunction.name && (
+                            <button
+                                onClick={() => setShowFunctionDialog(true)}
+                                className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-700"
+                            >
+                                Run▶️
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            <div className="flex justify-between items-center p-1">
                 <select
                     value={selectedFunction ? selectedFunction.name : ""}
                     onChange={(e) => {
@@ -212,10 +213,39 @@ const EditorTab = ({
                         </option>
                     ))}
                 </select>
-                <div className="space-x-1">
-                    <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
-                    <button onClick={handleRun} className="px-2 py-1 bg-green-500 text-white rounded">Run</button>
-                    <button onClick={() => setIsLLMOpen(true)} className="px-2 py-1 bg-purple-500 text-white rounded">AI✨</button>
+                <div className="space-x-1 flex items-center">
+                    <a
+                        href="https://www.boardflare.com/apps/excel/python"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-lg cursor-pointer select-none"
+                        title="Documentation"
+                    >
+                        📖
+                    </a>
+                    <span
+                        onClick={handleSave}
+                        className="text-lg cursor-pointer select-none"
+                        role="img"
+                        aria-label="Save"
+                        title="Save function"
+                    >
+                        💾
+                    </span>
+                    <button
+                        onClick={handleRun}
+                        className="px-2 py-1 bg-green-500 text-white rounded"
+                        title="Launch function dialog"
+                    >
+                        Run▶️
+                    </button>
+                    <button
+                        onClick={() => setIsLLMOpen(true)}
+                        className="px-2 py-1 bg-purple-500 text-white rounded"
+                        title="Create function using AI"
+                    >
+                        AI✨
+                    </button>
                 </div>
             </div>
 

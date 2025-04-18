@@ -2,11 +2,12 @@ import * as React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./components/App";
 import './index.css';  // Add this import
+import { release } from "./utils/constants";
 
 // Global window properties
 window.appName = 'Python';
 window.appConfig = {
-  app_version: "1.1.0",
+  app_version: release,
   content_group: window.appName,
   content_type: "Excel",
 };

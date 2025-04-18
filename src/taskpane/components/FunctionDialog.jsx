@@ -29,11 +29,14 @@ export default function FunctionDialog({
         try {
             await Excel.run(async (context) => {
                 const range = context.workbook.getSelectedRange();
-                range.load(["address", "worksheet"]);
+                range.load(["address"]);
                 await context.sync();
 
-                // Keep the full address including sheet name
+                // Strip sheet name if present, use only address after '!'
                 let address = range.address;
+                if (address.includes('!')) {
+                    address = address.split('!')[1];
+                }
 
                 if (currentActiveField === 'targetCell') {
                     // If range contains a colon, take only the first cell
@@ -70,14 +73,10 @@ export default function FunctionDialog({
             const setupSelectionHandler = async () => {
                 try {
                     await Excel.run(async (context) => {
-                        // Register the event at workbook level instead of worksheet
-                        Office.context.document.addHandlerAsync(
-                            Office.EventType.DocumentSelectionChanged,
-                            handleSelectionChange
-                        );
-
-                        // Store reference to the current handler for cleanup
+                        const sheet = context.workbook.worksheets.getActiveWorksheet();
+                        sheet.onSelectionChanged.add(handleSelectionChange);
                         selectionHandlerRef.current = handleSelectionChange;
+                        await context.sync();
                     });
                 } catch (error) {
                     console.error("Error setting up selection handler:", error);
@@ -90,15 +89,14 @@ export default function FunctionDialog({
                 // Remove the selection handler on cleanup
                 const removeSelectionHandler = async () => {
                     try {
-                        if (selectionHandlerRef.current) {
-                            Office.context.document.removeHandlerAsync(
-                                Office.EventType.DocumentSelectionChanged,
-                                { handler: selectionHandlerRef.current },
-                                (result) => {
-                                }
-                            );
-                            selectionHandlerRef.current = null;
-                        }
+                        await Excel.run(async (context) => {
+                            const sheet = context.workbook.worksheets.getActiveWorksheet();
+                            if (selectionHandlerRef.current) {
+                                sheet.onSelectionChanged.remove(selectionHandlerRef.current);
+                                selectionHandlerRef.current = null;
+                            }
+                            await context.sync();
+                        });
                     } catch (error) {
                         pyLogs({
                             message: `[Selection Handler] Failed to remove selection handler: ${error.message}`,
@@ -136,6 +134,9 @@ export default function FunctionDialog({
                         await context.sync();
 
                         let address = range.address;
+                        if (address.includes('!')) {
+                            address = address.split('!')[1];
+                        }
                         // If range contains a colon, take only the first cell
                         if (address.includes(':')) {
                             address = address.split(':')[0];
@@ -192,10 +193,8 @@ export default function FunctionDialog({
                 let worksheet, range, formula;
 
                 try {
-                    // Assumes targetCell is always sheet-qualified (e.g., "Sheet1!A1")
-                    const [sheetName, cellAddress] = targetCell.split("!");
-                    worksheet = context.workbook.worksheets.getItem(sheetName);
-                    range = worksheet.getRange(cellAddress);
+                    worksheet = context.workbook.worksheets.getActiveWorksheet();
+                    range = worksheet.getRange(targetCell);
                 } catch (error) {
                     throw new Error(`Failed to get worksheet or range: ${error.message}`);
                 }
@@ -258,8 +257,8 @@ export default function FunctionDialog({
 
     if (!selectedFunction.name) {
         return (
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-                <div className="bg-white p-4 rounded-lg shadow-lg w-96">
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
+                <div className="bg-white p-4 rounded-lg shadow-lg w-full max-w-md mx-2 my-8">
                     <h2 className="text-xl mb-4">No Function Selected</h2>
                     <p className="mb-4">Please select a function to use first.</p>
                     <div className="flex justify-end">
@@ -276,12 +275,12 @@ export default function FunctionDialog({
     }
 
     return (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white m-1 rounded-lg shadow-lg w-96">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
+            <div className="bg-white m-1 rounded-lg shadow-lg w-full max-w-md mx-2 my-8 overflow-auto">
                 <div className="p-2">
                     <div className="bg-gray-50 rounded">
                         <div className="flex justify-between items-center">
-                            <h3 className="font-bold">{selectedFunction.signature}</h3>
+                            <h3 className="font-bold">={selectedFunction.signature}</h3>
                             {selectedFunction.noName && (
                                 <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
                                     EXEC MODE
@@ -292,7 +291,7 @@ export default function FunctionDialog({
                             <p className="text-sm text-gray-600 mt-1">{selectedFunction.description}</p>
                         )}
                         {activeField && (
-                            <p className="text-sm text-blue-500 mt-1">Select range in worksheet to populate the input field.</p>
+                            <p className="text-sm text-blue-500 mt-1">Select range in active worksheet only.</p>
                         )}
                     </div>
 
@@ -330,7 +329,7 @@ export default function FunctionDialog({
 
                     <div className="mb-2 flex items-center">
                         <label className="mr-2 whitespace-nowrap font-semibold">
-                            Insert into cell:
+                            Insert formula:
                             <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -342,6 +341,7 @@ export default function FunctionDialog({
                             readOnly
                             className={`flex-1 px-2 py-1 border rounded ${activeField === 'targetCell' ? 'border-blue-500 border-2' : ''}`}
                             placeholder="Click, then select cell"
+                            title="Click and select a new cell to insert formula."
                         />
                     </div>
 
@@ -353,7 +353,7 @@ export default function FunctionDialog({
 
                     <div className="flex justify-between items-center mb-1">
                         <div>
-                            Experimental 🧪
+                            Insert formula into {targetCell}?.
                         </div>
                         <div className="flex space-x-2">
                             <button
