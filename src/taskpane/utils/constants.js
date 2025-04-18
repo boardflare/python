@@ -15,6 +15,7 @@ Overview:
 ✅ Excel functions using Python!
 🆓 Unlimited free use.
 🌐 Code has internet access.
+📖 https://www.boardflare.com/apps/excel/python
 
 How to use:
 ⬅️ Drag task pane open for space.
@@ -22,12 +23,8 @@ How to use:
 💾 Save to create Excel function.
 ▶️ Run function e.g. =HELLO("World").
 
-Help:
-📄 https://www.boardflare.com/apps/excel/python
-🛟 https://www.boardflare.com/company/support
 
-
-🚀 Click Save below to try!
+🚀 Click Run▶️ below to try =HELLO!
 """`;
 
 export const EventTypes = {

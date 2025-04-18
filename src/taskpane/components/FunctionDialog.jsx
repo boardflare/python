@@ -257,8 +257,8 @@ export default function FunctionDialog({
 
     if (!selectedFunction.name) {
         return (
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-                <div className="bg-white p-4 rounded-lg shadow-lg w-96">
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
+                <div className="bg-white p-4 rounded-lg shadow-lg w-full max-w-md mx-2 my-8">
                     <h2 className="text-xl mb-4">No Function Selected</h2>
                     <p className="mb-4">Please select a function to use first.</p>
                     <div className="flex justify-end">
@@ -275,12 +275,12 @@ export default function FunctionDialog({
     }
 
     return (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white m-1 rounded-lg shadow-lg w-96">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
+            <div className="bg-white m-1 rounded-lg shadow-lg w-full max-w-md mx-2 my-8 overflow-auto">
                 <div className="p-2">
                     <div className="bg-gray-50 rounded">
                         <div className="flex justify-between items-center">
-                            <h3 className="font-bold">{selectedFunction.signature}</h3>
+                            <h3 className="font-bold">={selectedFunction.signature}</h3>
                             {selectedFunction.noName && (
                                 <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
                                     EXEC MODE
@@ -341,6 +341,7 @@ export default function FunctionDialog({
                             readOnly
                             className={`flex-1 px-2 py-1 border rounded ${activeField === 'targetCell' ? 'border-blue-500 border-2' : ''}`}
                             placeholder="Click, then select cell"
+                            title="Click and select a new cell to insert formula."
                         />
                     </div>
 
@@ -351,9 +352,11 @@ export default function FunctionDialog({
                     )}
 
                     <div className="flex justify-between items-center mb-1">
-                        <div>
-                            Experimental 🧪
-                        </div>
+                        {!selectedFunction.noName && (
+                            <div>
+                                Insert ={selectedFunction.signature} into {targetCell}?.
+                            </div>
+                        )}
                         <div className="flex space-x-2">
                             <button
                                 onClick={() => { setActiveField(null); onClose(); }}

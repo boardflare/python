@@ -126,13 +126,10 @@ const EditorTab = ({
             const currentCode = editorRef.current.getValue();
             setUnsavedCode(currentCode);
 
-            // Check if we need to create a function first
-            if (!selectedFunction.name) {
-                // Use the existing handleSave method to save the function first
-                await handleSave();
-            }
+            // Always save before running
+            await handleSave();
 
-            // Now open the function dialog - handleSave will have created the function if needed
+            // Now open the function dialog
             setShowFunctionDialog(true);
         } catch (err) {
             await pyLogs({ message: err.message, ref: "handleRun_error" });
@@ -220,15 +217,34 @@ const EditorTab = ({
                         href="https://www.boardflare.com/apps/excel/python"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-bold text-lg text-blue-600 hover:text-blue-800 px-2"
-                        title="Help"
-                        aria-label="Help"
+                        className="text-lg cursor-pointer select-none"
+                        title="Documentation"
                     >
-                        ?
+                        📖
                     </a>
-                    <button onClick={handleSave} className="px-2 py-1 bg-blue-500 text-white rounded">Save</button>
-                    {/* <button onClick={handleRun} className="px-2 py-1 bg-green-500 text-white rounded">Run</button> */}
-                    <button onClick={() => setIsLLMOpen(true)} className="px-2 py-1 bg-purple-500 text-white rounded">AI✨</button>
+                    <span
+                        onClick={handleSave}
+                        className="text-lg cursor-pointer select-none"
+                        role="img"
+                        aria-label="Save"
+                        title="Save function"
+                    >
+                        💾
+                    </span>
+                    <button
+                        onClick={handleRun}
+                        className="px-2 py-1 bg-green-500 text-white rounded"
+                        title="Launch function dialog"
+                    >
+                        Run▶️
+                    </button>
+                    <button
+                        onClick={() => setIsLLMOpen(true)}
+                        className="px-2 py-1 bg-purple-500 text-white rounded"
+                        title="Create function using AI"
+                    >
+                        AI✨
+                    </button>
                 </div>
             </div>
 
