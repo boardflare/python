@@ -4,8 +4,6 @@
 
 This function automatically fills missing or incomplete data by analyzing patterns from a provided example range. It's particularly useful for completing datasets where there's a predictable relationship between columns, helping to automate data entry and ensure consistency.
 
-[View Python code on GitHub](https://github.com/boardflare/python-functions/blob/main/files/text/ai_fill/ai_fill.py)
-
 ## Usage
 
 Automatically fills in missing data in a target range by learning patterns from an example range.

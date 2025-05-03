@@ -4,8 +4,6 @@
 
 This function leverages an AI model (compatible with OpenAI's API structure and supporting JSON output format) to generate structured data in the form of a table (a 2D list). It takes a `prompt` describing the desired table content and can optionally use `header` information and `source` data to guide the generation process.
 
-[View Python code on GitHub](https://github.com/boardflare/python-functions/blob/main/files/text/ai_table/ai_table.py)
-
 ## Usage
 
 Instructs an AI model to generate a table based on a `prompt`, optional `header`, and optional `source` data, returning the result as a 2D list.

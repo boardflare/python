@@ -4,8 +4,6 @@
 
 This function standardizes and restructures text based on a specified format using AI. It's especially useful for cleaning and organizing inconsistent data in a structured way, making it easier to work with data from various sources.
 
-[View Python code on GitHub](https://github.com/boardflare/python-functions/blob/main/files/text/ai_format/ai_format.py)
-
 ## Usage
 
 Formats text according to a specific desired structure or pattern.

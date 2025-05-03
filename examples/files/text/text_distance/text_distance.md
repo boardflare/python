@@ -4,8 +4,6 @@
 
 This function demonstrates fuzzy matching techniques using the Python [textdistance](https://github.com/life4/textdistance) library. It implements various algorithms including edit distance, token-based, sequence-based, and phonetic algorithms to calculate the similarity between strings.
 
-[View Python code on GitHub](https://github.com/boardflare/python-functions/blob/main/files/text/text_distance/text_distance.py)
-
 ## Usage
 
 Compares a `lookup_value` with each item in a `lookup_array` and returns the `top_n` closest matches along with their normalized similarity scores (between 0 and 1, higher is more similar).

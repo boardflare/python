@@ -4,8 +4,6 @@
 
 This function uses an AI model to extract specific types of information from text. It's particularly useful for pulling structured data (like dates, contacts, key points) from unstructured text content such as emails, reports, or meeting notes.
 
-[View Python code on GitHub](https://github.com/boardflare/python-functions/blob/main/files/text/ai_extract/ai_extract.ipynb)
-
 ## Usage
 
 Extracts specific types of information from a given text based on what you specify in the extract parameter.

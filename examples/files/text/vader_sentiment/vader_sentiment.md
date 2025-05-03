@@ -4,8 +4,6 @@
 
 This function performs sentiment analysis on text using the VADER (Valence Aware Dictionary and sEntiment Reasoner) lexicon, which is specifically attuned to sentiments expressed in social media.
 
-[View Python code on GitHub](https://github.com/boardflare/python-functions/blob/main/files/text/vader_sentiment/vader_sentiment.py)
-
 ## Usage
 
 Analyzes the sentiment of the input text and returns a compound score.

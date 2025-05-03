@@ -4,8 +4,6 @@
 
 This function interacts with an AI model (specifically designed for chat completions, compatible with OpenAI's API structure) to generate text-based responses based on a given prompt. It can optionally incorporate data provided as a 2D list into the prompt for more context-specific analysis or generation.
 
-[View Python code on GitHub](https://github.com/boardflare/python-functions/blob/main/files/text/ai_ask/ai_ask.py)
-
 ## Usage
 
 Sends a `prompt` and optional `data` to an AI model and returns the generated text response.

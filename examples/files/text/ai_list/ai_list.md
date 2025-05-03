@@ -4,8 +4,6 @@
 
 This function leverages an AI model (compatible with OpenAI's API structure and supporting JSON output format) to generate a list of items based on a prompt. It's particularly useful for categorization, classification, and matching tasks where you need to assign items to predefined categories based on their content.
 
-[View Python code on GitHub](https://github.com/boardflare/python-functions/blob/main/files/text/ai_list/ai_list.py)
-
 ## Usage
 
 Instructs an AI model to generate a list of items based on a `prompt`, returning the result as a single-column list.

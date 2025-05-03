@@ -4,8 +4,6 @@
 
 This function leverages an AI model to generate concise summaries of text content. It's particularly useful for distilling key information from large documents, meeting notes, reports, or any text that needs to be condensed while preserving the core meaning.
 
-[View Python code on GitHub](https://github.com/boardflare/python-functions/blob/main/files/text/ai_summarize/ai_summarize.py)
-
 ## Usage
 
 Generates a summary of the provided text based on specified parameters like length and format.
