@@ -19,12 +19,12 @@ export function sanitizeSheetName(name) {
     return sanitized;
 }
 
-export async function singleDemo(parsedCode) {
+export async function singleDemo(func) {
     return Excel.run(async (context) => {
         let sheet;
         try {
             // Create sheet name based on function name
-            const sheetName = sanitizeSheetName(parsedCode.name.toUpperCase());
+            const sheetName = sanitizeSheetName(func.name.toUpperCase());
             sheet = context.workbook.worksheets.getItemOrNullObject(sheetName);
             await context.sync();
 
@@ -45,7 +45,7 @@ export async function singleDemo(parsedCode) {
 
             // Add function signature or exec formula in B1 based on noName flag
             const signatureRange = sheet.getRangeByIndexes(0, 1, 1, 1);
-            signatureRange.values = [[parsedCode.signature]];
+            signatureRange.values = [[func.signature]];
             signatureRange.format.verticalAlignment = 'Top';
 
             // Add "Description:" label in A2
@@ -55,7 +55,7 @@ export async function singleDemo(parsedCode) {
 
             // Add description in B2
             const descRange = sheet.getRangeByIndexes(1, 1, 1, 1);
-            descRange.values = [[parsedCode.description]];
+            descRange.values = [[func.description]];
             descRange.format.verticalAlignment = 'Top';
 
             // Add "Example:" label in A4
@@ -66,7 +66,7 @@ export async function singleDemo(parsedCode) {
             try {
                 // Add example code
                 const codeRange = sheet.getRangeByIndexes(3, 1, 1, 1);
-                codeRange.values = [[parsedCode.excelExample]];
+                codeRange.values = [[func.excelExample]];
                 await context.sync();
             } catch (exampleError) {
                 const errorRange = sheet.getRangeByIndexes(3, 1, 1, 1);

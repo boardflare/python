@@ -64,7 +64,7 @@ const AddFunctions = ({ loadFunctions }) => {
                 savedFunction.excelExample = func.excelExample;
             }
 
-            //await singleDemo(savedFunction);
+            await singleDemo(savedFunction);
             await loadFunctions();
 
             await pyLogs({

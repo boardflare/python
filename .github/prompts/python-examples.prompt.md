@@ -1,0 +1,1 @@
+The Python virtual environment is in the /.venv directory. This is where all Python scripts should be run from using a Windows Command Prompt.  Also add any new dependencies installed to the requirements.txt file in the /examples directory.
