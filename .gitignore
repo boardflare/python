@@ -3,5 +3,5 @@ local/
 .env
 .wrangler/
 .dev.vars
-venv/
+.venv/
 dist/
