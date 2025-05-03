@@ -133,9 +133,7 @@ const App = ({ title }) => {
           {/* <button className={`flex-grow px-2 py-2 ${selectedTab === "home" ? "border-b-2 border-blue-500" : ""}`} value="home" onClick={handleTabSelect}>Home</button> */}
           <button className={`flex-grow px-2 py-2 ${selectedTab === "editor" ? "border-b-2 border-blue-500" : ""}`} value="editor" onClick={handleTabSelect}>Editor</button>
           <button className={`flex-grow px-2 py-2 ${selectedTab === "functions" ? "border-b-2 border-blue-500" : ""}`} value="functions" onClick={handleTabSelect}>Functions</button>
-          <button className={`flex-grow px-2 py-2 ${selectedTab === "output" ? "border-b-2 border-blue-500" : ""}`} value="output" onClick={handleTabSelect} title="Output">
-            <span role="img" aria-label="info">ℹ️</span>
-          </button>
+          <button className={`flex-grow px-2 py-2 ${selectedTab === "output" ? "border-b-2 border-blue-500" : ""}`} value="output" onClick={handleTabSelect} title="Output">ℹ️</button>
           {/* <button className={`flex-grow px-2 py-2 ${selectedTab === "help" ? "border-b-2 border-blue-500" : ""}`} value="help" onClick={handleTabSelect}>Help</button> */}
         </div>
         <div className="flex-1 overflow-hidden">
