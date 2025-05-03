@@ -1,6 +1,6 @@
 import * as React from "react";
 import { saveWorkbookOnly } from "../utils/save";
-import { singleDemo } from "../utils/demo";
+import { singleDemo, testCasesDemo } from "../utils/demo";
 import { pyLogs } from "../utils/logs";
 import { parsePython } from "../utils/codeparser";
 import { getExecEnv } from "../utils/constants";
@@ -48,7 +48,7 @@ const AddFunctions = ({ loadFunctions }) => {
                 throw new Error("Function code missing");
             }
 
-            // Parse the function code for all metadata except excelExample
+            // Parse the function code for all metadata except test_cases
             const funcToSave = await parsePython(func.code);
 
             // Save workbook first and use returned function with noName set
@@ -61,10 +61,11 @@ const AddFunctions = ({ loadFunctions }) => {
                     (match, args) => `=${getExecEnv()}("${func.name}", ${args})`
                 );
             } else {
-                savedFunction.excelExample = func.excelExample;
+                savedFunction.test_cases = func.test_cases;
             }
 
-            await singleDemo(savedFunction);
+            // Use testCasesDemo instead of singleDemo
+            await testCasesDemo(savedFunction);
             await loadFunctions();
 
             await pyLogs({

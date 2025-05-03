@@ -19,7 +19,7 @@ export function sanitizeSheetName(name) {
     return sanitized;
 }
 
-export async function singleDemo(func) {
+export async function testCasesDemo(func) {
     return Excel.run(async (context) => {
         let sheet;
         try {
@@ -38,53 +38,116 @@ export async function singleDemo(func) {
             sheet = context.workbook.worksheets.add(sheetName);
             await context.sync();
 
-            // Add "Function:" label in A1
-            const functionLabelRange = sheet.getRangeByIndexes(0, 0, 1, 1);
-            functionLabelRange.values = [["Function:"]];
-            functionLabelRange.format.font.bold = true;
+            let startRow = 0;
+            for (const test of func.test_cases || []) {
+                const argNames = Object.keys(test.arguments || {});
+                const argCount = argNames.length;
+                let maxArgRows = 1;
+                // Determine the max number of rows for any argument (for 2D arrays)
+                argNames.forEach(arg => {
+                    const val = test.arguments[arg];
+                    if (Array.isArray(val) && Array.isArray(val[0])) {
+                        maxArgRows = Math.max(maxArgRows, val.length);
+                    } else {
+                        maxArgRows = Math.max(maxArgRows, 2); // header + value
+                    }
+                });
 
-            // Add function signature or exec formula in B1 based on noName flag
-            const signatureRange = sheet.getRangeByIndexes(0, 1, 1, 1);
-            signatureRange.values = [[func.signature]];
-            signatureRange.format.verticalAlignment = 'Top';
+                // --- Insert function signature above arguments ---
+                // Use func.signature directly
+                const signature = func.signature;
+                // Write signature in first 20 columns of the row
+                const signatureRange = sheet.getRangeByIndexes(startRow, 0, 1, 20);
+                signatureRange.values = [[signature, ...Array(19).fill("")]];
+                signatureRange.format.font.bold = true;
+                signatureRange.format.font.color = "#000000";
+                signatureRange.format.font.size = 14;
+                signatureRange.format.fill.color = "#E5E7EB"; // Tailwind gray-200
+                // Write description in the row below signature
+                const descRange = sheet.getRangeByIndexes(startRow + 1, 0, 1, 1);
+                descRange.values = [[func.description]];
+                // Add a blank row after description
+                startRow += 3;
 
-            // Add "Description:" label in A2
-            const descLabelRange = sheet.getRangeByIndexes(1, 0, 1, 1);
-            descLabelRange.values = [["Description:"]];
-            descLabelRange.format.font.bold = true;
+                // Write each argument in its own column, with a blank column between
+                let col = 0;
+                for (const arg of argNames) {
+                    const val = test.arguments[arg];
+                    // Write header (capitalize first letter)
+                    const header = arg.charAt(0).toUpperCase() + arg.slice(1);
+                    const headerRange = sheet.getRangeByIndexes(startRow, col, 1, 1);
+                    headerRange.values = [[header]];
+                    headerRange.format.font.bold = true;
+                    // Write value(s)
+                    if (Array.isArray(val) && Array.isArray(val[0])) {
+                        // 2D array
+                        const dataRange = sheet.getRangeByIndexes(startRow + 1, col, val.length, val[0].length);
+                        dataRange.values = val;
+                    } else {
+                        // Single value
+                        const dataRange = sheet.getRangeByIndexes(startRow + 1, col, 1, 1);
+                        dataRange.values = [[val]];
+                    }
+                    col += 2; // leave a blank column between arguments
+                }
 
-            // Add description in B2
-            const descRange = sheet.getRangeByIndexes(1, 1, 1, 1);
-            descRange.values = [[func.description]];
-            descRange.format.verticalAlignment = 'Top';
-
-            // Add "Example:" label in A4
-            const exampleLabelRange = sheet.getRangeByIndexes(3, 0, 1, 1);
-            exampleLabelRange.values = [["Example:"]];
-            exampleLabelRange.format.font.bold = true;
-
-            try {
-                // Add example code
-                const codeRange = sheet.getRangeByIndexes(3, 1, 1, 1);
-                codeRange.values = [[func.excelExample]];
+                // Sync to ensure data is written
                 await context.sync();
-            } catch (exampleError) {
-                const errorRange = sheet.getRangeByIndexes(3, 1, 1, 1);
-                errorRange.values = [[`Error in example code: ${exampleError.message}`]];
-                errorRange.format.fill.color = "#FFE0E0";
-                console.error("Failed to add example code:", exampleError);
+
+                // Find the last used row in this test case's argument block
+                let lastArgRow = startRow;
+                for (const arg of argNames) {
+                    const val = test.arguments[arg];
+                    if (Array.isArray(val) && Array.isArray(val[0])) {
+                        lastArgRow = Math.max(lastArgRow, startRow + val.length);
+                    } else {
+                        lastArgRow = Math.max(lastArgRow, startRow + 2);
+                    }
+                }
+
+                // Write the output heading above the formula
+                const outputHeadingRow = lastArgRow + 1;
+                const outputHeadingRange = sheet.getRangeByIndexes(outputHeadingRow, 0, 1, 1);
+                outputHeadingRange.values = [["Output"]];
+                outputHeadingRange.format.font.bold = true;
+                outputHeadingRange.format.fill.color = "#E0E7FF"; // Tailwind indigo-100
+
+                // Write the formula two rows below the last argument row
+                const formulaRow = lastArgRow + 2;
+                // Build formula string
+                const formulaArgs = argNames.map((arg, idx) => {
+                    const colIdx = idx * 2;
+                    const val = test.arguments[arg];
+                    if (Array.isArray(val) && Array.isArray(val[0])) {
+                        // Range reference
+                        const colLetter = String.fromCharCode(65 + colIdx);
+                        const start = `${colLetter}${startRow + 2}`;
+                        const end = `${String.fromCharCode(65 + colIdx + val[0].length - 1)}${startRow + 1 + val.length}`;
+                        return `${colLetter}${startRow + 2}:${String.fromCharCode(65 + colIdx + val[0].length - 1)}${startRow + 1 + val.length}`;
+                    } else {
+                        // Single cell reference
+                        const colLetter = String.fromCharCode(65 + colIdx);
+                        return `${colLetter}${startRow + 2}`;
+                    }
+                });
+                const formula = `=${func.name.toUpperCase()}(${formulaArgs.join(', ')})`;
+                const formulaCell = sheet.getRangeByIndexes(formulaRow, 0, 1, 1);
+                formulaCell.values = [[formula]];
+                formulaCell.format.font.bold = true;
+                formulaCell.format.font.color = "#1D4ED8";
+
+                // Add a blank row after the formula for spacing before next test case
+                startRow = formulaRow + 2;
             }
 
-            // Set column widths
-            sheet.getRange("A:A").format.columnWidth = 70;
-
-            // Activate the sheet
+            // Do not auto-fit columns (removed)
+            // sheet.getUsedRange().format.autofitColumns();
             sheet.activate();
             await context.sync();
         } catch (error) {
             if (sheet) {
                 try {
-                    const errorRange = sheet.getRangeByIndexes(2, 1, 1, 1);
+                    const errorRange = sheet.getRangeByIndexes(1, 1, 1, 1);
                     errorRange.values = [[`An error occurred: ${error.message}`]];
                     errorRange.format.fill.color = "#FFE0E0";
                     await context.sync();
@@ -96,7 +159,7 @@ export async function singleDemo(func) {
             throw error;
         }
     }).catch(error => {
-        console.error("Failed to update demo sheet:", error);
+        console.error("Failed to update test cases sheet:", error);
         throw error;
     });
 }
