@@ -1,3 +1,0 @@
-The Python virtual environment is in the /.venv directory. This is where all Python scripts should be run from using a Windows Command Prompt.  Also add any new dependencies installed to the requirements.txt file in the /examples directory.
-
-When you have finished editing a python function file (e.g. text_distance.py), run the corresponding pytest file (e.g. .venv\Scripts\python -m pytest examples\files\text\text_distance\test_text_distance.py) to ensure that the function works as expected.  If not, fix the function and re-run the tests until it works.  Once the function is working, run the #file:examples\build_examples.py script to build the examples.

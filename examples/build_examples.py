@@ -4,10 +4,10 @@ import importlib.util
 import json
 import re
 from pathlib import Path
-import ast
+import ast # Keep ast for potential future use or other metadata extraction if needed
 
 def get_function_metadata(file_path):
-    """Extract metadata from a Python function file."""
+    """Extract metadata from a Python function file and its corresponding test_cases.json."""
     try:
         # Import the module dynamically
         module_name = os.path.basename(file_path).replace('.py', '')
@@ -26,6 +26,7 @@ def get_function_metadata(file_path):
                     break
         
         if not main_func:
+            print(f"Warning: Could not find main function in {file_path}")
             return None
             
         # Extract the function metadata
@@ -39,73 +40,44 @@ def get_function_metadata(file_path):
         # Read the full file content to get the code
         with open(file_path, 'r', encoding='utf-8') as f:
             code = f.read()
-        
-        excel_example = get_excel_example(module_name, file_path)
+
+        # --- Removed: Code block for reading example.json ---
+
+        # --- Changed: Load test cases from test_cases.json and extract first as example ---
+        primary_example_data = None
+        all_test_cases = None
+        test_cases_file_path = Path(file_path).parent / "test_cases.json"
+        if test_cases_file_path.exists():
+            try:
+                with open(test_cases_file_path, 'r', encoding='utf-8') as f_test_cases:
+                    test_data = json.load(f_test_cases)
+                    # Expecting the list under a "test_cases" key
+                    if "test_cases" in test_data and isinstance(test_data["test_cases"], list):
+                         all_test_cases = test_data["test_cases"]
+                         if all_test_cases: # Check if the list is not empty
+                             primary_example_data = all_test_cases[0] # Use the first test case as the primary example
+                         else:
+                             print(f"Warning: 'test_cases' list is empty in {test_cases_file_path}")
+                    else:
+                         print(f"Warning: 'test_cases' key (list) not found or invalid in {test_cases_file_path}")
+            except json.JSONDecodeError as e:
+                print(f"Error reading or parsing {test_cases_file_path}: {e}")
+            except Exception as e:
+                 print(f"Error processing {test_cases_file_path}: {e}")
+        else:
+            print(f"Warning: No test_cases.json found for {module_name}")
+        # --- End Changed ---
         
         return {
             "name": module_name,
             "description": description,
             "code": code,
-            "excelExample": excel_example
+            # Removed the 'example' key as requested
+            "test_cases": all_test_cases 
         }
     except Exception as e:
         print(f"Error processing {file_path}: {str(e)}")
         return None
-
-def get_excel_example(module_name, function_file_path):
-    """Finds the first test_<func>.py, parses the first test, and builds an Excel formula example."""
-    test_file = os.path.join(os.path.dirname(function_file_path), f"test_{module_name}.py")
-    if not os.path.exists(test_file):
-        return None
-    try:
-        with open(test_file, 'r', encoding='utf-8') as f:
-            source = f.read()
-        tree = ast.parse(source)
-        # Find the first function definition
-        for node in tree.body:
-            if isinstance(node, ast.FunctionDef):
-                # Find the first call to the function under test
-                for stmt in ast.walk(node):
-                    if isinstance(stmt, ast.Call) and getattr(stmt.func, 'id', None) == module_name:
-                        # Build argument list for Excel formula
-                        args = []
-                        for arg in stmt.args:
-                            if isinstance(arg, ast.Str):
-                                args.append(f'"{arg.s}"')
-                            elif isinstance(arg, ast.Constant):
-                                # Python 3.8+: ast.Constant
-                                if isinstance(arg.value, str):
-                                    args.append(f'"{arg.value}"')
-                                else:
-                                    args.append(str(arg.value))
-                            elif isinstance(arg, ast.List):
-                                # For lists, convert to Excel array constant syntax
-                                try:
-                                    val = ast.literal_eval(arg)
-                                    if isinstance(val, list):
-                                        # Detect 2D or 1D
-                                        if all(isinstance(x, list) for x in val):
-                                            # 2D list: {a1,b1; a2,b2}
-                                            rows = []
-                                            for row in val:
-                                                row_str = ','.join(f'"{item}"' if isinstance(item, str) else str(item) for item in row)
-                                                rows.append(row_str)
-                                            array_str = '{' + ';'.join(rows) + '}'
-                                        else:
-                                            # 1D list: {a,b,c}
-                                            array_str = '{' + ','.join(f'"{item}"' if isinstance(item, str) else str(item) for item in val) + '}'
-                                        args.append(array_str)
-                                    else:
-                                        args.append(str(val))
-                                except Exception as e:
-                                    args.append(str(arg))
-                            else:
-                                args.append(ast.unparse(arg) if hasattr(ast, 'unparse') else str(arg))
-                        return f'={module_name.upper()}({", ".join(args)})'
-                break
-    except Exception as e:
-        print(f"Error parsing test file {test_file}: {e}")
-    return None
 
 def main():
     # Root directory for function files
@@ -119,8 +91,10 @@ def main():
 
     # Recursively find all .py files that are not test files
     for py_file in root_dir.rglob("*.py"):
-        if py_file.name.startswith("test_"):
+        # Skip __init__.py files and test files
+        if py_file.name.startswith("test_") or py_file.name == "__init__.py":
             continue
+            
         file_path = str(py_file)
         print(f"Processing {file_path}...")
 
@@ -143,7 +117,8 @@ def main():
     assets_dir.mkdir(exist_ok=True)
     output_path = assets_dir / "example_functions.json"
     with open(output_path, 'w', encoding='utf-8') as f:
-        json.dump(functions, f, indent=2)
+        # Use compact separators for potentially large test case data
+        json.dump(functions, f, indent=2) 
 
     print(f"Generated {output_path} with {len(functions)} functions")
 

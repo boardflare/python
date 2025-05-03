@@ -1,0 +1,154 @@
+{
+    "test_cases": [
+        {
+            "id": "test_basic_question",
+            "description": "Test: What is the tallest mountain in the world?",
+            "arguments": {
+                "prompt": "What is the tallest mountain in the world?"
+            },
+            "expected_contains_any": [
+                "Everest"
+            ]
+        },
+        {
+            "id": "test_with_data",
+            "description": "Test with additional data parameter",
+            "arguments": {
+                "prompt": "Summarize this data in one sentence",
+                "data": [
+                    [
+                        "Name",
+                        "Value"
+                    ],
+                    [
+                        "Item1",
+                        10
+                    ],
+                    [
+                        "Item2",
+                        20
+                    ]
+                ]
+            }
+        },
+        {
+            "id": "test_parameters",
+            "description": "Test that all optional parameters work correctly",
+            "arguments": {
+                "prompt": "Write a very short test response",
+                "temperature": 0.8,
+                "max_tokens": 50,
+                "model": "mistral-small-latest"
+            }
+        },
+        {
+            "id": "test_different_models_default",
+            "description": "Test that different models can be used (default)",
+            "arguments": {
+                "prompt": "Write a one-sentence test response"
+            }
+        },
+        {
+            "id": "test_different_models_specified",
+            "description": "Test that different models can be used (specified)",
+            "arguments": {
+                "prompt": "Write a one-sentence test response",
+                "model": "mistral-small-latest"
+            }
+        },
+        {
+            "id": "test_with_complex_data",
+            "description": "Test with more complex data structure",
+            "arguments": {
+                "prompt": "Describe the quarterly performance trends in one paragraph",
+                "data": [
+                    [
+                        "Product",
+                        "Q1",
+                        "Q2",
+                        "Q3",
+                        "Q4"
+                    ],
+                    [
+                        "Widgets",
+                        100,
+                        150,
+                        200,
+                        175
+                    ],
+                    [
+                        "Gadgets",
+                        120,
+                        130,
+                        110,
+                        140
+                    ],
+                    [
+                        "Doodads",
+                        90,
+                        85,
+                        95,
+                        105
+                    ]
+                ]
+            }
+        },
+        {
+            "id": "test_text_summarization",
+            "description": "Test: Summarize a block of text provided in a cell.",
+            "arguments": {
+                "prompt": "Summarize the following text in one sentence:",
+                "data": [
+                    [
+                        "The Industrial Revolution, which began in Great Britain in the late 18th century, was a period of major technological, socioeconomic, and cultural change. Key innovations included the steam engine, power loom, and advancements in iron production. This era transformed economies from agrarian and handicraft-based to industrial and machine-based, leading to urbanization and new social classes."
+                    ]
+                ]
+            },
+            "expected_contains_any": [
+                "Industrial Revolution",
+                "Britain"
+            ]
+        },
+        {
+            "id": "test_data_analysis",
+            "description": "Test: What is the average of the sales figures provided?",
+            "arguments": {
+                "prompt": "What is the average of the sales figures provided?",
+                "data": [
+                    [
+                        "Sales"
+                    ],
+                    [
+                        150
+                    ],
+                    [
+                        200
+                    ],
+                    [
+                        175
+                    ],
+                    [
+                        225
+                    ],
+                    [
+                        190
+                    ]
+                ]
+            },
+            "expected_contains_any": [
+                "188"
+            ]
+        },
+        {
+            "id": "test_creative_writing",
+            "description": "Test: Write a short paragraph about a robot discovering music for the first time.",
+            "arguments": {
+                "prompt": "Write a short paragraph about a robot discovering music for the first time."
+            },
+            "expected_contains_any_lower": [
+                "robot",
+                "music"
+            ]
+        }
+    ]
+}
