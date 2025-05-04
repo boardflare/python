@@ -21,6 +21,7 @@
                 ]
             },
             "expected_contains": "Travel",
+            "expected_rows": 1,
             "demo": true
         },
         {
@@ -41,6 +42,7 @@
                 ]
             },
             "expected_contains": "Negative",
+            "expected_rows": 1,
             "demo": true
         },
         {
@@ -61,6 +63,7 @@
                 ]
             },
             "expected_contains": "Hot Lead",
+            "expected_rows": 1,
             "demo": true
         },
         {
@@ -84,6 +87,7 @@
                 ]
             },
             "expected_contains": "High Priority",
+            "expected_rows": 1,
             "demo": true
         },
         {
@@ -110,6 +114,7 @@
                 ]
             },
             "expected_contains": "Feature Request",
+            "expected_rows": 1,
             "demo": true
         },
         {
@@ -120,6 +125,7 @@
                 "choices": "NDA, Service Agreement, Employment Contract, License Agreement"
             },
             "expected_contains": "Service Agreement",
+            "expected_rows": 1,
             "demo": true
         },
         {
@@ -130,6 +136,7 @@
                 "choices": ""
             },
             "expected_contains": "Error: No valid choices provided.",
+            "expected_rows": 1,
             "demo": false
         },
         {
@@ -142,6 +149,7 @@
                 "choices": "Yes, No"
             },
             "expected_contains": "Error: Empty input text.",
+            "expected_rows": 1,
             "demo": false
         },
         {
@@ -154,6 +162,7 @@
                 "model": "mistral-small-latest"
             },
             "expected_contains": "Positive",
+            "expected_rows": 1,
             "demo": false
         }
     ]
