@@ -105,7 +105,7 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
         }
     };
 
-    // Styled table for OneDrive Functions
+    // Styled table for OneDrive
     const OneDriveFunctionTable = ({ functions }) => (
         <div className="flex-1 flex flex-col min-h-0">
             <div className="flex-1 overflow-y-auto">
@@ -148,20 +148,17 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
     if (!folderUrl) {
         return (
             <div className="flex flex-col items-center w-full">
-                <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center w-full">
-                    OneDrive Functions
-                </div>
-                <div className="relative flex flex-col items-center w-full mt-2">
+                <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center w-full flex items-center justify-center gap-2">
+                    OneDrive
                     <button
                         onClick={handleLogin}
-                        className="px-2 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-normal relative group"
+                        className="px-2 py-0 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-normal relative group text-sm"
+                        title="Login to save functions to OneDrive."
                     >
                         Login
-                        <span className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-72 p-2 bg-blue-50 text-black text-sm rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity">
-                            Login to save functions to OneDrive.
-                        </span>
                     </button>
                 </div>
+                {/* Removed the separate div for the login button */}
             </div>
         );
     }
@@ -170,7 +167,7 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
         return (
             <>
                 <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center w-full">
-                    OneDrive Functions
+                    OneDrive
                 </div>
                 <div className="p-4 text-gray-900 text-center">
                     Loading OneDrive functions...
@@ -183,7 +180,7 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
         return (
             <div className="w-full">
                 <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center w-full">
-                    OneDrive Functions
+                    OneDrive
                 </div>
                 <div className="text-center text-sm text-gray-500 mb-4">
                     No functions
@@ -200,10 +197,10 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
                         {folderUrl ? (
                             <a href={folderUrl} target="_blank" rel="noopener noreferrer"
                                 className="hover:text-blue-500" title="Open in OneDrive">
-                                OneDrive Functions
+                                OneDrive
                             </a>
                         ) : (
-                            'OneDrive Functions'
+                            'OneDrive'
                         )}
                     </div>
                     {folderUrl && isPreview && (
