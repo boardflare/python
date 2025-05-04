@@ -54,10 +54,12 @@ def get_function_metadata(file_path):
                     # Expecting the list under a "test_cases" key
                     if "test_cases" in test_data and isinstance(test_data["test_cases"], list):
                          all_test_cases = test_data["test_cases"]
-                         if all_test_cases: # Check if the list is not empty
-                             primary_example_data = all_test_cases[0] # Use the first test case as the primary example
+                         # Filter test cases for demo examples
+                         demo_test_cases = [tc for tc in all_test_cases if tc.get("demo", True)]
+                         if demo_test_cases:
+                             primary_example_data = demo_test_cases[0] # Use the first demo test case as the primary example
                          else:
-                             print(f"Warning: 'test_cases' list is empty in {test_cases_file_path}")
+                             print(f"Warning: No demo test cases found in {test_cases_file_path}")
                     else:
                          print(f"Warning: 'test_cases' key (list) not found or invalid in {test_cases_file_path}")
             except json.JSONDecodeError as e:
@@ -72,8 +74,8 @@ def get_function_metadata(file_path):
             "name": module_name,
             "description": description,
             "code": code,
-            # Removed the 'example' key as requested
-            "test_cases": all_test_cases 
+            # Only include demo test cases in the output
+            "test_cases": [tc for tc in all_test_cases or [] if tc.get("demo", True)]
         }
     except Exception as e:
         print(f"Error processing {file_path}: {str(e)}")

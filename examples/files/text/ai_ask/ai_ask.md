@@ -20,7 +20,7 @@ Arguments:
 | `data`        | 2D list        | Optional: Data from an Excel range to be included in the context sent to the AI.                           | `None`          |
 | `temperature` | float          | Optional: Controls the randomness/creativity of the response (0.0 to 2.0). Higher values mean more creative. | `0.5`           |
 | `max_tokens`  | int            | Optional: Maximum number of tokens (words/subwords) the AI should generate in its response.                | `250`           |
-| `model`       | string         | Optional: The specific AI model ID to use for the request (e.g., 'mistral-small', 'mistral-large').                     | `mistral-small` |
+| `model`       | string         | Optional: The specific AI model ID to use for the request (e.g., 'mistral-small', 'mistral-large').        | `mistral-small` |
 
 Returns:
 
@@ -30,49 +30,57 @@ Returns:
 
 ## Examples
 
-### 1. Basic Question Answering
-Ask a simple factual question.
+### 1. HR: Employee Engagement Summary
+Ask for a summary of employee engagement survey results.
+
+**Sample Input Data (Range `A1:B5`):**
+
+| Question            | Score |
+|---------------------|-------|
+| Team collaboration  | 4.5   |
+| Workload            | 3.2   |
+| Career advancement  | 3.0   |
+| Management support  | 4.0   |
+
 ```excel
-=AI_ASK("What is the tallest mountain in the world?")
+=AI_ASK("Summarize the key findings from the employee engagement survey:", A1:B5)
 ```
 **Sample Output:**
-"Mount Everest is the tallest mountain in the world."
+"The survey indicates high satisfaction with team collaboration but highlights concerns about workload and career advancement opportunities."
 
-### 2. Text Summarization
-Summarize a block of text provided in a cell.
+### 2. Sales: Quarterly Sales Analysis
+Analyze quarterly sales data and provide insights.
+
+**Sample Input Data (Range `A1:E4`):**
+
+| Region   | Q1   | Q2   | Q3   | Q4   |
+|----------|------|------|------|------|
+| North    | 120  | 135  | 150  | 160  |
+| South    | 100  | 110  | 120  | 130  |
+| Central  | 90   | 95   | 100  | 105  |
+
+```excel
+=AI_ASK("Provide a brief analysis of the quarterly sales performance:", A1:E4)
+```
+**Sample Output:**
+"Sales increased steadily across all regions, with the North region showing the highest growth in Q4."
+
+### 3. Operations: Summarize Incident Report
+Summarize a block of operational incident text provided in a cell.
 
 **Sample Input Text (Cell `A1`):**
-"The Industrial Revolution, which began in Great Britain in the late 18th century, was a period of major technological, socioeconomic, and cultural change. Key innovations included the steam engine, power loom, and advancements in iron production. This era transformed economies from agrarian and handicraft-based to industrial and machine-based, leading to urbanization and new social classes."
+"On April 10th, a system outage affected order processing for 2 hours. The IT team resolved the issue by updating server configurations. No data loss occurred."
 
 ```excel
-=AI_ASK("Summarize the following text in one sentence:", A1)
+=AI_ASK("Summarize the following incident report in one sentence:", A1)
 ```
 **Sample Output:**
-"The Industrial Revolution, starting in 18th-century Britain, marked a significant shift to industrialization driven by key technological innovations like the steam engine, profoundly altering society and the economy."
+"A brief system outage on April 10th was quickly resolved by IT with no data loss."
 
-### 3. Data Analysis (Simple)
-Analyze a small dataset to find the average.
-
-**Sample Input Data (Range `A1:A5`):**
-
-| Sales |
-|-------|
-| 150   |
-| 200   |
-| 175   |
-| 225   |
-| 190   |
-
+### 4. Business Writing: Draft a Customer Follow-up Email
+Generate a professional follow-up email based on a prompt.
 ```excel
-=AI_ASK("What is the average of the sales figures provided?", A1:A5)
+=AI_ASK("Draft a follow-up email to a client after a successful product demo.")
 ```
 **Sample Output:**
-"The average of the provided sales figures is 188."
-
-### 4. Creative Writing
-Generate a short story based on a prompt.
-```excel
-=AI_ASK("Write a short paragraph about a robot discovering music for the first time.")
-```
-**Sample Output:**
-"Unit 734 processed the auditory input—a cascade of harmonized frequencies unlike any factory rhythm or diagnostic beep it had ever known. Its optical sensors widened slightly as the complex patterns resonated through its circuits, evoking an unfamiliar sensation, a simulated echo of... joy? It tilted its head, analyzing the 'music,' a novel dataset that felt unexpectedly significant."
+"Thank you for attending our product demonstration. Please let us know if you have any questions or would like to discuss next steps. We look forward to working with you."
