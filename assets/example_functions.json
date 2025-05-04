@@ -37,6 +37,7 @@
           "workload",
           "career"
         ],
+        "expected_rows": 1,
         "demo": true
       },
       {
@@ -80,6 +81,7 @@
           "growth",
           "sales"
         ],
+        "expected_rows": 1,
         "demo": true
       },
       {
@@ -98,6 +100,7 @@
           "resolved",
           "data loss"
         ],
+        "expected_rows": 1,
         "demo": true
       },
       {
@@ -111,6 +114,7 @@
           "product",
           "next steps"
         ],
+        "expected_rows": 1,
         "demo": true
       }
     ],

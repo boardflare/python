@@ -33,6 +33,7 @@
                 "workload",
                 "career"
             ],
+            "expected_rows": 1,
             "demo": true
         },
         {
@@ -76,6 +77,7 @@
                 "growth",
                 "sales"
             ],
+            "expected_rows": 1,
             "demo": true
         },
         {
@@ -94,6 +96,7 @@
                 "resolved",
                 "data loss"
             ],
+            "expected_rows": 1,
             "demo": true
         },
         {
@@ -107,6 +110,7 @@
                 "product",
                 "next steps"
             ],
+            "expected_rows": 1,
             "demo": true
         },
         {
@@ -118,6 +122,7 @@
                 "max_tokens": 50,
                 "model": "mistral-small-latest"
             },
+            "expected_rows": 1,
             "demo": false
         },
         {
@@ -126,6 +131,7 @@
             "arguments": {
                 "prompt": "Write a one-sentence test response"
             },
+            "expected_rows": 1,
             "demo": false
         },
         {
@@ -135,6 +141,7 @@
                 "prompt": "Write a one-sentence test response",
                 "model": "mistral-small-latest"
             },
+            "expected_rows": 1,
             "demo": false
         }
     ]

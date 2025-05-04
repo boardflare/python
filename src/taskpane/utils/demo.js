@@ -54,6 +54,9 @@ export async function testCasesDemo(func) {
 
             let exampleIdx = 0;
             for (const test of func.test_cases || []) {
+                // Get expected_rows parameter or default to 1 if not specified
+                const expectedRows = test.expected_rows || 1;
+
                 // Insert 'Example N:' and description row above each test case (N is a number)
                 const exampleLabel = `Example ${exampleIdx + 1}:`;
                 const exampleLabelRange = sheet.getRangeByIndexes(startRow, 0, 1, 1);
@@ -165,8 +168,8 @@ export async function testCasesDemo(func) {
                 formulaCell.format.font.bold = false;
                 formulaCell.format.font.color = "#000000";
 
-                // Add two blank rows after the output for spacing before next test case
-                startRow = outputRow + 3;
+                // Add space for the expected output rows plus two empty rows for spacing
+                startRow = outputRow + expectedRows + 2;
             }
 
             // Set the first column (A) width to 24 after all content is written
