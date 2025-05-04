@@ -1,100 +1,132 @@
 {
     "test_cases": [
         {
-            "id": "test_hr_candidate_selection",
-            "description": "HR: Select the best candidate for a financial analyst position based on qualifications and certifications.",
+            "id": "test_expense_categorization",
+            "description": "Finance: Categorize an expense transaction based on its description.",
             "arguments": {
-                "text": "We need a financial analyst with a CPA certification and at least 3 years of experience.",
-                "choices": [
-                    [
-                        "Jane Doe - MBA, 5 years experience"
-                    ],
-                    [
-                        "John Smith - CPA, 3 years experience"
-                    ],
-                    [
-                        "Emily Davis - CFA, 4 years experience"
-                    ]
-                ]
-            },
-            "expected_contains": "John Smith",
-            "demo": true
-        },
-        {
-            "id": "test_finance_expense_category",
-            "description": "Finance: Categorize a business expense for a client dinner at a restaurant.",
-            "arguments": {
-                "text": "Dinner with a client at a high-end restaurant.",
+                "text": "Uber ride from airport to hotel, $45.50",
                 "choices": [
                     [
                         "Travel"
                     ],
                     [
-                        "Meals & Entertainment"
+                        "Food"
                     ],
                     [
-                        "Office Supplies"
+                        "Office"
+                    ],
+                    [
+                        "Software"
                     ]
                 ]
             },
-            "expected_contains": "Meals & Entertainment",
+            "expected_contains": "Travel",
             "demo": true
         },
         {
-            "id": "test_sales_lead_priority",
-            "description": "Sales: Assign a priority to a sales lead based on their potential contract value and decision timeline.",
+            "id": "test_customer_email_sentiment",
+            "description": "Customer Service: Classify the sentiment of a customer email.",
             "arguments": {
-                "text": "Lead: Existing customer, $1M renewal contract, decision in 1 week.",
+                "text": "I've been waiting for a response about my refund for over two weeks now. This is completely unacceptable and I'm considering filing a complaint.",
                 "choices": [
                     [
-                        "High"
+                        "Positive"
                     ],
                     [
-                        "Medium"
+                        "Neutral"
                     ],
                     [
-                        "Low"
+                        "Negative"
                     ]
                 ]
             },
-            "expected_contains": "High",
+            "expected_contains": "Negative",
             "demo": true
         },
         {
-            "id": "test_branding_logo_color",
-            "description": "Branding: Select the most appropriate color for a financial services company's logo to convey trust and stability.",
+            "id": "test_sales_lead_qualification",
+            "description": "Sales: Determine the qualification level of a sales lead based on interaction notes.",
             "arguments": {
-                "text": "Our financial services company wants a logo color that conveys trust and stability.",
+                "text": "Company: Acme Corp (250+ employees). Contact expressed interest in enterprise plan, requested pricing information, and scheduled a demo next week. Budget confirmed. Decision timeline: end of quarter.",
                 "choices": [
                     [
-                        "Red"
+                        "Hot Lead"
                     ],
                     [
-                        "Blue"
+                        "Warm Lead"
                     ],
                     [
-                        "Green"
+                        "Cold Lead"
                     ]
                 ]
             },
-            "expected_contains": "Blue",
+            "expected_contains": "Hot Lead",
             "demo": true
         },
         {
-            "id": "test_marketing_channel_selection",
-            "description": "Marketing: Select the most effective channel for a new product launch targeting young professionals.",
+            "id": "test_support_ticket_priority",
+            "description": "IT Support: Assign a priority level to a support ticket based on its description.",
             "arguments": {
-                "text": "We are launching a new productivity app targeting young professionals (25-35). Which marketing channel is likely to yield the best ROI?",
-                "choices": [["LinkedIn Ads"], ["TikTok Influencers"], ["Email Marketing"], ["Print Magazine Ads"]]
+                "text": "Unable to access CRM system. Getting error 500 when trying to load customer records. This is affecting sales team productivity but they can still use other systems in the meantime.",
+                "choices": [
+                    [
+                        "Critical Priority"
+                    ],
+                    [
+                        "High Priority"
+                    ],
+                    [
+                        "Medium Priority"
+                    ],
+                    [
+                        "Low Priority"
+                    ]
+                ]
             },
-            "expected_contains": "LinkedIn Ads",
+            "expected_contains": "High Priority",
+            "demo": true
+        },
+        {
+            "id": "test_product_feedback_categorization",
+            "description": "Product Management: Categorize customer feedback into feedback types.",
+            "arguments": {
+                "text": "I love the new dashboard layout, but it would be even better if I could customize which widgets appear and their positions on the screen.",
+                "choices": [
+                    [
+                        "Bug Report"
+                    ],
+                    [
+                        "Feature Request"
+                    ],
+                    [
+                        "UI Feedback"
+                    ],
+                    [
+                        "Performance Issue"
+                    ],
+                    [
+                        "Compliment"
+                    ]
+                ]
+            },
+            "expected_contains": "Feature Request",
+            "demo": true
+        },
+        {
+            "id": "test_document_classification",
+            "description": "Legal: Classify a legal document based on its content.",
+            "arguments": {
+                "text": "This agreement outlines the terms under which Company A will provide consulting services to Company B, including scope of work, deliverables, timeline, and compensation structure.",
+                "choices": "NDA, Service Agreement, Employment Contract, License Agreement"
+            },
+            "expected_contains": "Service Agreement",
             "demo": true
         },
         {
             "id": "test_empty_choices",
             "description": "Validation: Return an error if the choices input cell is empty.",
             "arguments": {
-                "text": "Pick something.",
+                "text": "Classify this.",
                 "choices": ""
             },
             "expected_contains": "Error: No valid choices provided.",
@@ -113,30 +145,16 @@
             "demo": false
         },
         {
-            "id": "test_product_feature_prioritization",
-            "description": "Product Management: Prioritize which feature to develop next based on user feedback themes provided in a range.",
+            "id": "test_model_parameter",
+            "description": "Test that model parameter works correctly.",
             "arguments": {
-                "text": [
-                    [
-                        "User feedback strongly requests improved reporting features and faster data export."
-                    ]
-                ],
-                "choices": [["Develop New Dashboard Widgets"], ["Implement Faster Data Export"], ["Add Social Media Integration"], ["Redesign User Interface"]]
-            },
-            "expected_contains": "Implement Faster Data Export",
-            "demo": true
-        },
-        {
-            "id": "test_technology_language_selection",
-            "description": "Technology: Select the most suitable programming language for machine learning projects.",
-            "arguments": {
-                "text": "Which programming language is best for machine learning?",
-                "choices": "Python, R, Java, C++",
+                "text": "Please classify this simple email: 'Thanks for your help yesterday!'",
+                "choices": "Positive, Neutral, Negative",
                 "temperature": 0.0,
                 "model": "mistral-small-latest"
             },
-            "expected_contains": "Python",
-            "demo": true
+            "expected_contains": "Positive",
+            "demo": false
         }
     ]
 }

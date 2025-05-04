@@ -118,149 +118,129 @@
   },
   {
     "name": "ai_choice",
-    "description": "Uses AI to select the most appropriate value from a list of choices based on the input text.",
-    "code": "import requests\nimport json\nimport re\n\ndef ai_choice(text, choices, temperature=0.0, model='mistral-small-latest', max_tokens=500):\n    \"\"\"\n    Uses AI to select the most appropriate value from a list of choices based on the input text.\n    \n    Args:\n        text (str or list): The text to analyze (string or 2D list with a single cell)\n        choices (str or list): String with comma-separated choices or 2D list of choices\n        temperature (float, optional): Controls response creativity (0-2). Default is 0\n        model (str, optional): ID of the model to use\n        max_tokens (int, optional): Maximum tokens for response generation. Default is 500\n        \n    Returns:\n        str: The selected choice from the provided options\n    \"\"\"\n    # Handle 2D list input for text (flatten to a single string)\n    if isinstance(text, list):\n        if len(text) > 0 and len(text[0]) > 0:\n            text = str(text[0][0])\n        else:\n            return \"Error: Empty input text.\"\n    \n    # Process choices input\n    choices_list = []\n    if isinstance(choices, str):\n        # Parse comma-separated string of choices\n        choices_list = [choice.strip() for choice in choices.split(',') if choice.strip()]\n    elif isinstance(choices, list):\n        # Extract choices from 2D list\n        for row in choices:\n            if row and len(row) > 0:\n                choices_list.append(str(row[0]))\n    \n    # Validate choices\n    if not choices_list:\n        return \"Error: No valid choices provided.\"\n    \n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Construct a specific prompt for selecting a choice\n    choices_formatted = \", \".join([f\"\\\"{choice}\\\"\" for choice in choices_list])\n    choice_prompt = f\"Select the most appropriate option from these choices: {choices_formatted}\\n\\nInput text: {text}\"\n    \n    # Add instruction for structured output\n    choice_prompt += \"\\n\\nReturn ONLY a JSON object with a 'selected_choice' field containing the exact choice you selected from the provided options. \"\n    choice_prompt += \"The selected choice must match exactly one of the provided options. \"\n    choice_prompt += \"Do not include any explanatory text, just the JSON object.\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": choice_prompt}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens,\n        \"response_format\": {\n            \"type\": \"json_object\",\n        }\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    try:\n        # Make the API request\n        response = requests.post(api_url, headers=headers, json=payload)\n        response.raise_for_status()\n        \n        # Extract the response content\n        response_data = response.json()\n        content = response_data[\"choices\"][0][\"message\"][\"content\"]\n        # print(content)\n        \n        # Extract the selected choice from the response\n        try:\n            # Try to parse the content as JSON directly\n            choice_data = json.loads(content)\n            \n            # Get the selected choice from the JSON object\n            if isinstance(choice_data, dict) and \"selected_choice\" in choice_data:\n                selected = choice_data[\"selected_choice\"]\n                \n                # Verify the selected choice is in the original choices list\n                if selected in choices_list:\n                    return selected\n                else:\n                    # Try case-insensitive matching as fallback\n                    for choice in choices_list:\n                        if choice.lower() == selected.lower():\n                            return choice\n                    return \"Error: AI selected a choice that wasn't in the original options.\"\n            else:\n                return \"Error: Unable to parse response. Expected a JSON object with 'selected_choice' field.\"\n                \n        except (json.JSONDecodeError, ValueError):\n            # If JSON parsing fails, return an error message\n            return \"Error: Unable to determine choice. The AI response wasn't in the expected format.\"\n             \n    except requests.exceptions.RequestException as e:\n        # Handle API request errors\n        return f\"Error: API request failed. {str(e)}\"",
+    "description": "Uses AI to select the most appropriate choice from a list of options based on the given context.",
+    "code": "import requests\nimport json\n\ndef ai_choice(text, choices, temperature=0.2, model='mistral-small-latest'):\n    \"\"\"\n    Uses AI to select the most appropriate choice from a list of options based on the given context.\n    \n    Args:\n        text (str or list): The context, question, or scenario used for decision-making\n        choices (str or list): A string with comma-separated options or a 2D list of options\n        temperature (float, optional): Controls randomness in the selection (0-1). Default is 0.2\n        model (str, optional): ID of the AI model to use\n        \n    Returns:\n        str: The selected choice from the options provided\n    \"\"\"\n    # Input validation\n    if not text or (isinstance(text, list) and (len(text) == 0 or len(text[0]) == 0)):\n        return \"Error: Empty input text.\"\n    \n    if not choices or (isinstance(choices, list) and (len(choices) == 0 or len(choices[0]) == 0)):\n        return \"Error: No valid choices provided.\"\n    \n    # Normalize text to string if it's a 2D list\n    if isinstance(text, list):\n        text_str = \"\\n\".join([item[0] if isinstance(item[0], str) else str(item[0]) for item in text if len(item) > 0])\n    else:\n        text_str = text\n    \n    # Normalize choices to a list of strings\n    if isinstance(choices, list):\n        choices_list = [item[0] if isinstance(item, list) and len(item) > 0 else str(item) for item in choices]\n    else:\n        choices_list = [choice.strip() for choice in str(choices).split(',')]\n    \n    # Construct the AI prompt\n    prompt = f\"\"\"Based on the following context, select the single most appropriate option from the choices provided.\n    \nContext:\n{text_str}\n\nChoices:\n{json.dumps(choices_list, indent=2)}\n\nProvide ONLY your selected choice without explanation or additional text. Return the exact text of the selected choice.\"\"\"\n\n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    # Sign up for your free Mistral API account at https://console.mistral.ai/ then replace the following:\n    \n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": prompt}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": 200\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    try:\n        # Make the API request\n        response = requests.post(api_url, headers=headers, json=payload)\n        response.raise_for_status()\n        \n        # Extract and return the response content\n        response_data = response.json()\n        content = response_data[\"choices\"][0][\"message\"][\"content\"].strip()\n        \n        # Validate that the response is one of the choices\n        for choice in choices_list:\n            if choice in content or content in choice:\n                return choice\n        \n        # If no exact match, return the AI's response (which may be a paraphrase)\n        return content\n        \n    except Exception as e:\n        return f\"Error: Failed to get AI recommendation. {str(e)}\"",
     "test_cases": [
       {
-        "id": "test_hr_candidate_selection",
-        "description": "HR: Select the best candidate for a financial analyst position based on qualifications and certifications.",
+        "id": "test_expense_categorization",
+        "description": "Finance: Categorize an expense transaction based on its description.",
         "arguments": {
-          "text": "We need a financial analyst with a CPA certification and at least 3 years of experience.",
-          "choices": [
-            [
-              "Jane Doe - MBA, 5 years experience"
-            ],
-            [
-              "John Smith - CPA, 3 years experience"
-            ],
-            [
-              "Emily Davis - CFA, 4 years experience"
-            ]
-          ]
-        },
-        "expected_contains": "John Smith",
-        "demo": true
-      },
-      {
-        "id": "test_finance_expense_category",
-        "description": "Finance: Categorize a business expense for a client dinner at a restaurant.",
-        "arguments": {
-          "text": "Dinner with a client at a high-end restaurant.",
+          "text": "Uber ride from airport to hotel, $45.50",
           "choices": [
             [
               "Travel"
             ],
             [
-              "Meals & Entertainment"
+              "Food"
             ],
             [
-              "Office Supplies"
+              "Office"
+            ],
+            [
+              "Software"
             ]
           ]
         },
-        "expected_contains": "Meals & Entertainment",
+        "expected_contains": "Travel",
         "demo": true
       },
       {
-        "id": "test_sales_lead_priority",
-        "description": "Sales: Assign a priority to a sales lead based on their potential contract value and decision timeline.",
+        "id": "test_customer_email_sentiment",
+        "description": "Customer Service: Classify the sentiment of a customer email.",
         "arguments": {
-          "text": "Lead: Existing customer, $1M renewal contract, decision in 1 week.",
+          "text": "I've been waiting for a response about my refund for over two weeks now. This is completely unacceptable and I'm considering filing a complaint.",
           "choices": [
             [
-              "High"
+              "Positive"
             ],
             [
-              "Medium"
+              "Neutral"
             ],
             [
-              "Low"
+              "Negative"
             ]
           ]
         },
-        "expected_contains": "High",
+        "expected_contains": "Negative",
         "demo": true
       },
       {
-        "id": "test_branding_logo_color",
-        "description": "Branding: Select the most appropriate color for a financial services company's logo to convey trust and stability.",
+        "id": "test_sales_lead_qualification",
+        "description": "Sales: Determine the qualification level of a sales lead based on interaction notes.",
         "arguments": {
-          "text": "Our financial services company wants a logo color that conveys trust and stability.",
+          "text": "Company: Acme Corp (250+ employees). Contact expressed interest in enterprise plan, requested pricing information, and scheduled a demo next week. Budget confirmed. Decision timeline: end of quarter.",
           "choices": [
             [
-              "Red"
+              "Hot Lead"
             ],
             [
-              "Blue"
+              "Warm Lead"
             ],
             [
-              "Green"
+              "Cold Lead"
             ]
           ]
         },
-        "expected_contains": "Blue",
+        "expected_contains": "Hot Lead",
         "demo": true
       },
       {
-        "id": "test_marketing_channel_selection",
-        "description": "Marketing: Select the most effective channel for a new product launch targeting young professionals.",
+        "id": "test_support_ticket_priority",
+        "description": "IT Support: Assign a priority level to a support ticket based on its description.",
         "arguments": {
-          "text": "We are launching a new productivity app targeting young professionals (25-35). Which marketing channel is likely to yield the best ROI?",
+          "text": "Unable to access CRM system. Getting error 500 when trying to load customer records. This is affecting sales team productivity but they can still use other systems in the meantime.",
           "choices": [
             [
-              "LinkedIn Ads"
+              "Critical Priority"
             ],
             [
-              "TikTok Influencers"
+              "High Priority"
             ],
             [
-              "Email Marketing"
+              "Medium Priority"
             ],
             [
-              "Print Magazine Ads"
+              "Low Priority"
             ]
           ]
         },
-        "expected_contains": "LinkedIn Ads",
+        "expected_contains": "High Priority",
         "demo": true
       },
       {
-        "id": "test_product_feature_prioritization",
-        "description": "Product Management: Prioritize which feature to develop next based on user feedback themes provided in a range.",
+        "id": "test_product_feedback_categorization",
+        "description": "Product Management: Categorize customer feedback into feedback types.",
         "arguments": {
-          "text": [
-            [
-              "User feedback strongly requests improved reporting features and faster data export."
-            ]
-          ],
+          "text": "I love the new dashboard layout, but it would be even better if I could customize which widgets appear and their positions on the screen.",
           "choices": [
             [
-              "Develop New Dashboard Widgets"
+              "Bug Report"
             ],
             [
-              "Implement Faster Data Export"
+              "Feature Request"
             ],
             [
-              "Add Social Media Integration"
+              "UI Feedback"
             ],
             [
-              "Redesign User Interface"
+              "Performance Issue"
+            ],
+            [
+              "Compliment"
             ]
           ]
         },
-        "expected_contains": "Implement Faster Data Export",
+        "expected_contains": "Feature Request",
         "demo": true
       },
       {
-        "id": "test_technology_language_selection",
-        "description": "Technology: Select the most suitable programming language for machine learning projects.",
+        "id": "test_document_classification",
+        "description": "Legal: Classify a legal document based on its content.",
         "arguments": {
-          "text": "Which programming language is best for machine learning?",
-          "choices": "Python, R, Java, C++",
-          "temperature": 0.0,
-          "model": "mistral-small-latest"
+          "text": "This agreement outlines the terms under which Company A will provide consulting services to Company B, including scope of work, deliverables, timeline, and compensation structure.",
+          "choices": "NDA, Service Agreement, Employment Contract, License Agreement"
         },
-        "expected_contains": "Python",
+        "expected_contains": "Service Agreement",
         "demo": true
       }
     ],

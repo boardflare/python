@@ -1,65 +1,61 @@
 import requests
 import json
-import re
 
-def ai_choice(text, choices, temperature=0.0, model='mistral-small-latest', max_tokens=500):
+def ai_choice(text, choices, temperature=0.2, model='mistral-small-latest'):
     """
-    Uses AI to select the most appropriate value from a list of choices based on the input text.
+    Uses AI to select the most appropriate choice from a list of options based on the given context.
     
     Args:
-        text (str or list): The text to analyze (string or 2D list with a single cell)
-        choices (str or list): String with comma-separated choices or 2D list of choices
-        temperature (float, optional): Controls response creativity (0-2). Default is 0
-        model (str, optional): ID of the model to use
-        max_tokens (int, optional): Maximum tokens for response generation. Default is 500
+        text (str or list): The context, question, or scenario used for decision-making
+        choices (str or list): A string with comma-separated options or a 2D list of options
+        temperature (float, optional): Controls randomness in the selection (0-1). Default is 0.2
+        model (str, optional): ID of the AI model to use
         
     Returns:
-        str: The selected choice from the provided options
+        str: The selected choice from the options provided
     """
-    # Handle 2D list input for text (flatten to a single string)
-    if isinstance(text, list):
-        if len(text) > 0 and len(text[0]) > 0:
-            text = str(text[0][0])
-        else:
-            return "Error: Empty input text."
+    # Input validation
+    if not text or (isinstance(text, list) and (len(text) == 0 or len(text[0]) == 0)):
+        return "Error: Empty input text."
     
-    # Process choices input
-    choices_list = []
-    if isinstance(choices, str):
-        # Parse comma-separated string of choices
-        choices_list = [choice.strip() for choice in choices.split(',') if choice.strip()]
-    elif isinstance(choices, list):
-        # Extract choices from 2D list
-        for row in choices:
-            if row and len(row) > 0:
-                choices_list.append(str(row[0]))
-    
-    # Validate choices
-    if not choices_list:
+    if not choices or (isinstance(choices, list) and (len(choices) == 0 or len(choices[0]) == 0)):
         return "Error: No valid choices provided."
     
+    # Normalize text to string if it's a 2D list
+    if isinstance(text, list):
+        text_str = "\n".join([item[0] if isinstance(item[0], str) else str(item[0]) for item in text if len(item) > 0])
+    else:
+        text_str = text
+    
+    # Normalize choices to a list of strings
+    if isinstance(choices, list):
+        choices_list = [item[0] if isinstance(item, list) and len(item) > 0 else str(item) for item in choices]
+    else:
+        choices_list = [choice.strip() for choice in str(choices).split(',')]
+    
+    # Construct the AI prompt
+    prompt = f"""Based on the following context, select the single most appropriate option from the choices provided.
+    
+Context:
+{text_str}
+
+Choices:
+{json.dumps(choices_list, indent=2)}
+
+Provide ONLY your selected choice without explanation or additional text. Return the exact text of the selected choice."""
+
     # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.
+    # Sign up for your free Mistral API account at https://console.mistral.ai/ then replace the following:
+    
     api_url = "https://llm.boardflare.com" # replace with "https://api.mistral.ai/v1/chat/completions"
     api_key = "cV4a59t1wjYGs...." # replace with your Mistral API key
     
-    # Construct a specific prompt for selecting a choice
-    choices_formatted = ", ".join([f"\"{choice}\"" for choice in choices_list])
-    choice_prompt = f"Select the most appropriate option from these choices: {choices_formatted}\n\nInput text: {text}"
-    
-    # Add instruction for structured output
-    choice_prompt += "\n\nReturn ONLY a JSON object with a 'selected_choice' field containing the exact choice you selected from the provided options. "
-    choice_prompt += "The selected choice must match exactly one of the provided options. "
-    choice_prompt += "Do not include any explanatory text, just the JSON object."
-    
     # Prepare the API request payload
     payload = {
-        "messages": [{"role": "user", "content": choice_prompt}],
+        "messages": [{"role": "user", "content": prompt}],
         "temperature": temperature,
         "model": model,
-        "max_tokens": max_tokens,
-        "response_format": {
-            "type": "json_object",
-        }
+        "max_tokens": 200
     }
     
     headers = {
@@ -73,36 +69,17 @@ def ai_choice(text, choices, temperature=0.0, model='mistral-small-latest', max_
         response = requests.post(api_url, headers=headers, json=payload)
         response.raise_for_status()
         
-        # Extract the response content
+        # Extract and return the response content
         response_data = response.json()
-        content = response_data["choices"][0]["message"]["content"]
-        # print(content)
+        content = response_data["choices"][0]["message"]["content"].strip()
         
-        # Extract the selected choice from the response
-        try:
-            # Try to parse the content as JSON directly
-            choice_data = json.loads(content)
-            
-            # Get the selected choice from the JSON object
-            if isinstance(choice_data, dict) and "selected_choice" in choice_data:
-                selected = choice_data["selected_choice"]
-                
-                # Verify the selected choice is in the original choices list
-                if selected in choices_list:
-                    return selected
-                else:
-                    # Try case-insensitive matching as fallback
-                    for choice in choices_list:
-                        if choice.lower() == selected.lower():
-                            return choice
-                    return "Error: AI selected a choice that wasn't in the original options."
-            else:
-                return "Error: Unable to parse response. Expected a JSON object with 'selected_choice' field."
-                
-        except (json.JSONDecodeError, ValueError):
-            # If JSON parsing fails, return an error message
-            return "Error: Unable to determine choice. The AI response wasn't in the expected format."
-             
-    except requests.exceptions.RequestException as e:
-        # Handle API request errors
-        return f"Error: API request failed. {str(e)}"
+        # Validate that the response is one of the choices
+        for choice in choices_list:
+            if choice in content or content in choice:
+                return choice
+        
+        # If no exact match, return the AI's response (which may be a paraphrase)
+        return content
+        
+    except Exception as e:
+        return f"Error: Failed to get AI recommendation. {str(e)}"
