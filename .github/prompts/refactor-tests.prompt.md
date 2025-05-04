@@ -5,32 +5,49 @@ Goal: Convert the Python function and its tests in the provided folder to use a 
 Context: You will be given a folder containing:
 *   `{function_name}.py`: The Python function implementation.
 *   `test_{function_name}.py`: The existing pytest test file.
-*   (Optional) `{function_name}.md`: Documentation file.
+*   `{function_name}.md`: Documentation file.
 
 Instructions for Test Case Descriptions:
 - All test case descriptions in `test_cases.json` should be written from the perspective of an Excel user. Use Excel terminology (e.g., refer to 2D lists as "ranges" instead of "2D lists"). Describe scenarios as an Excel user would encounter them in the Excel interface.
 
 Steps:
 
-1.  Analyze `test_{function_name}.py`:
-    *   Identify each distinct test scenario currently implemented in separate `test_...` functions.
-    *   Note the specific input arguments used for the `{function_name}` function in each scenario.
-    *   Note any specific assertions made beyond basic type/existence checks (e.g., checking if the result contains a specific substring).
+1.  **Start with the documentation file**:
+    *   Begin by examining `{function_name}.md` to identify all examples shown in the documentation.
+    *   These examples must be your first priority and will form the basis for all test cases marked with `"demo": true`.
+    *   For each example in the documentation, note:
+        * The exact input arguments used (prompt, data ranges, optional parameters)
+        * The example context and business scenario
+        * The expected output format
 
-2.  Create `test_cases.json`:
+2.  **Then analyze the existing test file**:
+    *   After extracting all documentation examples, examine `test_{function_name}.py` to identify:
+        * Any additional test scenarios not covered by documentation examples
+        * Specific assertions made beyond basic type/existence checks
+        * Edge cases and error handling tests
+    *   These will form the basis for test cases marked with `"demo": false`.
+
+3.  Create `test_cases.json`:
     *   In the same folder, create a new file named `test_cases.json`.
     *   Structure the file with a top-level key `"test_cases"` containing a JSON list `[]`.
-    *   For each test scenario identified in step 1, add a JSON object to the `"test_cases"` list with the following keys:
-        *   `"id"`: A unique string identifier for the test case (e.g., `"test_basic_usage"`, `"test_with_optional_param"`).
-        *   `"description"`: A brief string describing the test case, written from the perspective of an Excel user and using Excel terminology (e.g., "When using a range as input...").
-        *   `"arguments"`: A JSON object containing the keyword arguments to pass to the `{function_name}` function for this scenario. Ensure data structures like lists are correctly represented in JSON.
-        *   `"demo"`: A boolean or string value indicating whether this test case should be used as a demo/example in documentation or UI. This key is required for every test case.
-        *   (Optional) `"expected_contains"`: If the original test asserted the result must contain a specific string, add this key with the expected string value.
-        *   (Optional) `"expected_contains_any"`: If the original test asserted the result must contain *any* of a list of strings, add this key with a JSON list of those strings.
-        *   (Optional) `"expected_contains_any_lower"`: Similar to `expected_contains_any`, but performs a case-insensitive check on the result.
-    *   Important: Ensure the first object in the `"test_cases"` list represents the primary, most representative example for the function.
+    *   **First add the documentation examples**:
+        *   Add a JSON object for each example in the documentation file with:
+            *   `"id"`: A unique string identifier matching the example (e.g., `"test_hr_engagement_summary"`).
+            *   `"description"`: Use the exact scenario description from the documentation.
+            *   `"arguments"`: Include all arguments exactly as shown in the documentation.
+            *   `"demo": true`: Mark all documentation examples as demo cases.
+            *   `"expected_rows"`: Estimate how many rows the output will need.
+            *   (Optional) `"expected_contains_any"`: Include relevant keywords for validation if needed.
+        *   The order of these test cases should match the order of examples in the documentation.
+    *   **Then add test-only cases**:
+        *   For each additional test scenario identified in the test file but not in documentation:
+            *   `"id"`: A unique string identifier for the test case.
+            *   `"description"`: A brief description from an Excel user's perspective.
+            *   `"arguments"`: The arguments needed for this test case.
+            *   `"demo": false`: Mark as non-demo cases.
+            *   Add any relevant validation keys (`expected_contains`, etc.).
 
-3.  Refactor `test_{function_name}.py`:
+4.  Refactor `test_{function_name}.py`:
     *   Keep necessary imports (`pytest`, `json`, `pathlib`, the function itself).
     *   Remove all the original individual `test_...` functions.
     *   Add a helper function `load_test_cases()`, which should:
@@ -41,26 +58,25 @@ Steps:
     *   Add a single parameterized test function, e.g., `test_{function_name}_parametrized(test_case)`, decorated with `@pytest.mark.parametrize("test_case", load_test_cases())`:
         *   Extract the `arguments` dictionary from the `test_case` parameter.
         *   Call the `{function_name}` function using `**arguments`.
-        *   Implement basic assertions (e.g., `assert isinstance(result, expected_type)`, `assert result is not None`). Adjust the expected type based on the function's return signature. For string results, usually assert `len(result) > 0`.
-        *   Implement conditional assertions based on the presence of `"expected_contains"`, `"expected_contains_any"`, or `"expected_contains_any_lower"` keys in the `test_case` dictionary, mirroring the logic from the original tests.
+        *   Implement basic assertions (e.g., `assert isinstance(result, expected_type)`, `assert result is not None`). 
+        *   Implement conditional assertions based on the presence of validation keys in the `test_case` dictionary.
 
-Note: If a documentation file (e.g., `{function_name}.md`) is present, ensure that the examples shown in the documentation align with the test cases in `test_cases.json` where `"demo"` is set. The documentation examples should match the demo test cases for consistency and use Excel terminology in their descriptions.
+5.  Verification:
+    *   Run the refactored tests using the command:
+        ```powershell
+        python -m pytest path\to\folder\test_{function_name}.py
+        ```
+    *   Ensure all tests pass.
+    *   Run the build script to verify documentation alignment:
+        ```powershell
+        python examples\build_examples.py
+        ```
+    *   **Critical check**: Verify that the examples generated by the build script exactly match the examples in the documentation file. The demo test cases must be identical to the documentation examples.
 
 Reference Examples:
 See the following files for examples of the expected finished product:
 - [ai_ask.py](../../examples/files/text/ai_ask/ai_ask.py)
 - [test_ai_ask.py](../../examples/files/text/ai_ask/test_ai_ask.py)
 - [test_cases.json](../../examples/files/text/ai_ask/test_cases.json)
-
-5.  Verification (As per Development Process):
-    *   Run the refactored tests using the command:
-        ```cmd
-        .venv\Scripts\python.exe -m pytest path\to\folder\test_{function_name}.py
-        ```
-    *   Ensure all tests pass.
-    *   Finally, run the build script:
-        ```cmd
-        .venv\Scripts\python.exe examples\build_examples.py
-        ```
 
 Deliverable: The updated `test_{function_name}.py` file and the new `test_cases.json` file for the provided function folder.
