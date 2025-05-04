@@ -114,23 +114,36 @@ export async function testCasesDemo(func) {
 
                 // Write the formula two rows below the last argument row
                 const formulaRow = lastArgRow + 2;
-                // Build formula string
-                const formulaArgs = argNames.map((arg, idx) => {
-                    const colIdx = idx * 2;
-                    const val = test.arguments[arg];
-                    if (Array.isArray(val) && Array.isArray(val[0])) {
-                        // Range reference
-                        const colLetter = String.fromCharCode(65 + colIdx);
-                        const start = `${colLetter}${startRow + 2}`;
-                        const end = `${String.fromCharCode(65 + colIdx + val[0].length - 1)}${startRow + 1 + val.length}`;
-                        return `${colLetter}${startRow + 2}:${String.fromCharCode(65 + colIdx + val[0].length - 1)}${startRow + 1 + val.length}`;
-                    } else {
-                        // Single cell reference
-                        const colLetter = String.fromCharCode(65 + colIdx);
-                        return `${colLetter}${startRow + 2}`;
+                // Build formula string using full parameter list
+                const paramList = func.parameters || [];
+                // Find the last parameter index that is provided in the test case
+                let lastProvidedIdx = -1;
+                paramList.forEach((param, idx) => {
+                    if (argNames.includes(param.name)) {
+                        lastProvidedIdx = idx;
                     }
                 });
-                const formula = `=${func.name.toUpperCase()}(${formulaArgs.join(', ')})`;
+                let formula = `=${func.name.toUpperCase()}(`;
+                for (let i = 0; i <= lastProvidedIdx; i++) {
+                    if (i > 0) formula += ', ';
+                    const param = paramList[i];
+                    const testArgIdx = argNames.indexOf(param.name);
+                    if (testArgIdx !== -1) {
+                        // Argument provided in test case
+                        const colIdx = testArgIdx * 2;
+                        const val = test.arguments[param.name];
+                        if (Array.isArray(val) && Array.isArray(val[0])) {
+                            // Range reference
+                            const colLetter = String.fromCharCode(65 + colIdx);
+                            formula += `${colLetter}${startRow + 2}:${String.fromCharCode(65 + colIdx + val[0].length - 1)}${startRow + 1 + val.length}`;
+                        } else {
+                            // Single cell reference
+                            const colLetter = String.fromCharCode(65 + colIdx);
+                            formula += `${colLetter}${startRow + 2}`;
+                        }
+                    } // else, just leave as ', ' for missing parameter
+                }
+                formula += ')';
                 const formulaCell = sheet.getRangeByIndexes(formulaRow, 0, 1, 1);
                 formulaCell.values = [[formula]];
                 formulaCell.format.font.bold = true;
