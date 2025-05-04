@@ -39,3 +39,7 @@ def test_ai_ask_parametrized(test_case):
         result_lower = result.lower()
         assert any(substring.lower() in result_lower for substring in expected_any_lower), \
             f"Test ID: {test_case.get('id')} - Result '{result}' (lowercase) did not contain any of {expected_any_lower}"
+
+if __name__ == "__main__":
+    import pytest
+    pytest.main([__file__])

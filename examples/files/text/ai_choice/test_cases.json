@@ -1,0 +1,142 @@
+{
+    "test_cases": [
+        {
+            "id": "test_hr_candidate_selection",
+            "description": "HR: Select the best candidate for a financial analyst position based on qualifications and certifications.",
+            "arguments": {
+                "text": "We need a financial analyst with a CPA certification and at least 3 years of experience.",
+                "choices": [
+                    [
+                        "Jane Doe - MBA, 5 years experience"
+                    ],
+                    [
+                        "John Smith - CPA, 3 years experience"
+                    ],
+                    [
+                        "Emily Davis - CFA, 4 years experience"
+                    ]
+                ]
+            },
+            "expected_contains": "John Smith",
+            "demo": true
+        },
+        {
+            "id": "test_finance_expense_category",
+            "description": "Finance: Categorize a business expense for a client dinner at a restaurant.",
+            "arguments": {
+                "text": "Dinner with a client at a high-end restaurant.",
+                "choices": [
+                    [
+                        "Travel"
+                    ],
+                    [
+                        "Meals & Entertainment"
+                    ],
+                    [
+                        "Office Supplies"
+                    ]
+                ]
+            },
+            "expected_contains": "Meals & Entertainment",
+            "demo": true
+        },
+        {
+            "id": "test_sales_lead_priority",
+            "description": "Sales: Assign a priority to a sales lead based on their potential contract value and decision timeline.",
+            "arguments": {
+                "text": "Lead: Existing customer, $1M renewal contract, decision in 1 week.",
+                "choices": [
+                    [
+                        "High"
+                    ],
+                    [
+                        "Medium"
+                    ],
+                    [
+                        "Low"
+                    ]
+                ]
+            },
+            "expected_contains": "High",
+            "demo": true
+        },
+        {
+            "id": "test_branding_logo_color",
+            "description": "Branding: Select the most appropriate color for a financial services company's logo to convey trust and stability.",
+            "arguments": {
+                "text": "Our financial services company wants a logo color that conveys trust and stability.",
+                "choices": [
+                    [
+                        "Red"
+                    ],
+                    [
+                        "Blue"
+                    ],
+                    [
+                        "Green"
+                    ]
+                ]
+            },
+            "expected_contains": "Blue",
+            "demo": true
+        },
+        {
+            "id": "test_marketing_channel_selection",
+            "description": "Marketing: Select the most effective channel for a new product launch targeting young professionals.",
+            "arguments": {
+                "text": "We are launching a new productivity app targeting young professionals (25-35). Which marketing channel is likely to yield the best ROI?",
+                "choices": [["LinkedIn Ads"], ["TikTok Influencers"], ["Email Marketing"], ["Print Magazine Ads"]]
+            },
+            "expected_contains": "LinkedIn Ads",
+            "demo": true
+        },
+        {
+            "id": "test_empty_choices",
+            "description": "Validation: Return an error if the choices input cell is empty.",
+            "arguments": {
+                "text": "Pick something.",
+                "choices": ""
+            },
+            "expected_contains": "Error: No valid choices provided.",
+            "demo": false
+        },
+        {
+            "id": "test_empty_text_2d",
+            "description": "Validation: Return an error if the input text cell is empty.",
+            "arguments": {
+                "text": [
+                    []
+                ],
+                "choices": "Yes, No"
+            },
+            "expected_contains": "Error: Empty input text.",
+            "demo": false
+        },
+        {
+            "id": "test_product_feature_prioritization",
+            "description": "Product Management: Prioritize which feature to develop next based on user feedback themes provided in a range.",
+            "arguments": {
+                "text": [
+                    [
+                        "User feedback strongly requests improved reporting features and faster data export."
+                    ]
+                ],
+                "choices": [["Develop New Dashboard Widgets"], ["Implement Faster Data Export"], ["Add Social Media Integration"], ["Redesign User Interface"]]
+            },
+            "expected_contains": "Implement Faster Data Export",
+            "demo": true
+        },
+        {
+            "id": "test_technology_language_selection",
+            "description": "Technology: Select the most suitable programming language for machine learning projects.",
+            "arguments": {
+                "text": "Which programming language is best for machine learning?",
+                "choices": "Python, R, Java, C++",
+                "temperature": 0.0,
+                "model": "mistral-small-latest"
+            },
+            "expected_contains": "Python",
+            "demo": true
+        }
+    ]
+}

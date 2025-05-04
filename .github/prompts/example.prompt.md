@@ -65,33 +65,34 @@ files
         └── my_function.md        # Documentation for the function in Markdown format.
 ```
 
-When you are passed a folder as context, make sure to read all the files in the folder (`.py`, `test_*.py`, `.json`, `.md`).
-
 ### File Purposes:
--   **`my_function.py`**: Contains the main Python function implementation. [See example](../../examples/files/text/ai_ask/ai_ask.py)
+-   `my_function.py`: Contains the main Python function implementation. [See example](../../examples/files/text/ai_ask/ai_ask.py)
     -   Imports should be at the top.
     -   The main function should accept 2D lists or scalars as input.
     -   Return either a 2D list or scalar as output.
     -   Handle input validation gracefully.
     -   Document the function with detailed docstrings.
-    -   For API-based functions, use placeholders for API keys that need to be replaced by the user. **Note:** Environment variables cannot be set in the Pyodide environment; secrets must be hard-coded (using placeholders for users to replace) or passed as function arguments.
+    -   For API-based functions, use placeholders for API keys that need to be replaced by the user. Note: Environment variables cannot be set in the Pyodide environment; secrets must be hard-coded (using placeholders for users to replace) or passed as function arguments.
     -   If your function requires packages beyond the standard library or those built into Pyodide, you must install them using `micropip`. Since the code runs asynchronously, use `await micropip.install(['package1', 'package2'])` at the top of your function. `micropip` is pre-imported. Only pure Python packages or those with OS-independent wheels on PyPI are supported.
-    -   **Testing for package availability:** Before using an external package, test whether it is available in the Pyodide distribution by attempting to import it using the `pyodide_install-packages` tool. If this tool throws an error, then the package is not available in the standard library and must be installed using `micropip`. If the package is available, you do not need to install it with `micropip`.
--   **`test_my_function.py`**: Contains unit tests using `pytest`. [See example](../../examples/files/text/ai_ask/test_ai_ask.py)
+    -   Testing for package availability: Before using an external package, test whether it is available in the Pyodide distribution by attempting to import it using the `pyodide_install-packages` tool. If this tool throws an error, then the package is not available in the standard library and must be installed using `micropip`. If the package is available, you do not need to install it with `micropip`.
+-   `test_my_function.py`: Contains unit tests using `pytest`. [See example](../../examples/files/text/ai_ask/test_ai_ask.py)
     -   Should load test cases from `test_cases.json`.
     -   Include tests for both success and failure paths.
     -   All examples given in the documentation should ideally be covered by tests.
     -   Test with various parameter combinations.
     -   Do not mock any external API calls; tests should run against live APIs if applicable (using placeholder or test keys if necessary).
--   **`test_cases.json`**: Stores structured test data used by `test_my_function.py`. [See example](../../examples/files/text/ai_ask/test_cases.json)
+-   `test_cases.json`: Stores structured test data used by `test_my_function.py`. [See example](../../examples/files/text/ai_ask/test_cases.json)
     -   Allows for easy addition and management of multiple test scenarios.
     -   Each test case can include an ID, description, input arguments, and expected outcomes or checks.
     -   Includes a `"demo": true/false` flag. Cases marked `true` should correspond to examples in the `my_function.md` documentation and represent typical usage. Cases marked `false` are for internal testing (e.g., edge cases, parameter variations, error handling) and should not be included in the user-facing documentation.
--   **`my_function.md`**: Provides user-facing documentation. [See example](../../examples/files/text/ai_ask/ai_ask.md)
+    -   All test case descriptions must be written from the perspective of an Excel user, using Excel terminology (e.g., refer to 2D lists as "ranges").
+    -   Demo test cases and documentation examples must reflect realistic business use cases. Examples should be as detailed, clear, and practical as possible, showing how the function can be applied to solve real-world business problems in Excel. Avoid trivial or artificial examples. Use meaningful data, realistic scenarios, and provide context for the example's purpose.
+-   `my_function.md`: Provides user-facing documentation. [See example](../../examples/files/text/ai_ask/ai_ask.md)
     -   Include an overview section.
     -   Detail function usage with argument descriptions in a table.
-    -   Provide clear examples, mirroring the `test_cases.json` entries where `"demo": true`.
+    -   Provide clear, detailed examples, mirroring the `test_cases.json` entries where `"demo": true`. These examples must be realistic business use cases, not trivial or artificial data.
     -   Include formatted tables for parameters and return values.
+    -   Each example should clearly explain the business context and expected outcome, so users understand how to apply the function in their own work.
 
 ## Other Guidelines:
 
@@ -100,15 +101,15 @@ When you are passed a folder as context, make sure to read all the files in the 
 
 ## Development Process:
 
-1.  **Edit Function:** Modify the `my_function.py` file with the required changes.
-2.  **Update Tests:** Adjust `test_my_function.py` and/or `test_cases.json` to reflect the changes and add new test cases if necessary. Ensure `demo` flags are set appropriately.
-3.  **Run Tests:** Execute the tests from the workspace root using the following command structure (replace `category` and `my_function`). Assumes the virtual environment is active:
+1.  Edit Function: Modify the `my_function.py` file with the required changes.
+2.  Update Tests: Adjust `test_my_function.py` and/or `test_cases.json` to reflect the changes and add new test cases if necessary. Ensure `demo` flags are set appropriately.
+3.  Run Tests: Execute the tests from the workspace root using the following command structure (replace `category` and `my_function`). Assumes the virtual environment is active:
     ```powershell
     python -m pytest examples/files/category/my_function/test_my_function.py
     ```
-4.  **Ensure Tests Pass:** Verify that all tests pass successfully. Debug and repeat steps 1-3 if necessary.
-5.  **Update Documentation:** If the function's behavior, arguments, or examples have changed, update the `my_function.md` file accordingly, ensuring examples match `test_cases.json` entries where `demo: true`.
-6.  **Build Examples:** Run the `build_examples.py` script from the workspace root to update the consolidated example file:
+4.  Ensure Tests Pass: Verify that all tests pass successfully. Debug and repeat steps 1-3 if necessary.
+5.  Update Documentation: If the function's behavior, arguments, or examples have changed, update the `my_function.md` file accordingly, ensuring examples match `test_cases.json` entries where `demo: true` and that all examples are realistic business use cases.
+6.  Build Examples: Run the `build_examples.py` script from the workspace root to update the consolidated example file:
     ```powershell
     python examples/build_examples.py
     ```

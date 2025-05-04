@@ -1,59 +1,32 @@
 import pytest
 import json
+from pathlib import Path
 from ai_choice import ai_choice
 
-def test_ai_choice_basic():
-    """Test basic functionality with string choices"""
-    result = ai_choice("We are very satisfied with the product quality and customer service.", 
-                       "Positive, Neutral, Negative")
-    assert isinstance(result, str)
-    assert result in ["Positive", "Neutral", "Negative"]
+# Helper function to load test cases from JSON
+def load_test_cases():
+    """Loads test cases from the test_cases.json file."""
+    test_case_path = Path(__file__).parent / "test_cases.json"
+    with open(test_case_path, 'r') as f:
+        data = json.load(f)
+    return [pytest.param(case, id=case.get("id", f"test_case_{i}"))
+            for i, case in enumerate(data.get("test_cases", []))]
 
-def test_ai_choice_with_list():
-    """Test with list of choices"""
-    choices = [["Sales"], ["Marketing"], ["Engineering"], ["Finance"], ["HR"]]
-    result = ai_choice("I have extensive experience in software development, including frontend and backend systems.", 
-                      choices)
-    assert isinstance(result, str)
-    assert result in ["Sales", "Marketing", "Engineering", "Finance", "HR"]
+# Parameterized test function
+@pytest.mark.parametrize("test_case", load_test_cases())
+def test_ai_choice_parametrized(test_case):
+    arguments = test_case.get("arguments", {})
+    result = ai_choice(**arguments)
 
-def test_ai_choice_parameters():
-    """Test that optional parameters work correctly"""
-    result = ai_choice(
-        "Our quarterly revenue exceeded expectations by 12%, but expenses also increased by 7%.",
-        "Good News, Bad News, Mixed Results",
-        temperature=0.2,
-        max_tokens=100
-    )
-    
-    assert isinstance(result, str)
-    assert result in ["Good News", "Bad News", "Mixed Results"]
+    # Basic assertions
+    assert isinstance(result, str), f"Test ID: {test_case.get('id')} - Expected result to be a string, but got {type(result)}"
+    assert len(result) > 0, f"Test ID: {test_case.get('id')} - Expected result string to be non-empty"
 
-def test_ai_choice_error_handling():
-    """Test error handling for invalid inputs"""
-    # Empty text
-    result_empty_text = ai_choice([], "Option A, Option B")
-    assert "Error" in result_empty_text
-    
-    # Empty choices
-    result_empty_choices = ai_choice("Some input text", "")
-    assert "Error" in result_empty_choices
-    
-    # Empty list choices
-    result_empty_list = ai_choice("Some input text", [[]])
-    assert "Error" in result_empty_list
+    # Conditional assertion for expected_contains
+    if "expected_contains" in test_case:
+        expected = test_case["expected_contains"]
+        assert expected in result, f"Test ID: {test_case.get('id')} - Result '{result}' did not contain expected substring '{expected}'"
 
-def test_ai_choice_with_complex_input():
-    """Test with complex text input"""
-    complex_text = """
-    The mobile application consistently crashes when users attempt to upload images larger than 5MB.
-    This issue has been reported by multiple users across different device types, including both
-    iOS and Android platforms. The development team has identified a memory management issue
-    that occurs during the image compression process.
-    """
-    
-    categories = "Bug Report, Feature Request, Performance Issue, Security Concern, Documentation Error"
-    
-    result = ai_choice(complex_text, categories)
-    assert isinstance(result, str)
-    assert result in [cat.strip() for cat in categories.split(",")]
+if __name__ == "__main__":
+    import pytest
+    pytest.main([__file__])
