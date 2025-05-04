@@ -250,7 +250,53 @@
     "name": "ai_extract",
     "description": "Uses AI to extract specific types of information from text.",
     "code": "import requests\nimport json\n\ndef ai_extract(text, extract_type, temperature=0.0, model='mistral-small-latest', max_tokens=1000):\n    \"\"\"\n    Uses AI to extract specific types of information from text.\n    \n    Args:\n        text (str or list): The text to analyze (string or 2D list with a single cell)\n        extract_type (str): Type of information to extract (e.g., 'emails', 'dates', 'action items')\n        temperature (float, optional): Controls response creativity (0-2). Default is 0\n        model (str, optional): ID of the model to use\n        max_tokens (int, optional): Maximum tokens for response generation. Default is 1000\n        \n    Returns:\n        list: 2D list representing the extracted data as a single column\n    \"\"\"\n    # Handle 2D list input (flatten to a single string)\n    if isinstance(text, list):\n        if len(text) > 0 and len(text[0]) > 0:\n            text = str(text[0][0])\n        else:\n            return [[\"Error: Empty input text.\"]]\n    \n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Construct a specific prompt for data extraction\n    extract_prompt = f\"Extract the following from the text: {extract_type}\\n\\nText: {text}\"\n    \n    # Add instruction for structured output\n    extract_prompt += \"\\n\\nReturn ONLY a JSON array of items you extracted. \"\n    extract_prompt += \"Each item should be a single value representing one extracted piece of information. \"\n    extract_prompt += \"Do not include any explanatory text, just the JSON array.\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": extract_prompt}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens,\n        \"response_format\": {\n            \"type\": \"json_object\",\n        }\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    try:\n        # Make the API request\n        response = requests.post(api_url, headers=headers, json=payload)\n        response.raise_for_status()\n        \n        # Extract the response content\n        response_data = response.json()\n        content = response_data[\"choices\"][0][\"message\"][\"content\"]\n        # print(content)\n        \n        # Extract the JSON array from the response\n        try:\n            # Try to parse the content as JSON directly\n            extracted_data = json.loads(content)\n            \n            # If extracted_data is a dictionary with an \"items\" or \"extracted\" key, use that\n            if isinstance(extracted_data, dict):\n                if \"items\" in extracted_data:\n                    extracted_data = extracted_data[\"items\"]\n                elif \"extracted\" in extracted_data:\n                    extracted_data = extracted_data[\"extracted\"]\n                elif \"results\" in extracted_data:\n                    extracted_data = extracted_data[\"results\"]\n            \n            # Convert the list to a 2D list (single column)\n            if isinstance(extracted_data, list):\n                return [[item] for item in extracted_data]\n            else:\n                return [[\"Error: Unable to parse response. Expected a list.\"]]\n                \n        except (json.JSONDecodeError, ValueError):\n            # If JSON parsing fails, return an error message as a single cell\n            return [[\"Error: Unable to extract data. The AI response wasn't in the expected format.\"]]\n             \n    except requests.exceptions.RequestException as e:\n        # Handle API request errors\n        return [[\"Error: API request failed.\", str(e)]]",
-    "test_cases": [],
+    "test_cases": [
+      {
+        "id": "test_client_names",
+        "description": "Business Development: Extract client names from meeting notes.",
+        "arguments": {
+          "text": "During today's annual review, we discussed progress with Acme Corporation, Global Enterprises, and TechSolutions Inc. All three clients reported satisfaction with our services.",
+          "extract_type": "client names"
+        },
+        "demo": true
+      },
+      {
+        "id": "test_financial_metrics",
+        "description": "Financial Analysis: Extract key financial metrics from a quarterly report.",
+        "arguments": {
+          "text": "Q1 results exceeded expectations with revenue of $2.4M, an EBITDA margin of 18.5%, and customer acquisition costs decreasing by 12%. Cash reserves stand at $5.2M and our runway extends to 24 months.",
+          "extract_type": "financial metrics"
+        },
+        "demo": true
+      },
+      {
+        "id": "test_action_items",
+        "description": "Project Management: Extract action items assigned in an email.",
+        "arguments": {
+          "text": "Hi team, Following our strategic planning session: 1) Mark needs to finalize the budget by Friday, 2) Sarah will contact vendors for new quotes, 3) Development team must provide timeline estimates by next Wednesday, and 4) Everyone should review the new marketing materials.",
+          "extract_type": "action items"
+        },
+        "demo": true
+      },
+      {
+        "id": "test_contact_information",
+        "description": "Contact Management: Extract contact details from scanned business card text.",
+        "arguments": {
+          "text": "John Smith\nSenior Project Manager\nInnovative Solutions Inc.\njsmith@innovativesolutions.com\n+1 (555) 123-4567\n123 Business Avenue, Suite 400\nSan Francisco, CA 94107",
+          "extract_type": "contact information"
+        },
+        "demo": true
+      },
+      {
+        "id": "test_dates_deadlines",
+        "description": "Project Planning: Extract important dates and deadlines from a project update.",
+        "arguments": {
+          "text": "The initial design phase will be completed by May 15, 2025. The stakeholder review is scheduled for May 20-22, with development starting June 1. Testing will run through September 15, with final delivery expected by October 3, 2025.",
+          "extract_type": "dates and deadlines"
+        },
+        "demo": true
+      }
+    ],
     "fileId": "3"
   },
   {

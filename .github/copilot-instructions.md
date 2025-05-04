@@ -3,3 +3,5 @@ You are working in an Excel add-in project using React and Tailwind CSS for the 
 Use bold and italics in markdown sparingly.
 
 Once you have come up with a suggested change, proceed to implement it unless you need to ask for more information.
+
+All terminal commands should be in Windows PowerShell format.

@@ -1,64 +1,44 @@
 import pytest
 import json
+from pathlib import Path
 from ai_extract import ai_extract
 
-def test_ai_extract_basic():
-    """Test basic functionality for extracting dates"""
-    result = ai_extract("The meeting is scheduled for March 15, 2025.", "dates")
-    assert isinstance(result, list)
-    assert len(result) > 0
-    assert all(isinstance(item, list) and len(item) == 1 for item in result)
-
-def test_ai_extract_with_complex_data():
-    """Test with complex text containing multiple data points"""
-    test_data = "Please contact our new clients: Jane Smith (jane.smith@example.com, 555-123-4567) and John Doe (john.doe@example.org, 555-987-6543)."
+# Helper function to load test cases from JSON
+def load_test_cases():
+    """Loads test cases from the test_cases.json file."""
+    test_case_path = Path(__file__).parent / "test_cases.json"
+    with open(test_case_path, 'r') as f:
+        data = json.load(f)
     
-    result = ai_extract(test_data, "contact information")
-    assert isinstance(result, list)
-    assert len(result) > 0
-    assert all(isinstance(item, list) and len(item) == 1 for item in result)
+    # Wrap each case in pytest.param, using 'id' for test identification
+    return [pytest.param(case, id=case.get("id", f"test_case_{i}")) 
+            for i, case in enumerate(data.get("test_cases", []))]
 
-def test_ai_extract_from_2d_list():
-    """Test extraction from a 2D list input"""
-    test_data = [["Project milestones: 1) Requirements gathering (complete by May 1), 2) Design phase (May 2-15), 3) Development (May 16-June 20)"]]
+# Parameterized test function
+@pytest.mark.parametrize("test_case", load_test_cases())
+def test_ai_extract_parametrized(test_case):
+    """Runs parameterized tests for the ai_extract function."""
+    arguments = test_case.get("arguments", {})
     
-    result = ai_extract(test_data, "project milestones")
-    assert isinstance(result, list)
-    assert len(result) > 0
-    assert all(isinstance(item, list) and len(item) == 1 for item in result)
-
-def test_ai_extract_empty_input():
-    """Test handling of empty input"""
-    result = ai_extract([], "dates")
-    assert result == [["Error: Empty input text."]]
-
-def test_ai_extract_parameters():
-    """Test that all optional parameters work correctly"""
-    result = ai_extract(
-        "The quarterly board meeting is scheduled for March 18, 2025 at 2:00 PM.", 
-        "dates and times",
-        temperature=0.2, 
-        max_tokens=500,
-        model="mistral-small-latest"
-    )
-    
-    assert isinstance(result, list)
-    assert len(result) > 0
-    assert all(isinstance(item, list) and len(item) == 1 for item in result)
-
-def test_ai_extract_different_types():
-    """Test extraction of different types of information"""
-    text = """Project milestones: 1) Requirements gathering (complete by May 1), 
-    2) Design phase (May 2-15), 3) Development (May 16-June 20), 
-    4) Testing (June 21-30), 5) Deployment (July 1). 
-    Contact John (john@example.com) or Sarah (sarah@example.com) for questions."""
-    
-    # Test extracting milestones
-    milestones = ai_extract(text, "project milestones")
-    assert isinstance(milestones, list)
-    assert len(milestones) > 0
-    
-    # Test extracting emails
-    emails = ai_extract(text, "email addresses")
-    assert isinstance(emails, list)
-    assert len(emails) > 0
+    try:
+        # Call the function with the arguments from the test case
+        result = ai_extract(**arguments)
+        
+        # Basic assertions
+        assert isinstance(result, list), f"Test ID: {test_case.get('id')} - Expected result to be a list, but got {type(result)}"
+        assert len(result) > 0, f"Test ID: {test_case.get('id')} - Expected result list to be non-empty"
+        assert all(isinstance(item, list) for item in result), f"Test ID: {test_case.get('id')} - Expected all items in result to be lists"
+        
+        # Check for expected error message in case of empty input
+        if "expected_contains" in test_case:
+            expected_content = test_case["expected_contains"]
+            assert any(expected_content in item[0] for item in result), \
+                f"Test ID: {test_case.get('id')} - Result '{result}' did not contain '{expected_content}'"
+        
+        # For non-error cases, check that we have valid data
+        elif "expected_contains" not in test_case:
+            assert all(len(item) == 1 for item in result), \
+                f"Test ID: {test_case.get('id')} - Expected all items in result to have length 1, but got {result}"
+                
+    except Exception as e:
+        pytest.fail(f"Test ID: {test_case.get('id')} - Exception occurred: {str(e)}")

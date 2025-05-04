@@ -1,0 +1,71 @@
+{
+    "test_cases": [
+        {
+            "id": "test_client_names",
+            "description": "Business Development: Extract client names from meeting notes.",
+            "arguments": {
+                "text": "During today's annual review, we discussed progress with Acme Corporation, Global Enterprises, and TechSolutions Inc. All three clients reported satisfaction with our services.",
+                "extract_type": "client names"
+            },
+            "demo": true
+        },
+        {
+            "id": "test_financial_metrics",
+            "description": "Financial Analysis: Extract key financial metrics from a quarterly report.",
+            "arguments": {
+                "text": "Q1 results exceeded expectations with revenue of $2.4M, an EBITDA margin of 18.5%, and customer acquisition costs decreasing by 12%. Cash reserves stand at $5.2M and our runway extends to 24 months.",
+                "extract_type": "financial metrics"
+            },
+            "demo": true
+        },
+        {
+            "id": "test_action_items",
+            "description": "Project Management: Extract action items assigned in an email.",
+            "arguments": {
+                "text": "Hi team, Following our strategic planning session: 1) Mark needs to finalize the budget by Friday, 2) Sarah will contact vendors for new quotes, 3) Development team must provide timeline estimates by next Wednesday, and 4) Everyone should review the new marketing materials.",
+                "extract_type": "action items"
+            },
+            "demo": true
+        },
+        {
+            "id": "test_contact_information",
+            "description": "Contact Management: Extract contact details from scanned business card text.",
+            "arguments": {
+                "text": "John Smith\nSenior Project Manager\nInnovative Solutions Inc.\njsmith@innovativesolutions.com\n+1 (555) 123-4567\n123 Business Avenue, Suite 400\nSan Francisco, CA 94107",
+                "extract_type": "contact information"
+            },
+            "demo": true
+        },
+        {
+            "id": "test_dates_deadlines",
+            "description": "Project Planning: Extract important dates and deadlines from a project update.",
+            "arguments": {
+                "text": "The initial design phase will be completed by May 15, 2025. The stakeholder review is scheduled for May 20-22, with development starting June 1. Testing will run through September 15, with final delivery expected by October 3, 2025.",
+                "extract_type": "dates and deadlines"
+            },
+            "demo": true
+        },
+        {
+            "id": "test_empty_input",
+            "description": "Error Handling: Extract information from an empty range.",
+            "arguments": {
+                "text": [],
+                "extract_type": "dates"
+            },
+            "expected_contains": "Error: Empty input text.",
+            "demo": false
+        },
+        {
+            "id": "test_all_parameters",
+            "description": "Advanced Usage: Extract dates with custom temperature, token limit, and model settings.",
+            "arguments": {
+                "text": "The quarterly board meeting is scheduled for March 18, 2025 at 2:00 PM in Conference Room A. The agenda includes Q1 financial review, marketing strategy update, and new product launch timeline.",
+                "extract_type": "meeting details",
+                "temperature": 0.2,
+                "max_tokens": 500,
+                "model": "mistral-small-latest"
+            },
+            "demo": false
+        }
+    ]
+}
