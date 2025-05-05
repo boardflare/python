@@ -56,7 +56,7 @@ Each function is stored in its own folder. This folder contains all necessary fi
 Example structure for a function named `my_function`:
 
 ```
-files
+examples
 └── category
     └── my_function
         ├── my_function.py        # The main Python function code.
@@ -67,7 +67,7 @@ files
 
 ## Python Implementation File (`my_function.py`)
 
-Contains the main Python function implementation. [See example](../../examples/files/text/ai_ask/ai_ask.py)
+Contains the main Python function implementation. [See example](../../examples/text/ai_ask/ai_ask.py)
 
 -   Imports should be at the top.
 -   The main function should accept 2D lists or scalars as input.
@@ -80,7 +80,7 @@ Contains the main Python function implementation. [See example](../../examples/f
 
 ## Test File (`test_my_function.py`)
 
-Contains unit tests using `pytest`. [See example](../../examples/files/text/ai_ask/test_ai_ask.py)
+Contains unit tests using `pytest`. [See example](../../examples/text/ai_ask/test_ai_ask.py)
 
 -   Should load test cases from `test_cases.json`.
 -   Include tests for both success and failure paths.
@@ -96,7 +96,7 @@ Contains unit tests using `pytest`. [See example](../../examples/files/text/ai_a
 
 ## Test Cases File (`test_cases.json`)
 
-Stores structured test data used by `test_my_function.py`. [See example](../../examples/files/text/ai_ask/test_cases.json)
+Stores structured test data used by `test_my_function.py`. [See example](../../examples/text/ai_ask/test_cases.json)
 
 -   Allows for easy addition and management of multiple test scenarios.
 -   Each test case can include an ID, description, input arguments, and expected outcomes or checks.
@@ -118,7 +118,7 @@ Stores structured test data used by `test_my_function.py`. [See example](../../e
 
 ## Documentation File (`my_function.md`)
 
-Provides user-facing documentation. [See example](../../examples/files/text/ai_ask/ai_ask.md)
+Provides user-facing documentation. [See example](../../examples/text/ai_ask/ai_ask.md)
 
 -   Include an overview section.
 -   Detail function usage with argument descriptions in a table.
@@ -137,7 +137,7 @@ Provides user-facing documentation. [See example](../../examples/files/text/ai_a
 2.  Update Tests: Adjust `test_my_function.py` and/or `test_cases.json` to reflect the changes and add new test cases if necessary. Ensure `demo` flags are set appropriately.
 3.  Run Tests: Execute the tests from the workspace root using the following command structure (replace `category` and `my_function`). Assumes the virtual environment is active:
     ```powershell
-    python -m pytest examples/files/category/my_function/test_my_function.py
+    python -m pytest examples/text/category/my_function/test_my_function.py
     ```
 4.  Ensure Tests Pass: Verify that all tests pass successfully. Debug and repeat steps 1-3 if necessary.
 5.  Update Documentation: If the function's behavior, arguments, or examples have changed, update the `my_function.md` file accordingly, ensuring examples match `test_cases.json` entries where `demo: true` and that all examples are realistic business use cases.

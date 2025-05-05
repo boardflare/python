@@ -83,18 +83,19 @@ def get_function_metadata(file_path):
 
 def main():
     # Root directory for function files
-    root_dir = Path(__file__).parent / "files"
-
+    # Changed to look directly in the text subdirectory
+    text_dir = Path(__file__).parent / "text"
+    
     # List to store function metadata
     functions = []
 
     # Index for fileId
     index = 1
 
-    # Recursively find all .py files that are not test files
-    for py_file in root_dir.rglob("*.py"):
-        # Skip __init__.py files and test files
-        if py_file.name.startswith("test_") or py_file.name == "__init__.py":
+    # Find all .py files in the text directory that are not test files
+    for py_file in text_dir.rglob("*.py"):
+        # Skip __init__.py files, test files, and the build script itself
+        if py_file.name.startswith("test_") or py_file.name == "__init__.py" or py_file.name == "build_examples.py":
             continue
             
         file_path = str(py_file)

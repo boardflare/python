@@ -72,7 +72,7 @@ Steps:
 5.  Verification:
     *   Run the refactored tests using the command:
         ```powershell
-        python -m pytest examples\files\text\{function_name}\test_{function_name}.py -v
+        python -m pytest examples\text\{function_name}\test_{function_name}.py -v
         ```
     *   Ensure all tests pass.
     *   Run the build script to verify documentation alignment:
@@ -85,8 +85,6 @@ Steps:
 
 Reference Examples:
 See the following files for examples of the expected finished product:
-- [ai_ask.py](../../examples/files/text/ai_ask/ai_ask.py)
-- [test_ai_ask.py](../../examples/files/text/ai_ask/test_ai_ask.py)
-- [test_cases.json](../../examples/files/text/ai_ask/test_cases.json)
-
-Deliverable: The updated `test_{function_name}.py` file and the new `test_cases.json` file for the provided function folder.
+- [ai_ask.py](../../examples/text/ai_ask/ai_ask.py)
+- [test_ai_ask.py](../../examples/text/ai_ask/test_ai_ask.py)
+- [test_cases.json](../../examples/text/ai_ask/test_cases.json)
