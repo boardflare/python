@@ -118,7 +118,8 @@
         "demo": true
       }
     ],
-    "fileId": "1"
+    "fileId": "1",
+    "link": "https://www.boardflare.com/resources/python-functions/text/ai_ask"
   },
   {
     "name": "ai_choice",
@@ -254,7 +255,8 @@
         "demo": true
       }
     ],
-    "fileId": "2"
+    "fileId": "2",
+    "link": "https://www.boardflare.com/resources/python-functions/text/ai_choice"
   },
   {
     "name": "ai_extract",
@@ -312,7 +314,8 @@
         "demo": true
       }
     ],
-    "fileId": "3"
+    "fileId": "3",
+    "link": "https://www.boardflare.com/resources/python-functions/text/ai_extract"
   },
   {
     "name": "ai_fill",
@@ -506,7 +509,8 @@
         "demo": true
       }
     ],
-    "fileId": "4"
+    "fileId": "4",
+    "link": "https://www.boardflare.com/resources/python-functions/text/ai_fill"
   },
   {
     "name": "ai_format",
@@ -603,7 +607,8 @@
         "demo": true
       }
     ],
-    "fileId": "5"
+    "fileId": "5",
+    "link": "https://www.boardflare.com/resources/python-functions/text/ai_format"
   },
   {
     "name": "ai_list",
@@ -667,7 +672,8 @@
         "demo": true
       }
     ],
-    "fileId": "6"
+    "fileId": "6",
+    "link": "https://www.boardflare.com/resources/python-functions/text/ai_list"
   },
   {
     "name": "ai_table",
@@ -769,7 +775,8 @@
         "demo": true
       }
     ],
-    "fileId": "7"
+    "fileId": "7",
+    "link": "https://www.boardflare.com/resources/python-functions/text/ai_table"
   },
   {
     "name": "text_distance",
@@ -896,7 +903,8 @@
         "demo": true
       }
     ],
-    "fileId": "8"
+    "fileId": "8",
+    "link": "https://www.boardflare.com/resources/python-functions/text/text_distance"
   },
   {
     "name": "vader_sentiment",
@@ -940,7 +948,8 @@
         "demo": true
       }
     ],
-    "fileId": "9"
+    "fileId": "9",
+    "link": "https://www.boardflare.com/resources/python-functions/text/vader_sentiment"
   },
   {
     "name": "web_content",
@@ -962,6 +971,7 @@
         "demo": true
       }
     ],
-    "fileId": "10"
+    "fileId": "10",
+    "link": "https://www.boardflare.com/resources/python-functions/text/web_content"
   }
 ]

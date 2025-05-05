@@ -48,24 +48,17 @@ const AddFunctions = ({ loadFunctions }) => {
                 throw new Error("Function code missing");
             }
 
-            // Parse the function code for all metadata except test_cases
-            const funcToSave = await parsePython(func.code);
+            // Merge all properties from func and parsed Python metadata
+            const funcToSave = { ...func, ...(await parsePython(func.code)) };
 
             // Save workbook first and use returned function with noName set
-            const savedFunction = await saveWorkbookOnly(funcToSave);
+            let savedFunction = await saveWorkbookOnly(funcToSave);
 
-            // Create execExample if noName is true
-            if (savedFunction.noName && func.excelExample) {
-                savedFunction.excelExample = func.excelExample.replace(
-                    new RegExp(`=${func.name.toUpperCase()}\\((.*?)\\)`, 'i'),
-                    (match, args) => `=${getExecEnv()}("${func.name}", ${args})`
-                );
-            } else {
-                savedFunction.test_cases = func.test_cases;
+            // Only add demo sheet if noName is not true
+            if (!savedFunction.noName) {
+                await testCasesDemo(funcToSave);
             }
 
-            // Use testCasesDemo instead of singleDemo
-            await testCasesDemo(savedFunction);
             await loadFunctions();
 
             await pyLogs({
@@ -108,7 +101,7 @@ const AddFunctions = ({ loadFunctions }) => {
                                 <tr key={func.name}>
                                     <td className="py-1 px-2 border-b w-full">
                                         <div className="relative group w-full">
-                                            <span className="font-mono cursor-help text-left block w-full">={func.name.toUpperCase()}</span>
+                                            <a href={func.link} target="_blank" rel="noopener noreferrer" className="font-mono cursor-help text-left block w-full text-blue-500 hover:underline">={func.name.toUpperCase()}</a>
                                             <div className="absolute left-0 top-full mt-2 w-64 p-2 bg-blue-50 text-black text-sm rounded shadow-lg hidden group-hover:block z-10">
                                                 {func.description}
                                             </div>
