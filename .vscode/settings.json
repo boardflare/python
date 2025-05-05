@@ -3,6 +3,6 @@
       "javascript",
       "javascriptreact",
       "typescript"
-    ]
-  }
-  
+    ],
+    "python.defaultInterpreterPath": "c:\\Users\\brent\\Code\\python\\.venv\\Scripts\\python.exe"
+}

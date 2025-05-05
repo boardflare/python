@@ -1,0 +1,173 @@
+{
+    "test_cases": [
+        {
+            "id": "test_smartphone_features",
+            "description": "Generate a table listing features of different smartphones for product comparison",
+            "arguments": {
+                "prompt": "Create a table listing the features of different smartphones including brand, model, camera quality, battery life."
+            },
+            "expected_contains_any": [
+                "Brand",
+                "Model",
+                "Camera",
+                "Battery"
+            ],
+            "expected_rows": 5,
+            "demo": true
+        },
+        {
+            "id": "test_tourist_destinations_with_header",
+            "description": "Create a reference table of top tourist destinations using a predefined header format",
+            "arguments": {
+                "prompt": "Generate a table of top 5 tourist destinations.",
+                "header": [
+                    [
+                        "Country",
+                        "Popular Attractions",
+                        "Best Time to Visit",
+                        "Average Cost"
+                    ]
+                ]
+            },
+            "expected_contains_any": [
+                "Country",
+                "Popular Attractions",
+                "Best Time to Visit",
+                "Average Cost"
+            ],
+            "expected_rows": 6,
+            "demo": true
+        },
+        {
+            "id": "test_sales_summary_with_source",
+            "description": "Summarize sales data by product category for quarterly business review",
+            "arguments": {
+                "prompt": "Summarize the sales data by product category.",
+                "source": [
+                    [
+                        "Product",
+                        "Category",
+                        "Sales Amount"
+                    ],
+                    [
+                        "Laptop",
+                        "Tech",
+                        1200
+                    ],
+                    [
+                        "Mouse",
+                        "Tech",
+                        25
+                    ],
+                    [
+                        "Keyboard",
+                        "Tech",
+                        75
+                    ],
+                    [
+                        "T-Shirt",
+                        "Apparel",
+                        20
+                    ],
+                    [
+                        "Jeans",
+                        "Apparel",
+                        50
+                    ],
+                    [
+                        "Laptop",
+                        "Tech",
+                        1350
+                    ],
+                    [
+                        "Hoodie",
+                        "Apparel",
+                        45
+                    ]
+                ]
+            },
+            "expected_contains_any": [
+                "Category",
+                "Tech",
+                "Apparel"
+            ],
+            "expected_rows": 3,
+            "demo": true
+        },
+        {
+            "id": "test_basic_functionality",
+            "description": "Create a basic table of top destinations for a travel planning worksheet",
+            "arguments": {
+                "prompt": "Generate a table of top 3 tourist destinations."
+            },
+            "expected_rows": 4,
+            "demo": false
+        },
+        {
+            "id": "test_with_custom_header",
+            "description": "Create a travel destinations table using a specific header format for a client presentation",
+            "arguments": {
+                "prompt": "Generate a table of tourist destinations.",
+                "header": [
+                    [
+                        "Country",
+                        "Attractions",
+                        "Season",
+                        "Cost"
+                    ]
+                ]
+            },
+            "expected_rows": 10,
+            "demo": false
+        },
+        {
+            "id": "test_with_source_data",
+            "description": "Convert economic data into a more readable table format for financial analysis",
+            "arguments": {
+                "prompt": "Summarize economic data.",
+                "source": [
+                    [
+                        "Country",
+                        "GDP"
+                    ],
+                    [
+                        "USA",
+                        "$21 trillion"
+                    ],
+                    [
+                        "China",
+                        "$14 trillion"
+                    ]
+                ]
+            },
+            "expected_rows": 3,
+            "demo": false
+        },
+        {
+            "id": "test_with_custom_parameters",
+            "description": "Create a detailed programming languages comparison table with specific formatting parameters",
+            "arguments": {
+                "prompt": "Generate a table of programming languages and their features.",
+                "temperature": 0.2,
+                "model": "mistral-small-latest",
+                "max_tokens": 1000
+            },
+            "expected_rows": 15,
+            "demo": false
+        },
+        {
+            "id": "test_error_handling",
+            "description": "Test how the function handles invalid inputs in an Excel worksheet",
+            "arguments": {
+                "prompt": "This should fail",
+                "model": "non-existent-model"
+            },
+            "expected_contains_any": [
+                "Error"
+            ],
+            "expected_rows": 1,
+            "demo": false,
+            "should_error": true
+        }
+    ]
+}

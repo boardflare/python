@@ -1,0 +1,13 @@
+{
+    "servers": {
+        "mcp-pyodide": {
+            "command": "mcp-pyodide",
+            "args": [],
+            "env": {
+                "PYODIDE_CACHE_DIR": "./cache",
+                "PYODIDE_DATA_DIR": "./data",
+                "PORT": 3020
+            }
+        }
+    }
+}

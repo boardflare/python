@@ -3,7 +3,6 @@ import { MonacoEditor } from "./MonacoEditor";
 import { DISPLAY_CODE } from "../utils/constants";
 import LLM from "./LLM";
 import { SignInButton } from "./Auth";
-import pdfUrl from "../../../assets/Python-v1.3.5.pdf";
 import { pyLogs } from "../utils/logs";
 import { abortController } from "../../functions/utils/queue";
 
@@ -99,11 +98,6 @@ const HelpTab = ({ handleTabSelect, setGeneratedCode, setSelectedFunction, loadF
                     <div className="py-1">
                         <p><span className="font-bold">Step 2:</span> Save it to create a custom function.</p>
                         <div className="bg-white"><code>=HELLO("Annie")</code> <br />
-                            {isWebPlatform && (
-                                <p className="mt-1 text-yellow-600">
-                                    Autocomplete is not available in Excel for Web, but typing in the function name will work.
-                                </p>
-                            )}
                             {selectedFunction?.noName && (
                                 <p className="mt-1 text-yellow-600">
                                     Named functions are not supported on this version of Excel.  Use <code>=BOARDFLARE.EXEC("hello", "Annie")</code> instead.
@@ -111,7 +105,7 @@ const HelpTab = ({ handleTabSelect, setGeneratedCode, setSelectedFunction, loadF
                             )}
                         </div>
                         <p className="mt-1">
-                            Check out the <a href={pdfUrl} target="_blank" rel="noopener" className="text-blue-500 underline" onClick={() => pyLogs({ ref: "slideshow_clicked" })}>slideshow</a> and <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>.
+                            Check out the slideshow and <a href="https://www.boardflare.com/apps/excel/python" target="_blank" rel="noopener" className="text-blue-500 underline">documentation</a>.
                         </p>
                     </div>
                 </div>

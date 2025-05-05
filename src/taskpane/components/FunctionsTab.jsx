@@ -142,7 +142,7 @@ const FunctionsTab = ({
             <div className="mt-2">
                 {/* Replace SectionHeader with direct styles */}
                 <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center">
-                    Workbook Functions
+                    Workbook
                 </div>
                 {workbookFunctions.length > 0 && (
                     <WorkbookFunctionTable functions={workbookFunctions} />

@@ -1,0 +1,172 @@
+{
+    "test_cases": [
+        {
+            "id": "test_customer_contact_info",
+            "description": "Standardizing customer contact information into a professional format.",
+            "arguments": {
+                "text": "John Smith / Marketing Director - Acme Inc / jsmith@acme.co - 555.123.4567",
+                "format_instruction": "standard business contact card format"
+            },
+            "expected_contains_any": [
+                "John Smith",
+                "Marketing Director",
+                "Acme Inc",
+                "jsmith@acme.co",
+                "555"
+            ],
+            "expected_rows": 1,
+            "demo": true
+        },
+        {
+            "id": "test_financial_figures",
+            "description": "Standardizing financial figures for reporting.",
+            "arguments": {
+                "text": "Revenue: 2.4m; COGS: 1.1m; Gross Margin: 1.3m (54%); Opex: 950k; EBITDA: 350k",
+                "format_instruction": "professional financial statement format with proper currency notation"
+            },
+            "expected_contains_any": [
+                "Revenue",
+                "2,400,000",
+                "Cost of Goods Sold",
+                "1,100,000",
+                "Gross Margin",
+                "Operating Expenses",
+                "EBITDA"
+            ],
+            "expected_rows": 1,
+            "demo": true
+        },
+        {
+            "id": "test_customer_feedback",
+            "description": "Converting free-form customer feedback into a structured review format.",
+            "arguments": {
+                "text": "Used the product for 3 weeks. Good quality but shipping took forever. Customer service was helpful though. Probably would buy again if they fix delivery issues.",
+                "format_instruction": "structured product review with ratings"
+            },
+            "expected_contains_any": [
+                "Rating",
+                "Product Quality",
+                "Shipping",
+                "Customer Service",
+                "Would Purchase Again"
+            ],
+            "expected_rows": 1,
+            "demo": true
+        },
+        {
+            "id": "test_address_data",
+            "description": "Standardizing inconsistent address entries into a standard format.",
+            "arguments": {
+                "text": "123 business park dr suite 12, austin tx 78701",
+                "format_instruction": "standard US business address format"
+            },
+            "expected_contains_any": [
+                "123 Business Park Drive",
+                "Suite 12",
+                "Austin",
+                "TX",
+                "78701"
+            ],
+            "expected_rows": 1,
+            "demo": true
+        },
+        {
+            "id": "test_meeting_notes",
+            "description": "Converting meeting notes to a structured action item list.",
+            "arguments": {
+                "text": "Tom said we need to finish the report by Friday. Maria will contact the client about budget concerns. Everyone should review the new marketing strategy before next meeting on 5/10.",
+                "format_instruction": "action items with responsible parties and deadlines"
+            },
+            "expected_contains_any": [
+                "ACTION ITEM",
+                "Tom",
+                "Friday",
+                "Maria",
+                "client",
+                "budget",
+                "May 10"
+            ],
+            "expected_rows": 1,
+            "demo": true
+        },
+        {
+            "id": "test_basic_formatting",
+            "description": "Basic text formatting with simple instructions.",
+            "arguments": {
+                "text": "sample text",
+                "format_instruction": "plain text format"
+            },
+            "expected_rows": 1,
+            "demo": false
+        },
+        {
+            "id": "test_list_input",
+            "description": "Formatting a 2D list input containing contact information.",
+            "arguments": {
+                "text": [
+                    [
+                        "Jane Doe / Sales Manager / jdoe@example.com / 555-987-6543"
+                    ]
+                ],
+                "format_instruction": "professional business card format"
+            },
+            "expected_contains_any": [
+                "Jane Doe",
+                "Sales Manager",
+                "jdoe@example.com"
+            ],
+            "expected_rows": 1,
+            "demo": false
+        },
+        {
+            "id": "test_all_parameters",
+            "description": "Testing all optional parameters of the function.",
+            "arguments": {
+                "text": "meeting with clients on Tuesday",
+                "format_instruction": "professional task list with deadlines",
+                "temperature": 0.1,
+                "max_tokens": 100,
+                "model": "mistral-small-latest"
+            },
+            "expected_rows": 1,
+            "demo": false
+        },
+        {
+            "id": "test_default_model",
+            "description": "Testing with the default AI model.",
+            "arguments": {
+                "text": "sample text",
+                "format_instruction": "simple plain text format"
+            },
+            "expected_rows": 1,
+            "demo": false
+        },
+        {
+            "id": "test_specified_model",
+            "description": "Testing with a specified AI model.",
+            "arguments": {
+                "text": "sample text",
+                "format_instruction": "simple plain text format",
+                "model": "mistral-small-latest"
+            },
+            "expected_rows": 1,
+            "demo": false
+        },
+        {
+            "id": "test_complex_format",
+            "description": "Testing with more complex formatting instructions.",
+            "arguments": {
+                "text": "product received 8/15, quality good but delivery slow, packaging damaged",
+                "format_instruction": "structured product review with ratings for quality, delivery, and packaging"
+            },
+            "expected_contains_any": [
+                "quality",
+                "delivery",
+                "packaging",
+                "rating"
+            ],
+            "expected_rows": 1,
+            "demo": false
+        }
+    ]
+}
