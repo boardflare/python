@@ -86,6 +86,12 @@ Contains unit tests using `pytest`. [See example](../../examples/files/text/ai_a
 -   Include tests for both success and failure paths.
 -   All examples given in the documentation should ideally be covered by tests.
 -   Test with various parameter combinations.
+-   **Implement only basic, generic assertions**:
+    * Type checking (e.g., `assert isinstance(result, expected_type)`)
+    * Non-emptiness checks (e.g., `assert len(result) > 0`)
+    * For list-returning functions: verify list structure, but not specific content
+-   Avoid content-specific assertions where possible, as AI outputs can vary
+-   If content validation is necessary, make it very broad and flexible using "expected_contains_any" with general keywords
 -   Do not mock any external API calls; tests should run against live APIs if applicable (using placeholder or test keys if necessary).
 
 ## Test Cases File (`test_cases.json`)
@@ -98,6 +104,7 @@ Stores structured test data used by `test_my_function.py`. [See example](../../e
 -   Includes an `"expected_rows": number` parameter that estimates how many rows the function's output will occupy when displayed in Excel. This parameter should be set based on the function's return type:
     -   For functions returning a single scalar value (string, number, boolean): set to 1
     -   For functions returning a 2D list: estimate the typical number of rows in the returned array
+-   **For list-generating functions**, prompts should explicitly ask for a specific number of items (e.g., "List 10 marketing strategies" instead of just "List marketing strategies"). This ensures consistent output length and enables more accurate row estimation with `expected_rows`.
 -   The demo system uses this parameter to properly space examples in the Excel sheet with two empty rows between each example.
 -   All test case descriptions must be written from the perspective of an Excel user, using Excel terminology (e.g., refer to 2D lists as "ranges").
 -   Demo test cases and documentation examples must reflect realistic business use cases. Examples should be as detailed, clear, and practical as possible, showing how the function can be applied to solve real-world business problems in Excel. Avoid trivial or artificial examples. Use meaningful data, realistic scenarios, and provide context for the example's purpose.
@@ -105,7 +112,7 @@ Stores structured test data used by `test_my_function.py`. [See example](../../e
     -   Use simple, distinct, and unambiguous choices that are easy for AI models to differentiate
     -   Provide clear context that strongly indicates the expected answer
     -   Prefer shorter option labels (e.g., "High Priority" instead of "P2 - High (Significant Impact)")
-    -   For validation tests, use `expected_contains_any` instead of exact matching where appropriate
+    -   For validation tests, use `expected_contains_any` instead of exact matching where appropriate, and keep validation keywords broad and general
     -   Avoid edge cases where multiple similar answers could be considered correct
     -   Test expected failures with clear error messages
 

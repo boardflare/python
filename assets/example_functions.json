@@ -512,14 +512,212 @@
     "name": "ai_format",
     "description": "Uses AI to format text according to a specific structure or pattern.",
     "code": "import requests\nimport json\n\ndef ai_format(text, format_instruction, temperature=0.0, model='mistral-small-latest', max_tokens=1500):\n    \"\"\"\n    Uses AI to format text according to a specific structure or pattern.\n    \n    Args:\n        text (str or list): The text to format (string or 2D list with a single cell)\n        format_instruction (str): Instructions describing the desired format\n        temperature (float, optional): Controls response creativity (0-2). Default is 0\n        model (str, optional): ID of the model to use\n        max_tokens (int, optional): Maximum tokens for response generation. Default is 1500\n        \n    Returns:\n        str: The formatted text according to the specified format\n    \"\"\"\n    # Handle 2D list input (flatten to a single string)\n    if isinstance(text, list):\n        if len(text) > 0 and len(text[0]) > 0:\n            text = str(text[0][0])\n        else:\n            return \"Error: Empty input text.\"\n    \n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Construct a specific prompt for formatting\n    format_prompt = f\"Format the following text according to this format instruction: {format_instruction}\\n\\nText to format: {text}\"\n    \n    # Remove JSON object instructions, just ask for plain formatted text\n    format_prompt += \"\\n\\nReturn ONLY the formatted text. Do not include any explanatory text, just the formatted result.\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": format_prompt}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    try:\n        # Make the API request\n        response = requests.post(api_url, headers=headers, json=payload)\n        response.raise_for_status()\n        \n        # Extract the response content\n        response_data = response.json()\n        content = response_data[\"choices\"][0][\"message\"][\"content\"]\n        \n        # Return the plain formatted text\n        return content.strip()\n        \n    except requests.exceptions.RequestException as e:\n        # Handle API request errors\n        return f\"Error: API request failed. {str(e)}\"",
-    "test_cases": [],
+    "test_cases": [
+      {
+        "id": "test_customer_contact_info",
+        "description": "Standardizing customer contact information into a professional format.",
+        "arguments": {
+          "text": "John Smith / Marketing Director - Acme Inc / jsmith@acme.co - 555.123.4567",
+          "format_instruction": "standard business contact card format"
+        },
+        "expected_contains_any": [
+          "John Smith",
+          "Marketing Director",
+          "Acme Inc",
+          "jsmith@acme.co",
+          "555"
+        ],
+        "expected_rows": 1,
+        "demo": true
+      },
+      {
+        "id": "test_financial_figures",
+        "description": "Standardizing financial figures for reporting.",
+        "arguments": {
+          "text": "Revenue: 2.4m; COGS: 1.1m; Gross Margin: 1.3m (54%); Opex: 950k; EBITDA: 350k",
+          "format_instruction": "professional financial statement format with proper currency notation"
+        },
+        "expected_contains_any": [
+          "Revenue",
+          "2,400,000",
+          "Cost of Goods Sold",
+          "1,100,000",
+          "Gross Margin",
+          "Operating Expenses",
+          "EBITDA"
+        ],
+        "expected_rows": 1,
+        "demo": true
+      },
+      {
+        "id": "test_customer_feedback",
+        "description": "Converting free-form customer feedback into a structured review format.",
+        "arguments": {
+          "text": "Used the product for 3 weeks. Good quality but shipping took forever. Customer service was helpful though. Probably would buy again if they fix delivery issues.",
+          "format_instruction": "structured product review with ratings"
+        },
+        "expected_contains_any": [
+          "Rating",
+          "Product Quality",
+          "Shipping",
+          "Customer Service",
+          "Would Purchase Again"
+        ],
+        "expected_rows": 1,
+        "demo": true
+      },
+      {
+        "id": "test_address_data",
+        "description": "Standardizing inconsistent address entries into a standard format.",
+        "arguments": {
+          "text": "123 business park dr suite 12, austin tx 78701",
+          "format_instruction": "standard US business address format"
+        },
+        "expected_contains_any": [
+          "123 Business Park Drive",
+          "Suite 12",
+          "Austin",
+          "TX",
+          "78701"
+        ],
+        "expected_rows": 1,
+        "demo": true
+      },
+      {
+        "id": "test_meeting_notes",
+        "description": "Converting meeting notes to a structured action item list.",
+        "arguments": {
+          "text": "Tom said we need to finish the report by Friday. Maria will contact the client about budget concerns. Everyone should review the new marketing strategy before next meeting on 5/10.",
+          "format_instruction": "action items with responsible parties and deadlines"
+        },
+        "expected_contains_any": [
+          "ACTION ITEM",
+          "Tom",
+          "Friday",
+          "Maria",
+          "client",
+          "budget",
+          "May 10"
+        ],
+        "expected_rows": 1,
+        "demo": true
+      }
+    ],
     "fileId": "5"
   },
   {
     "name": "ai_list",
     "description": "Uses AI to generate a list of items based on the prompt and optional values data.",
     "code": "import requests\nimport json\n\ndef ai_list(prompt, values=None, temperature=0.0, model='mistral-small-latest', max_tokens=1000):\n    \"\"\"\n    Uses AI to generate a list of items based on the prompt and optional values data.\n    \n    Args:\n        prompt (str): Instruction for AI to create a list\n        values (list, optional): 2D list containing additional data to append to prompt\n        temperature (float, optional): Controls response creativity (0-2). Default is 0\n        model (str, optional): ID of the model to use\n        max_tokens (int, optional): Maximum tokens for response generation. Default is 1000\n        \n    Returns:\n        list: 2D list representing the generated list data as a single column\n    \"\"\"\n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Construct a specific prompt for list generation\n    list_prompt = f\"Generate a list based on this request: {prompt}\"\n    \n    # Add values information if provided\n    if values is not None:\n        values_str = \"\\n\".join([str(item[0]) for item in values]) if len(values) > 0 and len(values[0]) > 0 else \"\"\n        if values_str:\n            list_prompt += f\"\\n\\nUse this information to help create the list:\\n{values_str}\"\n    \n    # Add instruction for structured output\n    list_prompt += \"\\nReturn ONLY a JSON array of items for the list. \"\n    list_prompt += \"Each item should be a single value. \"\n    list_prompt += \"Do not include any explanatory text, just the JSON array.\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": list_prompt}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens,\n        \"response_format\": {\n            \"type\": \"json_object\",\n        }\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    try:\n        # Make the API request\n        response = requests.post(api_url, headers=headers, json=payload)\n        response.raise_for_status()\n        \n        # Extract the response content\n        response_data = response.json()\n        content = response_data[\"choices\"][0][\"message\"][\"content\"]\n        \n        # Extract the JSON array from the response\n        try:\n            # Try to parse the content as JSON directly\n            list_data = json.loads(content)\n            \n            # If list_data is a dictionary with an \"items\" or \"list\" key, use that\n            if isinstance(list_data, dict):\n                if \"items\" in list_data:\n                    list_data = list_data[\"items\"]\n                elif \"list\" in list_data:\n                    list_data = list_data[\"list\"]\n                else:\n                    # Check for any array key in the response\n                    for key, value in list_data.items():\n                        if isinstance(value, list):\n                            list_data = value\n                            break\n            \n            # Convert the list to a 2D list (single column)\n            if isinstance(list_data, list):\n                # Ensure each item is a string and properly formatted as a single-item list\n                result = []\n                for item in list_data:\n                    if isinstance(item, list):\n                        # If item is already a list, ensure it has exactly one element\n                        if len(item) >= 1:\n                            result.append([str(item[0])])\n                        else:\n                            result.append([\"\"])\n                    else:\n                        # If item is not a list, make it a single-item list\n                        result.append([str(item)])\n                return result\n            else:\n                return [[\"Error: Unable to parse response. Expected a list.\"]]\n                \n        except (json.JSONDecodeError, ValueError):\n            # If JSON parsing fails, return an error message as a single cell\n            return [[\"Error: Unable to generate list. The AI response wasn't in the expected format.\"]]\n             \n    except requests.exceptions.RequestException as e:\n        # Handle API request errors\n        return [[\"Error: API request failed.\", str(e)]]",
-    "test_cases": [],
+    "test_cases": [
+      {
+        "id": "test_marketing_kpis",
+        "description": "Generate a list of KPIs relevant to a marketing department.",
+        "arguments": {
+          "prompt": "List essential marketing KPIs for quarterly performance reviews"
+        },
+        "expected_contains_any": [
+          "Customer Acquisition Cost",
+          "Conversion Rate",
+          "Return on Marketing Investment",
+          "Customer Lifetime Value",
+          "Website Traffic",
+          "Social Media Engagement",
+          "Email Open Rate"
+        ],
+        "expected_rows": 8,
+        "demo": true
+      },
+      {
+        "id": "test_risk_mitigation_strategies",
+        "description": "Generate a list of risk mitigation strategies for a business project.",
+        "arguments": {
+          "prompt": "List effective risk mitigation strategies for enterprise software implementation"
+        },
+        "expected_contains_any": [
+          "Phased Implementation",
+          "Testing Protocol",
+          "Stakeholder Engagement",
+          "Change Management",
+          "Support Team",
+          "Progress Reviews",
+          "SLA Enforcement"
+        ],
+        "expected_rows": 8,
+        "demo": true
+      },
+      {
+        "id": "test_compliance_requirements",
+        "description": "Get a list of compliance requirements for a specific industry.",
+        "arguments": {
+          "prompt": "List key compliance requirements for healthcare organizations"
+        },
+        "expected_contains_any": [
+          "HIPAA",
+          "HITECH",
+          "Medicare",
+          "Medicaid",
+          "Clinical",
+          "Laboratory",
+          "Stark",
+          "Anti-Kickback",
+          "Accreditation",
+          "Compliance",
+          "Privacy",
+          "Security",
+          "Patient",
+          "Data",
+          "Regulatory",
+          "Healthcare"
+        ],
+        "expected_rows": 8,
+        "demo": true
+      },
+      {
+        "id": "test_action_items_from_values",
+        "description": "Generate a list of action items based on specific meeting notes provided as values.",
+        "arguments": {
+          "prompt": "List priority action items based on these quarterly business review notes:",
+          "values": [
+            [
+              "Q1 revenue fell 5% below target"
+            ],
+            [
+              "Customer complaints increased by 12%"
+            ],
+            [
+              "New product launch delayed by 3 weeks"
+            ]
+          ]
+        },
+        "expected_contains_any": [
+          "revenue",
+          "gap analysis",
+          "customer",
+          "feedback",
+          "product",
+          "launch"
+        ],
+        "expected_rows": 6,
+        "demo": true
+      },
+      {
+        "id": "test_smart_goals",
+        "description": "Generate a list of SMART goals for a specific department.",
+        "arguments": {
+          "prompt": "List 5 SMART goals for an HR department focused on improving employee retention"
+        },
+        "expected_contains_any": [
+          "turnover",
+          "employee engagement",
+          "mentorship",
+          "training",
+          "benefits"
+        ],
+        "expected_rows": 5,
+        "demo": true
+      }
+    ],
     "fileId": "6"
   },
   {
@@ -533,7 +731,102 @@
     "name": "ai_table",
     "description": "Uses AI to generate a structured table based on the prompt and optional header/source data.",
     "code": "import requests\nimport json\n\ndef ai_table(prompt, header=None, source=None, temperature=0.0, model='mistral-small-latest', max_tokens=1500):\n    \"\"\"\n    Uses AI to generate a structured table based on the prompt and optional header/source data.\n    \n    Args:\n        prompt (str): Instruction for AI to create a table\n        header (list, optional): 2D list containing table header (column names)\n        source (list, optional): 2D list containing source data used to create the table\n        temperature (float, optional): Controls response creativity (0-2). Default is 0\n        model (str, optional): ID of the model to use\n        max_tokens (int, optional): Maximum tokens for response generation. Default is 1500\n        \n    Returns:\n        list: 2D list representing the generated table data\n    \"\"\"\n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Construct a specific prompt for table generation\n    table_prompt = f\"Generate a well-organized table based on this request: {prompt}\"\n    \n    # Add header information if provided\n    if header is not None:\n        # Assuming header is a 2D list with a single row for column names\n        if header and len(header) > 0:\n            header_str = \", \".join(str(col) for col in header[0])\n            table_prompt += f\"\\nUse exactly these columns: {header_str}\"\n    \n    # Add source data information if provided\n    if source is not None:\n        source_str = json.dumps(source, indent=2)\n        table_prompt += f\"\\n\\nUse this source data to create the table:\\n{source_str}\"\n    \n    # Add instruction for structured output\n    table_prompt += \"\\nReturn ONLY a JSON array of arrays (2D array) with the table data. \"\n    table_prompt += \"The first row should contain column headers if not provided. \"\n    table_prompt += \"Each subsequent row should contain data that fits the columns. \"\n    table_prompt += \"Do not include any explanatory text, just the JSON array.\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": table_prompt}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens,\n        \"response_format\": {\n            \"type\": \"json_object\",\n        }\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    try:\n        # Make the API request\n        response = requests.post(api_url, headers=headers, json=payload)\n        response.raise_for_status()\n        \n        # Extract the response content\n        response_data = response.json()\n        content = response_data[\"choices\"][0][\"message\"][\"content\"]\n        \n        # Extract the JSON array from the response\n        try:\n            # Try to parse the content as JSON directly\n            table_data = json.loads(content)\n            return table_data\n        except (json.JSONDecodeError, ValueError):\n            # If JSON parsing fails, return an error message as a single cell\n            return [[\"Error: Unable to generate table. The AI response wasn't in the expected format.\"]]\n             \n    except Exception as e:\n        # Handle any exception, including API request errors\n        return [[\"Error: API request failed.\", str(e)]]",
-    "test_cases": [],
+    "test_cases": [
+      {
+        "id": "test_smartphone_features",
+        "description": "Generate a table listing features of different smartphones for product comparison",
+        "arguments": {
+          "prompt": "Create a table listing the features of different smartphones including brand, model, camera quality, battery life."
+        },
+        "expected_contains_any": [
+          "Brand",
+          "Model",
+          "Camera",
+          "Battery"
+        ],
+        "expected_rows": 5,
+        "demo": true
+      },
+      {
+        "id": "test_tourist_destinations_with_header",
+        "description": "Create a reference table of top tourist destinations using a predefined header format",
+        "arguments": {
+          "prompt": "Generate a table of top 5 tourist destinations.",
+          "header": [
+            [
+              "Country",
+              "Popular Attractions",
+              "Best Time to Visit",
+              "Average Cost"
+            ]
+          ]
+        },
+        "expected_contains_any": [
+          "Country",
+          "Popular Attractions",
+          "Best Time to Visit",
+          "Average Cost"
+        ],
+        "expected_rows": 6,
+        "demo": true
+      },
+      {
+        "id": "test_sales_summary_with_source",
+        "description": "Summarize sales data by product category for quarterly business review",
+        "arguments": {
+          "prompt": "Summarize the sales data by product category.",
+          "source": [
+            [
+              "Product",
+              "Category",
+              "Sales Amount"
+            ],
+            [
+              "Laptop",
+              "Tech",
+              1200
+            ],
+            [
+              "Mouse",
+              "Tech",
+              25
+            ],
+            [
+              "Keyboard",
+              "Tech",
+              75
+            ],
+            [
+              "T-Shirt",
+              "Apparel",
+              20
+            ],
+            [
+              "Jeans",
+              "Apparel",
+              50
+            ],
+            [
+              "Laptop",
+              "Tech",
+              1350
+            ],
+            [
+              "Hoodie",
+              "Apparel",
+              45
+            ]
+          ]
+        },
+        "expected_contains_any": [
+          "Category",
+          "Tech",
+          "Apparel"
+        ],
+        "expected_rows": 3,
+        "demo": true
+      }
+    ],
     "fileId": "8"
   },
   {

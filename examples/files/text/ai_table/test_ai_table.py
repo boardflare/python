@@ -1,83 +1,73 @@
 import pytest
-from unittest.mock import patch, Mock
-from ai_table import ai_table
 import json
+from pathlib import Path
+from ai_table import ai_table
 
-@pytest.fixture
-def mock_successful_response():
-    """Create a mock for a successful API response"""
-    mock_response = Mock()
-    mock_response.status_code = 200
+# Helper function to load test cases from JSON
+def load_test_cases():
+    """Loads test cases from the test_cases.json file."""
+    test_case_path = Path(__file__).parent / "test_cases.json"
+    with open(test_case_path, 'r') as f:
+        data = json.load(f)
     
-    # Sample table data that would be returned from the API
-    table_data = [
-        ["Country", "Popular Attractions", "Best Time to Visit", "Average Cost"],
-        ["France", "Eiffel Tower, Louvre", "Spring, Fall", "$150/day"],
-        ["Japan", "Mt. Fuji, Temples", "Spring, Fall", "$120/day"],
-        ["Italy", "Colosseum, Canals", "Spring, Summer", "$140/day"]
-    ]
+    # Wrap each case in pytest.param, using 'id' for test identification
+    return [pytest.param(case, id=case.get("id", f"test_case_{i}")) 
+            for i, case in enumerate(data.get("test_cases", []))]
+
+# Parameterized test function
+@pytest.mark.parametrize("test_case", load_test_cases())
+def test_ai_table_parametrized(test_case):
+    """Runs parameterized tests for the ai_table function."""
+    arguments = test_case.get("arguments", {})
     
-    # Format the response as expected from the API
-    mock_response.json.return_value = {
-        "choices": [
-            {
-                "message": {
-                    "content": json.dumps(table_data)
-                }
-            }
-        ]
-    }
-    return mock_response
-
-@pytest.fixture
-def mock_failed_response():
-    """Create a mock for a failed API response"""
-    mock_response = Mock()
-    mock_response.raise_for_status.side_effect = Exception("API Error")
-    return mock_response
-
-def test_ai_table_basic(mock_successful_response):
-    """Test basic functionality of ai_table with mocked API response"""
-    with patch('requests.post', return_value=mock_successful_response):
-        result = ai_table("Generate a table of top 3 tourist destinations.")
+    try:
+        # Call the function with the arguments from the test case
+        result = ai_table(**arguments)
         
-        # Check that the result is a 2D list with expected structure
-        assert isinstance(result, list)
-        assert len(result) == 4  # Header + 3 data rows
-        assert len(result[0]) == 4  # 4 columns
-        assert result[0][0] == "Country"  # Check header
-        assert result[1][0] == "France"  # Check first data row
-
-def test_ai_table_with_header(mock_successful_response):
-    """Test ai_table with a custom header"""
-    with patch('requests.post', return_value=mock_successful_response):
-        custom_header = [["Country", "Attractions", "Season", "Cost"]]
-        result = ai_table("Generate a table of tourist destinations.", header=custom_header)
+        # Basic assertions
+        assert isinstance(result, list), f"Test ID: {test_case.get('id')} - Expected result to be a list, but got {type(result)}"
+        assert len(result) > 0, f"Test ID: {test_case.get('id')} - Expected result to be non-empty"
         
-        # Result should use API response regardless of header input in this mock
-        assert isinstance(result, list)
-        assert len(result) > 0
-
-def test_ai_table_with_source(mock_successful_response):
-    """Test ai_table with source data"""
-    with patch('requests.post', return_value=mock_successful_response):
-        source_data = [
-            ["Country", "GDP"],
-            ["USA", "$21 trillion"],
-            ["China", "$14 trillion"]
-        ]
-        result = ai_table("Summarize economic data.", source=source_data)
+        # Check expected rows if specified
+        if "expected_rows" in test_case:
+            expected_rows = test_case["expected_rows"]
+            # For error cases, we might only have one row with an error message
+            if not test_case.get("should_error", False):
+                assert len(result) >= expected_rows - 1 and len(result) <= expected_rows + 1, \
+                    f"Test ID: {test_case.get('id')} - Expected approximately {expected_rows} rows, but got {len(result)}"
         
-        # Result should use API response regardless of source input in this mock
-        assert isinstance(result, list)
-        assert len(result) > 0
-
-def test_ai_table_error_handling(mock_failed_response):
-    """Test error handling when API request fails"""
-    with patch('requests.post', side_effect=Exception("API Error")):
-        result = ai_table("This should fail")
+        # Conditional assertion for expected_contains_any
+        if "expected_contains_any" in test_case and not test_case.get("should_error", False):
+            expected_any = test_case["expected_contains_any"]
+            # Convert to string and flatten result for easier searching
+            flattened_result = []
+            for row in result:
+                for item in row:
+                    flattened_result.append(str(item))
+            
+            # Check if any of the expected strings appear in the flattened result
+            found = False
+            for expected in expected_any:
+                for item in flattened_result:
+                    if expected in item:
+                        found = True
+                        break
+                if found:
+                    break
+            
+            assert found, f"Test ID: {test_case.get('id')} - Result did not contain any of {expected_any}. Got: {flattened_result}"
         
-        # Should return an error message as a list
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert "Error" in result[0][0]
+        # If test case should error (we check this differently now)
+        if test_case.get("should_error", False):
+            assert "Error" in result[0][0], f"Test ID: {test_case.get('id')} - Expected error message not found"
+            
+    except Exception as e:
+        # If we expect an error but it's not caught by the function
+        if test_case.get("should_error", False):
+            # This is fine, the function itself should return an error message as a list
+            pytest.fail(f"Test ID: {test_case.get('id')} - Function did not handle expected error: {str(e)}")
+        else:
+            pytest.fail(f"Test ID: {test_case.get('id')} - Unexpected exception occurred: {str(e)}")
+
+if __name__ == "__main__":
+    pytest.main(["-v", __file__])
