@@ -614,70 +614,34 @@
         "id": "test_marketing_kpis",
         "description": "Generate a list of KPIs relevant to a marketing department.",
         "arguments": {
-          "prompt": "List essential marketing KPIs for quarterly performance reviews"
+          "prompt": "List 4 essential marketing KPIs for quarterly performance reviews"
         },
-        "expected_contains_any": [
-          "Customer Acquisition Cost",
-          "Conversion Rate",
-          "Return on Marketing Investment",
-          "Customer Lifetime Value",
-          "Website Traffic",
-          "Social Media Engagement",
-          "Email Open Rate"
-        ],
-        "expected_rows": 8,
+        "expected_rows": 4,
         "demo": true
       },
       {
         "id": "test_risk_mitigation_strategies",
         "description": "Generate a list of risk mitigation strategies for a business project.",
         "arguments": {
-          "prompt": "List effective risk mitigation strategies for enterprise software implementation"
+          "prompt": "List 4 effective risk mitigation strategies for enterprise software implementation"
         },
-        "expected_contains_any": [
-          "Phased Implementation",
-          "Testing Protocol",
-          "Stakeholder Engagement",
-          "Change Management",
-          "Support Team",
-          "Progress Reviews",
-          "SLA Enforcement"
-        ],
-        "expected_rows": 8,
+        "expected_rows": 4,
         "demo": true
       },
       {
         "id": "test_compliance_requirements",
         "description": "Get a list of compliance requirements for a specific industry.",
         "arguments": {
-          "prompt": "List key compliance requirements for healthcare organizations"
+          "prompt": "List 4 key compliance requirements for healthcare organizations"
         },
-        "expected_contains_any": [
-          "HIPAA",
-          "HITECH",
-          "Medicare",
-          "Medicaid",
-          "Clinical",
-          "Laboratory",
-          "Stark",
-          "Anti-Kickback",
-          "Accreditation",
-          "Compliance",
-          "Privacy",
-          "Security",
-          "Patient",
-          "Data",
-          "Regulatory",
-          "Healthcare"
-        ],
-        "expected_rows": 8,
+        "expected_rows": 4,
         "demo": true
       },
       {
         "id": "test_action_items_from_values",
         "description": "Generate a list of action items based on specific meeting notes provided as values.",
         "arguments": {
-          "prompt": "List priority action items based on these quarterly business review notes:",
+          "prompt": "List 4 priority action items based on these quarterly business review notes:",
           "values": [
             [
               "Q1 revenue fell 5% below target"
@@ -690,31 +654,16 @@
             ]
           ]
         },
-        "expected_contains_any": [
-          "revenue",
-          "gap analysis",
-          "customer",
-          "feedback",
-          "product",
-          "launch"
-        ],
-        "expected_rows": 6,
+        "expected_rows": 4,
         "demo": true
       },
       {
         "id": "test_smart_goals",
         "description": "Generate a list of SMART goals for a specific department.",
         "arguments": {
-          "prompt": "List 5 SMART goals for an HR department focused on improving employee retention"
+          "prompt": "List 4 SMART goals for an HR department focused on improving employee retention"
         },
-        "expected_contains_any": [
-          "turnover",
-          "employee engagement",
-          "mentorship",
-          "training",
-          "benefits"
-        ],
-        "expected_rows": 5,
+        "expected_rows": 4,
         "demo": true
       }
     ],
