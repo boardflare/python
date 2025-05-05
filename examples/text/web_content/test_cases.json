@@ -1,0 +1,55 @@
+{
+    "test_cases": [
+        {
+            "id": "test_company_page_content",
+            "description": "Extract content from a company page to analyze their business model.",
+            "arguments": {
+                "url": "https://www.ycombinator.com/companies/airbnb"
+            },
+            "expected_contains_any": [
+                "Airbnb",
+                "accommodation",
+                "travel"
+            ],
+            "expected_rows": 1,
+            "demo": true
+        },
+        {
+            "id": "test_news_article_content",
+            "description": "Extract content from a news article for summarization.",
+            "arguments": {
+                "url": "https://techcrunch.com/category/startups/"
+            },
+            "expected_contains_any": [
+                "startup",
+                "company",
+                "tech"
+            ],
+            "expected_rows": 1,
+            "demo": false
+        },
+        {
+            "id": "test_educational_page_content",
+            "description": "Extract content from an educational page for research.",
+            "arguments": {
+                "url": "https://en.wikipedia.org/wiki/Microsoft_Excel"
+            },
+            "expected_contains_any": [
+                "Excel",
+                "spreadsheet",
+                "Microsoft"
+            ],
+            "expected_rows": 1,
+            "demo": false
+        },
+        {
+            "id": "test_error_handling",
+            "description": "Test error handling for invalid URLs.",
+            "arguments": {
+                "url": "non-existent-website-12345.com"
+            },
+            "expected_error": true,
+            "demo": false
+        }
+    ]
+}

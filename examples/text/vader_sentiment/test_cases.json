@@ -1,0 +1,94 @@
+{
+    "test_cases": [
+        {
+            "id": "test_positive_review",
+            "description": "Analyze the sentiment of a positive product review.",
+            "arguments": {
+                "text": "I absolutely love this product! It exceeded all my expectations and I would highly recommend it to anyone."
+            },
+            "expected_rows": 1,
+            "demo": true
+        },
+        {
+            "id": "test_negative_feedback",
+            "description": "Analyze the sentiment of negative customer feedback.",
+            "arguments": {
+                "text": "The customer service was terrible. I waited for hours and my issue was never resolved properly."
+            },
+            "expected_rows": 1,
+            "demo": true
+        },
+        {
+            "id": "test_neutral_statement",
+            "description": "Analyze the sentiment of a neutral business statement.",
+            "arguments": {
+                "text": "Our company will be conducting the annual inventory count on June 15th. All departments will participate as scheduled."
+            },
+            "expected_rows": 1,
+            "demo": true
+        },
+        {
+            "id": "test_mixed_sentiment",
+            "description": "Analyze text with mixed positive and negative elements.",
+            "arguments": {
+                "text": "While the product quality is excellent, the shipping was delayed which was disappointing."
+            },
+            "expected_rows": 1,
+            "demo": true
+        },
+        {
+            "id": "test_positive_sentiment",
+            "description": "Test positive sentiment detection",
+            "arguments": {
+                "text": "I love this product!"
+            },
+            "expected_rows": 1,
+            "demo": false
+        },
+        {
+            "id": "test_negative_sentiment",
+            "description": "Test negative sentiment detection",
+            "arguments": {
+                "text": "This is terrible."
+            },
+            "expected_rows": 1,
+            "demo": false
+        },
+        {
+            "id": "test_neutral_sentiment",
+            "description": "Test neutral sentiment detection",
+            "arguments": {
+                "text": "This seems neutral."
+            },
+            "expected_rows": 1,
+            "demo": false
+        },
+        {
+            "id": "test_emoticons",
+            "description": "Test sentiment detection with emoticons",
+            "arguments": {
+                "text": "I hate waiting in line :("
+            },
+            "expected_rows": 1,
+            "demo": false
+        },
+        {
+            "id": "test_emphasis",
+            "description": "Test sentiment detection with emphasis",
+            "arguments": {
+                "text": "This is the best day EVER!!!"
+            },
+            "expected_rows": 1,
+            "demo": false
+        },
+        {
+            "id": "test_non_string",
+            "description": "Test handling of non-string input",
+            "arguments": {
+                "text": 123
+            },
+            "expected_rows": 1,
+            "demo": false
+        }
+    ]
+}

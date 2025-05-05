@@ -2,10 +2,7 @@ import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 
 # Ensure you have downloaded the necessary NLTK data
-try:
-    nltk.data.find('sentiment/vader_lexicon.zip')
-except nltk.downloader.DownloadError:
-    nltk.download('vader_lexicon')
+nltk.download('vader_lexicon')
 
 def vader_sentiment(text):
     """Analyzes sentiment of text using VADER.

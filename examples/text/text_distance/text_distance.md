@@ -23,6 +23,46 @@ Arguments:
 
 Returns a 2D list where each inner list contains the `top_n` matches for the corresponding `lookup_value`. Each match is represented as `[index, similarity_score]`. The matches are ordered by similarity score (highest first). The index is 1-based.
 
+## Examples
+
+### 1. Finding Products with Similar Names
+Find products with names similar to 'apple' in your product catalog.
+
+```excel
+=TEXT_DISTANCE({"apple"}, {"appl"; "banana"; "orange"; "grape"})
+```
+
+**Output:** `{1, 0.8}`
+
+The output indicates that "appl" (at position 1) is the closest match with a similarity score of 0.8 using the default Jaccard algorithm.
+
+### 2. Customer Name Matching
+Find customers with names similar to 'Johnson' in your customer database.
+
+```excel
+=TEXT_DISTANCE("Johnson", {"Johnsen"; "Jonson"; "Johanson"; "Smith"; "Jonsen"}, "jaro_winkler", 3)
+```
+
+**Output:** A range showing the top 3 matches with their positions and similarity scores.
+
+### 3. Multiple Product Name Matching
+Find matches for multiple product names using Levenshtein distance.
+
+```excel
+=TEXT_DISTANCE({"aple", "banaa"}, {"apple"; "banana"; "orange"; "grape"}, "levenshtein", 2)
+```
+
+**Output:** A range with the top 2 matches for each input term, showing positions and similarity scores.
+
+### 4. Address Fuzzy Matching
+Match addresses in your CRM with addresses in your billing system.
+
+```excel
+=TEXT_DISTANCE({"123 Main St"; "456 Oak Ave"}, {"123 Main Street"; "456 Oak Avenue"; "789 Pine Blvd"; "321 Elm Street"}, "ratcliff_obershelp", 1)
+```
+
+**Output:** A range showing the best match for each address with position and similarity score.
+
 ## Similarity Algorithms
 
 The similarity algorithms available in `textdistance` are given in the tables below.

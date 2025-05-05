@@ -1,0 +1,246 @@
+{
+    "test_cases": [
+        {
+            "id": "test_exact_match",
+            "description": "Find products with names similar to 'apple' in your product catalog.",
+            "arguments": {
+                "needle": [
+                    [
+                        "apple"
+                    ]
+                ],
+                "haystack": [
+                    [
+                        "appl"
+                    ],
+                    [
+                        "banana"
+                    ],
+                    [
+                        "orange"
+                    ],
+                    [
+                        "grape"
+                    ]
+                ],
+                "algorithm": "jaccard",
+                "top_n": 1
+            },
+            "expected_rows": 1,
+            "demo": true
+        },
+        {
+            "id": "test_customer_names",
+            "description": "Find customers with names similar to 'Johnson' in your customer database.",
+            "arguments": {
+                "needle": "Johnson",
+                "haystack": [
+                    [
+                        "Johnsen"
+                    ],
+                    [
+                        "Jonson"
+                    ],
+                    [
+                        "Johanson"
+                    ],
+                    [
+                        "Smith"
+                    ],
+                    [
+                        "Jonsen"
+                    ]
+                ],
+                "algorithm": "jaro_winkler",
+                "top_n": 3
+            },
+            "expected_rows": 1,
+            "demo": true
+        },
+        {
+            "id": "test_multiple_products",
+            "description": "Find matches for multiple product names using Levenshtein distance.",
+            "arguments": {
+                "needle": [
+                    [
+                        "aple",
+                        "banaa"
+                    ]
+                ],
+                "haystack": [
+                    [
+                        "apple"
+                    ],
+                    [
+                        "banana"
+                    ],
+                    [
+                        "orange"
+                    ],
+                    [
+                        "grape"
+                    ]
+                ],
+                "algorithm": "levenshtein",
+                "top_n": 2
+            },
+            "expected_rows": 2,
+            "demo": true
+        },
+        {
+            "id": "test_address_fuzzy_matching",
+            "description": "Match addresses in your CRM with addresses in your billing system.",
+            "arguments": {
+                "needle": [
+                    [
+                        "123 Main St"
+                    ],
+                    [
+                        "456 Oak Ave"
+                    ]
+                ],
+                "haystack": [
+                    [
+                        "123 Main Street"
+                    ],
+                    [
+                        "456 Oak Avenue"
+                    ],
+                    [
+                        "789 Pine Blvd"
+                    ],
+                    [
+                        "321 Elm Street"
+                    ]
+                ],
+                "algorithm": "ratcliff_obershelp",
+                "top_n": 1
+            },
+            "expected_rows": 2,
+            "demo": true
+        },
+        {
+            "id": "test_close_match_levenshtein",
+            "description": "Test close match using Levenshtein algorithm",
+            "arguments": {
+                "needle": [
+                    [
+                        "aple",
+                        "banaa"
+                    ]
+                ],
+                "haystack": [
+                    [
+                        "apple"
+                    ],
+                    [
+                        "banana"
+                    ],
+                    [
+                        "orange"
+                    ],
+                    [
+                        "grape"
+                    ]
+                ],
+                "algorithm": "levenshtein",
+                "top_n": 2
+            },
+            "expected_rows": 2,
+            "demo": false
+        },
+        {
+            "id": "test_string_needle",
+            "description": "Test with string needle instead of 2D list",
+            "arguments": {
+                "needle": "aple",
+                "haystack": [
+                    [
+                        "apple"
+                    ],
+                    [
+                        "banana"
+                    ],
+                    [
+                        "orange"
+                    ],
+                    [
+                        "grape"
+                    ]
+                ],
+                "algorithm": "jaro_winkler",
+                "top_n": 1
+            },
+            "expected_rows": 1,
+            "demo": false
+        },
+        {
+            "id": "test_empty_needle",
+            "description": "Test with empty needle",
+            "arguments": {
+                "needle": [
+                    []
+                ],
+                "haystack": [
+                    [
+                        "a"
+                    ],
+                    [
+                        "b"
+                    ]
+                ],
+                "algorithm": "jaccard",
+                "top_n": 1
+            },
+            "expected_rows": 0,
+            "demo": false
+        },
+        {
+            "id": "test_empty_haystack",
+            "description": "Test with empty haystack",
+            "arguments": {
+                "needle": [
+                    [
+                        "test"
+                    ]
+                ],
+                "haystack": [
+                    []
+                ],
+                "algorithm": "jaccard",
+                "top_n": 1
+            },
+            "expected_rows": 1,
+            "demo": false
+        },
+        {
+            "id": "test_multiple_matches",
+            "description": "Test with multiple potential matches",
+            "arguments": {
+                "needle": [
+                    [
+                        "sample"
+                    ]
+                ],
+                "haystack": [
+                    [
+                        "samples"
+                    ],
+                    [
+                        "exemplar"
+                    ],
+                    [
+                        "sample"
+                    ],
+                    [
+                        "examples"
+                    ]
+                ],
+                "algorithm": "jaccard",
+                "top_n": 3
+            },
+            "expected_rows": 1,
+            "demo": false
+        }
+    ]
+}
