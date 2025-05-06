@@ -1,0 +1,1 @@
+Documentation should use examples wherever possible that are relevant to common business use cases one might find in Excel.  Think carefully about the examples so that they simple and easy to understand but also relevant to the business world. 

@@ -8,6 +8,13 @@
                 "PYODIDE_DATA_DIR": "./data",
                 "PORT": 3020
             }
+        },
+        "browser-mcp": {
+            "command": "npx",
+            "args": [
+                "@browsermcp/mcp"
+            ],
+            "env": {}
         }
     }
 }
