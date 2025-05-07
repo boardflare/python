@@ -77,9 +77,9 @@ The value returned by your Python function will similarly be converted to the co
 
 If your function returns other Python types such as a list, set, or other non-scalar types, an error will be thrown.
 
-## Test File (`test_my_function.py`)
+## Test File (`test_my_function.py`) 
 
-Contains unit tests using `pytest`.
+Contains unit tests using `pytest`.  See this [example](../../examples/text/ai_ask/test_ai_ask.py) for a reference.
 
 -   Should load test cases from `test_cases.json`.
 -   Include tests for both success and failure paths.
@@ -95,7 +95,7 @@ Contains unit tests using `pytest`.
 
 ## Test Cases File (`test_cases.json`)
 
-Stores structured test data used by `test_my_function.py`.
+Stores structured test data used by `test_my_function.py`.  See this [example](../../examples/text/ai_ask/test_cases.json) for a reference.
 
 -   Allows for easy addition and management of multiple test scenarios.
 -   Each test case can include an ID, description, input arguments, and expected outcomes or checks.

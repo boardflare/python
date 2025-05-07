@@ -2,9 +2,9 @@
     {
         "id": "zillow_market_heat_index",
         "description": "Import the Zillow Market Heat Index for major US metro areas as a range in Excel.",
-        "args": [
-            "https://files.zillowstatic.com/research/public_csvs/market_temp_index/Metro_market_temp_index_uc_sfrcondo_month.csv?t=1746621339"
-        ],
+        "arguments": {
+            "url": "https://files.zillowstatic.com/research/public_csvs/market_temp_index/Metro_market_temp_index_uc_sfrcondo_month.csv?t=1746621339"
+        },
         "expected_type": "list",
         "expected_rows": 5,
         "demo": true
@@ -12,9 +12,9 @@
     {
         "id": "zillow_new_construction_sales",
         "description": "Import Zillow New Construction Sales data for major US metro areas as a range in Excel.",
-        "args": [
-            "https://files.zillowstatic.com/research/public_csvs/new_con_sales_count_raw/Metro_new_con_sales_count_raw_uc_sfrcondo_month.csv?t=1746621339"
-        ],
+        "arguments": {
+            "url": "https://files.zillowstatic.com/research/public_csvs/new_con_sales_count_raw/Metro_new_con_sales_count_raw_uc_sfrcondo_month.csv?t=1746621339"
+        },
         "expected_type": "list",
         "expected_rows": 5,
         "demo": true
@@ -22,9 +22,9 @@
     {
         "id": "empty_url",
         "description": "Test error handling for an empty URL.",
-        "args": [
-            ""
-        ],
+        "arguments": {
+            "url": ""
+        },
         "expected_type": "error",
         "expected_rows": 1,
         "demo": false
@@ -32,9 +32,9 @@
     {
         "id": "invalid_url",
         "description": "Test error handling for an invalid URL.",
-        "args": [
-            "not_a_url"
-        ],
+        "arguments": {
+            "url": "not_a_url"
+        },
         "expected_type": "error",
         "expected_rows": 1,
         "demo": false
@@ -42,9 +42,9 @@
     {
         "id": "tableau_county_health_rankings",
         "description": "Import the County Health Rankings sample data from Tableau Public as a range in Excel.",
-        "args": [
-            "https://public.tableau.com/app/sample-data/County_Health_Rankings.csv"
-        ],
+        "arguments": {
+            "url": "https://public.tableau.com/app/sample-data/County_Health_Rankings.csv"
+        },
         "expected_type": "list",
         "expected_rows": 5,
         "demo": false

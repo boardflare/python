@@ -779,6 +779,14 @@
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_table"
   },
   {
+    "name": "internet_csv",
+    "description": "Fetches a CSV file from the internet (with CORS proxy) and returns its contents as a 2D list.",
+    "code": "import csv\nimport io\nimport requests\n\n\ndef internet_csv(url):\n    \"\"\"\n    Fetches a CSV file from the internet (with CORS proxy) and returns its contents as a 2D list.\n\n    Args:\n        url (str): The direct URL to the CSV file.\n\n    Returns:\n        list[list[str]]: 2D list representing the CSV contents, where each sublist is a row.\n\n    Raises:\n        ValueError: If the URL is invalid or the content cannot be parsed as CSV.\n    \"\"\"\n    if not isinstance(url, str) or not url.strip():\n        raise ValueError(\"A non-empty URL string must be provided.\")\n\n    cors_url = f\"https://cors.boardflare.com/{url}\"\n    try:\n        response = requests.get(cors_url)\n        response.raise_for_status()\n        content = response.text\n        reader = csv.reader(io.StringIO(content))\n        data = [row for row in reader]\n        if not data:\n            raise ValueError(\"CSV file is empty or could not be parsed.\")\n        return data\n    except Exception as e:\n        raise ValueError(f\"Failed to fetch or parse CSV: {e}\")\n",
+    "test_cases": [],
+    "fileId": "8",
+    "link": "https://www.boardflare.com/resources/python-functions/text/internet_csv"
+  },
+  {
     "name": "onedrive_csv",
     "description": "Loads a CSV file from OneDrive using the global graphToken variable and returns its contents as a 2D list.",
     "code": "import requests\nimport csv\nimport io\nimport pandas as pd\n\ndef onedrive_csv(file_path):\n    \"\"\"\n    Loads a CSV file from OneDrive using the global graphToken variable and returns its contents as a 2D list.\n\n    Args:\n        file_path (str): The path to the CSV file in the user's OneDrive (e.g., '/Documents/data.csv').\n\n    Returns:\n        list: 2D list representing the CSV file's contents.\n\n    Raises:\n        Exception: If the file cannot be retrieved or parsed.\n    \"\"\"\n    # Use global graphToken if available\n    token = None\n    try:\n        token = globals()[\"graphToken\"]\n    except KeyError:\n        token = None\n    if not token:\n        raise Exception(\"Microsoft Graph token is not set. Please click login button next to OneDrive in Functions tab.\")\n    if not file_path or not isinstance(file_path, str):\n        raise Exception(\"A valid file_path string must be provided.\")\n\n    url = f\"https://graph.microsoft.com/v1.0/me/drive/root:{file_path}:/content\"\n    headers = {\n        \"Authorization\": f\"Bearer {token}\",\n        \"Accept\": \"text/csv\"\n    }\n    response = requests.get(url, headers=headers)\n    if response.status_code != 200:\n        raise Exception(f\"Failed to retrieve file: {response.status_code} {response.text}\")\n\n    csv_content = response.content.decode('utf-8')\n    # You could also use pandas to read the CSV content into a DataFrame\n    df = pd.read_csv(io.StringIO(csv_content))\n    print(df.head())\n\n    # For demo puposes, we will convert the CSV content to a 2D list\n    reader = csv.reader(io.StringIO(csv_content))\n    table = [row for row in reader]\n    return table\n",
@@ -794,7 +802,7 @@
         "demo": true
       }
     ],
-    "fileId": "8",
+    "fileId": "9",
     "link": "https://www.boardflare.com/resources/python-functions/text/onedrive_csv"
   },
   {
@@ -922,7 +930,7 @@
         "demo": true
       }
     ],
-    "fileId": "9",
+    "fileId": "10",
     "link": "https://www.boardflare.com/resources/python-functions/text/text_distance"
   },
   {
@@ -967,7 +975,7 @@
         "demo": true
       }
     ],
-    "fileId": "10",
+    "fileId": "11",
     "link": "https://www.boardflare.com/resources/python-functions/text/vader_sentiment"
   },
   {
@@ -990,7 +998,7 @@
         "demo": true
       }
     ],
-    "fileId": "11",
+    "fileId": "12",
     "link": "https://www.boardflare.com/resources/python-functions/text/web_content"
   }
 ]

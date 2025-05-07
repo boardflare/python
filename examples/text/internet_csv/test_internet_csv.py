@@ -13,13 +13,13 @@ def is_2d_list(obj):
 
 @pytest.mark.parametrize("case", TEST_CASES)
 def test_internet_csv(case):
-    args = case["args"]
+    arguments = case["arguments"]
     expected_type = case["expected_type"]
     if expected_type == "error":
         with pytest.raises(Exception):
-            internet_csv(*args)
+            internet_csv(**arguments)
     else:
-        result = internet_csv(*args)
+        result = internet_csv(**arguments)
         assert is_2d_list(result), "Result should be a 2D list"
         assert len(result) >= 1, "Result should not be empty"
         # Optionally check row count for demo cases
