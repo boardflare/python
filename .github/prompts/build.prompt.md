@@ -75,8 +75,7 @@ Contains the main Python function implementation. [See example](../../examples/t
 -   Handle input validation gracefully.
 -   Document the function with detailed docstrings.
 -   For API-based functions, use placeholders for API keys that need to be replaced by the user. Note: Environment variables cannot be set in the Pyodide environment; secrets must be hard-coded (using placeholders for users to replace) or passed as function arguments.
--   If your function requires packages beyond the standard library or those built into Pyodide, you must install them using `micropip`. Since the code runs asynchronously, use `await micropip.install(['package1', 'package2'])` at the top of your function. `micropip` is pre-imported. Only pure Python packages or those with OS-independent wheels on PyPI are supported.
--   Testing for package availability: Before using an external package, test whether it is available in the Pyodide distribution by attempting to import it using the `pyodide_install-packages` tool. If this tool throws an error, then the package is not available in the standard library and must be installed using `micropip`. If the package is available, you do not need to install it with `micropip`.
+-   If your function requires packages beyond the standard library or those built into Pyodide, you must check whether they are available by attempting to install them using the "Install Python packages using Pyodide" tool. If that tool throws an error, then the package cannot be used. Only use packages that are available in Pyodide or can be installed successfully using this tool.
 
 ## Test File (`test_my_function.py`)
 

@@ -109,6 +109,9 @@ def main():
             metadata["fileId"] = str(index)
             index += 1
             
+            # Add a link to the example functions component
+            metadata["link"] = f"https://www.boardflare.com/resources/python-functions/text/{metadata['name']}"
+            
             # Add to functions list
             functions.append(metadata)
 

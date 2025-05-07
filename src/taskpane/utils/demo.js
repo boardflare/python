@@ -49,8 +49,17 @@ export async function testCasesDemo(func) {
             // Write description in the row below signature
             const descRange = sheet.getRangeByIndexes(1, 0, 1, 1);
             descRange.values = [[func.description]];
-            // Add a blank row after description
-            let startRow = 3;
+
+            // Add link below description as an Excel hyperlink if available
+            let startRow;
+            if (func?.link) {
+                const linkRange = sheet.getRangeByIndexes(2, 0, 1, 1);
+                linkRange.formulas = [[`=HYPERLINK("${func.link}","More details")`]];
+                linkRange.format.font.color = "#0366d6"; // Standard hyperlink blue color
+                startRow = 4;
+            } else {
+                startRow = 3;
+            }
 
             let exampleIdx = 0;
             for (const test of func.test_cases || []) {
