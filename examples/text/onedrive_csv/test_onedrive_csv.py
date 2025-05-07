@@ -1,6 +1,6 @@
 import pytest
-import load_onedrive
-from load_onedrive import load_onedrive_csv
+import onedrive_csv
+from onedrive_csv import onedrive_csv
 import os
 
 def acquire_graph_token_device_code():
@@ -42,10 +42,10 @@ def acquire_graph_token_device_code():
 
 def test_data():
     # Acquire token using MSAL device code flow with persistent cache relative to this script
-    load_onedrive.graphToken = acquire_graph_token_device_code()
-    load_onedrive_csv("/Documents/data.csv")
+    onedrive_csv.graphToken = acquire_graph_token_device_code()
+    onedrive_csv("/Documents/data.csv")
 
-# Use:  python -m pytest -s examples/text/load_onedrive/test_load_onedrive.py if token refresh is needed
+# Use:  python -m pytest -s examples/text/onedrive_csv/test_onedrive_csv.py if token refresh is needed
 
 if __name__ == "__main__":
     import pytest

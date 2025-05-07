@@ -1,4 +1,4 @@
-# Load a CSV file from OneDrive using the global graph_token variable.
+# OneDrive CSV Loader
 
 ## Overview
 This function retrieves a CSV file from the user's Microsoft OneDrive using the Microsoft Graph API and a global variable `graphToken` for authentication, which is set if the user is signed in.  It returns the CSV contents as a 2D list, suitable for use in Excel.

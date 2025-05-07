@@ -779,9 +779,9 @@
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_table"
   },
   {
-    "name": "load_onedrive",
+    "name": "onedrive_csv",
     "description": "Loads a CSV file from OneDrive using the global graphToken variable and returns its contents as a 2D list.",
-    "code": "import requests\nimport csv\nimport io\n\ndef load_onedrive_csv(file_path):\n    \"\"\"\n    Loads a CSV file from OneDrive using the global graphToken variable and returns its contents as a 2D list.\n\n    Args:\n        file_path (str): The path to the CSV file in the user's OneDrive (e.g., '/Documents/data.csv').\n\n    Returns:\n        list: 2D list representing the CSV file's contents.\n\n    Raises:\n        Exception: If the file cannot be retrieved or parsed.\n    \"\"\"\n    # Use global graphToken if available\n    token = None\n    try:\n        token = globals()[\"graphToken\"]\n    except KeyError:\n        token = None\n    if not token:\n        raise Exception(\"Microsoft Graph token is not set. Please click login button next to OneDrive in Functions tab.\")\n    if not file_path or not isinstance(file_path, str):\n        raise Exception(\"A valid file_path string must be provided.\")\n\n    url = f\"https://graph.microsoft.com/v1.0/me/drive/root:{file_path}:/content\"\n    headers = {\n        \"Authorization\": f\"Bearer {token}\",\n        \"Accept\": \"text/csv\"\n    }\n    response = requests.get(url, headers=headers)\n    if response.status_code != 200:\n        raise Exception(f\"Failed to retrieve file: {response.status_code} {response.text}\")\n\n    csv_content = response.content.decode('utf-8')\n    reader = csv.reader(io.StringIO(csv_content))\n    table = [row for row in reader]\n    return table\n",
+    "code": "import requests\nimport csv\nimport io\nimport pandas as pd\n\ndef onedrive_csv(file_path):\n    \"\"\"\n    Loads a CSV file from OneDrive using the global graphToken variable and returns its contents as a 2D list.\n\n    Args:\n        file_path (str): The path to the CSV file in the user's OneDrive (e.g., '/Documents/data.csv').\n\n    Returns:\n        list: 2D list representing the CSV file's contents.\n\n    Raises:\n        Exception: If the file cannot be retrieved or parsed.\n    \"\"\"\n    # Use global graphToken if available\n    token = None\n    try:\n        token = globals()[\"graphToken\"]\n    except KeyError:\n        token = None\n    if not token:\n        raise Exception(\"Microsoft Graph token is not set. Please click login button next to OneDrive in Functions tab.\")\n    if not file_path or not isinstance(file_path, str):\n        raise Exception(\"A valid file_path string must be provided.\")\n\n    url = f\"https://graph.microsoft.com/v1.0/me/drive/root:{file_path}:/content\"\n    headers = {\n        \"Authorization\": f\"Bearer {token}\",\n        \"Accept\": \"text/csv\"\n    }\n    response = requests.get(url, headers=headers)\n    if response.status_code != 200:\n        raise Exception(f\"Failed to retrieve file: {response.status_code} {response.text}\")\n\n    csv_content = response.content.decode('utf-8')\n    # You could also use pandas to read the CSV content into a DataFrame\n    df = pd.read_csv(io.StringIO(csv_content))\n    print(df.head())\n\n    # For demo puposes, we will convert the CSV content to a 2D list\n    reader = csv.reader(io.StringIO(csv_content))\n    table = [row for row in reader]\n    return table\n",
     "test_cases": [
       {
         "id": "demo_load_csv_onedrive",
@@ -795,7 +795,7 @@
       }
     ],
     "fileId": "8",
-    "link": "https://www.boardflare.com/resources/python-functions/text/load_onedrive"
+    "link": "https://www.boardflare.com/resources/python-functions/text/onedrive_csv"
   },
   {
     "name": "text_distance",

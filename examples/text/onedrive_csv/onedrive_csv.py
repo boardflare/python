@@ -1,8 +1,9 @@
 import requests
 import csv
 import io
+import pandas as pd
 
-def load_onedrive_csv(file_path):
+def onedrive_csv(file_path):
     """
     Loads a CSV file from OneDrive using the global graphToken variable and returns its contents as a 2D list.
 
@@ -36,6 +37,11 @@ def load_onedrive_csv(file_path):
         raise Exception(f"Failed to retrieve file: {response.status_code} {response.text}")
 
     csv_content = response.content.decode('utf-8')
+    # You could also use pandas to read the CSV content into a DataFrame
+    df = pd.read_csv(io.StringIO(csv_content))
+    print(df.head())
+
+    # For demo puposes, we will convert the CSV content to a 2D list
     reader = csv.reader(io.StringIO(csv_content))
     table = [row for row in reader]
     return table
