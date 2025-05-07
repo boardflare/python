@@ -1,0 +1,77 @@
+[
+    {
+        "id": "test_basic_search",
+        "description": "Basic search for properties in Seattle",
+        "arguments": {
+            "search_location": "Seattle, WA"
+        },
+        "expected_rows": 11,
+        "demo": true
+    },
+    {
+        "id": "test_house_with_filters",
+        "description": "Search for houses in San Francisco with price and bedroom filters",
+        "arguments": {
+            "search_location": "San Francisco, CA",
+            "property_type": "house",
+            "min_price": 500000,
+            "max_price": 1500000,
+            "min_beds": 3,
+            "max_beds": 4
+        },
+        "expected_rows": 11,
+        "demo": true
+    },
+    {
+        "id": "test_condo_with_bathroom_filters",
+        "description": "Search for condos in New York with bathroom filters",
+        "arguments": {
+            "search_location": "New York, NY",
+            "property_type": "condo",
+            "min_baths": 2,
+            "max_baths": 3,
+            "limit": 5
+        },
+        "expected_rows": 6,
+        "demo": true
+    },
+    {
+        "id": "test_zip_code_search",
+        "description": "Search properties in a specific zip code",
+        "arguments": {
+            "search_location": "90210",
+            "limit": 3
+        },
+        "expected_rows": 4,
+        "demo": true
+    },
+    {
+        "id": "test_input_validation_invalid_property_type",
+        "description": "Test input validation with invalid property type",
+        "arguments": {
+            "search_location": "Chicago, IL",
+            "property_type": "invalid"
+        },
+        "expected_error": "Property type must be one of: 'all', 'house', 'apartment', 'condo', or 'townhome'",
+        "demo": false
+    },
+    {
+        "id": "test_input_validation_invalid_limit",
+        "description": "Test input validation with invalid limit",
+        "arguments": {
+            "search_location": "Chicago, IL",
+            "limit": 100
+        },
+        "expected_error": "Limit must be an integer between 1 and 50",
+        "demo": false
+    },
+    {
+        "id": "test_input_validation_empty_location",
+        "description": "Test input validation with empty location",
+        "arguments": {
+            "search_location": ""
+        },
+        "expected_error": "Search location must be a non-empty string",
+        "demo": false
+    }
+]

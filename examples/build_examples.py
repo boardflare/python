@@ -84,8 +84,10 @@ def get_function_metadata(file_path):
 
 def main():
     # Root directory for function files
-    # Changed to look directly in the text subdirectory
-    text_dir = Path(__file__).parent / "text"
+    examples_dir = Path(__file__).parent
+    
+    # Debug output
+    print(f"Searching for Python files in: {examples_dir.absolute()}")
     
     # List to store function metadata
     functions = []
@@ -93,8 +95,13 @@ def main():
     # Index for fileId
     index = 1
 
-    # Find all .py files in the text directory that are not test files
-    for py_file in text_dir.rglob("*.py"):
+    # Find all .py files in all subdirectories that are not test files
+    for py_file in examples_dir.rglob("*.py"):
+        # Skip files at the root of examples directory
+        if py_file.parent == examples_dir:
+            print(f"Skipping root file: {py_file.name}")
+            continue
+            
         # Skip __init__.py files, test files, and the build script itself
         if py_file.name.startswith("test_") or py_file.name == "__init__.py" or py_file.name == "build_examples.py":
             continue
@@ -111,7 +118,14 @@ def main():
             index += 1
             
             # Add a link to the example functions component
-            metadata["link"] = f"https://www.boardflare.com/resources/python-functions/text/{metadata['name']}"
+            # Updated to include the subfolder path in the URL
+            relative_path = py_file.relative_to(examples_dir).parent
+            if relative_path == Path('.'):  # If in the root examples directory
+                link_path = metadata['name']
+            else:
+                link_path = f"{relative_path}/{metadata['name']}"
+            
+            metadata["link"] = f"https://www.boardflare.com/resources/python-functions/{link_path}"
             
             # Add to functions list
             functions.append(metadata)

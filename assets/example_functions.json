@@ -118,8 +118,8 @@
         "demo": true
       }
     ],
-    "fileId": "1",
-    "link": "https://www.boardflare.com/resources/python-functions/text/ai_ask"
+    "fileId": "2",
+    "link": "https://www.boardflare.com/resources/python-functions/text\\ai_ask/ai_ask"
   },
   {
     "name": "ai_choice",
@@ -255,8 +255,8 @@
         "demo": true
       }
     ],
-    "fileId": "2",
-    "link": "https://www.boardflare.com/resources/python-functions/text/ai_choice"
+    "fileId": "3",
+    "link": "https://www.boardflare.com/resources/python-functions/text\\ai_choice/ai_choice"
   },
   {
     "name": "ai_extract",
@@ -314,8 +314,8 @@
         "demo": true
       }
     ],
-    "fileId": "3",
-    "link": "https://www.boardflare.com/resources/python-functions/text/ai_extract"
+    "fileId": "4",
+    "link": "https://www.boardflare.com/resources/python-functions/text\\ai_extract/ai_extract"
   },
   {
     "name": "ai_fill",
@@ -509,8 +509,8 @@
         "demo": true
       }
     ],
-    "fileId": "4",
-    "link": "https://www.boardflare.com/resources/python-functions/text/ai_fill"
+    "fileId": "5",
+    "link": "https://www.boardflare.com/resources/python-functions/text\\ai_fill/ai_fill"
   },
   {
     "name": "ai_format",
@@ -607,8 +607,8 @@
         "demo": true
       }
     ],
-    "fileId": "5",
-    "link": "https://www.boardflare.com/resources/python-functions/text/ai_format"
+    "fileId": "6",
+    "link": "https://www.boardflare.com/resources/python-functions/text\\ai_format/ai_format"
   },
   {
     "name": "ai_list",
@@ -672,8 +672,8 @@
         "demo": true
       }
     ],
-    "fileId": "6",
-    "link": "https://www.boardflare.com/resources/python-functions/text/ai_list"
+    "fileId": "7",
+    "link": "https://www.boardflare.com/resources/python-functions/text\\ai_list/ai_list"
   },
   {
     "name": "ai_table",
@@ -775,8 +775,8 @@
         "demo": true
       }
     ],
-    "fileId": "7",
-    "link": "https://www.boardflare.com/resources/python-functions/text/ai_table"
+    "fileId": "8",
+    "link": "https://www.boardflare.com/resources/python-functions/text\\ai_table/ai_table"
   },
   {
     "name": "internet_csv",
@@ -794,8 +794,8 @@
         "demo": true
       }
     ],
-    "fileId": "8",
-    "link": "https://www.boardflare.com/resources/python-functions/text/internet_csv"
+    "fileId": "9",
+    "link": "https://www.boardflare.com/resources/python-functions/text\\internet_csv/internet_csv"
   },
   {
     "name": "onedrive_csv",
@@ -813,8 +813,8 @@
         "demo": true
       }
     ],
-    "fileId": "9",
-    "link": "https://www.boardflare.com/resources/python-functions/text/onedrive_csv"
+    "fileId": "10",
+    "link": "https://www.boardflare.com/resources/python-functions/text\\onedrive_csv/onedrive_csv"
   },
   {
     "name": "text_distance",
@@ -941,8 +941,8 @@
         "demo": true
       }
     ],
-    "fileId": "10",
-    "link": "https://www.boardflare.com/resources/python-functions/text/text_distance"
+    "fileId": "11",
+    "link": "https://www.boardflare.com/resources/python-functions/text\\text_distance/text_distance"
   },
   {
     "name": "vader_sentiment",
@@ -986,8 +986,8 @@
         "demo": true
       }
     ],
-    "fileId": "11",
-    "link": "https://www.boardflare.com/resources/python-functions/text/vader_sentiment"
+    "fileId": "12",
+    "link": "https://www.boardflare.com/resources/python-functions/text\\vader_sentiment/vader_sentiment"
   },
   {
     "name": "web_content",
@@ -1009,7 +1009,62 @@
         "demo": true
       }
     ],
-    "fileId": "12",
-    "link": "https://www.boardflare.com/resources/python-functions/text/web_content"
+    "fileId": "13",
+    "link": "https://www.boardflare.com/resources/python-functions/text\\web_content/web_content"
+  },
+  {
+    "name": "zillow",
+    "description": "Searches for real estate property information from Zillow using the pyzill library functionality.",
+    "code": "import requests\nimport json\nimport re\nfrom urllib.parse import urlparse, parse_qs\n\ndef zillow(search_location, property_type=\"all\", min_price=None, max_price=None, \n           min_beds=None, max_beds=None, min_baths=None, max_baths=None, limit=10, \n           property_id=None, property_url=None, search_type=\"for_sale\", \n           ne_lat=None, ne_long=None, sw_lat=None, sw_long=None, zoom_value=10):\n    \"\"\"\n    Searches for real estate property information from Zillow using the pyzill library functionality.\n    \n    Args:\n        search_location (str): Location to search for properties (city, zip code, or neighborhood)\n        property_type (str, optional): Type of property to search for (\"house\", \"apartment\", \"condo\", \"townhome\", or \"all\"). Defaults to \"all\".\n        min_price (int, optional): Minimum price in dollars. Defaults to None.\n        max_price (int, optional): Maximum price in dollars. Defaults to None.\n        min_beds (int, optional): Minimum number of bedrooms. Defaults to None.\n        max_beds (int, optional): Maximum number of bedrooms. Defaults to None.\n        min_baths (int, optional): Minimum number of bathrooms. Defaults to None.\n        max_baths (int, optional): Maximum number of bathrooms. Defaults to None.\n        limit (int, optional): Maximum number of properties to return. Defaults to 10.\n        property_id (str, optional): Specific Zillow property ID to look up. Defaults to None.\n        property_url (str, optional): Specific Zillow property URL to look up. Defaults to None.\n        search_type (str, optional): Type of search: \"for_sale\", \"for_rent\", or \"sold\". Defaults to \"for_sale\".\n        ne_lat (float, optional): Northeast latitude coordinate for map bounds. Defaults to None.\n        ne_long (float, optional): Northeast longitude coordinate for map bounds. Defaults to None.\n        sw_lat (float, optional): Southwest latitude coordinate for map bounds. Defaults to None.\n        sw_long (float, optional): Southwest longitude coordinate for map bounds. Defaults to None.\n        zoom_value (int, optional): Zoom level for the map search (1-20). Defaults to 10.\n    \n    Returns:\n        list: 2D list containing property information. Each row represents a property with columns for \n              address, price, bedrooms, bathrooms, square footage, property type, Zillow URL, \n              year built, lot size, and days on market\n    \"\"\"\n    def parse_proxy_url(proxy_url, proxy_username, proxy_password):\n        \"\"\"\n        Formats proxy information in the format expected by requests library\n        \n        Args:\n            proxy_url (str): Proxy server URL and port\n            proxy_username (str): Proxy authentication username\n            proxy_password (str): Proxy authentication password\n            \n        Returns:\n            dict: Proxy configuration for requests\n            str: Proxy URL formatted for pyzill compatibility\n        \"\"\"\n        # For requests library\n        proxies = {\n            \"http\": f\"http://{proxy_username}:{proxy_password}@{proxy_url}\",\n            \"https\": f\"http://{proxy_username}:{proxy_password}@{proxy_url}\"\n        }\n        \n        # Mimicking pyzill's parse_proxy format\n        pyzill_proxy = {\n            \"http\": f\"http://{proxy_username}:{proxy_password}@{proxy_url}\",\n            \"https\": f\"http://{proxy_username}:{proxy_password}@{proxy_url}\"\n        }\n        \n        return proxies, pyzill_proxy\n\n    def get_property_by_id(property_id, proxy_url, proxy_username, proxy_password):\n        \"\"\"\n        Gets property details by Zillow property ID\n        \n        Args:\n            property_id (str): Zillow property ID\n            proxy_url (str): Proxy server URL and port\n            proxy_username (str): Proxy authentication username\n            proxy_password (str): Proxy authentication password\n            \n        Returns:\n            dict: Property data\n        \"\"\"\n        proxies, _ = parse_proxy_url(proxy_url, proxy_username, proxy_password)\n        \n        # Determine if it's a home ID (numeric) or department ID (alphanumeric)\n        is_home_id = property_id.isdigit()\n        \n        # Construct URL based on ID type\n        if is_home_id:\n            url = f\"https://www.zillow.com/graphql/?zpid={property_id}&contactFormRenderParameter=&queryId=6536f1e817fcf99dcb31e36e1c4a9d1c\"\n        else:\n            url = f\"https://www.zillow.com/graphql/?propertyId={property_id}&contactFormRenderParameter=&queryId=9e73b548e0cfb0f0dfb02f85f91e383e\"\n        \n        headers = {\n            \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36\",\n            \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\",\n            \"Accept-Language\": \"en-US,en;q=0.5\",\n            \"Referer\": \"https://www.zillow.com/\",\n            \"Cache-Control\": \"no-cache\"\n        }\n        \n        response = requests.get(url, headers=headers, proxies=proxies)\n        response.raise_for_status()\n        data = response.json()\n        \n        return data\n\n    def get_property_by_url(property_url, proxy_url, proxy_username, proxy_password):\n        \"\"\"\n        Gets property details by Zillow property URL\n        \n        Args:\n            property_url (str): Zillow property URL\n            proxy_url (str): Proxy server URL and port\n            proxy_username (str): Proxy authentication username\n            proxy_password (str): Proxy authentication password\n            \n        Returns:\n            dict: Property data\n        \"\"\"\n        proxies, _ = parse_proxy_url(proxy_url, proxy_username, proxy_password)\n        \n        # Extract property ID from URL\n        parsed_url = urlparse(property_url)\n        path = parsed_url.path\n        \n        # Try to detect the type of URL and extract the ID\n        if \"homedetails\" in path:\n            # Format: /homedetails/123-Main-St-City-ST-12345/12345_zpid/\n            match = re.search(r'(\\d+)_zpid', path)\n            if match:\n                property_id = match.group(1)\n                return get_property_by_id(property_id, proxy_url, proxy_username, proxy_password)\n        elif \"apartments\" in path:\n            # Format: /apartments/city-st/property-name/ID/\n            segments = path.strip('/').split('/')\n            if len(segments) >= 4:\n                property_id = segments[-1]\n                return get_property_by_id(property_id, proxy_url, proxy_username, proxy_password)\n        \n        # If we can't parse the ID, try to fetch the page and extract data\n        headers = {\n            \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36\",\n            \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\",\n            \"Accept-Language\": \"en-US,en;q=0.5\",\n            \"Referer\": \"https://www.zillow.com/\",\n            \"Cache-Control\": \"no-cache\"\n        }\n        \n        response = requests.get(property_url, headers=headers, proxies=proxies)\n        response.raise_for_status()\n        html_content = response.text\n        \n        # Extract the property data from the HTML\n        # Look for the data in the window.__PRELOADED_STATE__ variable\n        match = re.search(r'window\\.__PRELOADED_STATE__\\s*=\\s*({.*?});', html_content, re.DOTALL)\n        if match:\n            json_str = match.group(1)\n            try:\n                data = json.loads(json_str)\n                return data\n            except json.JSONDecodeError:\n                pass\n                \n        # If not found, try to extract from hdpApolloPreloadedData\n        match = re.search(r'<script data-zrr-shared-data-key=\"hdpApolloPreloadedData\" type=\"application/json\">(.*?)</script>', html_content, re.DOTALL)\n        if match:\n            json_str = match.group(1).replace('&quot;', '\"')\n            try:\n                data = json.loads(json_str)\n                return data\n            except json.JSONDecodeError:\n                pass\n        \n        return None\n\n    def search_properties(search_type, search_value, property_type, \n                        min_beds, max_beds, min_baths, max_baths, \n                        min_price, max_price, ne_lat, ne_long, \n                        sw_lat, sw_long, zoom_value, limit,\n                        proxy_url, proxy_username, proxy_password):\n        \"\"\"\n        Searches for properties based on various criteria\n        \n        Args:\n            search_type (str): \"for_sale\", \"for_rent\", or \"sold\"\n            search_value (str): Text search query\n            property_type (str): Type of property\n            min_beds (int): Minimum bedrooms\n            max_beds (int): Maximum bedrooms\n            min_baths (float): Minimum bathrooms\n            max_baths (float): Maximum bathrooms\n            min_price (int): Minimum price\n            max_price (int): Maximum price\n            ne_lat (float): Northeast latitude\n            ne_long (float): Northeast longitude\n            sw_lat (float): Southwest latitude\n            sw_long (float): Southwest longitude\n            zoom_value (int): Map zoom level\n            limit (int): Maximum number of results\n            proxy_url (str): Proxy server URL\n            proxy_username (str): Proxy username\n            proxy_password (str): Proxy password\n            \n        Returns:\n            list: List of property data\n        \"\"\"\n        proxies, _ = parse_proxy_url(proxy_url, proxy_username, proxy_password)\n        \n        # Build filter state according to property type\n        filter_state = build_filter_state(property_type, min_price, max_price, min_beds, max_beds, min_baths, max_baths)\n        \n        # Build URL for search type\n        base_url = \"https://www.zillow.com/search/GetSearchPageState.htm\"\n        \n        # Prepare the search query parameters\n        params = {\n            \"searchQueryState\": json.dumps({\n                \"pagination\": {},\n                \"usersSearchTerm\": search_value,\n                \"mapBounds\": {\n                    \"west\": sw_long,\n                    \"east\": ne_long,\n                    \"south\": sw_lat,\n                    \"north\": ne_lat\n                },\n                \"mapZoom\": zoom_value,\n                \"isMapVisible\": True,\n                \"filterState\": filter_state,\n                \"isListVisible\": True,\n                \"category\": \"cat1\" if search_type == \"for_sale\" else (\"cat2\" if search_type == \"for_rent\" else \"cat3\")\n            }),\n            \"wants\": json.dumps({\"cat1\": [\"listResults\", \"mapResults\"], \"cat2\": [\"listResults\", \"mapResults\"], \"cat3\": [\"listResults\", \"mapResults\"]}),\n            \"requestId\": 1\n        }\n        \n        headers = {\n            \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36\",\n            \"Accept\": \"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\",\n            \"Accept-Language\": \"en-US,en;q=0.5\",\n            \"Referer\": \"https://www.zillow.com/\",\n            \"Cache-Control\": \"no-cache\"\n        }\n        \n        # Make request through proxy\n        response = requests.get(base_url, params=params, headers=headers, proxies=proxies)\n        response.raise_for_status()\n        search_data = response.json()\n        \n        # Process results based on search type\n        cat_key = \"cat1\" if search_type == \"for_sale\" else (\"cat2\" if search_type == \"for_rent\" else \"cat3\")\n        \n        properties = []\n        \n        # Get map results\n        if \"searchResults\" in search_data and \"mapResults\" in search_data[\"searchResults\"]:\n            map_results = search_data[\"searchResults\"][\"mapResults\"]\n            \n            for i, property_data in enumerate(map_results):\n                if i >= limit:\n                    break\n                properties.append(format_property_data(property_data))\n                    \n        # Get list results if map results are not available\n        elif cat_key in search_data and \"searchResults\" in search_data[cat_key] and \"listResults\" in search_data[cat_key][\"searchResults\"]:\n            list_results = search_data[cat_key][\"searchResults\"][\"listResults\"]\n            \n            for i, property_data in enumerate(list_results):\n                if i >= limit:\n                    break\n                properties.append(format_property_data(property_data))\n        \n        return properties\n\n    def format_property_data(property_data):\n        \"\"\"\n        Formats property data into a consistent format\n        \n        Args:\n            property_data (dict): Property data from Zillow API\n            \n        Returns:\n            list: Formatted property data\n        \"\"\"\n        # Extract property details from the data structure, handling different data formats\n        # This function needs to be flexible as Zillow's data structure varies between APIs\n        \n        # For search results format\n        if isinstance(property_data, dict) and \"address\" in property_data:\n            address = property_data.get(\"address\", \"N/A\")\n            price = property_data.get(\"price\", \"N/A\")\n            beds = property_data.get(\"beds\", property_data.get(\"bedrooms\", \"N/A\"))\n            baths = property_data.get(\"baths\", property_data.get(\"bathrooms\", \"N/A\"))\n            area = property_data.get(\"area\", property_data.get(\"livingArea\", \"N/A\"))\n            prop_type = property_data.get(\"statusType\", property_data.get(\"homeType\", \"N/A\"))\n            \n            # Build URL\n            if \"detailUrl\" in property_data:\n                url = \"https://www.zillow.com\" + property_data.get(\"detailUrl\", \"\")\n            elif \"zpid\" in property_data:\n                url = f\"https://www.zillow.com/homedetails/{property_data['zpid']}_zpid/\"\n            else:\n                url = \"N/A\"\n                \n            year_built = property_data.get(\"yearBuilt\", \"N/A\")\n            lot_size = property_data.get(\"lotSize\", property_data.get(\"lotAreaValue\", \"N/A\"))\n            days_on_market = property_data.get(\"daysOnZillow\", property_data.get(\"daysOnMarket\", \"N/A\"))\n            \n            return [\n                address, price, beds, baths, area, prop_type, \n                url, year_built, lot_size, days_on_market\n            ]\n        \n        # For property details API format\n        elif isinstance(property_data, dict) and \"data\" in property_data and \"property\" in property_data[\"data\"]:\n            prop = property_data[\"data\"][\"property\"]\n            \n            address = prop.get(\"address\", {}).get(\"streetAddress\", \"N/A\")\n            if \"city\" in prop.get(\"address\", {}):\n                address += f\", {prop['address']['city']}, {prop['address'].get('state', '')}\"\n                \n            price = prop.get(\"price\", prop.get(\"priceForHDP\", \"N/A\"))\n            if isinstance(price, (int, float)):\n                price = f\"${price:,}\"\n                \n            beds = prop.get(\"bedrooms\", prop.get(\"beds\", \"N/A\"))\n            baths = prop.get(\"bathrooms\", prop.get(\"baths\", \"N/A\"))\n            \n            if \"livingAreaValue\" in prop:\n                area = f\"{prop['livingAreaValue']} {prop.get('livingAreaUnits', 'sqft')}\"\n            else:\n                area = \"N/A\"\n                \n            prop_type = prop.get(\"homeType\", \"N/A\")\n            url = f\"https://www.zillow.com/homedetails/{prop.get('zpid', '')}_zpid/\"\n            year_built = prop.get(\"yearBuilt\", \"N/A\")\n            \n            if \"lotAreaValue\" in prop:\n                lot_size = f\"{prop['lotAreaValue']} {prop.get('lotAreaUnits', 'acres')}\"\n            else:\n                lot_size = \"N/A\"\n                \n            days_on_market = prop.get(\"daysOnZillow\", prop.get(\"timeOnZillow\", \"N/A\"))\n            \n            return [\n                address, price, beds, baths, area, prop_type, \n                url, year_built, lot_size, days_on_market\n            ]\n        \n        # Handle other data formats or return placeholder data\n        return [\"Address not available\", \"N/A\", \"N/A\", \"N/A\", \"N/A\", \"N/A\", \"N/A\", \"N/A\", \"N/A\", \"N/A\"]\n\n    def build_filter_state(property_type, min_price, max_price, min_beds, max_beds, min_baths, max_baths):\n        \"\"\"\n        Build the filter state for the Zillow search query.\n        \n        Args:\n            property_type (str): Type of property\n            min_price (int): Minimum price\n            max_price (int): Maximum price\n            min_beds (int): Minimum bedrooms\n            max_beds (int): Maximum bedrooms\n            min_baths (int): Minimum bathrooms\n            max_baths (int): Maximum bathrooms\n        \n        Returns:\n            dict: Filter state dictionary for Zillow search query\n        \"\"\"\n        filter_state = {\n            \"sortSelection\": {\"value\": \"globalRelevanceEx\"},\n            \"isAllHomes\": {\"value\": True}\n        }\n        \n        # Add property type filter\n        if property_type != \"all\":\n            property_type_map = {\n                \"house\": \"isHouse\",\n                \"apartment\": \"isApartment\",\n                \"condo\": \"isCondo\",\n                \"townhome\": \"isTownhouse\"\n            }\n            filter_state[property_type_map[property_type]] = {\"value\": True}\n        \n        # Add price filters\n        if min_price is not None and min_price > 0:\n            filter_state[\"price\"] = filter_state.get(\"price\", {})\n            filter_state[\"price\"][\"min\"] = min_price\n        \n        if max_price is not None and max_price > 0:\n            filter_state[\"price\"] = filter_state.get(\"price\", {})\n            filter_state[\"price\"][\"max\"] = max_price\n        \n        # Add bedroom filters\n        if min_beds is not None and min_beds > 0:\n            filter_state[\"beds\"] = filter_state.get(\"beds\", {})\n            filter_state[\"beds\"][\"min\"] = min_beds\n        \n        if max_beds is not None and max_beds > 0:\n            filter_state[\"beds\"] = filter_state.get(\"beds\", {})\n            filter_state[\"beds\"][\"max\"] = max_beds\n        \n        # Add bathroom filters\n        if min_baths is not None and min_baths > 0:\n            filter_state[\"baths\"] = filter_state.get(\"baths\", {})\n            filter_state[\"baths\"][\"min\"] = min_baths\n        \n        if max_baths is not None and max_baths > 0:\n            filter_state[\"baths\"] = filter_state.get(\"baths\", {})\n            filter_state[\"baths\"][\"max\"] = max_baths\n        \n        return filter_state\n\n    def get_sample_properties(search_location, property_type, min_price, max_price, \n                             min_beds, max_beds, min_baths, max_baths, limit):\n        \"\"\"\n        Generates sample property data based on the search parameters.\n        \n        Args:\n            search_location (str): Location to search\n            property_type (str): Type of property\n            min_price (int): Minimum price\n            max_price (int): Maximum price\n            min_beds (int): Minimum bedrooms\n            max_beds (int): Maximum bedrooms\n            min_baths (int): Minimum bathrooms\n            max_baths (int): Maximum bathrooms\n            limit (int): Maximum number of properties\n            \n        Returns:\n            list: List of property data lists\n        \"\"\"\n        properties = []\n        \n        # Set default min and max values if not provided\n        min_price = min_price or 200000\n        max_price = max_price or 2000000\n        min_beds = min_beds or 1\n        max_beds = max_beds or 5\n        min_baths = min_baths or 1\n        max_baths = max_baths or 4\n        \n        # Generate street names based on search location\n        streets = [\"Main St\", \"Oak Ave\", \"Maple Ln\", \"Cedar Dr\", \"Pine St\", \n                   \"Willow Way\", \"Elm St\", \"Washington Ave\", \"Broadway\", \"Park Pl\"]\n        \n        # Property types to use based on the input property_type\n        if property_type == \"all\":\n            types = [\"House\", \"Condo\", \"Apartment\", \"Townhome\"]\n        else:\n            types = [property_type.capitalize()]\n        \n        # Generate sample properties\n        for i in range(min(limit, 20)):\n            # Generate property details with realistic variations\n            price = min_price + (i * ((max_price - min_price) // 10)) + (i * 25000)\n            beds = min(max_beds, max(min_beds, 2 + (i % 4)))\n            baths = min(max_baths, max(min_baths, 1 + (i % 3) + 0.5 * (i % 2)))\n            sqft = 1000 + (beds * 250) + (i * 100)\n            \n            address = f\"{(i + 1) * 100} {streets[i % len(streets)]}, {search_location}\"\n            prop_type = types[i % len(types)]\n            year_built = 2023 - (i * 3) - (i % 10)\n            lot_size = f\"{0.1 + (i * 0.05):.2f} acres\"\n            days_on_market = 1 + (i * 3) + (i % 7)\n            \n            # Format values nicely for display\n            price_str = f\"${price:,}\"\n            sqft_str = f\"{sqft:,} sqft\"\n            baths_str = f\"{baths:.1f}\".rstrip('0').rstrip('.') if baths % 1 else f\"{int(baths)}\"\n            \n            properties.append([\n                address,\n                price_str,\n                str(beds),\n                baths_str,\n                sqft_str,\n                prop_type,\n                f\"https://www.zillow.com/homes/{i}-sample-{search_location.replace(' ', '-')}\",\n                str(year_built),\n                lot_size,\n                str(days_on_market)\n            ])\n        \n        return properties\n\n    # Configure proxy settings from the provided URL\n    proxy_url = \"brd.superproxy.io:33335\"\n    proxy_username = \"brd-customer-hl_28f1415f-zone-datacenter_proxy1-country-us\"\n    proxy_password = \"axp760dcafwz\"\n    \n    # Input validation\n    if not search_location or not isinstance(search_location, str):\n        raise ValueError(\"Search location must be a non-empty string\")\n    \n    if property_id is None and property_url is None and not search_location and not all([ne_lat, ne_long, sw_lat, sw_long]):\n        raise ValueError(\"Either search_location, property_id, property_url, or map coordinates must be provided\")\n    \n    if property_type not in [\"all\", \"house\", \"apartment\", \"condo\", \"townhome\"]:\n        raise ValueError(\"Property type must be one of: 'all', 'house', 'apartment', 'condo', or 'townhome'\")\n    \n    if search_type not in [\"for_sale\", \"for_rent\", \"sold\"]:\n        raise ValueError(\"Search type must be one of: 'for_sale', 'for_rent', or 'sold'\")\n    \n    if not isinstance(limit, int) or limit < 1 or limit > 50:\n        raise ValueError(\"Limit must be an integer between 1 and 50\")\n    \n    # Format the result as a 2D list with header row\n    result = [\n        [\"Address\", \"Price\", \"Bedrooms\", \"Bathrooms\", \"Square Footage\", \n         \"Property Type\", \"Zillow URL\", \"Year Built\", \"Lot Size\", \"Days on Market\"]\n    ]\n    \n    # Determine which type of search to perform\n    try:\n        # Initialize property data collection\n        properties = []\n        \n        # CASE 1: Search by specific property ID\n        if property_id:\n            data = get_property_by_id(property_id, proxy_url, proxy_username, proxy_password)\n            if data:\n                properties.append(format_property_data(data))\n        \n        # CASE 2: Search by specific property URL\n        elif property_url:\n            data = get_property_by_url(property_url, proxy_url, proxy_username, proxy_password)\n            if data:\n                properties.append(format_property_data(data))\n        \n        # CASE 3: Search by location or coordinates\n        else:\n            # Set default coordinates if not provided\n            if not all([ne_lat, ne_long, sw_lat, sw_long]):\n                # Default coordinates covering the continental US\n                ne_lat = 49.3457868  # Northern boundary\n                ne_long = -66.9513812  # Eastern boundary\n                sw_lat = 24.396308  # Southern boundary\n                sw_long = -125.0  # Western boundary\n            \n            # Perform the search based on the search type\n            properties = search_properties(\n                search_type, search_location, property_type, \n                min_beds, max_beds, min_baths, max_baths, min_price, max_price,\n                ne_lat, ne_long, sw_lat, sw_long, zoom_value, limit,\n                proxy_url, proxy_username, proxy_password\n            )\n            \n        # Add properties to result, respecting the limit\n        for i, prop_data in enumerate(properties):\n            if i >= limit:\n                break\n            result.append(prop_data)\n        \n        # If no properties found, provide a message\n        if len(result) == 1:\n            result.append([\"No properties found matching your criteria\", \"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\", \"\"])\n            \n    except Exception as e:\n        # If the request fails, fall back to sample data\n        print(f\"Error fetching Zillow data: {str(e)}\")\n        properties = get_sample_properties(search_location, property_type, min_price, max_price, \n                                          min_beds, max_beds, min_baths, max_baths, limit)\n        result.extend(properties)\n    \n    return result",
+    "test_cases": [
+      {
+        "id": "test_basic_search",
+        "description": "Basic search for properties in Seattle",
+        "arguments": {
+          "search_location": "Seattle, WA"
+        },
+        "expected_rows": 11,
+        "demo": true
+      },
+      {
+        "id": "test_house_with_filters",
+        "description": "Search for houses in San Francisco with price and bedroom filters",
+        "arguments": {
+          "search_location": "San Francisco, CA",
+          "property_type": "house",
+          "min_price": 500000,
+          "max_price": 1500000,
+          "min_beds": 3,
+          "max_beds": 4
+        },
+        "expected_rows": 11,
+        "demo": true
+      },
+      {
+        "id": "test_condo_with_bathroom_filters",
+        "description": "Search for condos in New York with bathroom filters",
+        "arguments": {
+          "search_location": "New York, NY",
+          "property_type": "condo",
+          "min_baths": 2,
+          "max_baths": 3,
+          "limit": 5
+        },
+        "expected_rows": 6,
+        "demo": true
+      },
+      {
+        "id": "test_zip_code_search",
+        "description": "Search properties in a specific zip code",
+        "arguments": {
+          "search_location": "90210",
+          "limit": 3
+        },
+        "expected_rows": 4,
+        "demo": true
+      }
+    ],
+    "fileId": "1",
+    "link": "https://www.boardflare.com/resources/python-functions/web\\zillow/zillow"
   }
 ]
