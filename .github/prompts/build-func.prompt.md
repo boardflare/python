@@ -1,8 +1,36 @@
 ## Overview
 
-You are working on Python functions that can be used from within Excel using pyodide.
+You are creating new Python functions that can be used from within Excel using pyodide.
 
-## Input and Output Types
+## Folder Structure
+
+Each function is stored in its own folder. This folder contains all necessary files for the function: the Python implementation, pytest tests, test case data, and documentation.
+
+Example structure for a function named `my_function`:
+
+```
+examples
+└── category
+    └── my_function
+        ├── my_function.py        # The main Python function code.
+        ├── test_my_function.py   # Pytest unit tests for the function.
+        ├── test_cases.json       # JSON file containing parameterized test cases.
+        └── my_function.md        # Documentation for the function in Markdown format.
+```
+
+## Python Implementation File (`my_function.py`)
+
+Contains the main Python function implementation.
+
+-   Imports should be at the top.
+-   The main function should accept 2D lists or scalars as input.
+-   Return either a 2D list or scalar as output.
+-   Handle input validation gracefully.
+-   Document the function with detailed docstrings.
+-   For API-based functions, use placeholders for API keys that need to be replaced by the user. Note: Environment variables cannot be set in the Pyodide environment; secrets must be hard-coded (using placeholders for users to replace) or passed as function arguments.
+-   If your function requires packages beyond the standard library or those built into Pyodide, you must check whether they are available by attempting to install them using the "Install Python packages using Pyodide" tool. If that tool throws an error, then the package cannot be used. Only use packages that are available in Pyodide or can be installed successfully using this tool.
+
+### Input and Output Types
 
 Each function can only use a 2D list or scalar as input and must return a 2D list or scalar as output. The types supported are float, string, and bool. For example, a function that takes a range as an argument will pass a 2D list to the function. Similarly, a function that returns a 2D list will output a range in Excel.
 
@@ -49,37 +77,9 @@ The value returned by your Python function will similarly be converted to the co
 
 If your function returns other Python types such as a list, set, or other non-scalar types, an error will be thrown.
 
-## Folder Structure
-
-Each function is stored in its own folder. This folder contains all necessary files for the function: the Python implementation, pytest tests, test case data, and documentation.
-
-Example structure for a function named `my_function`:
-
-```
-examples
-└── category
-    └── my_function
-        ├── my_function.py        # The main Python function code.
-        ├── test_my_function.py   # Pytest unit tests for the function.
-        ├── test_cases.json       # JSON file containing parameterized test cases.
-        └── my_function.md        # Documentation for the function in Markdown format.
-```
-
-## Python Implementation File (`my_function.py`)
-
-Contains the main Python function implementation. [See example](../../examples/text/ai_ask/ai_ask.py)
-
--   Imports should be at the top.
--   The main function should accept 2D lists or scalars as input.
--   Return either a 2D list or scalar as output.
--   Handle input validation gracefully.
--   Document the function with detailed docstrings.
--   For API-based functions, use placeholders for API keys that need to be replaced by the user. Note: Environment variables cannot be set in the Pyodide environment; secrets must be hard-coded (using placeholders for users to replace) or passed as function arguments.
--   If your function requires packages beyond the standard library or those built into Pyodide, you must check whether they are available by attempting to install them using the "Install Python packages using Pyodide" tool. If that tool throws an error, then the package cannot be used. Only use packages that are available in Pyodide or can be installed successfully using this tool.
-
 ## Test File (`test_my_function.py`)
 
-Contains unit tests using `pytest`. [See example](../../examples/text/ai_ask/test_ai_ask.py)
+Contains unit tests using `pytest`.
 
 -   Should load test cases from `test_cases.json`.
 -   Include tests for both success and failure paths.
@@ -95,7 +95,7 @@ Contains unit tests using `pytest`. [See example](../../examples/text/ai_ask/tes
 
 ## Test Cases File (`test_cases.json`)
 
-Stores structured test data used by `test_my_function.py`. [See example](../../examples/text/ai_ask/test_cases.json)
+Stores structured test data used by `test_my_function.py`.
 
 -   Allows for easy addition and management of multiple test scenarios.
 -   Each test case can include an ID, description, input arguments, and expected outcomes or checks.
@@ -117,7 +117,7 @@ Stores structured test data used by `test_my_function.py`. [See example](../../e
 
 ## Documentation File (`my_function.md`)
 
-Provides user-facing documentation. [See example](../../examples/text/ai_ask/ai_ask.md)
+Provides user-facing documentation.
 
 -   Include an overview section.
 -   Detail function usage with argument descriptions in a table.
@@ -125,22 +125,21 @@ Provides user-facing documentation. [See example](../../examples/text/ai_ask/ai_
 -   Include formatted tables for parameters and return values.
 -   Each example should clearly explain the business context and expected outcome, so users understand how to apply the function in their own work.
 
-## Other Guidelines:
-
--   All terminal commands should use Windows PowerShell syntax.
--   The Python virtual environment is assumed to be activated in the terminal.
-
 ## Development Process:
 
-1.  Edit Function: Modify the `my_function.py` file with the required changes.
-2.  Update Tests: Adjust `test_my_function.py` and/or `test_cases.json` to reflect the changes and add new test cases if necessary. Ensure `demo` flags are set appropriately.
-3.  Run Tests: Execute the tests from the workspace root using the following command structure (replace `category` and `my_function`). Assumes the virtual environment is active:
+You do not need to search the repository for existing functions or documentation. All the context you need is provided.
+
+1.  **Think About the Solution**: Use the `think` tool to carefully consider the user's request and the context provided.
+2.  **Generate Folder and Documentation File**: Create a new folder for the function under the appropriate category and draft the `my_function.md` documentation file. This file should include an overview, argument descriptions, and detailed examples reflecting realistic business use cases.
+3.  **Ask for User Feedback**: Share the drafted documentation file with the user and request feedback. Repeat edits to the documentation file as many times as needed until the user confirms it is good.
+4.  **Write Function Code**: Once the documentation is finalized, implement the function in a `my_function.py` file.
+5.  **Write Tests**: Create a `test_my_function.py` file and a `test_cases.json` file with parameterized test cases. The demo test cases should follow from the examples defined in the finalized documentation.
+6.  **Run Tests**: Execute the tests using the `run_in_terminal` tool:
     ```powershell
     python -m pytest examples/text/category/my_function/test_my_function.py
     ```
-4.  Ensure Tests Pass: Verify that all tests pass successfully. Debug and repeat steps 1-3 if necessary.
-5.  Update Documentation: If the function's behavior, arguments, or examples have changed, update the `my_function.md` file accordingly, ensuring examples match `test_cases.json` entries where `demo: true` and that all examples are realistic business use cases.
-6.  Build Examples: Run the `build_examples.py` script from the workspace root to update the consolidated example file:
+7.  **Ensure Tests Pass**: Verify that all tests pass successfully. Debug and repeat steps 4-6 if necessary.
+8.  **Build Examples**: Run the `build_examples.py` script using the `run_in_terminal` tool to update the consolidated example file:
     ```powershell
     python examples/build_examples.py
     ```
