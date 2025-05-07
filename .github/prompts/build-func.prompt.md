@@ -143,3 +143,9 @@ You do not need to search the repository for existing functions or documentation
     ```powershell
     python examples/build_examples.py
     ```
+
+## Additional Implementation Notes
+
+- When implementing functions that fetch data from the internet, always use the `requests` library for HTTP requests instead of `urllib`.
+- For any network request to a public CSV or API, prepend the URL with the CORS proxy (`https://cors.boardflare.com/`) to handle CORS restrictions.
+- Ensure that all code and documentation examples reflect this approach.
