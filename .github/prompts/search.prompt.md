@@ -1,14 +1,7 @@
 # Internet Search Prompt
 
 ## Objective
-Guide the model to search for information on the Internet using browser automation tools. The model should:
-
-1. Navigate to a search engine (e.g., Google).
-2. Execute the search query provided.
-3. Gather multiple pages of search results.
-4. Visit each result page to extract relevant data.
-5. Assemble a summary of the gathered information.
-6. Write the summary into a markdown file located at `docs/searches/` with a descriptive but short filename based on the search query.
+Guide the model to search for information on the Internet, extract relevant data from the top 20 search results, and compile a comprehensive markdown report on the topic. The report should include detailed information from each source and a summary of the findings.
 
 ## Steps
 
@@ -21,18 +14,22 @@ Guide the model to search for information on the Internet using browser automati
 
 3. **Gather Search Results**
    - Use the tool for capturing a page snapshot to extract links from the search results.
+   - Continue to the next pages of search results as needed until you have collected URLs for all 20 links.
+   - Make sure to collect exactly 20 links before proceeding to the next step.
 
-4. **Visit Result Pages**
-   - Use the tool for navigating to a URL to visit each extracted link.
-   - Use the tool for capturing a page snapshot to extract relevant content from each page.
+4. **Process Result Pages**
+   - For each of the 20 links collected, use the fetch_webpage tool to retrieve and extract the main content.
+   - The fetch_webpage tool allows you to extract content from a webpage without having to navigate to it directly.
+   - IMPORTANT: Immediately after processing each link, record the important details from that page in a separate section of the markdown file, before moving to the next link.
+   - Continue this process until ALL 20 links have been processed. Do not stop until you have processed all 20 links.
 
 5. **Assemble Summary**
-   - Combine the extracted data into a concise summary.
+   - After all 20 links are processed, combine the extracted data into a concise summary and record it at the end of the markdown file.
 
 6. **Write to Markdown File**
-   - Save the summary into a markdown file located at `docs/searches/` with a descriptive but short filename based on the search query.
+   - Save the markdown file in `docs/searches/` with a descriptive but short filename based on the search query.
 
 ## Example Query
 
 - Search Query: "Latest advancements in AI technology 2025"
-- Expected Output: A markdown file named `ai-advancements-2025.md` in the `docs/searches/` directory containing a summary of the latest advancements in AI technology as of 2025, including key breakthroughs, companies involved, and potential applications.
+- Expected Output: A markdown file named `ai-advancements-2025.md` in the `docs/searches/` directory. Each link's details are in a separate section, followed by a summary section at the end, covering the latest advancements in AI technology as of 2025, including key breakthroughs, companies involved, and potential applications.

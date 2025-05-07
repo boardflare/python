@@ -779,6 +779,25 @@
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_table"
   },
   {
+    "name": "load_onedrive",
+    "description": "Loads a CSV file from OneDrive using the global graphToken variable and returns its contents as a 2D list.",
+    "code": "import requests\nimport csv\nimport io\n\ndef load_onedrive_csv(file_path):\n    \"\"\"\n    Loads a CSV file from OneDrive using the global graphToken variable and returns its contents as a 2D list.\n\n    Args:\n        file_path (str): The path to the CSV file in the user's OneDrive (e.g., '/Documents/data.csv').\n\n    Returns:\n        list: 2D list representing the CSV file's contents.\n\n    Raises:\n        Exception: If the file cannot be retrieved or parsed.\n    \"\"\"\n    # Use global graphToken if available\n    token = None\n    try:\n        token = globals()[\"graphToken\"]\n    except KeyError:\n        token = None\n    if not token:\n        raise Exception(\"Microsoft Graph token is not set. Please click login button next to OneDrive in Functions tab.\")\n    if not file_path or not isinstance(file_path, str):\n        raise Exception(\"A valid file_path string must be provided.\")\n\n    url = f\"https://graph.microsoft.com/v1.0/me/drive/root:{file_path}:/content\"\n    headers = {\n        \"Authorization\": f\"Bearer {token}\",\n        \"Accept\": \"text/csv\"\n    }\n    response = requests.get(url, headers=headers)\n    if response.status_code != 200:\n        raise Exception(f\"Failed to retrieve file: {response.status_code} {response.text}\")\n\n    csv_content = response.content.decode('utf-8')\n    reader = csv.reader(io.StringIO(csv_content))\n    table = [row for row in reader]\n    return table\n",
+    "test_cases": [
+      {
+        "id": "demo_load_csv_onedrive",
+        "description": "Demo: Load a CSV file from OneDrive using the file path '/Documents/data.csv'.",
+        "arguments": {
+          "file_path": "/Documents/data.csv"
+        },
+        "expect_error": false,
+        "expected_rows": 5,
+        "demo": true
+      }
+    ],
+    "fileId": "8",
+    "link": "https://www.boardflare.com/resources/python-functions/text/load_onedrive"
+  },
+  {
     "name": "text_distance",
     "description": "Calculate text similarity scores between needle(s) and haystack items.",
     "code": "import textdistance\n\ndef text_distance(needle, haystack, algorithm='jaccard', top_n=1):\n    \"\"\"Calculate text similarity scores between needle(s) and haystack items.\n    \n    Args:\n        needle: String or 2D list of strings to search for\n        haystack: 2D list of strings to search within\n        algorithm (str): Algorithm name from textdistance library (default: 'jaccard')\n        top_n (int): Number of top matches to return (default: 1).\n    \n    Returns:\n        list: For each needle, a flat list of [position, score, position, score, ...] for the top N matches (row format).\n    \"\"\"\n    algo_func = getattr(textdistance, algorithm)\n\n    # Handle needle as either string or 2D list\n    if isinstance(needle, str):\n        needle_flat = [needle] if needle.strip() else []\n    else:\n        # Flatten 2D lists and filter out None values\n        needle_flat = [item for sublist in needle for item in sublist if item is not None]\n\n    haystack_flat = [item for sublist in haystack for item in sublist if item is not None]\n\n    if not haystack_flat:\n        return [[] for _ in needle_flat] if needle_flat else []\n\n    results = []\n    for needle_item in needle_flat:\n        if not str(needle_item).strip():\n            results.append([])\n            continue\n        scores = [(index + 1, round(algo_func.normalized_similarity(str(needle_item), str(item)), 2))\n                  for index, item in enumerate(haystack_flat)]\n        scores.sort(key=lambda x: x[1], reverse=True)\n        # Flatten the top matches into a single row\n        row = []\n        for score in scores[:top_n]:\n            row.extend(list(score))  # [position, score, ...]\n        results.append(row)\n\n    # If only one needle, return just the row for that needle\n    if len(results) == 1:\n        return results[0]\n    return results",
@@ -903,7 +922,7 @@
         "demo": true
       }
     ],
-    "fileId": "8",
+    "fileId": "9",
     "link": "https://www.boardflare.com/resources/python-functions/text/text_distance"
   },
   {
@@ -948,7 +967,7 @@
         "demo": true
       }
     ],
-    "fileId": "9",
+    "fileId": "10",
     "link": "https://www.boardflare.com/resources/python-functions/text/vader_sentiment"
   },
   {
@@ -971,7 +990,7 @@
         "demo": true
       }
     ],
-    "fileId": "10",
+    "fileId": "11",
     "link": "https://www.boardflare.com/resources/python-functions/text/web_content"
   }
 ]
