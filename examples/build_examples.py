@@ -41,8 +41,6 @@ def get_function_metadata(file_path):
         with open(file_path, 'r', encoding='utf-8') as f:
             code = f.read()
 
-        # --- Removed: Code block for reading example.json ---
-
         # --- Changed: Load test cases from test_cases.json and extract first as example ---
         primary_example_data = None
         all_test_cases = None
@@ -51,21 +49,24 @@ def get_function_metadata(file_path):
             try:
                 with open(test_cases_file_path, 'r', encoding='utf-8') as f_test_cases:
                     test_data = json.load(f_test_cases)
-                    # Expecting the list under a "test_cases" key
-                    if "test_cases" in test_data and isinstance(test_data["test_cases"], list):
-                         all_test_cases = test_data["test_cases"]
-                         # Filter test cases for demo examples
-                         demo_test_cases = [tc for tc in all_test_cases if tc.get("demo", True)]
-                         if demo_test_cases:
-                             primary_example_data = demo_test_cases[0] # Use the first demo test case as the primary example
-                         else:
-                             print(f"Warning: No demo test cases found in {test_cases_file_path}")
+                    # Support both top-level array and 'test_cases' key
+                    if isinstance(test_data, list):
+                        all_test_cases = test_data
+                    elif "test_cases" in test_data and isinstance(test_data["test_cases"], list):
+                        all_test_cases = test_data["test_cases"]
                     else:
-                         print(f"Warning: 'test_cases' key (list) not found or invalid in {test_cases_file_path}")
+                        print(f"Warning: test_cases.json format not recognized in {test_cases_file_path}")
+                    # Filter test cases for demo examples
+                    if all_test_cases:
+                        demo_test_cases = [tc for tc in all_test_cases if tc.get("demo", True)]
+                        if demo_test_cases:
+                            primary_example_data = demo_test_cases[0] # Use the first demo test case as the primary example
+                        else:
+                            print(f"Warning: No demo test cases found in {test_cases_file_path}")
             except json.JSONDecodeError as e:
                 print(f"Error reading or parsing {test_cases_file_path}: {e}")
             except Exception as e:
-                 print(f"Error processing {test_cases_file_path}: {e}")
+                print(f"Error processing {test_cases_file_path}: {e}")
         else:
             print(f"Warning: No test_cases.json found for {module_name}")
         # --- End Changed ---

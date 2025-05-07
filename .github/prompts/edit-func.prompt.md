@@ -51,7 +51,7 @@ If your function returns other Python types such as a list, set, or other non-sc
 
 ## Python Implementation File (`my_function.py`)
 
-Contains the main Python function implementation. [See example](../../examples/text/ai_ask/ai_ask.py)
+Contains the main Python function implementation.
 
 -   Imports should be at the top.
 -   The main function should accept 2D lists or scalars as input.
@@ -63,7 +63,7 @@ Contains the main Python function implementation. [See example](../../examples/t
 
 ## Test File (`test_my_function.py`)
 
-Contains unit tests using `pytest`. [See example](../../examples/text/ai_ask/test_ai_ask.py)
+Contains unit tests using `pytest`.
 
 -   Should load test cases from `test_cases.json`.
 -   Include tests for both success and failure paths.
@@ -79,7 +79,7 @@ Contains unit tests using `pytest`. [See example](../../examples/text/ai_ask/tes
 
 ## Test Cases File (`test_cases.json`)
 
-Stores structured test data used by `test_my_function.py`. [See example](../../examples/text/ai_ask/test_cases.json)
+Stores structured test data used by `test_my_function.py`.
 
 -   Allows for easy addition and management of multiple test scenarios.
 -   Each test case can include an ID, description, input arguments, and expected outcomes or checks.
@@ -101,7 +101,7 @@ Stores structured test data used by `test_my_function.py`. [See example](../../e
 
 ## Documentation File (`my_function.md`)
 
-Provides user-facing documentation. [See example](../../examples/text/ai_ask/ai_ask.md)
+Provides user-facing documentation.
 
 -   Include an overview section.
 -   Detail function usage with argument descriptions in a table.

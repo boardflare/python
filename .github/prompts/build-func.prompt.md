@@ -20,7 +20,7 @@ examples
 
 ## Python Implementation File (`my_function.py`)
 
-Contains the main Python function implementation.
+Contains the main Python function implementation. [See example](../../examples/text/ai_ask/ai_ask.py)
 
 -   Imports should be at the top.
 -   The main function should accept 2D lists or scalars as input.

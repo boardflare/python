@@ -782,7 +782,28 @@
     "name": "internet_csv",
     "description": "Fetches a CSV file from the internet (with CORS proxy) and returns its contents as a 2D list.",
     "code": "import csv\nimport io\nimport requests\n\n\ndef internet_csv(url):\n    \"\"\"\n    Fetches a CSV file from the internet (with CORS proxy) and returns its contents as a 2D list.\n\n    Args:\n        url (str): The direct URL to the CSV file.\n\n    Returns:\n        list[list[str]]: 2D list representing the CSV contents, where each sublist is a row.\n\n    Raises:\n        ValueError: If the URL is invalid or the content cannot be parsed as CSV.\n    \"\"\"\n    if not isinstance(url, str) or not url.strip():\n        raise ValueError(\"A non-empty URL string must be provided.\")\n\n    cors_url = f\"https://cors.boardflare.com/{url}\"\n    try:\n        response = requests.get(cors_url)\n        response.raise_for_status()\n        content = response.text\n        reader = csv.reader(io.StringIO(content))\n        data = [row for row in reader]\n        if not data:\n            raise ValueError(\"CSV file is empty or could not be parsed.\")\n        return data\n    except Exception as e:\n        raise ValueError(f\"Failed to fetch or parse CSV: {e}\")\n",
-    "test_cases": [],
+    "test_cases": [
+      {
+        "id": "zillow_market_heat_index",
+        "description": "Import the Zillow Market Heat Index for major US metro areas as a range in Excel.",
+        "arguments": {
+          "url": "https://files.zillowstatic.com/research/public_csvs/market_temp_index/Metro_market_temp_index_uc_sfrcondo_month.csv?t=1746621339"
+        },
+        "expected_type": "list",
+        "expected_rows": 5,
+        "demo": true
+      },
+      {
+        "id": "zillow_new_construction_sales",
+        "description": "Import Zillow New Construction Sales data for major US metro areas as a range in Excel.",
+        "arguments": {
+          "url": "https://files.zillowstatic.com/research/public_csvs/new_con_sales_count_raw/Metro_new_con_sales_count_raw_uc_sfrcondo_month.csv?t=1746621339"
+        },
+        "expected_type": "list",
+        "expected_rows": 5,
+        "demo": true
+      }
+    ],
     "fileId": "8",
     "link": "https://www.boardflare.com/resources/python-functions/text/internet_csv"
   },

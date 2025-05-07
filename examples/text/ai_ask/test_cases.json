@@ -1,148 +1,146 @@
-{
-    "test_cases": [
-        {
-            "id": "test_hr_engagement_summary",
-            "description": "HR: Summarize employee engagement survey results.",
-            "arguments": {
-                "prompt": "Summarize the key findings from the employee engagement survey:",
-                "data": [
-                    [
-                        "Question",
-                        "Score"
-                    ],
-                    [
-                        "Team collaboration",
-                        4.5
-                    ],
-                    [
-                        "Workload",
-                        3.2
-                    ],
-                    [
-                        "Career advancement",
-                        3.0
-                    ],
-                    [
-                        "Management support",
-                        4.0
-                    ]
+[
+    {
+        "id": "test_hr_engagement_summary",
+        "description": "HR: Summarize employee engagement survey results.",
+        "arguments": {
+            "prompt": "Summarize the key findings from the employee engagement survey:",
+            "data": [
+                [
+                    "Question",
+                    "Score"
+                ],
+                [
+                    "Team collaboration",
+                    4.5
+                ],
+                [
+                    "Workload",
+                    3.2
+                ],
+                [
+                    "Career advancement",
+                    3.0
+                ],
+                [
+                    "Management support",
+                    4.0
                 ]
-            },
-            "expected_contains_any": [
-                "collaboration",
-                "workload",
-                "career"
-            ],
-            "expected_rows": 1,
-            "demo": true
+            ]
         },
-        {
-            "id": "test_sales_quarterly_analysis",
-            "description": "Sales: Analyze quarterly sales data and provide insights.",
-            "arguments": {
-                "prompt": "Provide a brief analysis of the quarterly sales performance:",
-                "data": [
-                    [
-                        "Region",
-                        "Q1",
-                        "Q2",
-                        "Q3",
-                        "Q4"
-                    ],
-                    [
-                        "North",
-                        120,
-                        135,
-                        150,
-                        160
-                    ],
-                    [
-                        "South",
-                        100,
-                        110,
-                        120,
-                        130
-                    ],
-                    [
-                        "Central",
-                        90,
-                        95,
-                        100,
-                        105
-                    ]
+        "expected_contains_any": [
+            "collaboration",
+            "workload",
+            "career"
+        ],
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "test_sales_quarterly_analysis",
+        "description": "Sales: Analyze quarterly sales data and provide insights.",
+        "arguments": {
+            "prompt": "Provide a brief analysis of the quarterly sales performance:",
+            "data": [
+                [
+                    "Region",
+                    "Q1",
+                    "Q2",
+                    "Q3",
+                    "Q4"
+                ],
+                [
+                    "North",
+                    120,
+                    135,
+                    150,
+                    160
+                ],
+                [
+                    "South",
+                    100,
+                    110,
+                    120,
+                    130
+                ],
+                [
+                    "Central",
+                    90,
+                    95,
+                    100,
+                    105
                 ]
-            },
-            "expected_contains_any": [
-                "North",
-                "growth",
-                "sales"
-            ],
-            "expected_rows": 1,
-            "demo": true
+            ]
         },
-        {
-            "id": "test_operations_incident_summary",
-            "description": "Operations: Summarize an incident report.",
-            "arguments": {
-                "prompt": "Summarize the following incident report in one sentence:",
-                "data": [
-                    [
-                        "On April 10th, a system outage affected order processing for 2 hours. The IT team resolved the issue by updating server configurations. No data loss occurred."
-                    ]
+        "expected_contains_any": [
+            "North",
+            "growth",
+            "sales"
+        ],
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "test_operations_incident_summary",
+        "description": "Operations: Summarize an incident report.",
+        "arguments": {
+            "prompt": "Summarize the following incident report in one sentence:",
+            "data": [
+                [
+                    "On April 10th, a system outage affected order processing for 2 hours. The IT team resolved the issue by updating server configurations. No data loss occurred."
                 ]
-            },
-            "expected_contains_any": [
-                "outage",
-                "resolved",
-                "data loss"
-            ],
-            "expected_rows": 1,
-            "demo": true
+            ]
         },
-        {
-            "id": "test_business_followup_email",
-            "description": "Business Writing: Draft a customer follow-up email.",
-            "arguments": {
-                "prompt": "Draft a follow-up email to a client after a successful product demo."
-            },
-            "expected_contains_any_lower": [
-                "thank you",
-                "product",
-                "next steps"
-            ],
-            "expected_rows": 1,
-            "demo": true
+        "expected_contains_any": [
+            "outage",
+            "resolved",
+            "data loss"
+        ],
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "test_business_followup_email",
+        "description": "Business Writing: Draft a customer follow-up email.",
+        "arguments": {
+            "prompt": "Draft a follow-up email to a client after a successful product demo."
         },
-        {
-            "id": "test_parameters",
-            "description": "Test that all optional parameters work correctly",
-            "arguments": {
-                "prompt": "Write a very short test response",
-                "temperature": 0.8,
-                "max_tokens": 50,
-                "model": "mistral-small-latest"
-            },
-            "expected_rows": 1,
-            "demo": false
+        "expected_contains_any_lower": [
+            "thank you",
+            "product",
+            "next steps"
+        ],
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "test_parameters",
+        "description": "Test that all optional parameters work correctly",
+        "arguments": {
+            "prompt": "Write a very short test response",
+            "temperature": 0.8,
+            "max_tokens": 50,
+            "model": "mistral-small-latest"
         },
-        {
-            "id": "test_different_models_default",
-            "description": "Test that different models can be used (default)",
-            "arguments": {
-                "prompt": "Write a one-sentence test response"
-            },
-            "expected_rows": 1,
-            "demo": false
+        "expected_rows": 1,
+        "demo": false
+    },
+    {
+        "id": "test_different_models_default",
+        "description": "Test that different models can be used (default)",
+        "arguments": {
+            "prompt": "Write a one-sentence test response"
         },
-        {
-            "id": "test_different_models_specified",
-            "description": "Test that different models can be used (specified)",
-            "arguments": {
-                "prompt": "Write a one-sentence test response",
-                "model": "mistral-small-latest"
-            },
-            "expected_rows": 1,
-            "demo": false
-        }
-    ]
-}
+        "expected_rows": 1,
+        "demo": false
+    },
+    {
+        "id": "test_different_models_specified",
+        "description": "Test that different models can be used (specified)",
+        "arguments": {
+            "prompt": "Write a one-sentence test response",
+            "model": "mistral-small-latest"
+        },
+        "expected_rows": 1,
+        "demo": false
+    }
+]

@@ -12,7 +12,7 @@ def load_test_cases():
     
     # Wrap each case in pytest.param, using 'id' for test identification
     return [pytest.param(case, id=case.get("id", f"test_case_{i}")) 
-            for i, case in enumerate(data.get("test_cases", []))]
+            for i, case in enumerate(data)]
 
 # Parameterized test function
 @pytest.mark.parametrize("test_case", load_test_cases())

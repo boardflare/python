@@ -1,5 +1,6 @@
 import pytest
 import json
+import os
 from pathlib import Path
 from ai_choice import ai_choice
 
@@ -8,9 +9,7 @@ def load_test_cases():
     """Loads test cases from the test_cases.json file."""
     test_case_path = Path(__file__).parent / "test_cases.json"
     with open(test_case_path, 'r') as f:
-        data = json.load(f)
-    return [pytest.param(case, id=case.get("id", f"test_case_{i}"))
-            for i, case in enumerate(data.get("test_cases", []))]
+        return json.load(f)
 
 # Parameterized test function
 @pytest.mark.parametrize("test_case", load_test_cases())
