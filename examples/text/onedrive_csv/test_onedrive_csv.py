@@ -42,7 +42,10 @@ def acquire_graph_token_device_code():
 
 def test_data():
     # Acquire token using MSAL device code flow with persistent cache relative to this script
-    onedrive_csv.graphToken = acquire_graph_token_device_code()
+    # Set token in the onedrive_csv module's global namespace
+    token = acquire_graph_token_device_code()
+    # This sets the token in the module where the onedrive_csv function is defined
+    onedrive_csv.__globals__["graphToken"] = token
     onedrive_csv("/Documents/data.csv")
 
 # Use:  python -m pytest -s examples/text/onedrive_csv/test_onedrive_csv.py if token refresh is needed
