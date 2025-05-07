@@ -17,7 +17,7 @@
         },
         "expected_type": "list",
         "expected_rows": 5,
-        "demo": true
+        "demo": false
     },
     {
         "id": "empty_url",

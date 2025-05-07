@@ -792,16 +792,6 @@
         "expected_type": "list",
         "expected_rows": 5,
         "demo": true
-      },
-      {
-        "id": "zillow_new_construction_sales",
-        "description": "Import Zillow New Construction Sales data for major US metro areas as a range in Excel.",
-        "arguments": {
-          "url": "https://files.zillowstatic.com/research/public_csvs/new_con_sales_count_raw/Metro_new_con_sales_count_raw_uc_sfrcondo_month.csv?t=1746621339"
-        },
-        "expected_type": "list",
-        "expected_rows": 5,
-        "demo": true
       }
     ],
     "fileId": "8",
