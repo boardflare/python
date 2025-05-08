@@ -10,11 +10,11 @@ export default {
         try {
             const url = new URL(request.url);
 
-            // Return simple usage info for root path
-            if (url.pathname === "/") {
+            // Return simple usage info for root path (GET only)
+            if (url.pathname === "/" && request.method === "GET") {
                 return Response.json({
-                    usage: `${url.origin}/proxy?url=<target_url>`,
-                    description: "IP proxy service for making GET requests"
+                    usage: `${url.origin}/ (POST with Bright Data API body)`,
+                    description: "IP proxy service for making POST requests to Bright Data API. Pass the Bright Data API body in the request body."
                 }, { headers });
             }
 
@@ -23,77 +23,54 @@ export default {
                 return new Response(null, { headers });
             }
 
-            // Only support the /proxy endpoint
-            if (url.pathname !== "/proxy") {
+            // Only support the root endpoint for POST
+            if (url.pathname !== "/" || request.method !== "POST") {
                 return Response.json({
                     success: false,
-                    error: "Invalid endpoint. Use /proxy?url=<target_url>"
+                    error: "Invalid endpoint or method. Use POST / with Bright Data API body."
                 }, { status: 404, headers });
             }
 
-            // Get target URL from query parameters
-            const targetUrl = url.searchParams.get("url");
-
-            if (!targetUrl) {
+            // Extract Bright Data API token from environment variables
+            const brightDataToken = env.BRIGHTDATA_TOKEN || "";
+            if (!brightDataToken) {
                 return Response.json({
                     success: false,
-                    error: "Missing 'url' parameter"
-                }, { status: 400, headers });
+                    error: "Missing Bright Data API token in environment variables."
+                }, { status: 500, headers });
             }
 
-            // Extract proxy information from environment variables
-            const proxyUrl = env.PROXY_URL || "brd.superproxy.io:33335";
-            const proxyUsername = env.PROXY_USERNAME || "";
-            const proxyPassword = env.PROXY_PASSWORD || "";
-            
-            // The key part: Instead of trying to use a forward proxy directly,
-            // construct the Bright Data super proxy URL with the target embedded
-            // Bright Data uses a specific format where we encode the target in the path
-            
-            // Extract parts from the target URL
-            const targetUrlObj = new URL(targetUrl);
-            const protocol = targetUrlObj.protocol.replace(':', '');
-            const hostAndPath = targetUrl.replace(`${targetUrlObj.protocol}//`, '');
-            
-            // Format: http(s)://{username}:{password}@{proxy-server}/{protocol}/{host}/{path}
-            // We need to separate host and path, and URL encode them properly
-            const [host, ...pathParts] = hostAndPath.split('/');
-            const path = pathParts.join('/');
-            
-            // Construct the final proxy URL
-            // This is specific to how Bright Data proxy works - it's not a standard HTTP forward proxy
-            // Instead, it uses a REST API style format with the target embedded in the URL
-            const proxyFullUrl = `http://${proxyUsername}:${proxyPassword}@${proxyUrl}/${protocol}/${host}/${path}`;
-            
-            // Set standard browsing headers
-            const requestHeaders = new Headers({
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
-            });
-            
-            // Forward the request through the Bright Data super proxy
-            const proxyResponse = await fetch(proxyFullUrl, {
-                method: 'GET',
-                headers: requestHeaders,
-                redirect: 'follow'
+            // Prepare Bright Data REST API request
+            const apiUrl = "https://api.brightdata.com/request";
+
+            // Set up headers for the Bright Data API request
+            const apiHeaders = {
+                'Authorization': `Bearer ${brightDataToken}`,
+                'Content-Type': 'application/json'
+            };
+
+            // Read and log the request body
+            const body = await request.json();
+            console.log("Request body:", body);
+            const bodyString = JSON.stringify(body);
+            console.log("Stringified body sent to Bright Data API:", bodyString);
+
+            // POST to Bright Data REST API with the client's raw body
+            const apiResponse = await fetch(apiUrl, {
+                method: 'POST',
+                headers: apiHeaders,
+                body: bodyString
             });
 
-            // Return the response with CORS headers
-            const newResponse = new Response(proxyResponse.body, {
-                status: proxyResponse.status,
-                statusText: proxyResponse.statusText,
-                headers: proxyResponse.headers
+            // Read the response as text (Bright Data returns raw HTML as string)
+            const text = await apiResponse.text();
+            console.log("Response from Bright Data API:", text);
+            const responseHeaders = new Headers({ ...headers, 'Content-Type': 'text/html' });
+            return new Response(text, {
+                status: apiResponse.status,
+                statusText: apiResponse.statusText,
+                headers: responseHeaders
             });
-            
-            // Add CORS headers
-            Object.entries(headers).forEach(([key, value]) => {
-                newResponse.headers.set(key, value);
-            });
-
-            return newResponse;
         } catch (error) {
             console.error("Proxy error:", error);
             return Response.json({

@@ -1,8 +1,7 @@
 import requests
 import json
 import re
-from urllib.parse import urlparse, parse_qs, urlencode
-import os
+from urllib.parse import urlparse
 
 def zillow(search_location, property_type="all", min_price=None, max_price=None, 
            min_beds=None, max_beds=None, min_baths=None, max_baths=None, limit=10, 
@@ -37,7 +36,7 @@ def zillow(search_location, property_type="all", min_price=None, max_price=None,
     """
     def send_request_through_proxy(target_url):
         """
-        Sends a request to Zillow through proxy to solve cors and blocking issues.
+        Sends a request to Zillow through proxy to avoid cors and IP blocking issues.
         
         Args:
             target_url (str): Target URL to fetch
@@ -45,29 +44,24 @@ def zillow(search_location, property_type="all", min_price=None, max_price=None,
         Returns:
             requests.Response: Response from the server
         """
-        # Use the Boardflare proxy URL, or optionally your own from BrightData, etc.
-        proxy_url = "https://ip_proxy.boardflare.com"
-        
-        # Form the proxy URL with the target as a parameter
-        proxy_endpoint = f"{proxy_url}/proxy"
-        params = {'url': target_url}
-        
-        # Define standard headers
+        body = {
+            "zone": "datacenter_proxy1",
+            "url": target_url,
+            "format": "raw",
+        }
         headers = {
+            "Content-Type": "application/json",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.5",
             "Referer": "https://www.zillow.com/",
             "Cache-Control": "no-cache"
         }
-        
-        # Send the request through the worker proxy with GET method
-        response = requests.get(
-            url=proxy_endpoint,
+        response = requests.post(
+            url="http://127.0.0.1:8787", #"https://proxy.boardflare.com/",
             headers=headers,
-            params=params
+            data=json.dumps(body)
         )
-        
         return response
 
     def get_property_by_id(property_id):
@@ -80,20 +74,24 @@ def zillow(search_location, property_type="all", min_price=None, max_price=None,
         Returns:
             dict: Property data
         """
-        # Determine if it's a home ID (numeric) or department ID (alphanumeric)
-        is_home_id = property_id.isdigit()
-        
-        # Construct URL based on ID type
-        if is_home_id:
-            url = f"https://www.zillow.com/graphql/?zpid={property_id}&contactFormRenderParameter=&queryId=6536f1e817fcf99dcb31e36e1c4a9d1c"
-        else:
-            url = f"https://www.zillow.com/graphql/?propertyId={property_id}&contactFormRenderParameter=&queryId=9e73b548e0cfb0f0dfb02f85f91e383e"
-        
-        response = send_request_through_proxy(url)
-        response.raise_for_status()
-        data = response.json()
-        
-        return data
+        try:
+            # Determine if it's a home ID (numeric) or department ID (alphanumeric)
+            is_home_id = property_id.isdigit()
+            
+            # Construct URL based on ID type
+            if is_home_id:
+                url = f"https://www.zillow.com/graphql/?zpid={property_id}&contactFormRenderParameter=&queryId=6536f1e817fcf99dcb31e36e1c4a9d1c"
+            else:
+                url = f"https://www.zillow.com/graphql/?propertyId={property_id}&contactFormRenderParameter=&queryId=9e73b548e0cfb0f0dfb02f85f91e383e"
+            
+            response = send_request_through_proxy(url)
+            response.raise_for_status()
+            data = response.json()
+            
+            return data
+        except Exception as e:
+            print(f"[get_property_by_id] Error: {type(e).__name__}: {e}")
+            raise
 
     def get_property_by_url(property_url):
         """
@@ -105,51 +103,54 @@ def zillow(search_location, property_type="all", min_price=None, max_price=None,
         Returns:
             dict: Property data
         """
-        # Extract property ID from URL
-        parsed_url = urlparse(property_url)
-        path = parsed_url.path
-        
-        # Try to detect the type of URL and extract the ID
-        if "homedetails" in path:
-            # Format: /homedetails/123-Main-St-City-ST-12345/12345_zpid/
-            match = re.search(r'(\d+)_zpid', path)
+        try:
+            # Extract property ID from URL
+            parsed_url = urlparse(property_url)
+            path = parsed_url.path
+            
+            # Try to detect the type of URL and extract the ID
+            if "homedetails" in path:
+                # Format: /homedetails/123-Main-St-City-ST-12345/12345_zpid/
+                match = re.search(r'(\d+)_zpid', path)
+                if match:
+                    property_id = match.group(1)
+                    return get_property_by_id(property_id)
+            elif "apartments" in path:
+                # Format: /apartments/city-st/property-name/ID/
+                segments = path.strip('/').split('/')
+                if len(segments) >= 4:
+                    property_id = segments[-1]
+                    return get_property_by_id(property_id)
+            
+            # If we can't parse the ID, try to fetch the page and extract data
+            response = send_request_through_proxy(property_url)
+            response.raise_for_status()
+            html_content = response.text
+            
+            # Extract the property data from the HTML
+            # Look for the data in the window.__PRELOADED_STATE__ variable
+            match = re.search(r'window\.__PRELOADED_STATE__\s*=\s*({.*?});', html_content, re.DOTALL)
             if match:
-                property_id = match.group(1)
-                return get_property_by_id(property_id)
-        elif "apartments" in path:
-            # Format: /apartments/city-st/property-name/ID/
-            segments = path.strip('/').split('/')
-            if len(segments) >= 4:
-                property_id = segments[-1]
-                return get_property_by_id(property_id)
-        
-        # If we can't parse the ID, try to fetch the page and extract data
-        response = send_request_through_proxy(property_url)
-        response.raise_for_status()
-        html_content = response.text
-        
-        # Extract the property data from the HTML
-        # Look for the data in the window.__PRELOADED_STATE__ variable
-        match = re.search(r'window\.__PRELOADED_STATE__\s*=\s*({.*?});', html_content, re.DOTALL)
-        if match:
-            json_str = match.group(1)
-            try:
-                data = json.loads(json_str)
-                return data
-            except json.JSONDecodeError:
-                pass
-                
-        # If not found, try to extract from hdpApolloPreloadedData
-        match = re.search(r'<script data-zrr-shared-data-key="hdpApolloPreloadedData" type="application/json">(.*?)</script>', html_content, re.DOTALL)
-        if match:
-            json_str = match.group(1).replace('&quot;', '"')
-            try:
-                data = json.loads(json_str)
-                return data
-            except json.JSONDecodeError:
-                pass
-        
-        return None
+                json_str = match.group(1)
+                try:
+                    data = json.loads(json_str)
+                    return data
+                except json.JSONDecodeError as jde:
+                    print(f"[get_property_by_url] JSON decode error: {jde}")
+            # If not found, try to extract from hdpApolloPreloadedData
+            match = re.search(r'<script data-zrr-shared-data-key="hdpApolloPreloadedData" type="application/json">(.*?)</script>', html_content, re.DOTALL)
+            if match:
+                json_str = match.group(1).replace('&quot;', '"')
+                try:
+                    data = json.loads(json_str)
+                    return data
+                except json.JSONDecodeError as jde:
+                    print(f"[get_property_by_url] JSON decode error: {jde}")
+            
+            return None
+        except Exception as e:
+            print(f"[get_property_by_url] Error: {type(e).__name__}: {e}")
+            raise
 
     def search_properties(search_type, search_value, property_type, 
                        min_beds, max_beds, min_baths, max_baths, 
@@ -178,65 +179,70 @@ def zillow(search_location, property_type="all", min_price=None, max_price=None,
         Returns:
             list: List of property data
         """
-        # Build filter state according to property type
-        filter_state = build_filter_state(property_type, min_price, max_price, min_beds, max_beds, min_baths, max_baths)
-        
-        # Build URL for search type
-        base_url = "https://www.zillow.com/search/GetSearchPageState.htm"
-        
-        # Prepare the search query parameters
-        params = {
-            "searchQueryState": json.dumps({
-                "pagination": {},
-                "usersSearchTerm": search_value,
-                "mapBounds": {
-                    "west": sw_long,
-                    "east": ne_long,
-                    "south": sw_lat,
-                    "north": ne_lat
-                },
-                "mapZoom": zoom_value,
-                "isMapVisible": True,
-                "filterState": filter_state,
-                "isListVisible": True,
-                "category": "cat1" if search_type == "for_sale" else ("cat2" if search_type == "for_rent" else "cat3")
-            }),
-            "wants": json.dumps({"cat1": ["listResults", "mapResults"], "cat2": ["listResults", "mapResults"], "cat3": ["listResults", "mapResults"]}),
-            "requestId": 1
-        }
-        
-        # Build full URL with parameters for the proxy
-        full_url = f"{base_url}?{urlencode(params)}"
-        
-        # Make request through proxy
-        response = send_request_through_proxy(full_url)
-        response.raise_for_status()
-        search_data = response.json()
-        
-        # Process results based on search type
-        cat_key = "cat1" if search_type == "for_sale" else ("cat2" if search_type == "for_rent" else "cat3")
-        
-        properties = []
-        
-        # Get map results
-        if "searchResults" in search_data and "mapResults" in search_data["searchResults"]:
-            map_results = search_data["searchResults"]["mapResults"]
+        try:
+            # Build filter state according to property type
+            filter_state = build_filter_state(property_type, min_price, max_price, min_beds, max_beds, min_baths, max_baths)
             
-            for i, property_data in enumerate(map_results):
-                if i >= limit:
-                    break
-                properties.append(format_property_data(property_data))
+            # Build URL for search type
+            base_url = "https://www.zillow.com/search/GetSearchPageState.htm"
+            
+            # Prepare the search query parameters
+            params = {
+                "searchQueryState": json.dumps({
+                    "pagination": {},
+                    "usersSearchTerm": search_value,
+                    "mapBounds": {
+                        "west": sw_long,
+                        "east": ne_long,
+                        "south": sw_lat,
+                        "north": ne_lat
+                    },
+                    "mapZoom": zoom_value,
+                    "isMapVisible": True,
+                    "filterState": filter_state,
+                    "isListVisible": True,
+                    "category": "cat1" if search_type == "for_sale" else ("cat2" if search_type == "for_rent" else "cat3")
+                }),
+                "wants": json.dumps({"cat1": ["listResults", "mapResults"], "cat2": ["listResults", "mapResults"], "cat3": ["listResults", "mapResults"]}),
+                "requestId": 1
+            }
+            
+            # Build full URL with parameters for the proxy
+            from urllib.parse import urlencode
+            full_url = f"{base_url}?{urlencode(params)}"
+            
+            # Make request through proxy
+            response = send_request_through_proxy(full_url)
+            response.raise_for_status()
+            search_data = response.json()
+            
+            # Process results based on search type
+            cat_key = "cat1" if search_type == "for_sale" else ("cat2" if search_type == "for_rent" else "cat3")
+            
+            properties = []
+            
+            # Get map results
+            if "searchResults" in search_data and "mapResults" in search_data["searchResults"]:
+                map_results = search_data["searchResults"]["mapResults"]
+                
+                for i, property_data in enumerate(map_results):
+                    if i >= limit:
+                        break
+                    properties.append(format_property_data(property_data))
                     
-        # Get list results if map results are not available
-        elif cat_key in search_data and "searchResults" in search_data[cat_key] and "listResults" in search_data[cat_key]["searchResults"]:
-            list_results = search_data[cat_key]["searchResults"]["listResults"]
+            # Get list results if map results are not available
+            elif cat_key in search_data and "searchResults" in search_data[cat_key] and "listResults" in search_data[cat_key]["searchResults"]:
+                list_results = search_data[cat_key]["searchResults"]["listResults"]
+                
+                for i, property_data in enumerate(list_results):
+                    if i >= limit:
+                        break
+                    properties.append(format_property_data(property_data))
             
-            for i, property_data in enumerate(list_results):
-                if i >= limit:
-                    break
-                properties.append(format_property_data(property_data))
-        
-        return properties
+            return properties
+        except Exception as e:
+            print(f"[search_properties] Error: {type(e).__name__}: {e}")
+            raise
 
     def format_property_data(property_data):
         """
@@ -448,11 +454,6 @@ def zillow(search_location, property_type="all", min_price=None, max_price=None,
             ])
         
         return properties
-
-    # Configure proxy settings from the provided URL
-    proxy_url = "brd.superproxy.io:33335"
-    proxy_username = "brd-customer-hl_28f1415f-zone-datacenter_proxy1-country-us"
-    proxy_password = "axp760dcafwz"
     
     # Input validation
     if not search_location or not isinstance(search_location, str):
@@ -521,8 +522,10 @@ def zillow(search_location, property_type="all", min_price=None, max_price=None,
             result.append(["No properties found matching your criteria", "", "", "", "", "", "", "", "", ""])
             
     except Exception as e:
+        import traceback
+        print(f"[zillow] Error: {type(e).__name__}: {e}")
+        traceback.print_exc()
         # If the request fails, fall back to sample data
-        print(f"Error fetching Zillow data: {str(e)}")
         properties = get_sample_properties(search_location, property_type, min_price, max_price, 
                                           min_beds, max_beds, min_baths, max_baths, limit)
         result.extend(properties)

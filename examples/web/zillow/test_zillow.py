@@ -61,4 +61,4 @@ def test_zillow_parametrized(test_case):
         pytest.fail(f"Test ID: {test_case.get('id')} - Exception occurred: {str(e)}")
 
 if __name__ == "__main__":
-    pytest.main(["-v", __file__])
+    pytest.main(["-v", "-s", __file__])
