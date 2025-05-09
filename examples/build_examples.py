@@ -97,6 +97,12 @@ def main():
 
     # Find all .py files in all subdirectories that are not test files
     for py_file in examples_dir.rglob("*.py"):
+        # Skip files in directories starting with underscore
+        relative_parts = py_file.relative_to(examples_dir).parts
+        if any(part.startswith("_") for part in relative_parts[:-1]):
+            print(f"Skipping file in underscore folder: {py_file}")
+            continue
+        
         # Skip files at the root of examples directory
         if py_file.parent == examples_dir:
             print(f"Skipping root file: {py_file.name}")
