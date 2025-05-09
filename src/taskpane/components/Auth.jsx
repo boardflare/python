@@ -241,3 +241,87 @@ async function isTokenValid(token) {
         return false;
     }
 }
+
+// Add AuthContext to provide auth state and a refresh function
+export const AuthContext = React.createContext();
+
+export function AuthProvider({ children }) {
+    const [refreshKey, setRefreshKey] = React.useState(0);
+    const [isSignedIn, setIsSignedIn] = React.useState(false);
+    const [userEmail, setUserEmail] = React.useState(null);
+    const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        let mounted = true;
+        async function check() {
+            try {
+                await initializeDB();
+                const tokenObj = await getStoredToken();
+                if (!tokenObj) {
+                    if (mounted) {
+                        setIsSignedIn(false);
+                        setUserEmail(null);
+                        setLoading(false);
+                    }
+                    return;
+                }
+                const isValid = await isTokenValid(tokenObj.auth_token);
+                if (!isValid) {
+                    await removeToken();
+                    if (mounted) {
+                        setIsSignedIn(false);
+                        setUserEmail(null);
+                        setLoading(false);
+                    }
+                    return;
+                }
+                if (mounted) {
+                    setIsSignedIn(true);
+                    setUserEmail(tokenObj.tokenClaims?.email || tokenObj.tokenClaims?.upn || null);
+                    setLoading(false);
+                }
+            } catch (error) {
+                if (mounted) {
+                    setIsSignedIn(false);
+                    setUserEmail(null);
+                    setLoading(false);
+                }
+            }
+        }
+        check();
+        return () => { mounted = false; };
+    }, [refreshKey]);
+
+    // Logout: remove token and clear MSAL cache
+    const logout = async (onLogout) => {
+        try {
+            await removeToken();
+            setIsSignedIn(false);
+            setUserEmail(null);
+            // Remove all MSAL accounts from cache
+            const accounts = pca.getAllAccounts();
+            for (const acc of accounts) {
+                await pca.logoutPopup({ account: acc });
+            }
+            setRefreshKey(k => k + 1);
+            if (typeof onLogout === 'function') {
+                onLogout();
+            }
+        } catch (error) {
+            // ignore
+        }
+    };
+
+    // Call this after login to refresh auth state
+    const refreshAuth = () => setRefreshKey(k => k + 1);
+
+    return (
+        <AuthContext.Provider value={{ isSignedIn, userEmail, loading, logout, refreshAuth }}>
+            {children}
+        </AuthContext.Provider>
+    );
+}
+
+export function useAuth() {
+    return React.useContext(AuthContext);
+}

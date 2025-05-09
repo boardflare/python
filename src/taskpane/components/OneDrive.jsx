@@ -3,7 +3,7 @@ import { loadFunctionFiles, deleteFile, TokenExpiredError } from "../utils/drive
 import { saveWorkbookOnly } from "../utils/save";
 import { parsePython } from "../utils/codeparser";
 import { storeScopes } from "../utils/indexedDB";
-import { authenticateWithDialog, refreshToken } from "./Auth";
+import { authenticateWithDialog, refreshToken, useAuth } from "./Auth";
 import { pyLogs } from "../utils/logs";
 
 const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRefresh }) => {
@@ -12,6 +12,7 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
     const [onedriveFunctions, setOnedriveFunctions] = React.useState([]);
     const [folderUrl, setFolderUrl] = React.useState(null);
     const [deleteConfirm, setDeleteConfirm] = React.useState(null);
+    const { isSignedIn, userEmail, loading, logout, refreshAuth } = useAuth();
 
     const loadOnedriveFunctions = async () => {
         try {
@@ -89,9 +90,10 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
 
     const handleLogin = async () => {
         try {
-            const updatedScopes = await storeScopes(["Files.ReadWrite"]); // Capture returned scopes
+            const updatedScopes = await storeScopes(["Files.ReadWrite"]);
             console.log('Updated scopes:', updatedScopes);
             await authenticateWithDialog();
+            refreshAuth(); // Refresh auth state after login
             loadOnedriveFunctions?.();
             pyLogs({
                 ref: 'onedrive_login_success'
@@ -103,6 +105,13 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
                 ref: 'onedrive_login_error'
             });
         }
+    };
+
+    const handleLogout = async () => {
+        await logout(() => {
+            loadOnedriveFunctions();
+            refreshAuth(); // Refresh auth state after logout
+        });
     };
 
     // Styled table for OneDrive
@@ -145,45 +154,13 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
         </div>
     );
 
-    if (!folderUrl) {
+    // Only render UI after loading is false to prevent flash
+    if (loading) {
         return (
             <div className="flex flex-col items-center w-full">
                 <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center w-full flex items-center justify-center gap-2">
                     OneDrive
-                    <button
-                        onClick={handleLogin}
-                        className="px-2 py-0 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-normal relative group text-sm"
-                        title="Login to save functions to OneDrive."
-                    >
-                        Login
-                    </button>
-                </div>
-                {/* Removed the separate div for the login button */}
-            </div>
-        );
-    }
-
-    if (isLoading) {
-        return (
-            <>
-                <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center w-full">
-                    OneDrive
-                </div>
-                <div className="p-4 text-gray-900 text-center">
-                    Loading OneDrive functions...
-                </div>
-            </>
-        );
-    }
-
-    if (onedriveFunctions.length === 0 && folderUrl) {
-        return (
-            <div className="w-full">
-                <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center w-full">
-                    OneDrive
-                </div>
-                <div className="text-center text-sm text-gray-500 mb-4">
-                    No functions
+                    <span className="ml-2 text-xs text-gray-400">Checking authentication...</span>
                 </div>
             </div>
         );
@@ -203,17 +180,41 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
                             'OneDrive'
                         )}
                     </div>
-                    {folderUrl && isPreview && (
+                    {folderUrl && isPreview && isSignedIn && (
                         <button onClick={loadOnedriveFunctions} className="text-blue-500 hover:text-blue-700"
                             title="Refresh OneDrive functions">
                             🔄
                         </button>
                     )}
+                    <div className="flex items-center ml-4">
+                        {isSignedIn ? (
+                            <>
+                                <span className="ml-2 text-gray-700 text-sm">{userEmail || 'User'}</span>
+                                <button
+                                    onClick={handleLogout}
+                                    className="ml-2 px-2 py-0 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-normal relative group text-sm"
+                                    title="Logout from OneDrive."
+                                >
+                                    Logout
+                                </button>
+                            </>
+                        ) : (
+                            <button
+                                onClick={handleLogin}
+                                className="px-2 py-0 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-normal relative group text-sm"
+                                title="Login to save functions to OneDrive."
+                            >
+                                Login
+                            </button>
+                        )}
+                    </div>
                 </div>
-                <OneDriveFunctionTable functions={onedriveFunctions} />
-                <div className="text-gray-500 p-1 text-center">
-                    Use ⬆️ or ⬇️to save between Workbook and OneDrive
-                </div>
+                <OneDriveFunctionTable functions={isSignedIn ? onedriveFunctions : []} />
+                {isSignedIn && (
+                    <div className="text-gray-500 p-1 text-center">
+                        Use ⬆️ or ⬇️to save between Workbook and OneDrive
+                    </div>
+                )}
             </div>
 
             {deleteConfirm && (
