@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Logout</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <script>
+        Office.onReady(function() {
+            // Clear MSAL and app tokens from localStorage and sessionStorage
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+            } catch (e) {
+                // Ignore errors
+            }
+            // Show message before redirecting to MSAL logout for this app only (not global logout)
+            setTimeout(function() {
+                window.location.href = `https://login.microsoftonline.com/common/oauth2/v2.0/logout?client_id=7fc35253-f44d-4c02-aea9-9b0b7a0a4b61&post_logout_redirect_uri=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
+            }, 500); // 500ms delay for user feedback
+        });
+    </script>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 40px; }
+    </style>
+</head>
+<body>
+    <p id="logout-message">Signing you out of the add-in...</p>
+</body>
+</html>

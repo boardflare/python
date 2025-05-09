@@ -25,7 +25,7 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
             setError(null);
             onLoadComplete?.(true); // Signal successful load
         } catch (error) {
-            console.error('Error loading OneDrive functions:', error);
+            //console.error('Error loading OneDrive functions:', error);
             setOnedriveFunctions([]);
             if (!(error instanceof TokenExpiredError)) {
                 setError('Failed to load OneDrive functions');

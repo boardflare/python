@@ -112,6 +112,12 @@ module.exports = async (env, options) => {
         template: "./src/taskpane/auth.html",
         chunks: ["auth"],
       }),
+      new HtmlWebpackPlugin({
+        filename: "logout.html",
+        template: "./src/taskpane/logout.html",
+        // No chunks needed for static logout page
+        inject: false
+      }),
       new CopyWebpackPlugin({
         patterns: [
           {

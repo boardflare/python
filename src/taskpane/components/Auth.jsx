@@ -294,21 +294,34 @@ export function AuthProvider({ children }) {
 
     // Logout: remove token and clear MSAL cache
     const logout = async (onLogout) => {
+        // Clear local tokens and state
+        localStorage.clear();
+        sessionStorage.clear();
+        await removeToken();
+        setIsSignedIn(false);
+        setUserEmail(null);
+        // Launch logout dialog (no Office.onReady check needed)
         try {
-            const accounts = pca.getAllAccounts();
-            for (const account of accounts) {
-                await pca.logoutPopup({ account });
-            }
-            // Optionally clear localStorage/sessionStorage if you store anything else
-            localStorage.clear();
-            sessionStorage.clear();
-            await removeToken();
-            setIsSignedIn(false);
-            setUserEmail(null);
-            if (onLogout) onLogout();
-        } catch (error) {
-            console.error("Logout error:", error);
+            window.Office.context.ui.displayDialogAsync(
+                window.location.origin + "/logout.html",
+                { height: 40, width: 30 },
+                (result) => {
+                    if (result.status === window.Office.AsyncResultStatus.Succeeded) {
+                        const dialog = result.value;
+                        // Close the dialog after 10 seconds
+                        setTimeout(() => dialog.close(), 30000);
+                    } else {
+                        // Optionally log or handle dialog launch failure
+                        console.error("Failed to launch logout dialog", result.error);
+                        alert("Failed to launch logout dialog: " + (result.error && result.error.message ? result.error.message : JSON.stringify(result)));
+                    }
+                }
+            );
+        } catch (e) {
+            console.error("displayDialogAsync threw an error", e);
+            alert("displayDialogAsync threw an error: " + e.message);
         }
+        if (onLogout) onLogout();
     };
 
     // Call this after login to refresh auth state
