@@ -20,24 +20,23 @@
         };
 
         Office.onReady(async function() {
+            // Initialize MSAL
+            const pca = new PublicClientApplication(msalConfig);
+            await pca.initialize();
+            // Clear MSAL and app tokens from localStorage and sessionStorage
             try {
-                // Clear MSAL and app tokens from localStorage and sessionStorage
                 localStorage.clear();
                 sessionStorage.clear();
             } catch (e) {
                 // Ignore errors
             }
-
-            // Initialize MSAL and perform logout
-            const pca = new PublicClientApplication(msalConfig);
-            await pca.initialize();
             // Get the current account (if any)
             const accounts = pca.getAllAccounts();
             const currentAccount = accounts && accounts.length > 0 ? accounts[0] : undefined;
-            // Use logoutRedirect with account for proper sign-out
+            // Use MSAL logoutRedirect to sign out of this application only
             await pca.logoutRedirect({
                 account: currentAccount,
-                postLogoutRedirectUri: window.location.origin + window.location.pathname
+                postLogoutRedirectUri: msalConfig.auth.redirectUri
             });
         });
     </script>

@@ -300,24 +300,24 @@ export function AuthProvider({ children }) {
         await removeToken();
         setIsSignedIn(false);
         setUserEmail(null);
-        // Launch logout dialog (no Office.onReady check needed)
-        try {
-            let logoutUrl;
-            if (window.location.href.includes("preview")) {
-                logoutUrl = "https://addins.boardflare.com/python/preview/logout.html";
-            } else if (window.location.href.includes("prod")) {
-                logoutUrl = "https://addins.boardflare.com/python/prod/logout.html";
-            } else {
-                logoutUrl = window.location.origin + "/logout.html";
-            }
-            Office.context.ui.displayDialogAsync(
-                logoutUrl,
-                { height: 60, width: 30 },
-                () => { }
-            );
-        } catch (e) {
-            // Ignore errors
-        }
+        // Logout does not actually revoke consent, so is only useful to clear the cache.
+        // try {
+        //     let logoutUrl;
+        //     if (window.location.href.includes("preview")) {
+        //         logoutUrl = "https://addins.boardflare.com/python/preview/logout.html";
+        //     } else if (window.location.href.includes("prod")) {
+        //         logoutUrl = "https://addins.boardflare.com/python/prod/logout.html";
+        //     } else {
+        //         logoutUrl = window.location.origin + "/logout.html";
+        //     }
+        //     Office.context.ui.displayDialogAsync(
+        //         logoutUrl,
+        //         { height: 60, width: 30 },
+        //         () => { }
+        //     );
+        // } catch (e) {
+        //     // Ignore errors
+        // }
         if (onLogout)
             onLogout();
     };
