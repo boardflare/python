@@ -5,19 +5,40 @@
     <title>Logout</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-    <script>
-        Office.onReady(function() {
-            // Clear MSAL and app tokens from localStorage and sessionStorage
+    <script type="module">
+        import { PublicClientApplication } from "https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.17.0/+esm";
+
+        const msalConfig = {
+            auth: {
+                clientId: '7fc35253-f44d-4c02-aea9-9b0b7a0a4b61',
+                authority: "https://login.microsoftonline.com/common",
+                redirectUri: window.location.origin + window.location.pathname
+            },
+            cache: {
+                cacheLocation: 'localStorage'
+            }
+        };
+
+        Office.onReady(async function() {
             try {
+                // Clear MSAL and app tokens from localStorage and sessionStorage
                 localStorage.clear();
                 sessionStorage.clear();
             } catch (e) {
                 // Ignore errors
             }
-            // Show message before redirecting to MSAL logout for this app only (not global logout)
-            setTimeout(function() {
-                window.location.href = `https://login.microsoftonline.com/common/oauth2/v2.0/logout?client_id=7fc35253-f44d-4c02-aea9-9b0b7a0a4b61&post_logout_redirect_uri=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
-            }, 500); // 500ms delay for user feedback
+
+            // Initialize MSAL and perform logout
+            const pca = new PublicClientApplication(msalConfig);
+            await pca.initialize();
+            // Get the current account (if any)
+            const accounts = pca.getAllAccounts();
+            const currentAccount = accounts && accounts.length > 0 ? accounts[0] : undefined;
+            // Use logoutRedirect with account for proper sign-out
+            await pca.logoutRedirect({
+                account: currentAccount,
+                postLogoutRedirectUri: window.location.origin + window.location.pathname
+            });
         });
     </script>
     <style>
