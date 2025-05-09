@@ -295,20 +295,19 @@ export function AuthProvider({ children }) {
     // Logout: remove token and clear MSAL cache
     const logout = async (onLogout) => {
         try {
+            const accounts = pca.getAllAccounts();
+            for (const account of accounts) {
+                await pca.logoutPopup({ account });
+            }
+            // Optionally clear localStorage/sessionStorage if you store anything else
+            localStorage.clear();
+            sessionStorage.clear();
             await removeToken();
             setIsSignedIn(false);
             setUserEmail(null);
-            // Remove all MSAL accounts from cache
-            const accounts = pca.getAllAccounts();
-            for (const acc of accounts) {
-                await pca.logoutPopup({ account: acc });
-            }
-            setRefreshKey(k => k + 1);
-            if (typeof onLogout === 'function') {
-                onLogout();
-            }
+            if (onLogout) onLogout();
         } catch (error) {
-            // ignore
+            console.error("Logout error:", error);
         }
     };
 
