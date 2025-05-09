@@ -1,3 +1,7 @@
+---
+applyTo: '**/*.{js,jsx}'
+---
+
 You are developing an Excel add-in that combines React, Tailwind CSS, and the Office JavaScript API to create a dynamic taskpane interface. The add-in's primary function is to enable users to create custom Excel functions that execute Python code through Pyodide, a Python runtime for the browser.
 
 Key components and technologies:
