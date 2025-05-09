@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <script type="module">
+
         import { PublicClientApplication } from "https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.17.0/+esm";
 
         const defaultScopes = ["User.Read", "offline_access"];
@@ -61,7 +62,7 @@
                 const accounts = pca.getAllAccounts();
                 const scopes = await getScopesFromDB();
                 if (accounts.length === 0) {
-                    const loginRequest = { scopes };
+                    const loginRequest = { scopes, prompt: "select_account" };
                     await pca.loginRedirect(loginRequest);
                     return;
                 }
