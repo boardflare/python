@@ -140,7 +140,7 @@ const FunctionsTab = ({
             )}
 
             <div className="mt-2">
-                {/* Replace SectionHeader with direct styles */}
+
                 <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center">
                     Workbook
                 </div>
@@ -152,17 +152,18 @@ const FunctionsTab = ({
                     <div className="text-center mb-2 mt-1">Try adding an example function below.</div>
                 )}
 
-                {!isWebPlatform && (
-                    <div className="mt-0">
-                        <OneDrive
-                            onEdit={onEdit}
-                            isPreview={isPreview}
-                            onLoadComplete={setOneDriveLoaded}
-                            refreshKey={refreshOneDriveKey}
-                            onWorkbookRefresh={loadFunctions}
-                        />
-                    </div>
-                )}
+                {/* !isWebPlatform removed so OneDrive is always shown */}
+                {/* {!isWebPlatform && ( */}
+                <div className="mt-0">
+                    <OneDrive
+                        onEdit={onEdit}
+                        isPreview={isPreview}
+                        onLoadComplete={setOneDriveLoaded}
+                        refreshKey={refreshOneDriveKey}
+                        onWorkbookRefresh={loadFunctions}
+                    />
+                </div>
+                {/* )} */}
 
                 <div className="mt-2">
                     <AddFunctions loadFunctions={loadFunctions} />
