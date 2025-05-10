@@ -126,9 +126,13 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
     };
 
     const handleLogout = async () => {
-        await logout(() => {
-            loadOnedriveFunctions();
-            refreshAuth(); // Refresh auth state after logout
+        await logout(async () => {
+            setFolderUrl(null); // Clear folderUrl on logout
+            setOnedriveFunctions([]); // Clear functions on logout
+            await refreshAuth(); // Ensure auth state is refreshed before UI update
+            setTimeout(() => {
+                loadOnedriveFunctions(); // Reload functions after auth state is updated
+            }, 0);
         });
     };
 
@@ -188,7 +192,7 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
         <>
             <div className="overflow-x-auto w-full">
                 <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center w-full flex items-center justify-center gap-2">                    <div className="flex items-center">
-                    {folderUrl ? (
+                    {folderUrl && isSignedIn ? (
                         <a href={folderUrl} target="_blank" rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-800 underline" title="Open in OneDrive">
                             OneDrive
