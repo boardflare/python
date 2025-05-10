@@ -115,7 +115,6 @@ export async function storeToken(tokenObj) {
             store.put(tokenObj.auth_token, authKey);
             store.put(tokenObj.graphToken, graphKey);
             store.put(tokenObj.tokenClaims, claimsKey);
-
             transaction.oncomplete = () => resolve();
             transaction.onerror = () => reject(transaction.error);
         });

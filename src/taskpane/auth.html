@@ -9,14 +9,17 @@
 
         import { PublicClientApplication } from "https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.17.0/+esm";
 
-        const defaultScopes = ["User.Read", "offline_access"];
+        const defaultScopes = [
+            "openid", "profile", "email", "offline_access",
+            "User.Read", "Files.ReadWrite.AppFolder"
+        ];
 
         async function getScopesFromDB() {
             const dbName = 'Boardflare';
             const storeName = 'User';
             const scopesKey = 'scopes';
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open(dbName, 1);
+                const request = indexedDB.open(dbName, 2);
                 
                 request.onsuccess = (event) => {
                     try {
@@ -47,7 +50,7 @@
             const pca = new PublicClientApplication({
                 auth: {
                     clientId: '7fc35253-f44d-4c02-aea9-9b0b7a0a4b61',
-                    authority: "https://login.microsoftonline.com/common",
+                    authority: "https://login.microsoftonline.com/common/v2.0", // <-- use v2.0 endpoint
                     redirectUri: window.location.origin + window.location.pathname
                 },
                 cache: {

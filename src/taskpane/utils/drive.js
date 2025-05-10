@@ -152,7 +152,10 @@ export async function listFiles() {
 
         await handleResponse(response);
         const data = await response.json();
-        const files = data.value.filter(file => !file.folder);
+        // Accept both .file and @microsoft.graph.downloadUrl as file indicators
+        const files = data.value.filter(file =>
+            (file.file || file['@microsoft.graph.downloadUrl']) && file.name
+        );
         // Get the folder URL from the first file if available
         const folderUrl = files.length > 0 ?
             files[0].webUrl.substring(0, files[0].webUrl.lastIndexOf('/')) :
@@ -173,35 +176,40 @@ export async function loadFunctionFiles() {
             return { driveFunctions: [], folderUrl };
         }
 
-        // Create requests with unique IDs that match file indices
-        const requests = functionFiles.map((file, index) => ({
+        // Separate files with downloadUrl (personal accounts) and those without (work/school)
+        const filesWithDownloadUrl = functionFiles.filter(f => f['@microsoft.graph.downloadUrl']);
+        const filesWithoutDownloadUrl = functionFiles.filter(f => !f['@microsoft.graph.downloadUrl']);
+
+        // Prepare batch requests for files without downloadUrl
+        const requests = filesWithoutDownloadUrl.map((file, index) => ({
             id: index.toString(),
             url: `${DRIVE_APPROOT}/${encodeURIComponent(file.name)}:/content`,
             method: 'GET',
             fileRef: file
         }));
 
-        const responses = await makeBatchRequests(requests);
+        // Fetch batch responses (work/school accounts)
+        let responses = [];
+        if (requests.length > 0) {
+            responses = await makeBatchRequests(requests);
+        }
 
-        // Create a map to associate responses with their files using the ID
+        // Map for associating responses with files
         const fileMap = {};
-        functionFiles.forEach((file, index) => {
+        filesWithoutDownloadUrl.forEach((file, index) => {
             fileMap[index.toString()] = file;
         });
 
-        const driveFunctions = [];
-        // Process all responses and match them to their files
-        const promises = responses.map(async (response) => {
+        // Process batch responses
+        const batchPromises = responses.map(async (response) => {
             if (response.status === 302 && response.headers && response.headers.Location) {
                 const file = fileMap[response.id];
                 if (!file) {
                     console.error(`No file found for response ID ${response.id}`);
                     return null;
                 }
-
                 try {
                     const notebook = await fetchRedirectContent(response.headers.Location);
-
                     if (notebook && notebook.cells && notebook.cells.length > 0) {
                         const firstCell = notebook.cells[0];
                         if (firstCell.metadata) {
@@ -228,16 +236,14 @@ export async function loadFunctionFiles() {
                 const file = fileMap[response.id];
                 if (!file) {
                     console.error(`No file found for response ID ${response.id}`);
-                    return null; // Using return instead of continue
+                    return null;
                 }
-
                 try {
                     const notebook = response.body;
-
                     if (notebook && notebook.cells && notebook.cells.length > 0) {
                         const firstCell = notebook.cells[0];
                         if (firstCell.metadata) {
-                            return {  // Return the function object instead of pushing to array
+                            return {
                                 name: firstCell.metadata.name || file.name.replace('.ipynb', ''),
                                 code: Array.isArray(firstCell.source) ? firstCell.source.join('') : firstCell.source,
                                 signature: firstCell.metadata.signature,
@@ -265,10 +271,61 @@ export async function loadFunctionFiles() {
             return null;
         });
 
+        // Fetch files with downloadUrl (personal accounts)
+        const downloadUrlPromises = filesWithDownloadUrl.map(async (file) => {
+            try {
+                console.log(`[OneDrive] Attempting to fetch file from downloadUrl:`, file.name, file['@microsoft.graph.downloadUrl']);
+                const response = await fetch(file['@microsoft.graph.downloadUrl']);
+                console.log(`[OneDrive] Fetch response for`, file.name, 'status:', response.status, 'content-type:', response.headers.get('content-type'));
+                if (!response.ok) {
+                    console.error(`[OneDrive] Failed to fetch file from downloadUrl: ${response.statusText}`);
+                    return null;
+                }
+                let notebook;
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    notebook = await response.json();
+                } else {
+                    // For application/octet-stream or other types, read as text and parse as JSON
+                    const text = await response.text();
+                    console.log(`[OneDrive] Raw text for`, file.name, ':', text.slice(0, 200));
+                    try {
+                        notebook = JSON.parse(text);
+                    } catch (e) {
+                        console.error(`[OneDrive] Failed to parse notebook JSON for ${file.name}:`, e);
+                        return null;
+                    }
+                }
+                console.log(`[OneDrive] Parsed notebook for`, file.name, ':', notebook);
+                if (notebook && notebook.cells && notebook.cells.length > 0) {
+                    const firstCell = notebook.cells[0];
+                    if (firstCell.metadata) {
+                        console.log(`[OneDrive] Extracted function metadata for`, file.name, ':', firstCell.metadata);
+                        return {
+                            name: firstCell.metadata.name || file.name.replace('.ipynb', ''),
+                            code: Array.isArray(firstCell.source) ? firstCell.source.join('') : firstCell.source,
+                            signature: firstCell.metadata.signature,
+                            description: firstCell.metadata.description,
+                            resultLine: firstCell.metadata.resultLine,
+                            formula: firstCell.metadata.formula,
+                            fileName: file.name,
+                            source: 'onedrive'
+                        };
+                    } else {
+                        console.warn(`[OneDrive] No metadata found in notebook cell for ${file.name}`);
+                    }
+                } else {
+                    console.warn(`[OneDrive] No valid cells found in notebook for ${file.name}`);
+                }
+            } catch (e) {
+                console.error(`[OneDrive] Error processing notebook for ${file.name}:`, e);
+            }
+            return null;
+        });
+
         // Wait for all promises to resolve
-        const results = await Promise.all(promises);
-        const validResults = results.filter(Boolean);
-        driveFunctions.push(...validResults);
+        const results = await Promise.all([...batchPromises, ...downloadUrlPromises]);
+        const driveFunctions = results.filter(Boolean);
 
         return { driveFunctions, folderUrl };
     } catch (error) {

@@ -20,6 +20,7 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
             setOnedriveFunctions([]);
 
             const { driveFunctions, folderUrl } = await loadFunctionFiles();
+            console.log('[OneDrive Component] driveFunctions returned:', driveFunctions);
             setOnedriveFunctions(driveFunctions || []);
             setFolderUrl(folderUrl);
             setError(null);
@@ -33,8 +34,17 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
             onLoadComplete?.(false); // Signal failed load
         } finally {
             setIsLoading(false);
+            setTimeout(() => {
+                console.log('[OneDrive Component] onedriveFunctions state after set:', onedriveFunctions);
+            }, 1000); // Delay to allow state update
         }
     };
+
+    // Log onedriveFunctions state and isSignedIn after it is set
+    React.useEffect(() => {
+        console.log('[OneDrive Component] onedriveFunctions state (effect):', onedriveFunctions);
+        console.log('[OneDrive Component] isSignedIn state (effect):', isSignedIn);
+    }, [onedriveFunctions, isSignedIn]);
 
     // Run loadOnedriveFunctions when refreshKey changes (also on mount)
     React.useEffect(() => {
@@ -90,7 +100,10 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
 
     const handleLogin = async () => {
         try {
-            const updatedScopes = await storeScopes(["Files.ReadWrite"]);
+            const updatedScopes = await storeScopes([
+                "openid", "profile", "email", "offline_access",
+                "User.Read", "Files.ReadWrite.AppFolder"
+            ]); // Always use full set of required scopes
             console.log('Updated scopes:', updatedScopes);
             await authenticateWithDialog();
             refreshAuth(); // Refresh auth state after login
