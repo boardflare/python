@@ -126,10 +126,14 @@ def main():
             # Add a link to the example functions component
             # Updated to include the subfolder path in the URL
             relative_path = py_file.relative_to(examples_dir).parent
+            parent_name = relative_path.name
+            file_stem = py_file.stem
             if relative_path == Path('.'):  # If in the root examples directory
                 link_path = metadata['name']
+            elif parent_name == file_stem:
+                link_path = str(relative_path).replace('\\', '/')
             else:
-                link_path = f"{relative_path}/{metadata['name']}"
+                link_path = f"{str(relative_path).replace('\\', '/')}/{metadata['name']}"
             
             metadata["link"] = f"https://www.boardflare.com/resources/python-functions/{link_path}"
             

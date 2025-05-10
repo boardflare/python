@@ -119,7 +119,7 @@
       }
     ],
     "fileId": "2",
-    "link": "https://www.boardflare.com/resources/python-functions/text\\ai_ask/ai_ask"
+    "link": "https://www.boardflare.com/resources/python-functions/text/ai_ask"
   },
   {
     "name": "ai_choice",
@@ -256,7 +256,7 @@
       }
     ],
     "fileId": "3",
-    "link": "https://www.boardflare.com/resources/python-functions/text\\ai_choice/ai_choice"
+    "link": "https://www.boardflare.com/resources/python-functions/text/ai_choice"
   },
   {
     "name": "ai_extract",
@@ -315,7 +315,7 @@
       }
     ],
     "fileId": "4",
-    "link": "https://www.boardflare.com/resources/python-functions/text\\ai_extract/ai_extract"
+    "link": "https://www.boardflare.com/resources/python-functions/text/ai_extract"
   },
   {
     "name": "ai_fill",
@@ -510,7 +510,7 @@
       }
     ],
     "fileId": "5",
-    "link": "https://www.boardflare.com/resources/python-functions/text\\ai_fill/ai_fill"
+    "link": "https://www.boardflare.com/resources/python-functions/text/ai_fill"
   },
   {
     "name": "ai_format",
@@ -608,7 +608,7 @@
       }
     ],
     "fileId": "6",
-    "link": "https://www.boardflare.com/resources/python-functions/text\\ai_format/ai_format"
+    "link": "https://www.boardflare.com/resources/python-functions/text/ai_format"
   },
   {
     "name": "ai_list",
@@ -673,7 +673,7 @@
       }
     ],
     "fileId": "7",
-    "link": "https://www.boardflare.com/resources/python-functions/text\\ai_list/ai_list"
+    "link": "https://www.boardflare.com/resources/python-functions/text/ai_list"
   },
   {
     "name": "ai_table",
@@ -776,7 +776,7 @@
       }
     ],
     "fileId": "8",
-    "link": "https://www.boardflare.com/resources/python-functions/text\\ai_table/ai_table"
+    "link": "https://www.boardflare.com/resources/python-functions/text/ai_table"
   },
   {
     "name": "internet_csv",
@@ -795,7 +795,7 @@
       }
     ],
     "fileId": "11",
-    "link": "https://www.boardflare.com/resources/python-functions/data\\internet_csv/internet_csv"
+    "link": "https://www.boardflare.com/resources/python-functions/data/internet_csv"
   },
   {
     "name": "onedrive_csv",
@@ -814,7 +814,7 @@
       }
     ],
     "fileId": "12",
-    "link": "https://www.boardflare.com/resources/python-functions/data\\onedrive_csv/onedrive_csv"
+    "link": "https://www.boardflare.com/resources/python-functions/data/onedrive_csv"
   },
   {
     "name": "text_distance",
@@ -942,7 +942,7 @@
       }
     ],
     "fileId": "9",
-    "link": "https://www.boardflare.com/resources/python-functions/text\\text_distance/text_distance"
+    "link": "https://www.boardflare.com/resources/python-functions/text/text_distance"
   },
   {
     "name": "vader_sentiment",
@@ -987,7 +987,7 @@
       }
     ],
     "fileId": "10",
-    "link": "https://www.boardflare.com/resources/python-functions/text\\vader_sentiment/vader_sentiment"
+    "link": "https://www.boardflare.com/resources/python-functions/text/vader_sentiment"
   },
   {
     "name": "web_content",
@@ -1010,6 +1010,6 @@
       }
     ],
     "fileId": "1",
-    "link": "https://www.boardflare.com/resources/python-functions/web\\web_content/web_content"
+    "link": "https://www.boardflare.com/resources/python-functions/web/web_content"
   }
 ]
