@@ -17,15 +17,15 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
     const loadOnedriveFunctions = async () => {
         try {
             setIsLoading(true);
-            setOnedriveFunctions([]);            const { driveFunctions, folderUrl } = await loadFunctionFiles();
+            setOnedriveFunctions([]); const { driveFunctions, folderUrl } = await loadFunctionFiles();
             console.log('[OneDrive Component] driveFunctions returned:', driveFunctions);
             console.log('[OneDrive Component] folderUrl:', folderUrl);
-            
+
             if (folderUrl) {
                 const isPersonalAccount = folderUrl.includes('onedrive.live.com');
                 console.log(`[OneDrive Component] Account type: ${isPersonalAccount ? 'Personal' : 'Work/School'}`);
             }
-            
+
             setOnedriveFunctions(driveFunctions || []);
             setFolderUrl(folderUrl);
             setError(null);
@@ -188,24 +188,25 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
         <>
             <div className="overflow-x-auto w-full">
                 <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center w-full flex items-center justify-center gap-2">                    <div className="flex items-center">
-                        {folderUrl ? (
-                            <a href={folderUrl} target="_blank" rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 underline" title="Open in OneDrive">
-                                OneDrive
-                            </a>
-                        ) : (
-                            'OneDrive'
-                        )}
-                    </div>
+                    {folderUrl ? (
+                        <a href={folderUrl} target="_blank" rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 underline" title="Open in OneDrive">
+                            OneDrive
+                        </a>
+                    ) : (
+                        'OneDrive'
+                    )}
+                </div>
                     {folderUrl && isPreview && isSignedIn && (
                         <button onClick={loadOnedriveFunctions} className="text-blue-500 hover:text-blue-700"
                             title="Refresh OneDrive functions">
                             🔄
                         </button>
-                    )}                    <div className="flex items-center ml-2">
+                    )}
+                    <div className="flex items-center">
                         {isSignedIn ? (
                             <>
-                                <span className="ml-2 text-gray-700 text-sm">{userEmail || 'User'}</span>
+                                <span className="ml-0 text-gray-700 text-sm">{userEmail || 'User'}</span>
                                 <button
                                     onClick={handleLogout}
                                     className="ml-2 px-2 py-0 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-normal relative group text-sm"
