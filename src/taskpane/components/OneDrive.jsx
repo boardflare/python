@@ -31,9 +31,14 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
             setError(null);
             onLoadComplete?.(true); // Signal successful load
         } catch (error) {
-            //console.error('Error loading OneDrive functions:', error);
             setOnedriveFunctions([]);
-            if (!(error instanceof TokenExpiredError)) {
+            if (error instanceof TokenExpiredError) {
+                // If token expired, force logout and refresh auth state
+                await logout();
+                await refreshAuth();
+                setFolderUrl(null);
+                // Removed setError for session expired
+            } else {
                 setError('Failed to load OneDrive functions');
             }
             onLoadComplete?.(false); // Signal failed load
