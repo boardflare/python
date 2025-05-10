@@ -26,3 +26,16 @@ jobs:
       with:
         inlineScript: |
             az storage blob upload-batch --account-name 'boardflareaddins' -d 'python/preview' -s './dist' --overwrite --sas-token '${{ secrets.CONTAINER_SAS_TOKEN }}'
+
+    - name: Wait for 10 seconds before cache purge
+      run: sleep 10
+
+    - name: Purge Cloudflare cache for preview path
+      run: |
+        curl -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+          -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          --data '{"prefixes":["https://addins.boardflare.com/python/preview"]}'
+      env:
+        CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
