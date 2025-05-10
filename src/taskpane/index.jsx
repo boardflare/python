@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import App from "./components/App";
 import './index.css';  // Add this import
 import { release } from "./utils/constants";
+import { AuthProvider } from "./components/Auth";
 
 // Global window properties
 window.appName = 'Python';
@@ -51,7 +52,9 @@ if (rootElement) {
     await initializeBrowserInfo();
 
     root.render(
-      <App title={window.appName} />
+      <AuthProvider>
+        <App title={window.appName} />
+      </AuthProvider>
     );
   });
 
@@ -59,7 +62,9 @@ if (rootElement) {
     module.hot.accept("./components/App", () => {
       const NextApp = require("./components/App").default;
       root.render(
-        <NextApp title={window.appName} />
+        <AuthProvider>
+          <NextApp title={window.appName} />
+        </AuthProvider>
       );
     });
   }

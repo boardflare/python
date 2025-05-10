@@ -140,7 +140,7 @@ const FunctionsTab = ({
             )}
 
             <div className="mt-2">
-                {/* Replace SectionHeader with direct styles */}
+
                 <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center">
                     Workbook
                 </div>
@@ -152,25 +152,24 @@ const FunctionsTab = ({
                     <div className="text-center mb-2 mt-1">Try adding an example function below.</div>
                 )}
 
-                {!isWebPlatform && (
-                    <div className="mt-0">
-                        <OneDrive
-                            onEdit={onEdit}
-                            isPreview={isPreview}
-                            onLoadComplete={setOneDriveLoaded}
-                            refreshKey={refreshOneDriveKey}
-                            onWorkbookRefresh={loadFunctions}
-                        />
-                    </div>
-                )}
+                {/* !isWebPlatform removed so OneDrive is always shown */}
+                {/* {!isWebPlatform && ( */}
+                <div className="mt-0">
+                    <OneDrive
+                        onEdit={onEdit}
+                        isPreview={isPreview}
+                        onLoadComplete={setOneDriveLoaded}
+                        refreshKey={refreshOneDriveKey}
+                        onWorkbookRefresh={loadFunctions}
+                    />
+                </div>
+                {/* )} */}
 
                 <div className="mt-2">
                     <AddFunctions loadFunctions={loadFunctions} />
                 </div>
-            </div>
-
-            {deleteConfirm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            </div>            {deleteConfirm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white p-6 rounded-lg max-w-sm w-full">
                         <h3 className="text-lg font-semibold mb-4">Delete Function</h3>
                         <p className="mb-4">Are you sure you want to delete "{deleteConfirm.name}"?</p>

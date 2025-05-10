@@ -20,6 +20,46 @@ async function getGraphToken() {
     return tokenObj.graphToken;
 }
 
+// Centralized utility to get the app folder URL for both account types
+async function resolveAppRootFolderUrl(accessToken) {
+    try {
+        const response = await fetch('https://graph.microsoft.com/v1.0/me/drive/special/approot', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        if (response.ok) {
+            const data = await response.json();
+            if (data.webUrl) {
+                return data.webUrl;
+            }
+            if (data.parentReference?.driveId && data.id) {
+                // Personal account fallback
+                return `https://onedrive.live.com/?id=${encodeURIComponent(data.id)}&cid=${encodeURIComponent(data.parentReference.driveId)}`;
+            }
+        }
+        // Fallback: check drive info
+        const driveResponse = await fetch('https://graph.microsoft.com/v1.0/me/drive', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        if (driveResponse.ok) {
+            const driveData = await driveResponse.json();
+            if (driveData.driveType === 'personal') {
+                return `https://onedrive.live.com/?cid=${encodeURIComponent(driveData.id)}`;
+            }
+        }
+    } catch (error) {
+        console.error('[OneDrive] Error resolving app folder URL:', error);
+    }
+    return null;
+}
+
+// Get the URL to the app root folder in OneDrive
+export async function getAppRootFolderUrl() {
+    const accessToken = await getGraphToken();
+    return await resolveAppRootFolderUrl(accessToken);
+}
+
 async function handleResponse(response) {
     if (response.status === 401) {
         throw new TokenExpiredError();
@@ -145,18 +185,24 @@ export async function listFiles() {
     try {
         const response = await fetch(`https://graph.microsoft.com/v1.0/me/drive/special/approot/children`, {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-            }
+            headers: { 'Authorization': `Bearer ${accessToken}` }
         });
-
         await handleResponse(response);
         const data = await response.json();
-        const files = data.value.filter(file => !file.folder);
-        // Get the folder URL from the first file if available
-        const folderUrl = files.length > 0 ?
-            files[0].webUrl.substring(0, files[0].webUrl.lastIndexOf('/')) :
-            null;
+        const files = data.value.filter(file => (file.file || file['@microsoft.graph.downloadUrl']) && file.name);
+        if (files.length > 0) {
+            const personalAccount = !files[0].webUrl && files[0]['@microsoft.graph.downloadUrl'];
+            console.log(`[OneDrive] First file details for ${personalAccount ? 'personal' : 'work/school'} account:`, {
+                name: files[0].name,
+                hasWebUrl: !!files[0].webUrl,
+                hasDownloadUrl: !!files[0]['@microsoft.graph.downloadUrl'],
+                hasParentReference: !!files[0].parentReference,
+                driveId: files[0].parentReference?.driveId || 'not available',
+                parentId: files[0].parentReference?.id || 'not available',
+            });
+        }
+        // Use the centralized resolver for folder URL
+        const folderUrl = await resolveAppRootFolderUrl(accessToken);
         return { files, folderUrl };
     } catch (error) {
         throw error;
@@ -173,35 +219,42 @@ export async function loadFunctionFiles() {
             return { driveFunctions: [], folderUrl };
         }
 
-        // Create requests with unique IDs that match file indices
-        const requests = functionFiles.map((file, index) => ({
+        // Separate files with downloadUrl (personal accounts) and those without (work/school)
+        const filesWithDownloadUrl = functionFiles.filter(f => f['@microsoft.graph.downloadUrl']);
+        const filesWithoutDownloadUrl = functionFiles.filter(f => !f['@microsoft.graph.downloadUrl']);
+
+        console.log(`[OneDrive] Found ${filesWithDownloadUrl.length} personal account files and ${filesWithoutDownloadUrl.length} work/school account files`);
+
+        // Prepare batch requests for files without downloadUrl
+        const requests = filesWithoutDownloadUrl.map((file, index) => ({
             id: index.toString(),
             url: `${DRIVE_APPROOT}/${encodeURIComponent(file.name)}:/content`,
             method: 'GET',
             fileRef: file
         }));
 
-        const responses = await makeBatchRequests(requests);
+        // Fetch batch responses (work/school accounts)
+        let responses = [];
+        if (requests.length > 0) {
+            responses = await makeBatchRequests(requests);
+        }
 
-        // Create a map to associate responses with their files using the ID
+        // Map for associating responses with files
         const fileMap = {};
-        functionFiles.forEach((file, index) => {
+        filesWithoutDownloadUrl.forEach((file, index) => {
             fileMap[index.toString()] = file;
         });
 
-        const driveFunctions = [];
-        // Process all responses and match them to their files
-        const promises = responses.map(async (response) => {
+        // Process batch responses
+        const batchPromises = responses.map(async (response) => {
             if (response.status === 302 && response.headers && response.headers.Location) {
                 const file = fileMap[response.id];
                 if (!file) {
                     console.error(`No file found for response ID ${response.id}`);
                     return null;
                 }
-
                 try {
                     const notebook = await fetchRedirectContent(response.headers.Location);
-
                     if (notebook && notebook.cells && notebook.cells.length > 0) {
                         const firstCell = notebook.cells[0];
                         if (firstCell.metadata) {
@@ -228,16 +281,14 @@ export async function loadFunctionFiles() {
                 const file = fileMap[response.id];
                 if (!file) {
                     console.error(`No file found for response ID ${response.id}`);
-                    return null; // Using return instead of continue
+                    return null;
                 }
-
                 try {
                     const notebook = response.body;
-
                     if (notebook && notebook.cells && notebook.cells.length > 0) {
                         const firstCell = notebook.cells[0];
                         if (firstCell.metadata) {
-                            return {  // Return the function object instead of pushing to array
+                            return {
                                 name: firstCell.metadata.name || file.name.replace('.ipynb', ''),
                                 code: Array.isArray(firstCell.source) ? firstCell.source.join('') : firstCell.source,
                                 signature: firstCell.metadata.signature,
@@ -263,12 +314,71 @@ export async function loadFunctionFiles() {
                 }
             }
             return null;
-        });
+        });        // Fetch files with downloadUrl (personal accounts)
+        const downloadUrlPromises = filesWithDownloadUrl.map(async (file) => {
+            try {
+                // Log additional properties from personal account files
+                console.log(`[OneDrive] Personal account file properties:`, {
+                    name: file.name,
+                    id: file.id,
+                    driveId: file.parentReference?.driveId,
+                    parentId: file.parentReference?.id,
+                    hasWebUrl: !!file.webUrl
+                });
 
-        // Wait for all promises to resolve
-        const results = await Promise.all(promises);
-        const validResults = results.filter(Boolean);
-        driveFunctions.push(...validResults);
+                console.log(`[OneDrive] Attempting to fetch file from downloadUrl:`, file.name, file['@microsoft.graph.downloadUrl']);
+                const response = await fetch(file['@microsoft.graph.downloadUrl']);
+                console.log(`[OneDrive] Fetch response for`, file.name, 'status:', response.status, 'content-type:', response.headers.get('content-type'));
+                if (!response.ok) {
+                    console.error(`[OneDrive] Failed to fetch file from downloadUrl: ${response.statusText}`);
+                    return null;
+                }
+                let notebook;
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    notebook = await response.json();
+                } else {
+                    // For application/octet-stream or other types, read as text and parse as JSON
+                    const text = await response.text();
+                    console.log(`[OneDrive] Raw text for`, file.name, ':', text.slice(0, 200));
+                    try {
+                        notebook = JSON.parse(text);
+                    } catch (e) {
+                        console.error(`[OneDrive] Failed to parse notebook JSON for ${file.name}:`, e);
+                        return null;
+                    }
+                }
+                console.log(`[OneDrive] Parsed notebook for`, file.name, ':', notebook);
+                if (notebook && notebook.cells && notebook.cells.length > 0) {
+                    const firstCell = notebook.cells[0];
+                    if (firstCell.metadata) {
+                        console.log(`[OneDrive] Extracted function metadata for`, file.name, ':', firstCell.metadata);
+                        return {
+                            name: firstCell.metadata.name || file.name.replace('.ipynb', ''),
+                            code: Array.isArray(firstCell.source) ? firstCell.source.join('') : firstCell.source,
+                            signature: firstCell.metadata.signature,
+                            description: firstCell.metadata.description,
+                            resultLine: firstCell.metadata.resultLine,
+                            formula: firstCell.metadata.formula,
+                            fileName: file.name,
+                            source: 'onedrive'
+                        };
+                    } else {
+                        console.warn(`[OneDrive] No metadata found in notebook cell for ${file.name}`);
+                    }
+                } else {
+                    console.warn(`[OneDrive] No valid cells found in notebook for ${file.name}`);
+                }
+            } catch (e) {
+                console.error(`[OneDrive] Error processing notebook for ${file.name}:`, e);
+            }
+            return null;
+        });        // Wait for all promises to resolve
+        const results = await Promise.all([...batchPromises, ...downloadUrlPromises]);
+        const driveFunctions = results.filter(Boolean);
+
+        console.log(`[OneDrive] Loaded ${driveFunctions.length} functions from OneDrive`);
+        console.log(`[OneDrive] Final folder URL: ${folderUrl}`);
 
         return { driveFunctions, folderUrl };
     } catch (error) {

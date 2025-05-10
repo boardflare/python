@@ -2,6 +2,11 @@ import * as React from "react";
 import { getScopes, storeScopes } from "../utils/indexedDB";
 import { authenticateWithDialog } from "./Auth";
 
+const REQUIRED_SCOPES = [
+    "openid", "profile", "email", "offline_access",
+    "User.Read", "Files.ReadWrite.AppFolder"
+];
+
 const SettingsTab = ({ loadFunctions }) => {
     const [scopes, setScopes] = React.useState([]);
     const [isLoading, setIsLoading] = React.useState(false);
@@ -28,7 +33,9 @@ const SettingsTab = ({ loadFunctions }) => {
     const updateToken = async () => {
         setIsLoading(true);
         try {
-            await storeScopes(scopes);
+            // Always include required scopes
+            const mergedScopes = Array.from(new Set([...scopes, ...REQUIRED_SCOPES]));
+            await storeScopes(mergedScopes);
             await authenticateWithDialog();
             loadFunctions?.(); // Call loadFunctions after successful token update
         } catch (error) {

@@ -1,129 +1,127 @@
-{
-    "test_cases": [
-        {
-            "id": "test_marketing_kpis",
-            "description": "Generate a list of KPIs relevant to a marketing department.",
-            "arguments": {
-                "prompt": "List 4 essential marketing KPIs for quarterly performance reviews"
-            },
-            "expected_rows": 4,
-            "demo": true
+[
+    {
+        "id": "test_marketing_kpis",
+        "description": "Generate a list of KPIs relevant to a marketing department.",
+        "arguments": {
+            "prompt": "List 4 essential marketing KPIs for quarterly performance reviews"
         },
-        {
-            "id": "test_risk_mitigation_strategies",
-            "description": "Generate a list of risk mitigation strategies for a business project.",
-            "arguments": {
-                "prompt": "List 4 effective risk mitigation strategies for enterprise software implementation"
-            },
-            "expected_rows": 4,
-            "demo": true
+        "expected_rows": 4,
+        "demo": true
+    },
+    {
+        "id": "test_risk_mitigation_strategies",
+        "description": "Generate a list of risk mitigation strategies for a business project.",
+        "arguments": {
+            "prompt": "List 4 effective risk mitigation strategies for enterprise software implementation"
         },
-        {
-            "id": "test_compliance_requirements",
-            "description": "Get a list of compliance requirements for a specific industry.",
-            "arguments": {
-                "prompt": "List 4 key compliance requirements for healthcare organizations"
-            },
-            "expected_rows": 4,
-            "demo": true
+        "expected_rows": 4,
+        "demo": true
+    },
+    {
+        "id": "test_compliance_requirements",
+        "description": "Get a list of compliance requirements for a specific industry.",
+        "arguments": {
+            "prompt": "List 4 key compliance requirements for healthcare organizations"
         },
-        {
-            "id": "test_action_items_from_values",
-            "description": "Generate a list of action items based on specific meeting notes provided as values.",
-            "arguments": {
-                "prompt": "List 4 priority action items based on these quarterly business review notes:",
-                "values": [
-                    [
-                        "Q1 revenue fell 5% below target"
-                    ],
-                    [
-                        "Customer complaints increased by 12%"
-                    ],
-                    [
-                        "New product launch delayed by 3 weeks"
-                    ]
+        "expected_rows": 4,
+        "demo": true
+    },
+    {
+        "id": "test_action_items_from_values",
+        "description": "Generate a list of action items based on specific meeting notes provided as values.",
+        "arguments": {
+            "prompt": "List 4 priority action items based on these quarterly business review notes:",
+            "values": [
+                [
+                    "Q1 revenue fell 5% below target"
+                ],
+                [
+                    "Customer complaints increased by 12%"
+                ],
+                [
+                    "New product launch delayed by 3 weeks"
                 ]
-            },
-            "expected_rows": 4,
-            "demo": true
+            ]
         },
-        {
-            "id": "test_smart_goals",
-            "description": "Generate a list of SMART goals for a specific department.",
-            "arguments": {
-                "prompt": "List 4 SMART goals for an HR department focused on improving employee retention"
-            },
-            "expected_rows": 4,
-            "demo": true
+        "expected_rows": 4,
+        "demo": true
+    },
+    {
+        "id": "test_smart_goals",
+        "description": "Generate a list of SMART goals for a specific department.",
+        "arguments": {
+            "prompt": "List 4 SMART goals for an HR department focused on improving employee retention"
         },
-        {
-            "id": "test_basic_financial_metrics",
-            "description": "Testing basic functionality with just a prompt to list financial metrics.",
-            "arguments": {
-                "prompt": "List 4 important financial metrics"
-            },
-            "expected_rows": 4,
-            "demo": false
+        "expected_rows": 4,
+        "demo": true
+    },
+    {
+        "id": "test_basic_financial_metrics",
+        "description": "Testing basic functionality with just a prompt to list financial metrics.",
+        "arguments": {
+            "prompt": "List 4 important financial metrics"
         },
-        {
-            "id": "test_meeting_action_items",
-            "description": "Testing with meeting notes in values parameter to generate action items.",
-            "arguments": {
-                "prompt": "List 4 action items based on these meeting notes",
-                "values": [
-                    [
-                        "Customer satisfaction dropped 8%"
-                    ],
-                    [
-                        "New software rollout delayed"
-                    ],
-                    [
-                        "Marketing budget underutilized by 15%"
-                    ]
+        "expected_rows": 4,
+        "demo": false
+    },
+    {
+        "id": "test_meeting_action_items",
+        "description": "Testing with meeting notes in values parameter to generate action items.",
+        "arguments": {
+            "prompt": "List 4 action items based on these meeting notes",
+            "values": [
+                [
+                    "Customer satisfaction dropped 8%"
+                ],
+                [
+                    "New software rollout delayed"
+                ],
+                [
+                    "Marketing budget underutilized by 15%"
                 ]
-            },
-            "expected_rows": 4,
-            "demo": false
+            ]
         },
-        {
-            "id": "test_with_all_parameters",
-            "description": "Testing that all optional parameters work correctly.",
-            "arguments": {
-                "prompt": "List 4 common project management challenges",
-                "temperature": 0.1,
-                "max_tokens": 500,
-                "model": "mistral-small-latest"
-            },
-            "expected_rows": 4,
-            "demo": false
+        "expected_rows": 4,
+        "demo": false
+    },
+    {
+        "id": "test_with_all_parameters",
+        "description": "Testing that all optional parameters work correctly.",
+        "arguments": {
+            "prompt": "List 4 common project management challenges",
+            "temperature": 0.1,
+            "max_tokens": 500,
+            "model": "mistral-small-latest"
         },
-        {
-            "id": "test_default_model",
-            "description": "Testing with the default AI model.",
-            "arguments": {
-                "prompt": "List 4 popular programming languages"
-            },
-            "expected_rows": 4,
-            "demo": false
+        "expected_rows": 4,
+        "demo": false
+    },
+    {
+        "id": "test_default_model",
+        "description": "Testing with the default AI model.",
+        "arguments": {
+            "prompt": "List 4 popular programming languages"
         },
-        {
-            "id": "test_specified_model",
-            "description": "Testing with a specified AI model.",
-            "arguments": {
-                "prompt": "List 4 popular programming languages",
-                "model": "mistral-small-latest"
-            },
-            "expected_rows": 4,
-            "demo": false
+        "expected_rows": 4,
+        "demo": false
+    },
+    {
+        "id": "test_specified_model",
+        "description": "Testing with a specified AI model.",
+        "arguments": {
+            "prompt": "List 4 popular programming languages",
+            "model": "mistral-small-latest"
         },
-        {
-            "id": "test_specific_count",
-            "description": "Testing generating a list with a specific number of requested items.",
-            "arguments": {
-                "prompt": "List exactly 4 essential soft skills for the workplace"
-            },
-            "expected_rows": 4,
-            "demo": false
-        }
-    ]
-}
+        "expected_rows": 4,
+        "demo": false
+    },
+    {
+        "id": "test_specific_count",
+        "description": "Testing generating a list with a specific number of requested items.",
+        "arguments": {
+            "prompt": "List exactly 4 essential soft skills for the workplace"
+        },
+        "expected_rows": 4,
+        "demo": false
+    }
+]

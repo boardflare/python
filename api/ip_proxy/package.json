@@ -1,0 +1,13 @@
+{
+  "name": "ip_proxy",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev --local-protocol https",
+    "start": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.14.3"
+  }
+}

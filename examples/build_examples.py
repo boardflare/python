@@ -41,8 +41,6 @@ def get_function_metadata(file_path):
         with open(file_path, 'r', encoding='utf-8') as f:
             code = f.read()
 
-        # --- Removed: Code block for reading example.json ---
-
         # --- Changed: Load test cases from test_cases.json and extract first as example ---
         primary_example_data = None
         all_test_cases = None
@@ -51,21 +49,24 @@ def get_function_metadata(file_path):
             try:
                 with open(test_cases_file_path, 'r', encoding='utf-8') as f_test_cases:
                     test_data = json.load(f_test_cases)
-                    # Expecting the list under a "test_cases" key
-                    if "test_cases" in test_data and isinstance(test_data["test_cases"], list):
-                         all_test_cases = test_data["test_cases"]
-                         # Filter test cases for demo examples
-                         demo_test_cases = [tc for tc in all_test_cases if tc.get("demo", True)]
-                         if demo_test_cases:
-                             primary_example_data = demo_test_cases[0] # Use the first demo test case as the primary example
-                         else:
-                             print(f"Warning: No demo test cases found in {test_cases_file_path}")
+                    # Support both top-level array and 'test_cases' key
+                    if isinstance(test_data, list):
+                        all_test_cases = test_data
+                    elif "test_cases" in test_data and isinstance(test_data["test_cases"], list):
+                        all_test_cases = test_data["test_cases"]
                     else:
-                         print(f"Warning: 'test_cases' key (list) not found or invalid in {test_cases_file_path}")
+                        print(f"Warning: test_cases.json format not recognized in {test_cases_file_path}")
+                    # Filter test cases for demo examples
+                    if all_test_cases:
+                        demo_test_cases = [tc for tc in all_test_cases if tc.get("demo", True)]
+                        if demo_test_cases:
+                            primary_example_data = demo_test_cases[0] # Use the first demo test case as the primary example
+                        else:
+                            print(f"Warning: No demo test cases found in {test_cases_file_path}")
             except json.JSONDecodeError as e:
                 print(f"Error reading or parsing {test_cases_file_path}: {e}")
             except Exception as e:
-                 print(f"Error processing {test_cases_file_path}: {e}")
+                print(f"Error processing {test_cases_file_path}: {e}")
         else:
             print(f"Warning: No test_cases.json found for {module_name}")
         # --- End Changed ---
@@ -83,8 +84,10 @@ def get_function_metadata(file_path):
 
 def main():
     # Root directory for function files
-    # Changed to look directly in the text subdirectory
-    text_dir = Path(__file__).parent / "text"
+    examples_dir = Path(__file__).parent
+    
+    # Debug output
+    print(f"Searching for Python files in: {examples_dir.absolute()}")
     
     # List to store function metadata
     functions = []
@@ -92,8 +95,19 @@ def main():
     # Index for fileId
     index = 1
 
-    # Find all .py files in the text directory that are not test files
-    for py_file in text_dir.rglob("*.py"):
+    # Find all .py files in all subdirectories that are not test files
+    for py_file in examples_dir.rglob("*.py"):
+        # Skip files in directories starting with underscore
+        relative_parts = py_file.relative_to(examples_dir).parts
+        if any(part.startswith("_") for part in relative_parts[:-1]):
+            print(f"Skipping file in underscore folder: {py_file}")
+            continue
+        
+        # Skip files at the root of examples directory
+        if py_file.parent == examples_dir:
+            print(f"Skipping root file: {py_file.name}")
+            continue
+            
         # Skip __init__.py files, test files, and the build script itself
         if py_file.name.startswith("test_") or py_file.name == "__init__.py" or py_file.name == "build_examples.py":
             continue
@@ -110,7 +124,18 @@ def main():
             index += 1
             
             # Add a link to the example functions component
-            metadata["link"] = f"https://www.boardflare.com/resources/python-functions/text/{metadata['name']}"
+            # Updated to include the subfolder path in the URL
+            relative_path = py_file.relative_to(examples_dir).parent
+            parent_name = relative_path.name
+            file_stem = py_file.stem
+            if relative_path == Path('.'):  # If in the root examples directory
+                link_path = metadata['name']
+            elif parent_name == file_stem:
+                link_path = str(relative_path).replace('\\', '/')
+            else:
+                link_path = f"{str(relative_path).replace('\\', '/')}/{metadata['name']}"
+            
+            metadata["link"] = f"https://www.boardflare.com/resources/python-functions/{link_path}"
             
             # Add to functions list
             functions.append(metadata)

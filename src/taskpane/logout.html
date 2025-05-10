@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Logout</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <script type="module">
+        import { PublicClientApplication } from "https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.17.0/+esm";
+
+        const msalConfig = {
+            auth: {
+                clientId: '7fc35253-f44d-4c02-aea9-9b0b7a0a4b61',
+                authority: "https://login.microsoftonline.com/common",
+                redirectUri: window.location.origin + window.location.pathname
+            },
+            cache: {
+                cacheLocation: 'localStorage'
+            }
+        };
+
+        Office.onReady(async function() {
+            // Initialize MSAL
+            const pca = new PublicClientApplication(msalConfig);
+            await pca.initialize();
+            // Clear MSAL and app tokens from localStorage and sessionStorage
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+            } catch (e) {
+                // Ignore errors
+            }
+            // Get the current account (if any)
+            const accounts = pca.getAllAccounts();
+            const currentAccount = accounts && accounts.length > 0 ? accounts[0] : undefined;
+            // Use MSAL logoutRedirect to sign out of this application only
+            await pca.logoutRedirect({
+                account: currentAccount,
+                postLogoutRedirectUri: msalConfig.auth.redirectUri
+            });
+        });
+    </script>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 40px; }
+    </style>
+</head>
+<body>
+    <p id="logout-message">Signing you out of the add-in...</p>
+</body>
+</html>

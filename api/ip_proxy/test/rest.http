@@ -1,0 +1,7 @@
+### cors_proxy local endpoint
+GET http://localhost:8787/http://universities.hipolabs.com/search?country=Canada HTTP/1.1
+content-type: application/json
+
+### cors_proxy remote endpoint at cors.boardflare.com
+GET http://cors.boardflare.com/http://universities.hipolabs.com/search?country=Canada HTTP/1.1
+content-type: application/json

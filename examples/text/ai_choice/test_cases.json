@@ -1,169 +1,167 @@
-{
-    "test_cases": [
-        {
-            "id": "test_expense_categorization",
-            "description": "Finance: Categorize an expense transaction based on its description.",
-            "arguments": {
-                "text": "Uber ride from airport to hotel, $45.50",
-                "choices": [
-                    [
-                        "Travel"
-                    ],
-                    [
-                        "Food"
-                    ],
-                    [
-                        "Office"
-                    ],
-                    [
-                        "Software"
-                    ]
-                ]
-            },
-            "expected_contains": "Travel",
-            "expected_rows": 1,
-            "demo": true
-        },
-        {
-            "id": "test_customer_email_sentiment",
-            "description": "Customer Service: Classify the sentiment of a customer email.",
-            "arguments": {
-                "text": "I've been waiting for a response about my refund for over two weeks now. This is completely unacceptable and I'm considering filing a complaint.",
-                "choices": [
-                    [
-                        "Positive"
-                    ],
-                    [
-                        "Neutral"
-                    ],
-                    [
-                        "Negative"
-                    ]
-                ]
-            },
-            "expected_contains": "Negative",
-            "expected_rows": 1,
-            "demo": true
-        },
-        {
-            "id": "test_sales_lead_qualification",
-            "description": "Sales: Determine the qualification level of a sales lead based on interaction notes.",
-            "arguments": {
-                "text": "Company: Acme Corp (250+ employees). Contact expressed interest in enterprise plan, requested pricing information, and scheduled a demo next week. Budget confirmed. Decision timeline: end of quarter.",
-                "choices": [
-                    [
-                        "Hot Lead"
-                    ],
-                    [
-                        "Warm Lead"
-                    ],
-                    [
-                        "Cold Lead"
-                    ]
-                ]
-            },
-            "expected_contains": "Hot Lead",
-            "expected_rows": 1,
-            "demo": true
-        },
-        {
-            "id": "test_support_ticket_priority",
-            "description": "IT Support: Assign a priority level to a support ticket based on its description.",
-            "arguments": {
-                "text": "Unable to access CRM system. Getting error 500 when trying to load customer records. This is affecting sales team productivity but they can still use other systems in the meantime.",
-                "choices": [
-                    [
-                        "Critical Priority"
-                    ],
-                    [
-                        "High Priority"
-                    ],
-                    [
-                        "Medium Priority"
-                    ],
-                    [
-                        "Low Priority"
-                    ]
-                ]
-            },
-            "expected_contains": "High Priority",
-            "expected_rows": 1,
-            "demo": true
-        },
-        {
-            "id": "test_product_feedback_categorization",
-            "description": "Product Management: Categorize customer feedback into feedback types.",
-            "arguments": {
-                "text": "I love the new dashboard layout, but it would be even better if I could customize which widgets appear and their positions on the screen.",
-                "choices": [
-                    [
-                        "Bug Report"
-                    ],
-                    [
-                        "Feature Request"
-                    ],
-                    [
-                        "UI Feedback"
-                    ],
-                    [
-                        "Performance Issue"
-                    ],
-                    [
-                        "Compliment"
-                    ]
-                ]
-            },
-            "expected_contains": "Feature Request",
-            "expected_rows": 1,
-            "demo": true
-        },
-        {
-            "id": "test_document_classification",
-            "description": "Legal: Classify a legal document based on its content.",
-            "arguments": {
-                "text": "This agreement outlines the terms under which Company A will provide consulting services to Company B, including scope of work, deliverables, timeline, and compensation structure.",
-                "choices": "NDA, Service Agreement, Employment Contract, License Agreement"
-            },
-            "expected_contains": "Service Agreement",
-            "expected_rows": 1,
-            "demo": true
-        },
-        {
-            "id": "test_empty_choices",
-            "description": "Validation: Return an error if the choices input cell is empty.",
-            "arguments": {
-                "text": "Classify this.",
-                "choices": ""
-            },
-            "expected_contains": "Error: No valid choices provided.",
-            "expected_rows": 1,
-            "demo": false
-        },
-        {
-            "id": "test_empty_text_2d",
-            "description": "Validation: Return an error if the input text cell is empty.",
-            "arguments": {
-                "text": [
-                    []
+[
+    {
+        "id": "test_expense_categorization",
+        "description": "Finance: Categorize an expense transaction based on its description.",
+        "arguments": {
+            "text": "Uber ride from airport to hotel, $45.50",
+            "choices": [
+                [
+                    "Travel"
                 ],
-                "choices": "Yes, No"
-            },
-            "expected_contains": "Error: Empty input text.",
-            "expected_rows": 1,
-            "demo": false
+                [
+                    "Food"
+                ],
+                [
+                    "Office"
+                ],
+                [
+                    "Software"
+                ]
+            ]
         },
-        {
-            "id": "test_model_parameter",
-            "description": "Test that model parameter works correctly.",
-            "arguments": {
-                "text": "Please classify this simple email: 'Thanks for your help yesterday!'",
-                "choices": "Positive, Neutral, Negative",
-                "temperature": 0.0,
-                "model": "mistral-small-latest"
-            },
-            "expected_contains": "Positive",
-            "expected_rows": 1,
-            "demo": false
-        }
-    ]
-}
+        "expected_contains": "Travel",
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "test_customer_email_sentiment",
+        "description": "Customer Service: Classify the sentiment of a customer email.",
+        "arguments": {
+            "text": "I've been waiting for a response about my refund for over two weeks now. This is completely unacceptable and I'm considering filing a complaint.",
+            "choices": [
+                [
+                    "Positive"
+                ],
+                [
+                    "Neutral"
+                ],
+                [
+                    "Negative"
+                ]
+            ]
+        },
+        "expected_contains": "Negative",
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "test_sales_lead_qualification",
+        "description": "Sales: Determine the qualification level of a sales lead based on interaction notes.",
+        "arguments": {
+            "text": "Company: Acme Corp (250+ employees). Contact expressed interest in enterprise plan, requested pricing information, and scheduled a demo next week. Budget confirmed. Decision timeline: end of quarter.",
+            "choices": [
+                [
+                    "Hot Lead"
+                ],
+                [
+                    "Warm Lead"
+                ],
+                [
+                    "Cold Lead"
+                ]
+            ]
+        },
+        "expected_contains": "Hot Lead",
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "test_support_ticket_priority",
+        "description": "IT Support: Assign a priority level to a support ticket based on its description.",
+        "arguments": {
+            "text": "Unable to access CRM system. Getting error 500 when trying to load customer records. This is affecting sales team productivity but they can still use other systems in the meantime.",
+            "choices": [
+                [
+                    "Critical Priority"
+                ],
+                [
+                    "High Priority"
+                ],
+                [
+                    "Medium Priority"
+                ],
+                [
+                    "Low Priority"
+                ]
+            ]
+        },
+        "expected_contains": "High Priority",
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "test_product_feedback_categorization",
+        "description": "Product Management: Categorize customer feedback into feedback types.",
+        "arguments": {
+            "text": "I love the new dashboard layout, but it would be even better if I could customize which widgets appear and their positions on the screen.",
+            "choices": [
+                [
+                    "Bug Report"
+                ],
+                [
+                    "Feature Request"
+                ],
+                [
+                    "UI Feedback"
+                ],
+                [
+                    "Performance Issue"
+                ],
+                [
+                    "Compliment"
+                ]
+            ]
+        },
+        "expected_contains": "Feature Request",
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "test_document_classification",
+        "description": "Legal: Classify a legal document based on its content.",
+        "arguments": {
+            "text": "This agreement outlines the terms under which Company A will provide consulting services to Company B, including scope of work, deliverables, timeline, and compensation structure.",
+            "choices": "NDA, Service Agreement, Employment Contract, License Agreement"
+        },
+        "expected_contains": "Service Agreement",
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "test_empty_choices",
+        "description": "Validation: Return an error if the choices input cell is empty.",
+        "arguments": {
+            "text": "Classify this.",
+            "choices": ""
+        },
+        "expected_contains": "Error: No valid choices provided.",
+        "expected_rows": 1,
+        "demo": false
+    },
+    {
+        "id": "test_empty_text_2d",
+        "description": "Validation: Return an error if the input text cell is empty.",
+        "arguments": {
+            "text": [
+                []
+            ],
+            "choices": "Yes, No"
+        },
+        "expected_contains": "Error: Empty input text.",
+        "expected_rows": 1,
+        "demo": false
+    },
+    {
+        "id": "test_model_parameter",
+        "description": "Test that model parameter works correctly.",
+        "arguments": {
+            "text": "Please classify this simple email: 'Thanks for your help yesterday!'",
+            "choices": "Positive, Neutral, Negative",
+            "temperature": 0.0,
+            "model": "mistral-small-latest"
+        },
+        "expected_contains": "Positive",
+        "expected_rows": 1,
+        "demo": false
+    }
+]

@@ -14,7 +14,7 @@ import {
 const msalConfig = {
     auth: {
         clientId: '7fc35253-f44d-4c02-aea9-9b0b7a0a4b61',
-        authority: "https://login.microsoftonline.com/common",
+        authority: "https://login.microsoftonline.com/common/v2.0", // <-- use v2.0 endpoint
         redirectUri: window.location.origin + window.location.pathname
     },
     cache: {
@@ -41,8 +41,12 @@ function base64UrlToBase64(base64Url) {
 // Add helper to parse token claims
 export function parseTokenClaims(token) {
     try {
+        if (!token || typeof token !== 'string') return null;
         const parts = token.split('.');
-        if (parts.length < 2) return null;
+        if (parts.length < 2) {
+            // Silently return null if not a JWT (opaque token)
+            return null;
+        }
         const standardBase64 = base64UrlToBase64(parts[1]);
         const payload = atob(standardBase64);
         return JSON.parse(payload);
@@ -50,6 +54,18 @@ export function parseTokenClaims(token) {
         console.error("Error parsing token claims:", error);
         return null;
     }
+}
+
+// Helper to get claims from either idToken or accessToken (prefer idToken)
+function getBestTokenClaims(response) {
+    let claims = null;
+    if (response?.idToken) {
+        claims = parseTokenClaims(response.idToken);
+    }
+    if (!claims && response?.accessToken) {
+        claims = parseTokenClaims(response.accessToken);
+    }
+    return claims;
 }
 
 export async function authenticateWithDialog() {
@@ -76,13 +92,21 @@ export async function authenticateWithDialog() {
                     dialog.close();
                     const message = JSON.parse(args.message);
                     if (message.status === 'error') {
+                        console.error('[Auth] Dialog error message:', message);
                         reject(new Error(message.errorData.message));
                     } else {
+                        // Log the full msalResponse for debugging
+                        console.log('[Auth] Full msalResponse from dialog:', message.msalResponse);
+                        pyLogs({ ref: 'auth_full_msalResponse', msalResponse: message.msalResponse });
+                        // Try to get claims from accessToken, fallback to idToken if needed
+                        const tokenClaims = getBestTokenClaims(message.msalResponse);
                         const tokenObj = {
                             auth_token: message.msalResponse?.accessToken,
                             graphToken: message.graphToken,
-                            tokenClaims: parseTokenClaims(message.msalResponse?.accessToken)
+                            tokenClaims
                         };
+                        console.log('[Auth] TokenObj from dialog:', tokenObj);
+                        pyLogs({ ref: 'auth_tokenObj', tokenObj });
                         resolve(tokenObj);
                     }
                 });
@@ -98,24 +122,21 @@ export async function authenticateWithDialog() {
 export async function refreshToken() {
     try {
         const accounts = pca.getAllAccounts();
-
-        // If no accounts, return null immediately
         if (accounts.length === 0) {
             return null;
         }
-
         const tokenRequest = {
             scopes: await getScopes(),
-            account: accounts[0] // Always use first account if available
+            account: accounts[0]
         };
-
         const response = await pca.acquireTokenSilent(tokenRequest);
+        // Try to get claims from accessToken, fallback to idToken if needed
+        const tokenClaims = getBestTokenClaims(response);
         const tokenObj = {
             auth_token: response.accessToken,
             graphToken: response.accessToken,
-            tokenClaims: parseTokenClaims(response.accessToken)
+            tokenClaims
         };
-
         await storeToken(tokenObj);
         return tokenObj;
     } catch (error) {
@@ -166,7 +187,10 @@ export function SignInButton({ loadFunctions }) {
 
     const signIn = async () => {
         try {
-            await storeScopes(["User.Read", "offline_access"]);  // Store default scopes before auth
+            await storeScopes([
+                "openid", "profile", "email", "offline_access",
+                "User.Read", "Files.ReadWrite.AppFolder"
+            ]);  // Always store all required scopes before auth
             await authenticateWithDialog();
             pyLogs({ message: "Sign in successful", ref: "auth_signin_success" });
             setIsSignedIn(true);
@@ -221,23 +245,120 @@ export function SignInButton({ loadFunctions }) {
 
 async function isTokenValid(token) {
     if (!token) return false;
+    // Parse claims; opaque (non-JWT) tokens return null
+    const claims = parseTokenClaims(token);
+    if (!claims) {
+        return true;
+    }
     try {
-        // JWT tokens are base64 encoded and split by dots
-        const [, payloadBase64] = token.split('.');
-        if (!payloadBase64) return false;
-
-        // Convert from base64url to standard base64 before decoding
-        const standardBase64 = base64UrlToBase64(payloadBase64);
-
-        // Decode the base64 payload
-        const payload = JSON.parse(atob(standardBase64));
-
-        // Check if token is expired
         const currentTime = Math.floor(Date.now() / 1000);
-        return payload.exp > currentTime;
+        return claims.exp > currentTime;
     } catch (error) {
-        console.error("Error validating token:", error);
+        console.error("Error validating token claims:", error);
         await pyLogs({ message: error.message, ref: "auth_validateToken_error" });
         return false;
     }
+}
+
+// Add AuthContext to provide auth state and a refresh function
+export const AuthContext = React.createContext();
+
+export function AuthProvider({ children }) {
+    const [refreshKey, setRefreshKey] = React.useState(0);
+    const [isSignedIn, setIsSignedIn] = React.useState(false);
+    const [userEmail, setUserEmail] = React.useState(null);
+    const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        let mounted = true;
+        async function check() {
+            try {
+                await initializeDB();
+                const tokenObj = await getStoredToken();
+                if (!tokenObj) {
+                    if (mounted) {
+                        setIsSignedIn(false);
+                        setUserEmail(null);
+                        setLoading(false);
+                        console.log('[AuthProvider] No tokenObj found, set isSignedIn to false');
+                        pyLogs({ ref: 'auth_no_tokenObj', isSignedIn: false });
+                    }
+                    return;
+                }
+                const isValid = await isTokenValid(tokenObj.auth_token);
+                if (!isValid) {
+                    await removeToken();
+                    if (mounted) {
+                        setIsSignedIn(false);
+                        setUserEmail(null);
+                        setLoading(false);
+                        console.log('[AuthProvider] Token invalid, set isSignedIn to false');
+                        pyLogs({ ref: 'auth_token_invalid', isSignedIn: false });
+                    }
+                    return;
+                }
+                if (mounted) {
+                    setIsSignedIn(true);
+                    const claims = tokenObj.tokenClaims || {};
+                    setUserEmail(claims.email || claims.upn || claims.preferred_username || null);
+                    setLoading(false);
+                    console.log('[AuthProvider] Token valid, set isSignedIn to true, claims:', claims);
+                    pyLogs({ ref: 'auth_token_valid', isSignedIn: true, claims });
+                }
+            } catch (error) {
+                if (mounted) {
+                    setIsSignedIn(false);
+                    setUserEmail(null);
+                    setLoading(false);
+                    console.log('[AuthProvider] Error in check, set isSignedIn to false:', error);
+                    pyLogs({ ref: 'auth_check_error', isSignedIn: false, error: error.message });
+                }
+            }
+        }
+        check();
+        return () => { mounted = false; };
+    }, [refreshKey]);
+
+    // Logout: remove token and clear MSAL cache
+    const logout = async (onLogout) => {
+        // Clear local tokens and state
+        localStorage.clear();
+        sessionStorage.clear();
+        await removeToken();
+        setIsSignedIn(false);
+        setUserEmail(null);
+        // Logout does not actually revoke consent, so is only useful to clear the cache.
+        // try {
+        //     let logoutUrl;
+        //     if (window.location.href.includes("preview")) {
+        //         logoutUrl = "https://addins.boardflare.com/python/preview/logout.html";
+        //     } else if (window.location.href.includes("prod")) {
+        //         logoutUrl = "https://addins.boardflare.com/python/prod/logout.html";
+        //     } else {
+        //         logoutUrl = window.location.origin + "/logout.html";
+        //     }
+        //     Office.context.ui.displayDialogAsync(
+        //         logoutUrl,
+        //         { height: 60, width: 30 },
+        //         () => { }
+        //     );
+        // } catch (e) {
+        //     // Ignore errors
+        // }
+        if (onLogout)
+            onLogout();
+    };
+
+    // Call this after login to refresh auth state
+    const refreshAuth = () => setRefreshKey(k => k + 1);
+
+    return (
+        <AuthContext.Provider value={{ isSignedIn, userEmail, loading, logout, refreshAuth }}>
+            {children}
+        </AuthContext.Provider>
+    );
+}
+
+export function useAuth() {
+    return React.useContext(AuthContext);
 }
