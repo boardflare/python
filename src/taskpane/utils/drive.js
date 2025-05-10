@@ -20,6 +20,56 @@ async function getGraphToken() {
     return tokenObj.graphToken;
 }
 
+// Get the URL to the app root folder in OneDrive
+export async function getAppRootFolderUrl() {
+    const accessToken = await getGraphToken();
+    try {
+        // First try getting the direct URL from the approot special folder
+        const response = await fetch('https://graph.microsoft.com/v1.0/me/drive/special/approot', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.webUrl) {
+                console.log('[OneDrive] Found direct app folder URL:', data.webUrl);
+                return data.webUrl;
+            }
+            
+            // If no webUrl but we have drive and folder IDs, construct URL for personal accounts
+            if (data.parentReference && data.parentReference.driveId && data.id) {
+                const folderUrl = `https://onedrive.live.com/?id=${encodeURIComponent(data.id)}&cid=${encodeURIComponent(data.parentReference.driveId)}`;
+                console.log('[OneDrive] Constructed app folder URL for personal account:', folderUrl);
+                return folderUrl;
+            }
+        }
+        
+        // Fallback to checking drive info
+        const driveResponse = await fetch('https://graph.microsoft.com/v1.0/me/drive', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+            }
+        });
+        
+        if (driveResponse.ok) {
+            const driveData = await driveResponse.json();
+            if (driveData.driveType === 'personal') {
+                // For personal accounts without specific folder info
+                return `https://onedrive.live.com/?cid=${encodeURIComponent(driveData.id)}`;
+            }
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('[OneDrive] Error getting app folder URL:', error);
+        return null;
+    }
+}
+
 async function handleResponse(response) {
     if (response.status === 401) {
         throw new TokenExpiredError();
@@ -149,17 +199,79 @@ export async function listFiles() {
                 'Authorization': `Bearer ${accessToken}`,
             }
         });
-
+        
         await handleResponse(response);
         const data = await response.json();
         // Accept both .file and @microsoft.graph.downloadUrl as file indicators
         const files = data.value.filter(file =>
             (file.file || file['@microsoft.graph.downloadUrl']) && file.name
         );
-        // Get the folder URL from the first file if available
-        const folderUrl = files.length > 0 ?
-            files[0].webUrl.substring(0, files[0].webUrl.lastIndexOf('/')) :
-            null;
+        
+        // Log details of first file for debugging
+        if (files.length > 0) {
+            const personalAccount = !files[0].webUrl && files[0]['@microsoft.graph.downloadUrl'];
+            console.log(`[OneDrive] First file details for ${personalAccount ? 'personal' : 'work/school'} account:`, {
+                name: files[0].name,
+                hasWebUrl: !!files[0].webUrl,
+                hasDownloadUrl: !!files[0]['@microsoft.graph.downloadUrl'],
+                hasParentReference: !!files[0].parentReference,
+                driveId: files[0].parentReference?.driveId || 'not available',
+                parentId: files[0].parentReference?.id || 'not available',
+            });
+        }
+          // Get the folder URL from the first file if available
+        let folderUrl = null;
+        
+        // Try to get the app folder info directly, which should work for both account types
+        try {
+            const appResponse = await fetch('https://graph.microsoft.com/v1.0/me/drive/special/approot', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                }
+            });
+            
+            if (appResponse.ok) {
+                const appFolder = await appResponse.json();
+                
+                // For work/school accounts, use the webUrl if available
+                if (appFolder.webUrl) {
+                    folderUrl = appFolder.webUrl;
+                    console.log(`[OneDrive] Using direct app folder URL: ${folderUrl}`);
+                } 
+                // For personal accounts with no webUrl, construct URL from IDs
+                else if (appFolder.parentReference?.driveId && appFolder.id) {
+                    folderUrl = `https://onedrive.live.com/edit.aspx?cid=${encodeURIComponent(appFolder.parentReference.driveId)}&resid=${encodeURIComponent(appFolder.id)}&app=Excel`;
+                    console.log(`[OneDrive] Using constructed personal account URL: ${folderUrl}`);
+                }
+            }
+        } catch (error) {
+            console.error("[OneDrive] Error getting app folder:", error);
+        }
+        
+        // If no folder URL determined yet, fall back to original logic
+        if (!folderUrl && files.length > 0) {
+            if (files[0].webUrl) {
+                // For work/school accounts
+                folderUrl = files[0].webUrl.substring(0, files[0].webUrl.lastIndexOf('/'));
+                console.log(`[OneDrive] Using work/school account fallback URL: ${folderUrl}`);
+            } else if (files[0].parentReference && files[0].parentReference.driveId) {
+                // For personal accounts, various URL formats to try
+                const driveId = files[0].parentReference.driveId;
+                
+                if (files[0].parentReference.id) {
+                    // Format directly using IDs - most reliable for personal accounts
+                    const folderId = files[0].parentReference.id; 
+                    folderUrl = `https://onedrive.live.com/edit.aspx?cid=${encodeURIComponent(driveId)}&resid=${encodeURIComponent(folderId)}&app=Excel`;
+                } else {
+                    // Generic root folder URL
+                    folderUrl = `https://onedrive.live.com/?cid=${encodeURIComponent(driveId)}`;
+                }
+                
+                console.log(`[OneDrive] Using personal account fallback URL: ${folderUrl}`);
+            }
+        }
+        
         return { files, folderUrl };
     } catch (error) {
         throw error;
@@ -179,6 +291,8 @@ export async function loadFunctionFiles() {
         // Separate files with downloadUrl (personal accounts) and those without (work/school)
         const filesWithDownloadUrl = functionFiles.filter(f => f['@microsoft.graph.downloadUrl']);
         const filesWithoutDownloadUrl = functionFiles.filter(f => !f['@microsoft.graph.downloadUrl']);
+        
+        console.log(`[OneDrive] Found ${filesWithDownloadUrl.length} personal account files and ${filesWithoutDownloadUrl.length} work/school account files`);
 
         // Prepare batch requests for files without downloadUrl
         const requests = filesWithoutDownloadUrl.map((file, index) => ({
@@ -269,11 +383,18 @@ export async function loadFunctionFiles() {
                 }
             }
             return null;
-        });
-
-        // Fetch files with downloadUrl (personal accounts)
+        });        // Fetch files with downloadUrl (personal accounts)
         const downloadUrlPromises = filesWithDownloadUrl.map(async (file) => {
             try {
+                // Log additional properties from personal account files
+                console.log(`[OneDrive] Personal account file properties:`, {
+                    name: file.name,
+                    id: file.id,
+                    driveId: file.parentReference?.driveId,
+                    parentId: file.parentReference?.id,
+                    hasWebUrl: !!file.webUrl
+                });
+                
                 console.log(`[OneDrive] Attempting to fetch file from downloadUrl:`, file.name, file['@microsoft.graph.downloadUrl']);
                 const response = await fetch(file['@microsoft.graph.downloadUrl']);
                 console.log(`[OneDrive] Fetch response for`, file.name, 'status:', response.status, 'content-type:', response.headers.get('content-type'));
@@ -321,11 +442,12 @@ export async function loadFunctionFiles() {
                 console.error(`[OneDrive] Error processing notebook for ${file.name}:`, e);
             }
             return null;
-        });
-
-        // Wait for all promises to resolve
+        });        // Wait for all promises to resolve
         const results = await Promise.all([...batchPromises, ...downloadUrlPromises]);
         const driveFunctions = results.filter(Boolean);
+        
+        console.log(`[OneDrive] Loaded ${driveFunctions.length} functions from OneDrive`);
+        console.log(`[OneDrive] Final folder URL: ${folderUrl}`);
 
         return { driveFunctions, folderUrl };
     } catch (error) {

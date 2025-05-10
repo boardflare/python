@@ -17,10 +17,15 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
     const loadOnedriveFunctions = async () => {
         try {
             setIsLoading(true);
-            setOnedriveFunctions([]);
-
-            const { driveFunctions, folderUrl } = await loadFunctionFiles();
+            setOnedriveFunctions([]);            const { driveFunctions, folderUrl } = await loadFunctionFiles();
             console.log('[OneDrive Component] driveFunctions returned:', driveFunctions);
+            console.log('[OneDrive Component] folderUrl:', folderUrl);
+            
+            if (folderUrl) {
+                const isPersonalAccount = folderUrl.includes('onedrive.live.com');
+                console.log(`[OneDrive Component] Account type: ${isPersonalAccount ? 'Personal' : 'Work/School'}`);
+            }
+            
             setOnedriveFunctions(driveFunctions || []);
             setFolderUrl(folderUrl);
             setError(null);
@@ -182,11 +187,10 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
     return (
         <>
             <div className="overflow-x-auto w-full">
-                <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center w-full flex items-center justify-center gap-2">
-                    <div className="flex items-center">
+                <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center w-full flex items-center justify-center gap-2">                    <div className="flex items-center">
                         {folderUrl ? (
                             <a href={folderUrl} target="_blank" rel="noopener noreferrer"
-                                className="hover:text-blue-500" title="Open in OneDrive">
+                                className="text-blue-600 hover:text-blue-800 underline" title="Open in OneDrive">
                                 OneDrive
                             </a>
                         ) : (
@@ -198,8 +202,7 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
                             title="Refresh OneDrive functions">
                             🔄
                         </button>
-                    )}
-                    <div className="flex items-center ml-4">
+                    )}                    <div className="flex items-center ml-2">
                         {isSignedIn ? (
                             <>
                                 <span className="ml-2 text-gray-700 text-sm">{userEmail || 'User'}</span>
@@ -228,10 +231,8 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
                         Use ⬆️ or ⬇️to save between Workbook and OneDrive
                     </div>
                 )}
-            </div>
-
-            {deleteConfirm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            </div>            {deleteConfirm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white p-6 rounded-lg max-w-sm w-full">
                         <h3 className="text-lg font-semibold mb-4">Delete Function</h3>
                         <p className="mb-4">Are you sure you want to delete "{deleteConfirm.name}"?</p>
