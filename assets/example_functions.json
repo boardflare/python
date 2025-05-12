@@ -844,7 +844,7 @@
         "demo": true
       }
     ],
-    "fileId": "12",
+    "fileId": "13",
     "link": "https://www.boardflare.com/resources/python-functions/financial/black_scholes"
   },
   {
@@ -863,7 +863,7 @@
         "demo": true
       }
     ],
-    "fileId": "13",
+    "fileId": "14",
     "link": "https://www.boardflare.com/resources/python-functions/data/internet_csv"
   },
   {
@@ -897,7 +897,7 @@
         "demo": true
       }
     ],
-    "fileId": "11",
+    "fileId": "12",
     "link": "https://www.boardflare.com/resources/python-functions/optimize/minimize_scalar"
   },
   {
@@ -916,7 +916,7 @@
         "demo": true
       }
     ],
-    "fileId": "14",
+    "fileId": "15",
     "link": "https://www.boardflare.com/resources/python-functions/data/onedrive_csv"
   },
   {
@@ -1091,6 +1091,72 @@
     ],
     "fileId": "10",
     "link": "https://www.boardflare.com/resources/python-functions/text/vader_sentiment"
+  },
+  {
+    "name": "val_discrete",
+    "description": "Selects a value from a list based on a discrete probability distribution.",
+    "code": "import random\nfrom typing import List, Any, Optional\n\ndef val_discrete(values: List[List[Any]], distribution: List[List[float]]) -> Optional[Any]:\n    \"\"\"\n    Selects a value from a list based on a discrete probability distribution.\n\n    Args:\n        values (list of lists): 2D list of possible values (Excel range or Python 2D list)\n        distribution (list of lists): 2D list of probabilities (must sum to 1)\n\n    Returns:\n        The selected value (scalar), or None if input is invalid.\n    \"\"\"\n    # Input validation\n    if not values or not distribution:\n        return None\n    if not isinstance(values, list) or not isinstance(distribution, list):\n        return None\n    if not values or not values[0] or not distribution or not distribution[0]:\n        return None\n    if len(values[0]) != len(distribution[0]):\n        return None\n    weights = distribution[0]\n    # Check if all weights are numbers and sum to 1 (\u00b10.01)\n    try:\n        total = sum(float(w) for w in weights)\n        if abs(total - 1.0) > 0.01:\n            return None\n    except Exception:\n        return None\n    # Use random.choices to select\n    try:\n        return random.choices(values[0], weights=weights)[0]\n    except Exception:\n        return None\n",
+    "test_cases": [
+      {
+        "id": "demo_customer_type",
+        "description": "Simulate customer type selection based on market share.",
+        "arguments": {
+          "values": [
+            [
+              "Retail",
+              "Wholesale",
+              "Online"
+            ]
+          ],
+          "distribution": [
+            [
+              0.6,
+              0.3,
+              0.1
+            ]
+          ]
+        },
+        "expected_type": [
+          "str"
+        ],
+        "expected_values": [
+          "Retail",
+          "Wholesale",
+          "Online"
+        ],
+        "expected_rows": 1,
+        "demo": true
+      },
+      {
+        "id": "demo_project_outcome",
+        "description": "Select project outcome based on risk assessment.",
+        "arguments": {
+          "values": [
+            [
+              "Success",
+              "Failure"
+            ]
+          ],
+          "distribution": [
+            [
+              0.8,
+              0.2
+            ]
+          ]
+        },
+        "expected_type": [
+          "str"
+        ],
+        "expected_values": [
+          "Success",
+          "Failure"
+        ],
+        "expected_rows": 1,
+        "demo": true
+      }
+    ],
+    "fileId": "11",
+    "link": "https://www.boardflare.com/resources/python-functions/text/val_discrete"
   },
   {
     "name": "web_content",

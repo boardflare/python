@@ -1,0 +1,148 @@
+[
+    {
+        "id": "demo_customer_type",
+        "description": "Simulate customer type selection based on market share.",
+        "arguments": {
+            "values": [
+                [
+                    "Retail",
+                    "Wholesale",
+                    "Online"
+                ]
+            ],
+            "distribution": [
+                [
+                    0.6,
+                    0.3,
+                    0.1
+                ]
+            ]
+        },
+        "expected_type": [
+            "str"
+        ],
+        "expected_values": [
+            "Retail",
+            "Wholesale",
+            "Online"
+        ],
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "demo_project_outcome",
+        "description": "Select project outcome based on risk assessment.",
+        "arguments": {
+            "values": [
+                [
+                    "Success",
+                    "Failure"
+                ]
+            ],
+            "distribution": [
+                [
+                    0.8,
+                    0.2
+                ]
+            ]
+        },
+        "expected_type": [
+            "str"
+        ],
+        "expected_values": [
+            "Success",
+            "Failure"
+        ],
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "numeric_values",
+        "description": "Select a number based on weighted probabilities.",
+        "arguments": {
+            "values": [
+                [
+                    1,
+                    2,
+                    3
+                ]
+            ],
+            "distribution": [
+                [
+                    0.2,
+                    0.5,
+                    0.3
+                ]
+            ]
+        },
+        "expected_type": [
+            "int",
+            "float"
+        ],
+        "expected_values": [
+            1,
+            2,
+            3
+        ],
+        "expected_rows": 1,
+        "demo": false
+    },
+    {
+        "id": "probabilities_not_sum_to_1",
+        "description": "Probabilities do not sum to 1 (should return None).",
+        "arguments": {
+            "values": [
+                [
+                    "A",
+                    "B"
+                ]
+            ],
+            "distribution": [
+                [
+                    0.7,
+                    0.7
+                ]
+            ]
+        },
+        "expected_type": [
+            "NoneType"
+        ],
+        "expected_rows": 1,
+        "demo": false
+    },
+    {
+        "id": "empty_input",
+        "description": "Empty input should return None.",
+        "arguments": {
+            "values": [],
+            "distribution": []
+        },
+        "expected_type": [
+            "NoneType"
+        ],
+        "expected_rows": 1,
+        "demo": false
+    },
+    {
+        "id": "mismatched_lengths",
+        "description": "Mismatched value and distribution lengths should return None.",
+        "arguments": {
+            "values": [
+                [
+                    1,
+                    2
+                ]
+            ],
+            "distribution": [
+                [
+                    0.5
+                ]
+            ]
+        },
+        "expected_type": [
+            "NoneType"
+        ],
+        "expected_rows": 1,
+        "demo": false
+    }
+]
