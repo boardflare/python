@@ -3,10 +3,11 @@ mode: 'agent'
 tools: ['read_file', 'insert_edit_into_file', 'create_file', 'fetch_webpage', 'think', 'run_in_terminal', 'get_terminal_output', 'list_dir', 'pyodide_install-packages', 'get_errors']
 description: 'Create or edit a Python function'
 ---
-You are working on Python function.  If you have only been given a documentation file, you will need to create the function, pytest, and test_cases files, which should be placed in the same folder as the documentation file.  Otherwise, you will be editing one or more of these files.  Either way, follow the instructions below to complete the task.  After you create a file, use the `get_errors` tool to check for any errors in the code.  If there are errors, use the `insert_edit_into_file` tool to fix them.
 
-1. **Read the Files**: Use the `list_dir` tool to list all the files in the folder you have been provided, and then use the `read_file` tool to read them.  Make sure you read **all** the files.  This includes the documentation file, any existing Python files, and test_cases files.
-2. **Think About the Solution**: Use the `think` tool to carefully consider the design of the function given the documentation and any request for changes you have received.
+This is a prompt for a language model to create a Python function that will be used from within Excel.  Follow the instructions below to complete the task.  After you create or edit a file, use the `get_errors` tool to check for any errors in the code.  If there are errors, use the `insert_edit_into_file` tool to fix them.
+
+1. **Read the Files**: Read any files provided using `read_file`.  If a folder has been added to the context, use the `list_dir` tool to list all the files in the folder, and then use the `read_file` tool to read them.  Make sure you read **all** the files.
+2. **Explain the Solution**: Before you start writing code, think step by step and explain how you will solve the problem.  This should include your understanding of the problem and requirements.  Plan the structure of the new function, including inputs, outputs, and any necessary libraries or dependencies.
 3. **Write Function Code**: Implement the function in a `my_function.py` file using the `create_file` tool. See this [example](../../examples/text/ai_ask/ai_ask.py).
 4. **Write Tests**: Create a `test_my_function.py` file and a `test_cases.json` file with parameterized test cases using the `create_file` tool. The demo test cases should follow from the examples defined in the documentation. Read the [example test file](../../examples/text/ai_ask/test_cases.json) and [example test_cases data file](../../examples/text/ai_ask/test_ai_ask.py) using the `read_file` tool for reference.
 5. **Run Tests**: Execute the tests using the `run_in_terminal` tool:

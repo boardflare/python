@@ -22,3 +22,5 @@ Stores structured test data used by the test file, e.g. `test_my_function.py`.
     -   For validation tests, use `expected_contains_any` instead of exact matching where appropriate, and keep validation keywords broad and general
     -   Avoid edge cases where multiple similar answers could be considered correct
     -   Test expected failures with clear error messages
+
+**Note:** The `"demo"` parameter is required for all test cases. Set `"demo": true` for cases used in documentation or user-facing demos, and `"demo": false` for internal/validation-only cases.

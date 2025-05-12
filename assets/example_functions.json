@@ -779,6 +779,75 @@
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_table"
   },
   {
+    "name": "black_scholes",
+    "description": "Calculate the Black-Scholes price for a European call or put option.",
+    "code": "import math\nfrom scipy.stats import norm\n\ndef black_scholes(S, K, T, r, sigma, option_type):\n    \"\"\"\n    Calculate the Black-Scholes price for a European call or put option.\n    Args:\n        S (float): Current price of the underlying asset\n        K (float): Strike price\n        T (float): Time to expiration in years\n        r (float): Annual risk-free interest rate (decimal)\n        sigma (float): Volatility of the underlying asset (decimal)\n        option_type (str): 'call' or 'put'\n    Returns:\n        float: Theoretical price of the option\n    \"\"\"\n    # Input validation\n    if not (isinstance(S, (int, float)) and S > 0):\n        raise ValueError(\"S must be a positive float\")\n    if not (isinstance(K, (int, float)) and K > 0):\n        raise ValueError(\"K must be a positive float\")\n    if not (isinstance(T, (int, float)) and T > 0):\n        raise ValueError(\"T must be a positive float\")\n    if not (isinstance(r, (int, float)) and r >= 0):\n        raise ValueError(\"r must be a non-negative float\")\n    if not (isinstance(sigma, (int, float)) and sigma > 0):\n        raise ValueError(\"sigma must be a positive float\")\n    if option_type not in ('call', 'put'):\n        raise ValueError(\"option_type must be 'call' or 'put'\")\n\n    d1 = (math.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * math.sqrt(T))\n    d2 = d1 - sigma * math.sqrt(T)\n\n    if option_type == 'call':\n        price = S * norm.cdf(d1) - K * math.exp(-r * T) * norm.cdf(d2)\n    else:  # put\n        price = K * math.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)\n    return float(price)\n",
+    "test_cases": [
+      {
+        "id": "call_option_6mo_excel",
+        "description": "Price a 6-month European call option in Excel for a stock at $100, strike $105, 3% risk-free rate, 20% volatility.",
+        "arguments": {
+          "S": 100,
+          "K": 105,
+          "T": 0.5,
+          "r": 0.03,
+          "sigma": 0.2,
+          "option_type": "call"
+        },
+        "expected": 4.1783,
+        "expected_rows": 1,
+        "demo": true
+      },
+      {
+        "id": "put_option_1yr_excel",
+        "description": "Price a 1-year European put option in Excel for a stock at $50, strike $45, 2% risk-free rate, 25% volatility.",
+        "arguments": {
+          "S": 50,
+          "K": 45,
+          "T": 1,
+          "r": 0.02,
+          "sigma": 0.25,
+          "option_type": "put"
+        },
+        "expected": 2.3078,
+        "expected_rows": 1,
+        "demo": true
+      },
+      {
+        "id": "call_option_atm_1yr",
+        "description": "Call option, at-the-money, 1 year, 5% risk-free, 20% volatility.",
+        "arguments": {
+          "S": 100,
+          "K": 100,
+          "T": 1,
+          "r": 0.05,
+          "sigma": 0.2,
+          "option_type": "call"
+        },
+        "expected": 10.45,
+        "expected_rows": 1,
+        "demo": true
+      },
+      {
+        "id": "put_option_atm_1yr",
+        "description": "Put option, at-the-money, 1 year, 5% risk-free, 20% volatility.",
+        "arguments": {
+          "S": 100,
+          "K": 100,
+          "T": 1,
+          "r": 0.05,
+          "sigma": 0.2,
+          "option_type": "put"
+        },
+        "expected": 5.573,
+        "expected_rows": 1,
+        "demo": true
+      }
+    ],
+    "fileId": "11",
+    "link": "https://www.boardflare.com/resources/python-functions/financial/black_scholes"
+  },
+  {
     "name": "internet_csv",
     "description": "Fetches a CSV file from the internet (with CORS proxy) and returns its contents as a 2D list.",
     "code": "import csv\nimport io\nimport requests\n\n\ndef internet_csv(url):\n    \"\"\"\n    Fetches a CSV file from the internet (with CORS proxy) and returns its contents as a 2D list.\n\n    Args:\n        url (str): The direct URL to the CSV file.\n\n    Returns:\n        list[list[str]]: 2D list representing the CSV contents, where each sublist is a row.\n\n    Raises:\n        ValueError: If the URL is invalid or the content cannot be parsed as CSV.\n    \"\"\"\n    if not isinstance(url, str) or not url.strip():\n        raise ValueError(\"A non-empty URL string must be provided.\")\n\n    cors_url = f\"https://cors.boardflare.com/{url}\"\n    try:\n        response = requests.get(cors_url)\n        response.raise_for_status()\n        content = response.text\n        reader = csv.reader(io.StringIO(content))\n        data = [row for row in reader]\n        if not data:\n            raise ValueError(\"CSV file is empty or could not be parsed.\")\n        return data\n    except Exception as e:\n        raise ValueError(f\"Failed to fetch or parse CSV: {e}\")\n",
@@ -794,7 +863,7 @@
         "demo": true
       }
     ],
-    "fileId": "11",
+    "fileId": "12",
     "link": "https://www.boardflare.com/resources/python-functions/data/internet_csv"
   },
   {
@@ -813,7 +882,7 @@
         "demo": true
       }
     ],
-    "fileId": "12",
+    "fileId": "13",
     "link": "https://www.boardflare.com/resources/python-functions/data/onedrive_csv"
   },
   {
