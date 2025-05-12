@@ -118,7 +118,7 @@
         "demo": true
       }
     ],
-    "fileId": "2",
+    "fileId": "3",
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_ask"
   },
   {
@@ -255,7 +255,7 @@
         "demo": true
       }
     ],
-    "fileId": "3",
+    "fileId": "4",
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_choice"
   },
   {
@@ -314,7 +314,7 @@
         "demo": true
       }
     ],
-    "fileId": "4",
+    "fileId": "5",
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_extract"
   },
   {
@@ -509,7 +509,7 @@
         "demo": true
       }
     ],
-    "fileId": "5",
+    "fileId": "6",
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_fill"
   },
   {
@@ -607,7 +607,7 @@
         "demo": true
       }
     ],
-    "fileId": "6",
+    "fileId": "7",
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_format"
   },
   {
@@ -672,7 +672,7 @@
         "demo": true
       }
     ],
-    "fileId": "7",
+    "fileId": "8",
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_list"
   },
   {
@@ -775,7 +775,7 @@
         "demo": true
       }
     ],
-    "fileId": "8",
+    "fileId": "9",
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_table"
   },
   {
@@ -844,7 +844,7 @@
         "demo": true
       }
     ],
-    "fileId": "13",
+    "fileId": "14",
     "link": "https://www.boardflare.com/resources/python-functions/financial/black_scholes"
   },
   {
@@ -863,7 +863,7 @@
         "demo": true
       }
     ],
-    "fileId": "14",
+    "fileId": "15",
     "link": "https://www.boardflare.com/resources/python-functions/data/internet_csv"
   },
   {
@@ -897,7 +897,7 @@
         "demo": true
       }
     ],
-    "fileId": "12",
+    "fileId": "13",
     "link": "https://www.boardflare.com/resources/python-functions/optimize/minimize_scalar"
   },
   {
@@ -916,8 +916,32 @@
         "demo": true
       }
     ],
-    "fileId": "15",
+    "fileId": "16",
     "link": "https://www.boardflare.com/resources/python-functions/data/onedrive_csv"
+  },
+  {
+    "name": "smolagents_example",
+    "description": "Uses a code agent from smolagents to run a simple tool (hello) using an LLM model.",
+    "code": "import sys\nfrom typing import Optional\n\ndef smolagents_example(prompt: str, model_id: Optional[str] = None):\n    \"\"\"\n    Uses a code agent from smolagents to run a simple tool (hello) using an LLM model.\n\n    Args:\n        prompt (str): The instruction or request for the agent (e.g., \"Get a greeting for Mike\").\n        model_id (str, optional): The HuggingFace model ID to use. Defaults to 'Qwen/Qwen2.5-Coder-32B-Instruct'.\n\n    Returns:\n        str: The agent's response as a string.\n    \"\"\"\n    try:\n        from smolagents import CodeAgent, InferenceClientModel, tool\n    except ImportError:\n        return \"smolagents package is not installed.\"\n\n    if not isinstance(prompt, str) or not prompt.strip():\n        return \"Invalid prompt. Please provide a non-empty string.\"\n\n    model_id = model_id or \"Qwen/Qwen2.5-Coder-32B-Instruct\"\n    # Use the provided token for testing; replace with your own for production\n    api_token = \"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\"\n    try:\n        model = InferenceClientModel(model_id=model_id, token=api_token)\n    except Exception as e:\n        return f\"Model initialization failed: {e}\"\n\n    @tool\n    def hello(name: str) -> str:\n        \"\"\"\n        Returns a greeting.\n\n        Args:\n            name: The name of the person that you want a greeting for.\n        \"\"\"\n        return f\"Hello {name}!\"\n\n    try:\n        agent = CodeAgent(tools=[hello], model=model, add_base_tools=False)\n        result = agent.run(prompt)\n        if isinstance(result, str):\n            return result\n        return str(result)\n    except Exception as e:\n        return f\"Agent error: {e}\"\n",
+    "test_cases": [
+      {
+        "id": "basic_greeting",
+        "description": "Excel user requests a personalized greeting for a client named Mike. Should return a greeting string including 'Mike'.",
+        "arguments": {
+          "prompt": "Get a greeting for Mike"
+        },
+        "expected_contains_any": [
+          "Mike",
+          "Hello",
+          "greeting"
+        ],
+        "expected_type": "str",
+        "expected_rows": 1,
+        "demo": true
+      }
+    ],
+    "fileId": "1",
+    "link": "https://www.boardflare.com/resources/python-functions/agents/smolagents_example"
   },
   {
     "name": "text_distance",
@@ -1044,7 +1068,7 @@
         "demo": true
       }
     ],
-    "fileId": "9",
+    "fileId": "10",
     "link": "https://www.boardflare.com/resources/python-functions/text/text_distance"
   },
   {
@@ -1089,7 +1113,7 @@
         "demo": true
       }
     ],
-    "fileId": "10",
+    "fileId": "11",
     "link": "https://www.boardflare.com/resources/python-functions/text/vader_sentiment"
   },
   {
@@ -1155,8 +1179,8 @@
         "demo": true
       }
     ],
-    "fileId": "11",
-    "link": "https://www.boardflare.com/resources/python-functions/text/val_discrete"
+    "fileId": "12",
+    "link": "https://www.boardflare.com/resources/python-functions/statistics/val_discrete"
   },
   {
     "name": "web_content",
@@ -1178,7 +1202,7 @@
         "demo": true
       }
     ],
-    "fileId": "1",
+    "fileId": "2",
     "link": "https://www.boardflare.com/resources/python-functions/web/web_content"
   }
 ]
