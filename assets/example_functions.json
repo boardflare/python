@@ -844,7 +844,7 @@
         "demo": true
       }
     ],
-    "fileId": "11",
+    "fileId": "12",
     "link": "https://www.boardflare.com/resources/python-functions/financial/black_scholes"
   },
   {
@@ -863,8 +863,42 @@
         "demo": true
       }
     ],
-    "fileId": "12",
+    "fileId": "13",
     "link": "https://www.boardflare.com/resources/python-functions/data/internet_csv"
+  },
+  {
+    "name": "minimize_scalar",
+    "description": "Local minimization of scalar function of one variable.",
+    "code": "# Minimize Scalar Function\n\nfrom scipy.optimize import minimize_scalar\nimport math\n\n\ndef minimize_scalar_function(func_expr, bounds=None, method=None):\n    \"\"\"\n    Minimizes a scalar function using scipy.optimize.minimize_scalar.\n\n    Args:\n        func_expr (str): A string representing the function to minimize, e.g., 'x**2 + 3*x + 2'.\n        bounds (list, optional): A 2D list [[min, max]] specifying the bounds for bounded methods.\n        method (str, optional): Optimization method: 'brent', 'bounded', or 'golden'.\n\n    Returns:\n        list: [[x, fun]] where x is the location of minimum and fun is the minimum value\n    \"\"\"\n    # Define the function from the string expression\n    def func(x):\n        return eval(func_expr, {\"x\": x, \"math\": math})\n\n    # Check if 'x' is present in the function expression\n    if 'x' not in func_expr:\n        raise ValueError(\"Function expression must contain the variable 'x'.\")\n\n    kwargs = {}\n    # Accept bounds as a 2D list [[min, max]] or as a scalar (not tuple)\n    if bounds is not None:\n        # If bounds is a 2D list (e.g., [[0, 10]]), extract min and max\n        if isinstance(bounds, list) and len(bounds) == 1 and isinstance(bounds[0], list) and len(bounds[0]) == 2:\n            min_val, max_val = bounds[0][0], bounds[0][1]\n            kwargs['bounds'] = [min_val, max_val]\n        else:\n            kwargs['bounds'] = bounds\n    if method is not None:\n        kwargs['method'] = method\n\n    result = minimize_scalar(func, **kwargs)\n    # Return as a 2D list: [[x, fun]]\n    return [[float(result.x), float(result.fun)]]\n",
+    "test_cases": [
+      {
+        "id": "quadratic_unbounded",
+        "description": "Minimize the quadratic cost function C(x) = x^2 + 3x + 2 in Excel. Returns the x-value and minimum cost as a 2D list.",
+        "arguments": {
+          "func_expr": "x**2 + 3*x + 2"
+        },
+        "expected_rows": 1,
+        "demo": true
+      },
+      {
+        "id": "bounded_minimum",
+        "description": "Minimize f(x) = (x-5)^2 + 10 in Excel, with x between 0 and 10. Returns the x-value and minimum value as a 2D list.",
+        "arguments": {
+          "func_expr": "(x-5)**2 + 10",
+          "bounds": [
+            [
+              0,
+              10
+            ]
+          ],
+          "method": "bounded"
+        },
+        "expected_rows": 1,
+        "demo": true
+      }
+    ],
+    "fileId": "11",
+    "link": "https://www.boardflare.com/resources/python-functions/optimize/minimize_scalar"
   },
   {
     "name": "onedrive_csv",
@@ -882,7 +916,7 @@
         "demo": true
       }
     ],
-    "fileId": "13",
+    "fileId": "14",
     "link": "https://www.boardflare.com/resources/python-functions/data/onedrive_csv"
   },
   {
