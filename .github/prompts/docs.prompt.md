@@ -21,6 +21,7 @@ The documentation must include:
     - Be detailed, practical, and non-trivial.
   - **Parameter and Output Types**: Only 2D lists or scalars are allowed as input and output. Supported types are float, string, and bool. Clearly specify the allowed input and output types in this section.
   - **Edge Cases and Limitations**: Briefly describe any important edge cases, limitations, or error handling relevant to Excel users.
+  - **Comparison with Native Excel Functionality**: Explain whether and how this functionality could be achieved using Excel out of the box. If it can be done, provide a specific example of how it would be implemented natively in Excel (using formulas, features, or built-in tools). Then, discuss why using this Python function may be preferable, highlighting differences in usability, flexibility, or business value.
 
 See this [example](../../examples/text/ai_ask/ai_ask.md) for a reference.
 
