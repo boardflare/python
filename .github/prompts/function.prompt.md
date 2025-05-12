@@ -1,22 +1,77 @@
 ---
 mode: 'agent'
 tools: ['read_file', 'insert_edit_into_file', 'create_file', 'fetch_webpage', 'think', 'run_in_terminal', 'get_terminal_output', 'list_dir', 'pyodide_install-packages', 'get_errors']
-description: 'Create or edit a Python function'
+description: 'Create or edit a Python function for Excel, ensuring all related files are in sync and follow best practices.'
 ---
 
-This is a prompt for a language model to create a Python function that will be used from within Excel.  Follow the instructions below to complete the task.  After you create or edit a file, use the `get_errors` tool to check for any errors in the code.  If there are errors, use the `insert_edit_into_file` tool to fix them.
+This is a prompt for a language model to create or edit a Python function for use in Excel. Follow the steps below, ensuring all files (documentation, implementation, tests, and test cases) are consistent and follow best practices. Use the AI Ask function in `examples/text/ai_ask/` as a reference for each step.
 
-1. **Read the Files**: Read any files provided using `read_file`.  If a folder has been added to the context, use the `list_dir` tool to list all the files in the folder, and then use the `read_file` tool to read them.  Make sure you read **all** the files.
-2. **Explain the Solution**: Before you start writing code, think step by step and explain how you will solve the problem.  This should include your understanding of the problem and requirements.  Plan the structure of the new function, including inputs, outputs, and any necessary libraries or dependencies.
-3. **Write Function Code**: Implement the function in a `my_function.py` file using the `create_file` tool. See this [example](../../examples/text/ai_ask/ai_ask.py).
-4. **Write Tests**: Create a `test_my_function.py` file and a `test_cases.json` file with parameterized test cases using the `create_file` tool. The demo test cases should follow from the examples defined in the documentation. Read the [example test file](../../examples/text/ai_ask/test_cases.json) and [example test_cases data file](../../examples/text/ai_ask/test_ai_ask.py) using the `read_file` tool for reference.
-5. **Run Tests**: Execute the tests using the `run_in_terminal` tool:
-    ```powershell
-    python -m pytest examples/text/category/my_function/test_my_function.py
-    ```
-6. **Ensure Tests Pass**: Verify that all tests pass successfully by using the `get_terminal_output` tool. Debug and repeat steps 2-5 if necessary.  
-7. **Ensure Files are in Sync**.  Once all the tests have passed, use the `think` tool to consider if the documentation, function tests, and test cases are all in sync. If they are not, update those files as needed.
-8. **Build Examples**: Run the `build_examples.py` script using the `run_in_terminal` tool to update the consolidated example file:
-    ```powershell
-    python examples/build_examples.py
-    ```
+After you create or edit a file, use the `get_errors` tool to check for any errors in the code. If there are errors, use the `insert_edit_into_file` tool to fix them.
+
+### 1. Documentation: Create or Review
+- If creating a new function, create a documentation file (e.g., `my_function.md`) following the [AI Ask example](../../examples/text/ai_ask/ai_ask.md).
+- If editing, review and update the documentation to reflect any requested changes or new behavior.
+- Documentation must use bullet points and include:
+  - Function purpose and description
+  - Input and output types (using Excel/2D list terminology)
+  - Usage examples (realistic business scenarios)
+  - Any required API keys or dependencies
+  - Edge cases and error handling
+
+### 2. Implementation: Create or Edit Function
+- Create or update the Python implementation file (e.g., `my_function.py`).
+- Requirements:
+  - Imports at the top.
+  - Main function must accept 2D lists or scalars as input and return a 2D list or scalar.
+  - Input validation should be graceful.
+  - Use detailed docstrings.
+  - For HTTP requests, use the `requests` library and prepend URLs with `https://cors.boardflare.com/`.
+  - Use placeholders for API keys unless specified as a function argument.
+  - Only use packages available in Pyodide. Test all imports with `pyodide_install-packages` to ensure compatibility.
+  - Supported types: float, string, bool, 2D list, or scalar.
+  - Excel/Python type conversions:
+    | Excel Type | Python Type | Example |
+    |------------|-------------|---------|
+    | Number     | int/float   | 42/3.14 |
+    | String     | str         | "hello" |
+    | Boolean    | bool        | True    |
+    | Array      | 2D List     | [[1,2]] |
+    | Null       | None        | None    |
+    | Date       | int         | 45678   |
+  - Return types must be compatible with Excel (see table in instructions).
+  - See [ai_ask.py](../../examples/text/ai_ask/ai_ask.py) for an example.
+
+### 3. Tests: Create or Edit Test File
+- Create or update the test file (e.g., `test_my_function.py`) using `pytest`.
+- Tests should:
+  - Load test cases from `test_cases.json`.
+  - Cover both success and failure paths.
+  - Use only generic assertions (type checks, non-emptiness, structure).
+  - Avoid content-specific assertions.
+  - Do not mock external APIs; use live calls with placeholder/test keys.
+  - See [test_ai_ask.py](../../examples/text/ai_ask/test_ai_ask.py) for an example.
+
+### 4. Test Cases: Create or Edit Test Cases File
+- Create or update `test_cases.json` with structured test data.
+- Each test case should include:
+  - ID, description (Excel user perspective), input arguments, expected outcomes/checks.
+  - `"demo": true/false` (true for documentation/demo, false for internal/edge cases).
+  - `"expected_rows"`: 1 for scalars, estimated rows for 2D lists.
+  - For list-generating functions, prompts must specify the number of items.
+  - Demo cases must be realistic, practical, and business-focused.
+  - For AI functions, use clear, unambiguous choices and broad validation.
+  - See [test_cases.json](../../examples/text/ai_ask/test_cases.json) for an example.
+
+### 5. Run Tests
+- Execute the tests (replace the path below with the actual path to your function's test file):
+  ```powershell
+  python -m pytest examples/text/ai_ask/test_ai_ask.py
+  ```
+- Ensure all tests pass. If not, debug and repeat steps 1–4 as needed.
+
+### 6. Sync and Build Examples
+- Confirm that documentation, function, tests, and test cases are in sync.
+- Run the example builder:
+  ```powershell
+  python examples/build_examples.py
+  ```

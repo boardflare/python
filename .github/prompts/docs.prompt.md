@@ -6,22 +6,28 @@ description: 'Create or edit documentation for a Python function'
 
 # Documentation for a Python Function
 
-This is a prompt for a language model to create documentation for a Python function that will be used from within Excel using pyodide.  Using the user's input, create the documentation following the format and process outlined below. 
+This is a prompt for a language model to create documentation for a Python function that will be used from within Excel using pyodide. Using the user's input, create the documentation following the format and process outlined below. 
 
 ## Documentation format
 
 The documentation must include:
   - **Overview**: A clear summary of what the function does and its business value.
-  - **Arguments Table**: A table describing each argument, its type, and its purpose.
-  - **Return Value Table**: A table describing the return value(s) and their types.
-  - **Detailed Examples**: At least two realistic business scenarios, using Excel terminology and showing how the function can be applied to solve real-world problems. For each example:
+  - **Usage**: Show how the function is called from Excel, using the parameter names in the formula (not an example with actual arguments). For example:
+    ```
+    =MY_FUNCTION(param1, param2, ...)
+    ```
+    Briefly describe how to use the function and what the parameters represent.
+  - **Parameters**: A table describing each parameter, its type, and its purpose.
+    - Only use 2D lists or scalars as input. Supported types: float, string, and bool. (This is a guide for the model and should not appear in the documentation.)
+  - **Return Value**: A table describing the return value(s) and their types.
+    - Only use 2D lists or scalars as output. Supported types: float, string, and bool. (This is a guide for the model and should not appear in the documentation.)
+  - **Examples**: At least two realistic business scenarios, using Excel terminology and showing how the function can be applied to solve real-world problems. For each example:
     - Use cases should be relevant to common business scenarios in Excel, simple, easy to understand, and realistic for business users.
     - Clearly explain the business context and expected outcome.
     - Use ranges, formulas, and data as an Excel user would encounter them.
     - Be detailed, practical, and non-trivial.
-  - **Parameter and Output Types**: Only 2D lists or scalars are allowed as input and output. Supported types are float, string, and bool. Clearly specify the allowed input and output types in this section.
-  - **Edge Cases and Limitations**: Briefly describe any important edge cases, limitations, or error handling relevant to Excel users.
-  - **Comparison with Native Excel Functionality**: Explain whether and how this functionality could be achieved using Excel out of the box. If it can be done, provide a specific example of how it would be implemented natively in Excel (using formulas, features, or built-in tools). Then, discuss why using this Python function may be preferable, highlighting differences in usability, flexibility, or business value.
+  - **Limitations**: Briefly describe any important edge cases, limitations, or error handling relevant to Excel users.
+  - **Benefits**: Explain whether and how this functionality could be achieved using Excel out of the box and if so how. If it can be done, provide a specific example of how it would be implemented natively in Excel (using formulas, features, or built-in tools). Then, discuss why using this Python function may be preferable, highlighting differences in usability, flexibility, or business value.
 
 See this [example](../../examples/text/ai_ask/ai_ask.md) for a reference.
 
