@@ -1,4 +1,4 @@
-# Internet CSV Function
+# INTERNET_CSV
 
 ## Overview
 The `internet_csv` function allows you to import data from any public CSV file on the internet directly into Excel. By providing a URL to a CSV file, the function fetches the file (using a CORS proxy for compatibility), parses its contents, and returns the data as a 2D list (range) suitable for use in Excel formulas. This enables seamless integration of live, external datasets into your spreadsheets for analysis, reporting, or automation.

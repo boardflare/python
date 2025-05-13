@@ -2,9 +2,9 @@
     "test_cases": [
         {
             "id": "demo_load_csv_onedrive",
-            "description": "Demo: Load a CSV file from OneDrive using the file path '/Documents/data.csv'.",
+            "description": "Demo: Load a CSV file from OneDrive using the file path '/Apps/Boardflare Python for Excel/data.csv'.",
             "arguments": {
-                "file_path": "/Documents/data.csv"
+                "file_path": "/Apps/Boardflare Python for Excel/data.csv"
             },
             "expect_error": false,
             "expected_rows": 5,

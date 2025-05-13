@@ -2,13 +2,13 @@
   {
     "name": "ai_ask",
     "description": "Uses AI to generate responses based on prompts and optional data ranges.",
-    "code": "import requests\nimport json\n\ndef ai_ask(prompt, data=None, temperature=0.5, max_tokens=250, model='mistral-small-latest'):\n    \"\"\"\n    Uses AI to generate responses based on prompts and optional data ranges.\n\n    Args:\n        prompt (str): The question, task, or analysis to perform\n        data (list, optional): 2D list containing data from Excel range to analyze\n        temperature (float, optional): Controls response creativity (0-2). Default is 0.5\n        max_tokens (int, optional): Maximum tokens for response generation\n        model (str, optional): ID of the model to use\n        # Note: API key is hardcoded for this example, replace with secure handling in production\n\n    Returns:\n        str: The AI-generated response\n    \"\"\"\n    \n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    # Sign up for your free Mistral API account at https://console.mistral.ai/ then replace the following:\n    \n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Construct the message incorporating both prompt and data if provided\n    message = prompt\n    if data is not None:\n        data_str = json.dumps(data, indent=2)\n        message += f\"\\n\\nData to analyze:\\n{data_str}\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": message}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    # Make the API request\n    response = requests.post(api_url, headers=headers, json=payload)\n    response.raise_for_status()\n    \n    # Extract and return the response content\n    response_data = response.json()\n    content = response_data[\"choices\"][0][\"message\"][\"content\"]\n\n    return content",
+    "code": "import requests\nimport json\n\ndef ai_ask(prompt, data=None, temperature=0.5, max_tokens=250, model='mistral-small-latest'):\n    \"\"\"\n    Uses AI to generate responses based on prompts and optional data ranges.\n\n    Args:\n        prompt (str): The question, task, or analysis to perform\n        data (list, optional): 2D list containing data from Excel range to analyze\n        temperature (float, optional): Controls response creativity (0-2). Default is 0.5\n        max_tokens (int, optional): Maximum tokens for response generation\n        model (str, optional): ID of the model to use\n        # Note: API key is hardcoded for this example, replace with secure handling in production\n\n    Returns:\n        str: The AI-generated response\n    \"\"\"\n    \n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    # Sign up for your free Mistral API account at https://console.mistral.ai/ then replace the following:\n    \n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Construct the message incorporating both prompt and data if provided\n    message = prompt\n    if data is not None:\n        data_str = json.dumps(data, indent=2)\n        message += f\"\\n\\nData to analyze:\\n{data_str}\"\n    \n    # Remove array-specific instructions; just request a direct answer\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": message}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    # Make the API request\n    response = requests.post(api_url, headers=headers, json=payload)\n    response.raise_for_status()\n    \n    # Extract and return the response content\n    response_data = response.json()\n    content = response_data[\"choices\"][0][\"message\"][\"content\"]\n\n    return content",
     "test_cases": [
       {
         "id": "test_hr_engagement_summary",
         "description": "HR: Summarize employee engagement survey results.",
         "arguments": {
-          "prompt": "Summarize the key findings from the employee engagement survey:",
+          "prompt": "Summarize the key findings from the employee engagement survey in 1 sentence:",
           "data": [
             [
               "Question",
@@ -37,14 +37,14 @@
           "workload",
           "career"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_sales_quarterly_analysis",
         "description": "Sales: Analyze quarterly sales data and provide insights.",
         "arguments": {
-          "prompt": "Provide a brief analysis of the quarterly sales performance:",
+          "prompt": "Provide a brief analysis of the quarterly sales performance in 1 sentence:",
           "data": [
             [
               "Region",
@@ -81,14 +81,14 @@
           "growth",
           "sales"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_operations_incident_summary",
         "description": "Operations: Summarize an incident report.",
         "arguments": {
-          "prompt": "Summarize the following incident report in one sentence:",
+          "prompt": "Summarize the following incident report in 1 sentence:",
           "data": [
             [
               "On April 10th, a system outage affected order processing for 2 hours. The IT team resolved the issue by updating server configurations. No data loss occurred."
@@ -100,21 +100,21 @@
           "resolved",
           "data loss"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_business_followup_email",
         "description": "Business Writing: Draft a customer follow-up email.",
         "arguments": {
-          "prompt": "Draft a follow-up email to a client after a successful product demo."
+          "prompt": "Draft a follow-up email to a client after a successful product demo. Limit to 1 email."
         },
         "expected_contains_any_lower": [
           "thank you",
           "product",
           "next steps"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       }
     ],
@@ -130,7 +130,7 @@
         "id": "test_expense_categorization",
         "description": "Finance: Categorize an expense transaction based on its description.",
         "arguments": {
-          "text": "Uber ride from airport to hotel, $45.50",
+          "text": "Uber ride from airport to hotel, $45.50 (Choose 1 category)",
           "choices": [
             [
               "Travel"
@@ -147,14 +147,14 @@
           ]
         },
         "expected_contains": "Travel",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_customer_email_sentiment",
         "description": "Customer Service: Classify the sentiment of a customer email.",
         "arguments": {
-          "text": "I've been waiting for a response about my refund for over two weeks now. This is completely unacceptable and I'm considering filing a complaint.",
+          "text": "I've been waiting for a response about my refund for over two weeks now. This is completely unacceptable and I'm considering filing a complaint. (Choose 1 sentiment)",
           "choices": [
             [
               "Positive"
@@ -168,14 +168,14 @@
           ]
         },
         "expected_contains": "Negative",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_sales_lead_qualification",
         "description": "Sales: Determine the qualification level of a sales lead based on interaction notes.",
         "arguments": {
-          "text": "Company: Acme Corp (250+ employees). Contact expressed interest in enterprise plan, requested pricing information, and scheduled a demo next week. Budget confirmed. Decision timeline: end of quarter.",
+          "text": "Company: Acme Corp (250+ employees). Contact expressed interest in enterprise plan, requested pricing information, and scheduled a demo next week. Budget confirmed. Decision timeline: end of quarter. (Choose 1 qualification)",
           "choices": [
             [
               "Hot Lead"
@@ -189,14 +189,14 @@
           ]
         },
         "expected_contains": "Hot Lead",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_support_ticket_priority",
         "description": "IT Support: Assign a priority level to a support ticket based on its description.",
         "arguments": {
-          "text": "Unable to access CRM system. Getting error 500 when trying to load customer records. This is affecting sales team productivity but they can still use other systems in the meantime.",
+          "text": "Unable to access CRM system. Getting error 500 when trying to load customer records. This is affecting sales team productivity but they can still use other systems in the meantime. (Choose 1 priority)",
           "choices": [
             [
               "Critical Priority"
@@ -213,14 +213,14 @@
           ]
         },
         "expected_contains": "High Priority",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_product_feedback_categorization",
         "description": "Product Management: Categorize customer feedback into feedback types.",
         "arguments": {
-          "text": "I love the new dashboard layout, but it would be even better if I could customize which widgets appear and their positions on the screen.",
+          "text": "I love the new dashboard layout, but it would be even better if I could customize which widgets appear and their positions on the screen. (Choose 1 feedback type)",
           "choices": [
             [
               "Bug Report"
@@ -240,18 +240,18 @@
           ]
         },
         "expected_contains": "Feature Request",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_document_classification",
         "description": "Legal: Classify a legal document based on its content.",
         "arguments": {
-          "text": "This agreement outlines the terms under which Company A will provide consulting services to Company B, including scope of work, deliverables, timeline, and compensation structure.",
+          "text": "This agreement outlines the terms under which Company A will provide consulting services to Company B, including scope of work, deliverables, timeline, and compensation structure. (Choose 1 document type)",
           "choices": "NDA, Service Agreement, Employment Contract, License Agreement"
         },
         "expected_contains": "Service Agreement",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       }
     ],
@@ -261,16 +261,16 @@
   {
     "name": "ai_extract",
     "description": "Uses AI to extract specific types of information from text.",
-    "code": "import requests\nimport json\n\ndef ai_extract(text, extract_type, temperature=0.0, model='mistral-small-latest', max_tokens=1000):\n    \"\"\"\n    Uses AI to extract specific types of information from text.\n    \n    Args:\n        text (str or list): The text to analyze (string or 2D list with a single cell)\n        extract_type (str): Type of information to extract (e.g., 'emails', 'dates', 'action items')\n        temperature (float, optional): Controls response creativity (0-2). Default is 0\n        model (str, optional): ID of the model to use\n        max_tokens (int, optional): Maximum tokens for response generation. Default is 1000\n        \n    Returns:\n        list: 2D list representing the extracted data as a single column\n    \"\"\"\n    # Handle 2D list input (flatten to a single string)\n    if isinstance(text, list):\n        if len(text) > 0 and len(text[0]) > 0:\n            text = str(text[0][0])\n        else:\n            return [[\"Error: Empty input text.\"]]\n    \n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Construct a specific prompt for data extraction\n    extract_prompt = f\"Extract the following from the text: {extract_type}\\n\\nText: {text}\"\n    \n    # Add instruction for structured output\n    extract_prompt += \"\\n\\nReturn ONLY a JSON array of items you extracted. \"\n    extract_prompt += \"Each item should be a single value representing one extracted piece of information. \"\n    extract_prompt += \"Do not include any explanatory text, just the JSON array.\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": extract_prompt}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens,\n        \"response_format\": {\n            \"type\": \"json_object\",\n        }\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    try:\n        # Make the API request\n        response = requests.post(api_url, headers=headers, json=payload)\n        response.raise_for_status()\n        \n        # Extract the response content\n        response_data = response.json()\n        content = response_data[\"choices\"][0][\"message\"][\"content\"]\n        # print(content)\n        \n        # Extract the JSON array from the response\n        try:\n            # Try to parse the content as JSON directly\n            extracted_data = json.loads(content)\n            \n            # If extracted_data is a dictionary with an \"items\" or \"extracted\" key, use that\n            if isinstance(extracted_data, dict):\n                if \"items\" in extracted_data:\n                    extracted_data = extracted_data[\"items\"]\n                elif \"extracted\" in extracted_data:\n                    extracted_data = extracted_data[\"extracted\"]\n                elif \"results\" in extracted_data:\n                    extracted_data = extracted_data[\"results\"]\n            \n            # Convert the list to a 2D list (single column)\n            if isinstance(extracted_data, list):\n                return [[item] for item in extracted_data]\n            else:\n                return [[\"Error: Unable to parse response. Expected a list.\"]]\n                \n        except (json.JSONDecodeError, ValueError):\n            # If JSON parsing fails, return an error message as a single cell\n            return [[\"Error: Unable to extract data. The AI response wasn't in the expected format.\"]]\n             \n    except requests.exceptions.RequestException as e:\n        # Handle API request errors\n        return [[\"Error: API request failed.\", str(e)]]",
+    "code": "import requests\nimport json\n\ndef ai_extract(text, extract_type, temperature=0.0, model='mistral-small-latest', max_tokens=1000):\n    \"\"\"\n    Uses AI to extract specific types of information from text.\n    \n    Args:\n        text (str or list): The text to analyze (string or 2D list with a single cell)\n        extract_type (str): Type of information to extract (e.g., 'emails', 'dates', 'action items')\n        temperature (float, optional): Controls response creativity (0-2). Default is 0\n        model (str, optional): ID of the model to use\n        max_tokens (int, optional): Maximum tokens for response generation. Default is 1000\n        \n    Returns:\n        list: 2D list representing the extracted data as a single column\n    \"\"\"\n    # Handle 2D list input (flatten to a single string)\n    if isinstance(text, list):\n        if len(text) > 0 and len(text[0]) > 0:\n            text = str(text[0][0])\n        else:\n            return [[\"Error: Empty input text.\"]]\n    \n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Construct a specific prompt for data extraction\n    extract_prompt = f\"Extract the following from the text: {extract_type}\\n\\nText: {text}\"\n    \n    # Add instruction for structured output\n    extract_prompt += \"\\n\\nReturn ONLY a JSON object with a key 'items' whose value is a JSON array of the items you extracted. \"\n    extract_prompt += \"Each item should be a single value representing one extracted piece of information. \"\n    extract_prompt += \"Do not include any explanatory text, just the JSON object. \"\n    extract_prompt += \"For example: {\\\"items\\\": [\\\"item1\\\", \\\"item2\\\", \\\"item3\\\"]}\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": extract_prompt}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens,\n        \"response_format\": {\n            \"type\": \"json_object\",\n        }\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    try:\n        # Make the API request\n        response = requests.post(api_url, headers=headers, json=payload)\n        response.raise_for_status()\n        \n        # Extract the response content\n        response_data = response.json()\n        content = response_data[\"choices\"][0][\"message\"][\"content\"]\n        # print(content)\n        \n        # Extract the JSON array from the response\n        try:\n            # Try to parse the content as JSON directly\n            extracted_data = json.loads(content)\n            \n            # Always look for the 'items' key as per the prompt\n            if isinstance(extracted_data, dict) and \"items\" in extracted_data:\n                extracted_data = extracted_data[\"items\"]\n            # Legacy fallback for older keys (optional)\n            elif isinstance(extracted_data, dict):\n                if \"extracted\" in extracted_data:\n                    extracted_data = extracted_data[\"extracted\"]\n                elif \"results\" in extracted_data:\n                    extracted_data = extracted_data[\"results\"]\n            \n            # Convert the list to a 2D list (single column)\n            if isinstance(extracted_data, list):\n                return [[item] for item in extracted_data]\n            else:\n                return [[\"Error: Unable to parse response. Expected a list.\"]]\n                \n        except (json.JSONDecodeError, ValueError):\n            # If JSON parsing fails, return an error message as a single cell\n            return [[\"Error: Unable to extract data. The AI response wasn't in the expected format.\"]]\n             \n    except requests.exceptions.RequestException as e:\n        # Handle API request errors\n        return [[\"Error: API request failed.\", str(e)]]",
     "test_cases": [
       {
         "id": "test_client_names",
         "description": "Business Development: Extract client names from meeting notes.",
         "arguments": {
           "text": "During today's annual review, we discussed progress with Acme Corporation, Global Enterprises, and TechSolutions Inc. All three clients reported satisfaction with our services.",
-          "extract_type": "client names"
+          "extract_type": "Extract 3 client names"
         },
-        "expected_rows": 3,
+        "expected_rows": 4,
         "demo": true
       },
       {
@@ -278,9 +278,9 @@
         "description": "Financial Analysis: Extract key financial metrics from a quarterly report.",
         "arguments": {
           "text": "Q1 results exceeded expectations with revenue of $2.4M, an EBITDA margin of 18.5%, and customer acquisition costs decreasing by 12%. Cash reserves stand at $5.2M and our runway extends to 24 months.",
-          "extract_type": "financial metrics"
+          "extract_type": "Extract 5 financial metrics"
         },
-        "expected_rows": 5,
+        "expected_rows": 6,
         "demo": true
       },
       {
@@ -288,9 +288,9 @@
         "description": "Project Management: Extract action items assigned in an email.",
         "arguments": {
           "text": "Hi team, Following our strategic planning session: 1) Mark needs to finalize the budget by Friday, 2) Sarah will contact vendors for new quotes, 3) Development team must provide timeline estimates by next Wednesday, and 4) Everyone should review the new marketing materials.",
-          "extract_type": "action items"
+          "extract_type": "Extract 4 action items"
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
       },
       {
@@ -298,9 +298,9 @@
         "description": "Contact Management: Extract contact details from scanned business card text.",
         "arguments": {
           "text": "John Smith, Senior Project Manager, Innovative Solutions Inc., jsmith@innovativesolutions.com, +1 (555) 123-4567, 123 Business Avenue, Suite 400, San Francisco, CA 94107",
-          "extract_type": "contact information"
+          "extract_type": "Extract 6 contact information fields"
         },
-        "expected_rows": 6,
+        "expected_rows": 7,
         "demo": true
       },
       {
@@ -308,9 +308,9 @@
         "description": "Project Planning: Extract important dates and deadlines from a project update.",
         "arguments": {
           "text": "The initial design phase will be completed by May 15, 2025. The stakeholder review is scheduled for May 20-22, with development starting June 1. Testing will run through September 15, with final delivery expected by October 3, 2025.",
-          "extract_type": "dates and deadlines"
+          "extract_type": "Extract 5 dates and deadlines"
         },
-        "expected_rows": 5,
+        "expected_rows": 6,
         "demo": true
       }
     ],
@@ -320,7 +320,7 @@
   {
     "name": "ai_fill",
     "description": "Uses AI to fill in missing data in a target range by learning patterns from an example range.",
-    "code": "import requests\nimport json\n\ndef ai_fill(example_range, fill_range, temperature=0.0, model='mistral-small-latest', max_tokens=1500):\n    \"\"\"\n    Uses AI to fill in missing data in a target range by learning patterns from an example range.\n    \n    Args:\n        example_range (list): 2D list containing complete data as examples for the AI to learn from\n        fill_range (list): 2D list containing data with missing values to be filled\n        temperature (float, optional): Controls response creativity (0-2). Default is 0\n        model (str, optional): ID of the model to use\n        max_tokens (int, optional): Maximum tokens for response generation. Default is 1500\n        \n    Returns:\n        list: 2D list with missing data filled in\n    \"\"\"\n    # Validate inputs\n    if not isinstance(example_range, list) or not example_range:\n        return [[\"Error: Example range is empty or invalid.\"]]\n    if not isinstance(fill_range, list) or not fill_range:\n        return [[\"Error: Fill range is empty or invalid.\"]]\n    \n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Convert example_range and fill_range to JSON strings for the prompt\n    example_json = json.dumps(example_range)\n    fill_json = json.dumps(fill_range)\n    \n    # Construct a specific prompt for filling data\n    fill_prompt = \"\"\"Fill in the missing values in the target data based on patterns in the example data.\nExample data (complete): {}\\n\\n\nTarget data (with missing values): {}\\n\\n\nStudy the patterns in the example data and complete the target data by filling in missing values. Preserve all existing values in the target data.\"\"\".format(\n        example_json, fill_json\n    )\n    \n    # Add instruction for structured output\n    fill_prompt += \"\\n\\nReturn ONLY a JSON array of arrays (2D array) with the completed target data. \"\n    fill_prompt += \"Do not include any explanatory text, just the JSON array.\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": fill_prompt}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens,\n        \"response_format\": {\n            \"type\": \"json_object\",\n        }\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    try:\n        # Make the API request\n        response = requests.post(api_url, headers=headers, json=payload)\n        response.raise_for_status()\n        \n        # Extract the response content\n        response_data = response.json()\n        content = response_data[\"choices\"][0][\"message\"][\"content\"]\n        # print(content)\n        \n        # Extract the filled data from the response\n        try:\n            # Try to parse the content as JSON directly\n            filled_data = json.loads(content)\n            \n            # If filled_data is a dictionary with a \"data\" or \"filled_data\" key, use that\n            if isinstance(filled_data, dict):\n                if \"data\" in filled_data:\n                    filled_data = filled_data[\"data\"]\n                elif \"filled_data\" in filled_data:\n                    filled_data = filled_data[\"filled_data\"]\n                elif \"result\" in filled_data:\n                    filled_data = filled_data[\"result\"]\n            \n            # Ensure the filled data is a 2D list\n            if isinstance(filled_data, list) and all(isinstance(row, list) for row in filled_data):\n                # Ensure the dimensions match the original fill_range\n                if (len(filled_data) == len(fill_range) and \n                    all(len(row) == len(fill_range[i]) for i, row in enumerate(filled_data))):\n                    return filled_data\n                else:\n                    return [[\"Error: AI response dimensions don't match the fill range.\"]]\n            else:\n                return [[\"Error: Unable to parse response. Expected a 2D array.\"]]\n                \n        except (json.JSONDecodeError, ValueError):\n            # If JSON parsing fails, return an error message\n            return [[\"Error: Unable to fill data. The AI response wasn't in the expected format.\"]]\n             \n    except requests.exceptions.RequestException as e:\n        # Handle API request errors\n        return [[\"Error: API request failed.\", str(e)]]",
+    "code": "import requests\nimport json\n\ndef ai_fill(example_range, fill_range, temperature=0.0, model='mistral-small-latest', max_tokens=1500):\n    \"\"\"\n    Uses AI to fill in missing data in a target range by learning patterns from an example range.\n    \n    Args:\n        example_range (list): 2D list containing complete data as examples for the AI to learn from\n        fill_range (list): 2D list containing data with missing values to be filled\n        temperature (float, optional): Controls response creativity (0-2). Default is 0\n        model (str, optional): ID of the model to use\n        max_tokens (int, optional): Maximum tokens for response generation. Default is 1500\n        \n    Returns:\n        list: 2D list with missing data filled in\n    \"\"\"\n    # Validate inputs\n    if not isinstance(example_range, list) or not example_range:\n        return [[\"Error: Example range is empty or invalid.\"]]\n    if not isinstance(fill_range, list) or not fill_range:\n        return [[\"Error: Fill range is empty or invalid.\"]]\n    \n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Convert example_range and fill_range to JSON strings for the prompt\n    example_json = json.dumps(example_range)\n    fill_json = json.dumps(fill_range)\n    \n    # Construct a specific prompt for filling data\n    fill_prompt = \"\"\"Fill in the missing values in the target data based on patterns in the example data.\nExample data (complete): {}\\n\\n\nTarget data (with missing values): {}\\n\\n\nStudy the patterns in the example data and complete the target data by filling in missing values. Preserve all existing values in the target data.\"\"\".format(\n        example_json, fill_json\n    )\n    \n    # Add instruction for structured output\n    fill_prompt += \"\\n\\nReturn ONLY a JSON object with a key 'items' whose value is a JSON array of arrays (2D array) with the completed target data. \"\n    fill_prompt += \"Do not include any explanatory text, just the JSON object. \"\n    fill_prompt += \"For example: {\\\"items\\\": [[\\\"row1col1\\\", \\\"row1col2\\\"], [\\\"row2col1\\\", \\\"row2col2\\\"]]}\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": fill_prompt}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens,\n        \"response_format\": {\n            \"type\": \"json_object\",\n        }\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    try:\n        # Make the API request\n        response = requests.post(api_url, headers=headers, json=payload)\n        response.raise_for_status()\n        \n        # Extract the response content\n        response_data = response.json()\n        content = response_data[\"choices\"][0][\"message\"][\"content\"]\n        # print(content)\n        \n        # Extract the filled data from the response\n        try:\n            # Try to parse the content as JSON directly\n            filled_data = json.loads(content)\n            \n            # Always look for the 'items' key as per the prompt\n            if isinstance(filled_data, dict) and \"items\" in filled_data:\n                filled_data = filled_data[\"items\"]\n            # Legacy fallback for older keys (optional)\n            elif isinstance(filled_data, dict):\n                if \"data\" in filled_data:\n                    filled_data = filled_data[\"data\"]\n                elif \"filled_data\" in filled_data:\n                    filled_data = filled_data[\"filled_data\"]\n                elif \"result\" in filled_data:\n                    filled_data = filled_data[\"result\"]\n            \n            # Ensure the filled data is a 2D list\n            if isinstance(filled_data, list) and all(isinstance(row, list) for row in filled_data):\n                # Ensure the dimensions match the original fill_range\n                if (len(filled_data) == len(fill_range) and \n                    all(len(row) == len(fill_range[i]) for i, row in enumerate(filled_data))):\n                    return filled_data\n                else:\n                    return [[\"Error: AI response dimensions don't match the fill range.\"]]\n            else:\n                return [[\"Error: Unable to parse response. Expected a 2D array.\"]]\n                \n        except (json.JSONDecodeError, ValueError):\n            # If JSON parsing fails, return an error message\n            return [[\"Error: Unable to fill data. The AI response wasn't in the expected format.\"]]\n             \n    except requests.exceptions.RequestException as e:\n        # Handle API request errors\n        return [[\"Error: API request failed.\", str(e)]]",
     "test_cases": [
       {
         "id": "test_product_catalog",
@@ -379,7 +379,7 @@
             ]
           ]
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
       },
       {
@@ -451,7 +451,7 @@
             ]
           ]
         },
-        "expected_rows": 5,
+        "expected_rows": 6,
         "demo": true
       },
       {
@@ -505,7 +505,7 @@
             ]
           ]
         },
-        "expected_rows": 3,
+        "expected_rows": 4,
         "demo": true
       }
     ],
@@ -515,13 +515,13 @@
   {
     "name": "ai_format",
     "description": "Uses AI to format text according to a specific structure or pattern.",
-    "code": "import requests\nimport json\n\ndef ai_format(text, format_instruction, temperature=0.0, model='mistral-small-latest', max_tokens=1500):\n    \"\"\"\n    Uses AI to format text according to a specific structure or pattern.\n    \n    Args:\n        text (str or list): The text to format (string or 2D list with a single cell)\n        format_instruction (str): Instructions describing the desired format\n        temperature (float, optional): Controls response creativity (0-2). Default is 0\n        model (str, optional): ID of the model to use\n        max_tokens (int, optional): Maximum tokens for response generation. Default is 1500\n        \n    Returns:\n        str: The formatted text according to the specified format\n    \"\"\"\n    # Handle 2D list input (flatten to a single string)\n    if isinstance(text, list):\n        if len(text) > 0 and len(text[0]) > 0:\n            text = str(text[0][0])\n        else:\n            return \"Error: Empty input text.\"\n    \n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Construct a specific prompt for formatting\n    format_prompt = f\"Format the following text according to this format instruction: {format_instruction}\\n\\nText to format: {text}\"\n    \n    # Remove JSON object instructions, just ask for plain formatted text\n    format_prompt += \"\\n\\nReturn ONLY the formatted text. Do not include any explanatory text, just the formatted result.\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": format_prompt}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    try:\n        # Make the API request\n        response = requests.post(api_url, headers=headers, json=payload)\n        response.raise_for_status()\n        \n        # Extract the response content\n        response_data = response.json()\n        content = response_data[\"choices\"][0][\"message\"][\"content\"]\n        \n        # Return the plain formatted text\n        return content.strip()\n        \n    except requests.exceptions.RequestException as e:\n        # Handle API request errors\n        return f\"Error: API request failed. {str(e)}\"",
+    "code": "import requests\nimport json\n\ndef ai_format(text, format_instruction, temperature=0.0, model='mistral-small-latest', max_tokens=1500):\n    \"\"\"\n    Uses AI to format text according to a specific structure or pattern.\n    \n    Args:\n        text (str or list): The text to format (string or 2D list with a single cell)\n        format_instruction (str): Instructions describing the desired format\n        temperature (float, optional): Controls response creativity (0-2). Default is 0\n        model (str, optional): ID of the model to use\n        max_tokens (int, optional): Maximum tokens for response generation. Default is 1500\n        \n    Returns:\n        str: The formatted text according to the specified format\n    \"\"\"\n    # Handle 2D list input (flatten to a single string)\n    if isinstance(text, list):\n        if len(text) > 0 and len(text[0]) > 0:\n            text = str(text[0][0])\n        else:\n            return \"Error: Empty input text.\"\n    \n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Construct a specific prompt for formatting\n    format_prompt = f\"Format the following text according to this format instruction: {format_instruction}\\n\\nText to format: {text}\"\n    \n    # Remove array-specific instructions; just request a direct answer\n    format_prompt += \"\\n\\nReturn ONLY the formatted text. Do not include any explanatory text, just the formatted text.\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": format_prompt}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    try:\n        # Make the API request\n        response = requests.post(api_url, headers=headers, json=payload)\n        response.raise_for_status()\n        \n        # Extract the response content\n        response_data = response.json()\n        content = response_data[\"choices\"][0][\"message\"][\"content\"]\n        \n        # Return the plain formatted text\n        return content.strip()\n        \n    except requests.exceptions.RequestException as e:\n        # Handle API request errors\n        return f\"Error: API request failed. {str(e)}\"",
     "test_cases": [
       {
         "id": "test_customer_contact_info",
         "description": "Standardizing customer contact information into a professional format.",
         "arguments": {
-          "text": "John Smith / Marketing Director - Acme Inc / jsmith@acme.co - 555.123.4567",
+          "text": "John Smith / Marketing Director - Acme Inc / jsmith@acme.co - 555.123.4567 (Format as 1 business card)",
           "format_instruction": "standard business contact card format"
         },
         "expected_contains_any": [
@@ -531,14 +531,14 @@
           "jsmith@acme.co",
           "555"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_financial_figures",
         "description": "Standardizing financial figures for reporting.",
         "arguments": {
-          "text": "Revenue: 2.4m; COGS: 1.1m; Gross Margin: 1.3m (54%); Opex: 950k; EBITDA: 350k",
+          "text": "Revenue: 2.4m; COGS: 1.1m; Gross Margin: 1.3m (54%); Opex: 950k; EBITDA: 350k (Format as 1 financial statement)",
           "format_instruction": "professional financial statement format with proper currency notation"
         },
         "expected_contains_any": [
@@ -550,14 +550,14 @@
           "Operating Expenses",
           "EBITDA"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_customer_feedback",
         "description": "Converting free-form customer feedback into a structured review format.",
         "arguments": {
-          "text": "Used the product for 3 weeks. Good quality but shipping took forever. Customer service was helpful though. Probably would buy again if they fix delivery issues.",
+          "text": "Used the product for 3 weeks. Good quality but shipping took forever. Customer service was helpful though. Probably would buy again if they fix delivery issues. (Format as 1 review)",
           "format_instruction": "structured product review with ratings"
         },
         "expected_contains_any": [
@@ -567,14 +567,14 @@
           "Customer Service",
           "Would Purchase Again"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_address_data",
         "description": "Standardizing inconsistent address entries into a standard format.",
         "arguments": {
-          "text": "123 business park dr suite 12, austin tx 78701",
+          "text": "123 business park dr suite 12, austin tx 78701 (Format as 1 address)",
           "format_instruction": "standard US business address format"
         },
         "expected_contains_any": [
@@ -584,14 +584,14 @@
           "TX",
           "78701"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_meeting_notes",
         "description": "Converting meeting notes to a structured action item list.",
         "arguments": {
-          "text": "Tom said we need to finish the report by Friday. Maria will contact the client about budget concerns. Everyone should review the new marketing strategy before next meeting on 5/10.",
+          "text": "Tom said we need to finish the report by Friday. Maria will contact the client about budget concerns. Everyone should review the new marketing strategy before next meeting on 5/10. (Format as 1 action item list)",
           "format_instruction": "action items with responsible parties and deadlines"
         },
         "expected_contains_any": [
@@ -603,7 +603,7 @@
           "budget",
           "May 10"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       }
     ],
@@ -613,7 +613,7 @@
   {
     "name": "ai_list",
     "description": "Uses AI to generate a list of items based on the prompt and optional values data.",
-    "code": "import requests\nimport json\n\ndef ai_list(prompt, values=None, temperature=0.0, model='mistral-small-latest', max_tokens=1000):\n    \"\"\"\n    Uses AI to generate a list of items based on the prompt and optional values data.\n    \n    Args:\n        prompt (str): Instruction for AI to create a list\n        values (list, optional): 2D list containing additional data to append to prompt\n        temperature (float, optional): Controls response creativity (0-2). Default is 0\n        model (str, optional): ID of the model to use\n        max_tokens (int, optional): Maximum tokens for response generation. Default is 1000\n        \n    Returns:\n        list: 2D list representing the generated list data as a single column\n    \"\"\"\n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Construct a specific prompt for list generation\n    list_prompt = f\"Generate a list based on this request: {prompt}\"\n    \n    # Add values information if provided\n    if values is not None:\n        values_str = \"\\n\".join([str(item[0]) for item in values]) if len(values) > 0 and len(values[0]) > 0 else \"\"\n        if values_str:\n            list_prompt += f\"\\n\\nUse this information to help create the list:\\n{values_str}\"\n    \n    # Add instruction for structured output\n    list_prompt += \"\\nReturn ONLY a JSON array of items for the list. \"\n    list_prompt += \"Each item should be a single value. \"\n    list_prompt += \"Do not include any explanatory text, just the JSON array.\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": list_prompt}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens,\n        \"response_format\": {\n            \"type\": \"json_object\",\n        }\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    try:\n        # Make the API request\n        response = requests.post(api_url, headers=headers, json=payload)\n        response.raise_for_status()\n        \n        # Extract the response content\n        response_data = response.json()\n        content = response_data[\"choices\"][0][\"message\"][\"content\"]\n        \n        # Extract the JSON array from the response\n        try:\n            # Try to parse the content as JSON directly\n            list_data = json.loads(content)\n            \n            # If list_data is a dictionary with an \"items\" or \"list\" key, use that\n            if isinstance(list_data, dict):\n                if \"items\" in list_data:\n                    list_data = list_data[\"items\"]\n                elif \"list\" in list_data:\n                    list_data = list_data[\"list\"]\n                else:\n                    # Check for any array key in the response\n                    for key, value in list_data.items():\n                        if isinstance(value, list):\n                            list_data = value\n                            break\n            \n            # Convert the list to a 2D list (single column)\n            if isinstance(list_data, list):\n                # Ensure each item is a string and properly formatted as a single-item list\n                result = []\n                for item in list_data:\n                    if isinstance(item, list):\n                        # If item is already a list, ensure it has exactly one element\n                        if len(item) >= 1:\n                            result.append([str(item[0])])\n                        else:\n                            result.append([\"\"])\n                    else:\n                        # If item is not a list, make it a single-item list\n                        result.append([str(item)])\n                return result\n            else:\n                return [[\"Error: Unable to parse response. Expected a list.\"]]\n                \n        except (json.JSONDecodeError, ValueError):\n            # If JSON parsing fails, return an error message as a single cell\n            return [[\"Error: Unable to generate list. The AI response wasn't in the expected format.\"]]\n             \n    except requests.exceptions.RequestException as e:\n        # Handle API request errors\n        return [[\"Error: API request failed.\", str(e)]]",
+    "code": "import requests\nimport json\n\ndef ai_list(prompt, values=None, temperature=0.0, model='mistral-small-latest', max_tokens=1000):\n    \"\"\"\n    Uses AI to generate a list of items based on the prompt and optional values data.\n    \n    Args:\n        prompt (str): Instruction for AI to create a list\n        values (list, optional): 2D list containing additional data to append to prompt\n        temperature (float, optional): Controls response creativity (0-2). Default is 0\n        model (str, optional): ID of the model to use\n        max_tokens (int, optional): Maximum tokens for response generation. Default is 1000\n        \n    Returns:\n        list: 2D list representing the generated list data as a single column\n    \"\"\"\n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Construct a specific prompt for list generation\n    list_prompt = f\"Generate a list based on this request: {prompt}\"\n    \n    # Add values information if provided\n    if values is not None:\n        values_str = \"\\n\".join([str(item[0]) for item in values]) if len(values) > 0 and len(values[0]) > 0 else \"\"\n        if values_str:\n            list_prompt += f\"\\n\\nUse this information to help create the list:\\n{values_str}\"\n    \n    # Add instruction for structured output\n    list_prompt += \"\\nReturn ONLY a JSON object with a key 'items' whose value is a JSON array of the items for the list. \"\n    list_prompt += \"Each item should be a single value. \"\n    list_prompt += \"Do not include any explanatory text, just the JSON object. \"\n    list_prompt += \"For example: {\\\"items\\\": [\\\"item1\\\", \\\"item2\\\", \\\"item3\\\"]}\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": list_prompt}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens,\n        \"response_format\": {\n            \"type\": \"json_object\",\n        }\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    try:\n        # Make the API request\n        response = requests.post(api_url, headers=headers, json=payload)\n        response.raise_for_status()\n        \n        # Extract the response content\n        response_data = response.json()\n        content = response_data[\"choices\"][0][\"message\"][\"content\"]\n        \n        # Extract the JSON array from the response\n        try:\n            # Try to parse the content as JSON directly\n            list_data = json.loads(content)\n            \n            # Always look for the 'items' key as per the prompt\n            if isinstance(list_data, dict) and \"items\" in list_data:\n                list_data = list_data[\"items\"]\n            # Legacy fallback for older keys (optional)\n            elif isinstance(list_data, dict):\n                if \"list\" in list_data:\n                    list_data = list_data[\"list\"]\n                else:\n                    # Check for any array key in the response\n                    for key, value in list_data.items():\n                        if isinstance(value, list):\n                            list_data = value\n                            break\n            \n            # Convert the list to a 2D list (single column)\n            if isinstance(list_data, list):\n                # Ensure each item is a string and properly formatted as a single-item list\n                result = []\n                for item in list_data:\n                    if isinstance(item, list):\n                        # If item is already a list, ensure it has exactly one element\n                        if len(item) >= 1:\n                            result.append([str(item[0])])\n                        else:\n                            result.append([\"\"])\n                    else:\n                        # If item is not a list, make it a single-item list\n                        result.append([str(item)])\n                return result\n            else:\n                return [[\"Error: Unable to parse response. Expected a list.\"]]\n                \n        except (json.JSONDecodeError, ValueError):\n            # If JSON parsing fails, return an error message as a single cell\n            return [[\"Error: Unable to generate list. The AI response wasn't in the expected format.\"]]\n             \n    except requests.exceptions.RequestException as e:\n        # Handle API request errors\n        return [[\"Error: API request failed.\", str(e)]]",
     "test_cases": [
       {
         "id": "test_marketing_kpis",
@@ -621,7 +621,7 @@
         "arguments": {
           "prompt": "List 4 essential marketing KPIs for quarterly performance reviews"
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
       },
       {
@@ -630,7 +630,7 @@
         "arguments": {
           "prompt": "List 4 effective risk mitigation strategies for enterprise software implementation"
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
       },
       {
@@ -639,7 +639,7 @@
         "arguments": {
           "prompt": "List 4 key compliance requirements for healthcare organizations"
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
       },
       {
@@ -659,7 +659,7 @@
             ]
           ]
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
       },
       {
@@ -668,7 +668,7 @@
         "arguments": {
           "prompt": "List 4 SMART goals for an HR department focused on improving employee retention"
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
       }
     ],
@@ -678,13 +678,13 @@
   {
     "name": "ai_table",
     "description": "Uses AI to generate a structured table based on the prompt and optional header/source data.",
-    "code": "import requests\nimport json\n\ndef ai_table(prompt, header=None, source=None, temperature=0.0, model='mistral-small-latest', max_tokens=1500):\n    \"\"\"\n    Uses AI to generate a structured table based on the prompt and optional header/source data.\n    \n    Args:\n        prompt (str): Instruction for AI to create a table\n        header (list, optional): 2D list containing table header (column names)\n        source (list, optional): 2D list containing source data used to create the table\n        temperature (float, optional): Controls response creativity (0-2). Default is 0\n        model (str, optional): ID of the model to use\n        max_tokens (int, optional): Maximum tokens for response generation. Default is 1500\n        \n    Returns:\n        list: 2D list representing the generated table data\n    \"\"\"\n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Construct a specific prompt for table generation\n    table_prompt = f\"Generate a well-organized table based on this request: {prompt}\"\n    \n    # Add header information if provided\n    if header is not None:\n        # Assuming header is a 2D list with a single row for column names\n        if header and len(header) > 0:\n            header_str = \", \".join(str(col) for col in header[0])\n            table_prompt += f\"\\nUse exactly these columns: {header_str}\"\n    \n    # Add source data information if provided\n    if source is not None:\n        source_str = json.dumps(source, indent=2)\n        table_prompt += f\"\\n\\nUse this source data to create the table:\\n{source_str}\"\n    \n    # Add instruction for structured output\n    table_prompt += \"\\nReturn ONLY a JSON array of arrays (2D array) with the table data. \"\n    table_prompt += \"The first row should contain column headers if not provided. \"\n    table_prompt += \"Each subsequent row should contain data that fits the columns. \"\n    table_prompt += \"Do not include any explanatory text, just the JSON array.\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": table_prompt}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens,\n        \"response_format\": {\n            \"type\": \"json_object\",\n        }\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    try:\n        # Make the API request\n        response = requests.post(api_url, headers=headers, json=payload)\n        response.raise_for_status()\n        \n        # Extract the response content\n        response_data = response.json()\n        content = response_data[\"choices\"][0][\"message\"][\"content\"]\n        \n        # Extract the JSON array from the response\n        try:\n            # Try to parse the content as JSON directly\n            table_data = json.loads(content)\n            return table_data\n        except (json.JSONDecodeError, ValueError):\n            # If JSON parsing fails, return an error message as a single cell\n            return [[\"Error: Unable to generate table. The AI response wasn't in the expected format.\"]]\n             \n    except Exception as e:\n        # Handle any exception, including API request errors\n        return [[\"Error: API request failed.\", str(e)]]",
+    "code": "import requests\nimport json\n\ndef ai_table(prompt, header=None, source=None, temperature=0.0, model='mistral-small-latest', max_tokens=1500):\n    \"\"\"\n    Uses AI to generate a structured table based on the prompt and optional header/source data.\n    \n    Args:\n        prompt (str): Instruction for AI to create a table\n        header (list, optional): 2D list containing table header (column names)\n        source (list, optional): 2D list containing source data used to create the table\n        temperature (float, optional): Controls response creativity (0-2). Default is 0\n        model (str, optional): ID of the model to use\n        max_tokens (int, optional): Maximum tokens for response generation. Default is 1500\n        \n    Returns:\n        list: 2D list representing the generated table data\n    \"\"\"\n    # Using Boardflare API for demo purposes. Replace with any OpenAI compatible API endpoint.\n    api_url = \"https://llm.boardflare.com\" # replace with \"https://api.mistral.ai/v1/chat/completions\"\n    api_key = \"cV4a59t1wjYGs....\" # replace with your Mistral API key\n    \n    # Construct a specific prompt for table generation\n    table_prompt = f\"Generate a well-organized table based on this request: {prompt}\"\n    \n    # Add header information if provided\n    if header is not None:\n        # Assuming header is a 2D list with a single row for column names\n        if header and len(header) > 0:\n            header_str = \", \".join(str(col) for col in header[0])\n            table_prompt += f\"\\nUse exactly these columns: {header_str}\"\n    \n    # Add source data information if provided\n    if source is not None:\n        source_str = json.dumps(source, indent=2)\n        table_prompt += f\"\\n\\nUse this source data to create the table:\\n{source_str}\"\n    \n    # Add instruction for structured output\n    table_prompt += \"\\nReturn ONLY a JSON object with a key 'items' whose value is a JSON array of arrays (2D array) with the table data. \"\n    table_prompt += \"The first row should contain column headers if not provided. \"\n    table_prompt += \"Each subsequent row should contain data that fits the columns. \"\n    table_prompt += \"Do not include any explanatory text, just the JSON object. \"\n    table_prompt += \"For example: {\\\"items\\\": [[\\\"Header1\\\", \\\"Header2\\\"], [\\\"Row1Col1\\\", \\\"Row1Col2\\\"]]}\"\n    \n    # Prepare the API request payload\n    payload = {\n        \"messages\": [{\"role\": \"user\", \"content\": table_prompt}],\n        \"temperature\": temperature,\n        \"model\": model,\n        \"max_tokens\": max_tokens,\n        \"response_format\": {\n            \"type\": \"json_object\",\n        }\n    }\n    \n    headers = {\n        \"Authorization\": f\"Bearer {api_key}\",\n        \"Content-Type\": \"application/json\",\n        \"Accept\": \"application/json\"\n    }\n    \n    try:\n        # Make the API request\n        response = requests.post(api_url, headers=headers, json=payload)\n        response.raise_for_status()\n        \n        # Extract the response content\n        response_data = response.json()\n        content = response_data[\"choices\"][0][\"message\"][\"content\"]\n        \n        # Extract the JSON array from the response\n        try:\n            # Try to parse the content as JSON directly\n            table_data = json.loads(content)\n            \n            # Always look for the 'items' key as per the prompt\n            if isinstance(table_data, dict) and \"items\" in table_data:\n                table_data = table_data[\"items\"]\n            # Legacy fallback for older keys (optional)\n            elif isinstance(table_data, dict):\n                if \"data\" in table_data:\n                    table_data = table_data[\"data\"]\n                elif \"filled_data\" in table_data:\n                    table_data = table_data[\"filled_data\"]\n                elif \"result\" in table_data:\n                    table_data = table_data[\"result\"]\n            \n            # Ensure the table data is a 2D list\n            if isinstance(table_data, list) and all(isinstance(row, list) for row in table_data):\n                return table_data\n            else:\n                return [[\"Error: Unable to parse response. Expected a 2D array.\"]]\n        except (json.JSONDecodeError, ValueError):\n            # If JSON parsing fails, return an error message as a single cell\n            return [[\"Error: Unable to generate table. The AI response wasn't in the expected format.\"]]\n             \n    except Exception as e:\n        # Handle any exception, including API request errors\n        return [[\"Error: API request failed.\", str(e)]]",
     "test_cases": [
       {
         "id": "test_smartphone_features",
         "description": "Generate a table listing features of different smartphones for product comparison",
         "arguments": {
-          "prompt": "Create a table listing the features of different smartphones including brand, model, camera quality, battery life."
+          "prompt": "Create a table listing the features of 4 different smartphones including brand, model, camera quality, battery life."
         },
         "expected_contains_any": [
           "Brand",
@@ -722,7 +722,7 @@
         "id": "test_sales_summary_with_source",
         "description": "Summarize sales data by product category for quarterly business review",
         "arguments": {
-          "prompt": "Summarize the sales data by product category.",
+          "prompt": "Summarize the sales data by product category (2 categories).",
           "source": [
             [
               "Product",
@@ -779,6 +779,75 @@
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_table"
   },
   {
+    "name": "black_scholes",
+    "description": "Calculate the Black-Scholes price for a European call or put option.",
+    "code": "import math\nfrom scipy.stats import norm\n\ndef black_scholes(S, K, T, r, sigma, option_type):\n    \"\"\"\n    Calculate the Black-Scholes price for a European call or put option.\n    Args:\n        S (float): Current price of the underlying asset\n        K (float): Strike price\n        T (float): Time to expiration in years\n        r (float): Annual risk-free interest rate (decimal)\n        sigma (float): Volatility of the underlying asset (decimal)\n        option_type (str): 'call' or 'put'\n    Returns:\n        float: Theoretical price of the option\n    \"\"\"\n    # Input validation\n    if not (isinstance(S, (int, float)) and S > 0):\n        raise ValueError(\"S must be a positive float\")\n    if not (isinstance(K, (int, float)) and K > 0):\n        raise ValueError(\"K must be a positive float\")\n    if not (isinstance(T, (int, float)) and T > 0):\n        raise ValueError(\"T must be a positive float\")\n    if not (isinstance(r, (int, float)) and r >= 0):\n        raise ValueError(\"r must be a non-negative float\")\n    if not (isinstance(sigma, (int, float)) and sigma > 0):\n        raise ValueError(\"sigma must be a positive float\")\n    if option_type not in ('call', 'put'):\n        raise ValueError(\"option_type must be 'call' or 'put'\")\n\n    d1 = (math.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * math.sqrt(T))\n    d2 = d1 - sigma * math.sqrt(T)\n\n    if option_type == 'call':\n        price = S * norm.cdf(d1) - K * math.exp(-r * T) * norm.cdf(d2)\n    else:  # put\n        price = K * math.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)\n    return float(price)\n",
+    "test_cases": [
+      {
+        "id": "call_option_6mo_excel",
+        "description": "Price a 6-month European call option in Excel for a stock at $100, strike $105, 3% risk-free rate, 20% volatility.",
+        "arguments": {
+          "S": 100,
+          "K": 105,
+          "T": 0.5,
+          "r": 0.03,
+          "sigma": 0.2,
+          "option_type": "call"
+        },
+        "expected": 4.1783,
+        "expected_rows": 1,
+        "demo": true
+      },
+      {
+        "id": "put_option_1yr_excel",
+        "description": "Price a 1-year European put option in Excel for a stock at $50, strike $45, 2% risk-free rate, 25% volatility.",
+        "arguments": {
+          "S": 50,
+          "K": 45,
+          "T": 1,
+          "r": 0.02,
+          "sigma": 0.25,
+          "option_type": "put"
+        },
+        "expected": 2.3078,
+        "expected_rows": 1,
+        "demo": true
+      },
+      {
+        "id": "call_option_atm_1yr",
+        "description": "Call option, at-the-money, 1 year, 5% risk-free, 20% volatility.",
+        "arguments": {
+          "S": 100,
+          "K": 100,
+          "T": 1,
+          "r": 0.05,
+          "sigma": 0.2,
+          "option_type": "call"
+        },
+        "expected": 10.45,
+        "expected_rows": 1,
+        "demo": true
+      },
+      {
+        "id": "put_option_atm_1yr",
+        "description": "Put option, at-the-money, 1 year, 5% risk-free, 20% volatility.",
+        "arguments": {
+          "S": 100,
+          "K": 100,
+          "T": 1,
+          "r": 0.05,
+          "sigma": 0.2,
+          "option_type": "put"
+        },
+        "expected": 5.573,
+        "expected_rows": 1,
+        "demo": true
+      }
+    ],
+    "fileId": "13",
+    "link": "https://www.boardflare.com/resources/python-functions/financial/black_scholes"
+  },
+  {
     "name": "internet_csv",
     "description": "Fetches a CSV file from the internet (with CORS proxy) and returns its contents as a 2D list.",
     "code": "import csv\nimport io\nimport requests\n\n\ndef internet_csv(url):\n    \"\"\"\n    Fetches a CSV file from the internet (with CORS proxy) and returns its contents as a 2D list.\n\n    Args:\n        url (str): The direct URL to the CSV file.\n\n    Returns:\n        list[list[str]]: 2D list representing the CSV contents, where each sublist is a row.\n\n    Raises:\n        ValueError: If the URL is invalid or the content cannot be parsed as CSV.\n    \"\"\"\n    if not isinstance(url, str) or not url.strip():\n        raise ValueError(\"A non-empty URL string must be provided.\")\n\n    cors_url = f\"https://cors.boardflare.com/{url}\"\n    try:\n        response = requests.get(cors_url)\n        response.raise_for_status()\n        content = response.text\n        reader = csv.reader(io.StringIO(content))\n        data = [row for row in reader]\n        if not data:\n            raise ValueError(\"CSV file is empty or could not be parsed.\")\n        return data\n    except Exception as e:\n        raise ValueError(f\"Failed to fetch or parse CSV: {e}\")\n",
@@ -794,27 +863,85 @@
         "demo": true
       }
     ],
-    "fileId": "11",
+    "fileId": "14",
     "link": "https://www.boardflare.com/resources/python-functions/data/internet_csv"
+  },
+  {
+    "name": "minimize_scalar",
+    "description": "Local minimization of scalar function of one variable.",
+    "code": "# Minimize Scalar Function\n\nfrom scipy.optimize import minimize_scalar\nimport math\n\n\ndef minimize_scalar_function(func_expr, bounds=None, method=None):\n    \"\"\"\n    Minimizes a scalar function using scipy.optimize.minimize_scalar.\n\n    Args:\n        func_expr (str): A string representing the function to minimize, e.g., 'x**2 + 3*x + 2'.\n        bounds (list, optional): A 2D list [[min, max]] specifying the bounds for bounded methods.\n        method (str, optional): Optimization method: 'brent', 'bounded', or 'golden'.\n\n    Returns:\n        list: [[x, fun]] where x is the location of minimum and fun is the minimum value\n    \"\"\"\n    # Define the function from the string expression\n    def func(x):\n        return eval(func_expr, {\"x\": x, \"math\": math})\n\n    # Check if 'x' is present in the function expression\n    if 'x' not in func_expr:\n        raise ValueError(\"Function expression must contain the variable 'x'.\")\n\n    kwargs = {}\n    # Accept bounds as a 2D list [[min, max]] or as a scalar (not tuple)\n    if bounds is not None:\n        # If bounds is a 2D list (e.g., [[0, 10]]), extract min and max\n        if isinstance(bounds, list) and len(bounds) == 1 and isinstance(bounds[0], list) and len(bounds[0]) == 2:\n            min_val, max_val = bounds[0][0], bounds[0][1]\n            kwargs['bounds'] = [min_val, max_val]\n        else:\n            kwargs['bounds'] = bounds\n    if method is not None:\n        kwargs['method'] = method\n\n    result = minimize_scalar(func, **kwargs)\n    # Return as a 2D list: [[x, fun]]\n    return [[float(result.x), float(result.fun)]]\n",
+    "test_cases": [
+      {
+        "id": "quadratic_unbounded",
+        "description": "Minimize the quadratic cost function C(x) = x^2 + 3x + 2 in Excel. Returns the x-value and minimum cost as a 2D list.",
+        "arguments": {
+          "func_expr": "x**2 + 3*x + 2"
+        },
+        "expected_rows": 1,
+        "demo": true
+      },
+      {
+        "id": "bounded_minimum",
+        "description": "Minimize f(x) = (x-5)^2 + 10 in Excel, with x between 0 and 10. Returns the x-value and minimum value as a 2D list.",
+        "arguments": {
+          "func_expr": "(x-5)**2 + 10",
+          "bounds": [
+            [
+              0,
+              10
+            ]
+          ],
+          "method": "bounded"
+        },
+        "expected_rows": 1,
+        "demo": true
+      }
+    ],
+    "fileId": "12",
+    "link": "https://www.boardflare.com/resources/python-functions/optimize/minimize_scalar"
   },
   {
     "name": "onedrive_csv",
     "description": "Loads a CSV file from OneDrive using the global graphToken variable and returns its contents as a 2D list.",
-    "code": "import requests\nimport csv\nimport io\nimport pandas as pd\n\ndef onedrive_csv(file_path):\n    \"\"\"\n    Loads a CSV file from OneDrive using the global graphToken variable and returns its contents as a 2D list.\n\n    Args:\n        file_path (str): The path to the CSV file in the user's OneDrive (e.g., '/Documents/data.csv').\n\n    Returns:\n        list: 2D list representing the CSV file's contents.\n\n    Raises:\n        Exception: If the file cannot be retrieved or parsed.\n    \"\"\"\n    # Use global graphToken if available\n    token = None\n    try:\n        token = globals()[\"graphToken\"]\n    except KeyError:\n        token = None\n    if not token:\n        raise Exception(\"Microsoft Graph token is not set. Please click login button next to OneDrive in Functions tab.\")\n    if not file_path or not isinstance(file_path, str):\n        raise Exception(\"A valid file_path string must be provided.\")\n\n    url = f\"https://graph.microsoft.com/v1.0/me/drive/root:{file_path}:/content\"\n    headers = {\n        \"Authorization\": f\"Bearer {token}\",\n        \"Accept\": \"text/csv\"\n    }\n    response = requests.get(url, headers=headers)\n    if response.status_code != 200:\n        raise Exception(f\"Failed to retrieve file: {response.status_code} {response.text}\")\n\n    csv_content = response.content.decode('utf-8')\n    # You could also use pandas to read the CSV content into a DataFrame\n    df = pd.read_csv(io.StringIO(csv_content))\n    print(df.head())\n\n    # For demo puposes, we will convert the CSV content to a 2D list\n    reader = csv.reader(io.StringIO(csv_content))\n    table = [row for row in reader]\n    return table\n",
+    "code": "import requests\nimport csv\nimport io\nimport pandas as pd\n\ndef onedrive_csv(file_path):\n    \"\"\"\n    Loads a CSV file from OneDrive using the global graphToken variable and returns its contents as a 2D list.\n\n    Args:\n        file_path (str): The path to the CSV file in the user's OneDrive (e.g., '/Documents/data.csv').\n\n    Returns:\n        list: 2D list representing the CSV file's contents.\n\n    Raises:\n        Exception: If the file cannot be retrieved or parsed.\n    \"\"\"\n    # Use global graphToken if available\n    token = None\n    try:\n        token = globals()[\"graphToken\"]\n    except KeyError:\n        token = None\n    if not token:\n        return \"Microsoft Graph token is not set. Please click login button next to OneDrive in Functions tab.\"\n    if not file_path or not isinstance(file_path, str):\n        raise Exception(\"A valid file_path string must be provided.\")\n\n    url = f\"https://graph.microsoft.com/v1.0/me/drive/root:{file_path}:/content\"\n    headers = {\n        \"Authorization\": f\"Bearer {token}\",\n        \"Accept\": \"text/csv\"\n    }\n    response = requests.get(url, headers=headers)\n    if response.status_code != 200:\n        raise Exception(f\"Failed to retrieve file: {response.status_code} {response.text}\")\n\n    csv_content = response.content.decode('utf-8')\n    # You could also use pandas to read the CSV content into a DataFrame\n    df = pd.read_csv(io.StringIO(csv_content))\n    print(df.head())\n\n    # For demo puposes, we will convert the CSV content to a 2D list\n    reader = csv.reader(io.StringIO(csv_content))\n    table = [row for row in reader]\n    return table\n",
     "test_cases": [
       {
         "id": "demo_load_csv_onedrive",
-        "description": "Demo: Load a CSV file from OneDrive using the file path '/Documents/data.csv'.",
+        "description": "Demo: Load a CSV file from OneDrive using the file path '/Apps/Boardflare Python for Excel/data.csv'.",
         "arguments": {
-          "file_path": "/Documents/data.csv"
+          "file_path": "/Apps/Boardflare Python for Excel/data.csv"
         },
         "expect_error": false,
         "expected_rows": 5,
         "demo": true
       }
     ],
-    "fileId": "12",
+    "fileId": "15",
     "link": "https://www.boardflare.com/resources/python-functions/data/onedrive_csv"
+  },
+  {
+    "name": "smolagents_hello",
+    "description": "Uses a code agent from smolagents to run a simple tool (hello) using an LLM model.",
+    "code": "from smolagents import CodeAgent, InferenceClientModel, tool\n\ndef smolagents_hello(prompt, model_id = \"https://llm.boardflare.com\", token = \"cV4a59t1wjYGs....\"):\n    \"\"\"\n    Uses a code agent from smolagents to run a simple tool (hello) using an LLM model.\n\n    Args:\n        prompt (str): The instruction or request for the agent (e.g., \"Get a greeting for Mike\") that uses the hello tool.\n        model_id (str, optional): The model_id to use. Defaults to 'https://llm.boardflare.com' to make this work in a demo, but this is heavily rate-limited, an not for production use.\n        token (str, optional): The API token for the LLM provider.\n\n    Returns:\n        str: The agent's response as a string, or an error message if something fails.\n    \"\"\"\n    if not isinstance(prompt, str) or not prompt.strip():\n        return \"Invalid prompt. Please provide a non-empty string.\"\n\n    # See https://huggingface.co/docs/smolagents/main/en/reference/models#smolagents.InferenceClientModel for instuctions on how to set up your own model.\n    model = InferenceClientModel(\n        model_id=model_id,\n        token=token\n    )\n\n    # Define a simple tool that returns a greeting\n    @tool\n    def hello(name: str) -> str:\n        \"\"\"\n        Returns a greeting.\n\n        Args:\n            name: The name of the person that you want a greeting for.\n        \"\"\"\n        return f\"Hello {name}!\"\n\n    try:\n        agent = CodeAgent(tools=[hello], model=model, add_base_tools=False)\n        result = agent.run(prompt)\n        if isinstance(result, str):\n            return result\n        return str(result)\n    except Exception as e:\n        return f\"Agent error: {e}\"\n",
+    "test_cases": [
+      {
+        "id": "basic_greeting",
+        "description": "Excel user requests a personalized greeting for a client named Mike. Should return a greeting string including 'Mike'.",
+        "arguments": {
+          "prompt": "Get a greeting for Mike"
+        },
+        "expected_contains_any": [
+          "Mike",
+          "Hello",
+          "greeting"
+        ],
+        "expected_type": "str",
+        "expected_rows": 1,
+        "demo": true
+      }
+    ],
+    "fileId": "16",
+    "link": "https://www.boardflare.com/resources/python-functions/agents/smolagents_hello"
   },
   {
     "name": "text_distance",
@@ -988,6 +1115,72 @@
     ],
     "fileId": "10",
     "link": "https://www.boardflare.com/resources/python-functions/text/vader_sentiment"
+  },
+  {
+    "name": "val_discrete",
+    "description": "Selects a value from a list based on a discrete probability distribution.",
+    "code": "import random\nfrom typing import List, Any, Optional\n\ndef val_discrete(values: List[List[Any]], distribution: List[List[float]]) -> Optional[Any]:\n    \"\"\"\n    Selects a value from a list based on a discrete probability distribution.\n\n    Args:\n        values (list of lists): 2D list of possible values (Excel range or Python 2D list)\n        distribution (list of lists): 2D list of probabilities (must sum to 1)\n\n    Returns:\n        The selected value (scalar), or None if input is invalid.\n    \"\"\"\n    # Input validation\n    if not values or not distribution:\n        return None\n    if not isinstance(values, list) or not isinstance(distribution, list):\n        return None\n    if not values or not values[0] or not distribution or not distribution[0]:\n        return None\n    if len(values[0]) != len(distribution[0]):\n        return None\n    weights = distribution[0]\n    # Check if all weights are numbers and sum to 1 (\u00b10.01)\n    try:\n        total = sum(float(w) for w in weights)\n        if abs(total - 1.0) > 0.01:\n            return None\n    except Exception:\n        return None\n    # Use random.choices to select\n    try:\n        return random.choices(values[0], weights=weights)[0]\n    except Exception:\n        return None\n",
+    "test_cases": [
+      {
+        "id": "demo_customer_type",
+        "description": "Simulate customer type selection based on market share.",
+        "arguments": {
+          "values": [
+            [
+              "Retail",
+              "Wholesale",
+              "Online"
+            ]
+          ],
+          "distribution": [
+            [
+              0.6,
+              0.3,
+              0.1
+            ]
+          ]
+        },
+        "expected_type": [
+          "str"
+        ],
+        "expected_values": [
+          "Retail",
+          "Wholesale",
+          "Online"
+        ],
+        "expected_rows": 1,
+        "demo": true
+      },
+      {
+        "id": "demo_project_outcome",
+        "description": "Select project outcome based on risk assessment.",
+        "arguments": {
+          "values": [
+            [
+              "Success",
+              "Failure"
+            ]
+          ],
+          "distribution": [
+            [
+              0.8,
+              0.2
+            ]
+          ]
+        },
+        "expected_type": [
+          "str"
+        ],
+        "expected_values": [
+          "Success",
+          "Failure"
+        ],
+        "expected_rows": 1,
+        "demo": true
+      }
+    ],
+    "fileId": "11",
+    "link": "https://www.boardflare.com/resources/python-functions/statistics/val_discrete"
   },
   {
     "name": "web_content",

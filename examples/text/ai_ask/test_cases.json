@@ -3,7 +3,7 @@
         "id": "test_hr_engagement_summary",
         "description": "HR: Summarize employee engagement survey results.",
         "arguments": {
-            "prompt": "Summarize the key findings from the employee engagement survey:",
+            "prompt": "Summarize the key findings from the employee engagement survey in 1 sentence:",
             "data": [
                 [
                     "Question",
@@ -32,14 +32,14 @@
             "workload",
             "career"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
     },
     {
         "id": "test_sales_quarterly_analysis",
         "description": "Sales: Analyze quarterly sales data and provide insights.",
         "arguments": {
-            "prompt": "Provide a brief analysis of the quarterly sales performance:",
+            "prompt": "Provide a brief analysis of the quarterly sales performance in 1 sentence:",
             "data": [
                 [
                     "Region",
@@ -76,14 +76,14 @@
             "growth",
             "sales"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
     },
     {
         "id": "test_operations_incident_summary",
         "description": "Operations: Summarize an incident report.",
         "arguments": {
-            "prompt": "Summarize the following incident report in one sentence:",
+            "prompt": "Summarize the following incident report in 1 sentence:",
             "data": [
                 [
                     "On April 10th, a system outage affected order processing for 2 hours. The IT team resolved the issue by updating server configurations. No data loss occurred."
@@ -95,21 +95,21 @@
             "resolved",
             "data loss"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
     },
     {
         "id": "test_business_followup_email",
         "description": "Business Writing: Draft a customer follow-up email.",
         "arguments": {
-            "prompt": "Draft a follow-up email to a client after a successful product demo."
+            "prompt": "Draft a follow-up email to a client after a successful product demo. Limit to 1 email."
         },
         "expected_contains_any_lower": [
             "thank you",
             "product",
             "next steps"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
     },
     {

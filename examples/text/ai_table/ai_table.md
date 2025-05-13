@@ -1,4 +1,4 @@
-# AI Table
+# AI_TABLE
 
 ## Overview
 

@@ -18,19 +18,95 @@ export default {
 			const genText = await request.json();
 			console.log(genText);
 
-			genText.max_tokens = 1500;
+			// Universal Provider refactor
+			const universalPayload = [
+				{
+					provider: "mistral",
+					endpoint: "v1/chat/completions",
+					headers: {
+						Authorization: `Bearer ${env.MISTRAL_API_KEY}`,
+						"Content-Type": "application/json"
+					},
+					query: {
+						...genText,
+						max_tokens: 1000,
+						model: "mistral-medium-latest"
+					}
+				},
+				{
+					provider: "groq",
+					endpoint: "https://api.groq.com/openai/v1/chat/completions",
+					headers: {
+						Authorization: `Bearer ${env.GROQ_API_KEY}`,
+						"Content-Type": "application/json"
+					},
+					query: {
+						...genText,
+						max_tokens: 1000,
+						model: "llama-3.3-70b-versatile"
+					}
+				},
+				{
+					provider: "mistral",
+					endpoint: "v1/chat/completions",
+					headers: {
+						Authorization: `Bearer ${env.MISTRAL_API_KEY}`,
+						"Content-Type": "application/json"
+					},
+					query: {
+						...genText,
+						max_tokens: 1000,
+						model: "mistral-small-latest"
+					}
+				},
+				{
+					provider: "google-ai-studio",
+					endpoint: "v1beta/openai/chat/completions",
+					headers: {
+						Authorization: `Bearer ${env.GOOGLE_API_KEY}`,
+						"Content-Type": "application/json"
+					},
+					query: {
+						...genText,
+						max_tokens: 1000,
+						model: "gemini-2.5-flash-preview-04-17"
+					}
+				},
+				{
+					provider: "groq",
+					endpoint: "https://api.groq.com/openai/v1/chat/completions",
+					headers: {
+						Authorization: `Bearer ${env.GROQ_API_KEY}`,
+						"Content-Type": "application/json"
+					},
+					query: {
+						...genText,
+						max_tokens: 1000,
+						model: "meta-llama/llama-4-scout-17b-16e-instruct"
+					}
+				}
+			];
 
-			const response = await fetch('https://gateway.ai.cloudflare.com/v1/92d55664b831823cc914de02c9a0d0ae/llm_proxy/mistral/v1/chat/completions', {
+			// Hard code the account and gateway IDs as requested
+			const accountId = "92d55664b831823cc914de02c9a0d0ae";
+			const gatewayId = "llm_proxy";
+			const universalUrl = `https://gateway.ai.cloudflare.com/v1/${accountId}/${gatewayId}`;
+
+			const response = await fetch(universalUrl, {
 				method: 'POST',
 				headers: {
-					'Authorization': `Bearer ${env.MISTRAL_API_KEY}`,
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify(genText),
+				body: JSON.stringify(universalPayload),
 			});
 
 			if (!response.ok) {
-				throw new Error(`Mistral API error: ${response.statusText}`);
+				const errorText = await response.text();
+				throw new Error(JSON.stringify({
+					status: response.status,
+					statusText: response.statusText,
+					body: errorText
+				}));
 			}
 
 			const result = await response.json();

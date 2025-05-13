@@ -1,0 +1,92 @@
+[
+    {
+        "id": "call_option_6mo_excel",
+        "description": "Price a 6-month European call option in Excel for a stock at $100, strike $105, 3% risk-free rate, 20% volatility.",
+        "arguments": {
+            "S": 100,
+            "K": 105,
+            "T": 0.5,
+            "r": 0.03,
+            "sigma": 0.2,
+            "option_type": "call"
+        },
+        "expected": 4.1783,
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "put_option_1yr_excel",
+        "description": "Price a 1-year European put option in Excel for a stock at $50, strike $45, 2% risk-free rate, 25% volatility.",
+        "arguments": {
+            "S": 50,
+            "K": 45,
+            "T": 1,
+            "r": 0.02,
+            "sigma": 0.25,
+            "option_type": "put"
+        },
+        "expected": 2.3078,
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "call_option_atm_1yr",
+        "description": "Call option, at-the-money, 1 year, 5% risk-free, 20% volatility.",
+        "arguments": {
+            "S": 100,
+            "K": 100,
+            "T": 1,
+            "r": 0.05,
+            "sigma": 0.2,
+            "option_type": "call"
+        },
+        "expected": 10.45,
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "put_option_atm_1yr",
+        "description": "Put option, at-the-money, 1 year, 5% risk-free, 20% volatility.",
+        "arguments": {
+            "S": 100,
+            "K": 100,
+            "T": 1,
+            "r": 0.05,
+            "sigma": 0.2,
+            "option_type": "put"
+        },
+        "expected": 5.573,
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "invalid_negative_stock",
+        "description": "Invalid: negative stock price should raise error.",
+        "arguments": {
+            "S": -100,
+            "K": 100,
+            "T": 1,
+            "r": 0.05,
+            "sigma": 0.2,
+            "option_type": "call"
+        },
+        "expect_error": true,
+        "expected_rows": 1,
+        "demo": false
+    },
+    {
+        "id": "invalid_option_type",
+        "description": "Invalid: option_type not 'call' or 'put' should raise error.",
+        "arguments": {
+            "S": 100,
+            "K": 100,
+            "T": 1,
+            "r": 0.05,
+            "sigma": 0.2,
+            "option_type": "invalid"
+        },
+        "expect_error": true,
+        "expected_rows": 1,
+        "demo": false
+    }
+]

@@ -11,7 +11,7 @@
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.8.4",
     "vitest": "3.0.9",
-    "wrangler": "^4.4.0"
+    "wrangler": "^4.15.0"
   },
   "dependencies": {
     "@ai-sdk/mistral": "^1.2.1",

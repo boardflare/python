@@ -1,0 +1,79 @@
+[
+    {
+        "id": "basic_greeting",
+        "description": "Excel user requests a personalized greeting for a client named Mike. Should return a greeting string including 'Mike'.",
+        "arguments": {
+            "prompt": "Get a greeting for Mike"
+        },
+        "expected_contains_any": [
+            "Mike",
+            "Hello",
+            "greeting"
+        ],
+        "expected_type": "str",
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "empty_prompt",
+        "description": "Excel user provides an empty prompt. Should return an error message about invalid prompt.",
+        "arguments": {
+            "prompt": ""
+        },
+        "expected_contains_any": [
+            "invalid",
+            "error",
+            "prompt"
+        ],
+        "expected_type": "str",
+        "expected_rows": 1,
+        "demo": false
+    },
+    {
+        "id": "non_string_prompt",
+        "description": "Excel user provides a non-string prompt (number). Should return an error message about invalid prompt.",
+        "arguments": {
+            "prompt": 123
+        },
+        "expected_contains_any": [
+            "invalid",
+            "error",
+            "prompt"
+        ],
+        "expected_type": "str",
+        "expected_rows": 1,
+        "demo": false
+    },
+    {
+        "id": "custom_model_id",
+        "description": "Excel user requests a greeting for Alice using a custom model. This model_id is not supported and should return a model initialization error message.",
+        "arguments": {
+            "prompt": "Get a greeting for Alice",
+            "model_id": "Qwen/Qwen2.5-Coder-32B-Instruct"
+        },
+        "expected_contains_any": [
+            "error",
+            "invalid",
+            "model"
+        ],
+        "expected_type": "str",
+        "expected_rows": 1,
+        "demo": false
+    },
+    {
+        "id": "invalid_model_id",
+        "description": "Excel user requests a greeting for Bob with an invalid model_id. Should return a model initialization error message.",
+        "arguments": {
+            "prompt": "Get a greeting for Bob",
+            "model_id": "invalid-model-id"
+        },
+        "expected_contains_any": [
+            "error",
+            "invalid",
+            "model"
+        ],
+        "expected_type": "str",
+        "expected_rows": 1,
+        "demo": false
+    }
+]

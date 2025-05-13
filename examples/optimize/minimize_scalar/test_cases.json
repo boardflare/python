@@ -1,0 +1,47 @@
+[
+    {
+        "id": "quadratic_unbounded",
+        "description": "Minimize the quadratic cost function C(x) = x^2 + 3x + 2 in Excel. Returns the x-value and minimum cost as a 2D list.",
+        "arguments": {
+            "func_expr": "x**2 + 3*x + 2"
+        },
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "bounded_minimum",
+        "description": "Minimize f(x) = (x-5)^2 + 10 in Excel, with x between 0 and 10. Returns the x-value and minimum value as a 2D list.",
+        "arguments": {
+            "func_expr": "(x-5)**2 + 10",
+            "bounds": [
+                [
+                    0,
+                    10
+                ]
+            ],
+            "method": "bounded"
+        },
+        "expected_rows": 1,
+        "demo": true
+    },
+    {
+        "id": "invalid_expression",
+        "description": "Invalid function expression should raise an error.",
+        "arguments": {
+            "func_expr": "x***2 + 3x + 2"
+        },
+        "expect_error": true,
+        "expected_rows": 1,
+        "demo": false
+    },
+    {
+        "id": "missing_x",
+        "description": "Function expression without 'x' should raise an error.",
+        "arguments": {
+            "func_expr": "5 + 7"
+        },
+        "expect_error": true,
+        "expected_rows": 1,
+        "demo": false
+    }
+]

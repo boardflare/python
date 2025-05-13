@@ -30,9 +30,10 @@ def ai_extract(text, extract_type, temperature=0.0, model='mistral-small-latest'
     extract_prompt = f"Extract the following from the text: {extract_type}\n\nText: {text}"
     
     # Add instruction for structured output
-    extract_prompt += "\n\nReturn ONLY a JSON array of items you extracted. "
+    extract_prompt += "\n\nReturn ONLY a JSON object with a key 'items' whose value is a JSON array of the items you extracted. "
     extract_prompt += "Each item should be a single value representing one extracted piece of information. "
-    extract_prompt += "Do not include any explanatory text, just the JSON array."
+    extract_prompt += "Do not include any explanatory text, just the JSON object. "
+    extract_prompt += "For example: {\"items\": [\"item1\", \"item2\", \"item3\"]}"
     
     # Prepare the API request payload
     payload = {
@@ -66,11 +67,12 @@ def ai_extract(text, extract_type, temperature=0.0, model='mistral-small-latest'
             # Try to parse the content as JSON directly
             extracted_data = json.loads(content)
             
-            # If extracted_data is a dictionary with an "items" or "extracted" key, use that
-            if isinstance(extracted_data, dict):
-                if "items" in extracted_data:
-                    extracted_data = extracted_data["items"]
-                elif "extracted" in extracted_data:
+            # Always look for the 'items' key as per the prompt
+            if isinstance(extracted_data, dict) and "items" in extracted_data:
+                extracted_data = extracted_data["items"]
+            # Legacy fallback for older keys (optional)
+            elif isinstance(extracted_data, dict):
+                if "extracted" in extracted_data:
                     extracted_data = extracted_data["extracted"]
                 elif "results" in extracted_data:
                     extracted_data = extracted_data["results"]

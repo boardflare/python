@@ -29,8 +29,8 @@ def ai_format(text, format_instruction, temperature=0.0, model='mistral-small-la
     # Construct a specific prompt for formatting
     format_prompt = f"Format the following text according to this format instruction: {format_instruction}\n\nText to format: {text}"
     
-    # Remove JSON object instructions, just ask for plain formatted text
-    format_prompt += "\n\nReturn ONLY the formatted text. Do not include any explanatory text, just the formatted result."
+    # Remove array-specific instructions; just request a direct answer
+    format_prompt += "\n\nReturn ONLY the formatted text. Do not include any explanatory text, just the formatted text."
     
     # Prepare the API request payload
     payload = {

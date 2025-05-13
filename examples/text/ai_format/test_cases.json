@@ -3,7 +3,7 @@
         "id": "test_customer_contact_info",
         "description": "Standardizing customer contact information into a professional format.",
         "arguments": {
-            "text": "John Smith / Marketing Director - Acme Inc / jsmith@acme.co - 555.123.4567",
+            "text": "John Smith / Marketing Director - Acme Inc / jsmith@acme.co - 555.123.4567 (Format as 1 business card)",
             "format_instruction": "standard business contact card format"
         },
         "expected_contains_any": [
@@ -13,14 +13,14 @@
             "jsmith@acme.co",
             "555"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
     },
     {
         "id": "test_financial_figures",
         "description": "Standardizing financial figures for reporting.",
         "arguments": {
-            "text": "Revenue: 2.4m; COGS: 1.1m; Gross Margin: 1.3m (54%); Opex: 950k; EBITDA: 350k",
+            "text": "Revenue: 2.4m; COGS: 1.1m; Gross Margin: 1.3m (54%); Opex: 950k; EBITDA: 350k (Format as 1 financial statement)",
             "format_instruction": "professional financial statement format with proper currency notation"
         },
         "expected_contains_any": [
@@ -32,14 +32,14 @@
             "Operating Expenses",
             "EBITDA"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
     },
     {
         "id": "test_customer_feedback",
         "description": "Converting free-form customer feedback into a structured review format.",
         "arguments": {
-            "text": "Used the product for 3 weeks. Good quality but shipping took forever. Customer service was helpful though. Probably would buy again if they fix delivery issues.",
+            "text": "Used the product for 3 weeks. Good quality but shipping took forever. Customer service was helpful though. Probably would buy again if they fix delivery issues. (Format as 1 review)",
             "format_instruction": "structured product review with ratings"
         },
         "expected_contains_any": [
@@ -49,14 +49,14 @@
             "Customer Service",
             "Would Purchase Again"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
     },
     {
         "id": "test_address_data",
         "description": "Standardizing inconsistent address entries into a standard format.",
         "arguments": {
-            "text": "123 business park dr suite 12, austin tx 78701",
+            "text": "123 business park dr suite 12, austin tx 78701 (Format as 1 address)",
             "format_instruction": "standard US business address format"
         },
         "expected_contains_any": [
@@ -66,14 +66,14 @@
             "TX",
             "78701"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
     },
     {
         "id": "test_meeting_notes",
         "description": "Converting meeting notes to a structured action item list.",
         "arguments": {
-            "text": "Tom said we need to finish the report by Friday. Maria will contact the client about budget concerns. Everyone should review the new marketing strategy before next meeting on 5/10.",
+            "text": "Tom said we need to finish the report by Friday. Maria will contact the client about budget concerns. Everyone should review the new marketing strategy before next meeting on 5/10. (Format as 1 action item list)",
             "format_instruction": "action items with responsible parties and deadlines"
         },
         "expected_contains_any": [
@@ -85,7 +85,7 @@
             "budget",
             "May 10"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
     },
     {
