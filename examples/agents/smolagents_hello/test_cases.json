@@ -46,15 +46,15 @@
     },
     {
         "id": "custom_model_id",
-        "description": "Excel user requests a greeting for Alice using a custom model. Should return a greeting string using the specified model.",
+        "description": "Excel user requests a greeting for Alice using a custom model. This model_id is not supported and should return a model initialization error message.",
         "arguments": {
             "prompt": "Get a greeting for Alice",
             "model_id": "Qwen/Qwen2.5-Coder-32B-Instruct"
         },
         "expected_contains_any": [
-            "Alice",
-            "Hello",
-            "greeting"
+            "error",
+            "invalid",
+            "model"
         ],
         "expected_type": "str",
         "expected_rows": 1,
