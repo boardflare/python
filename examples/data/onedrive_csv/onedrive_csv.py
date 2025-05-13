@@ -23,7 +23,7 @@ def onedrive_csv(file_path):
     except KeyError:
         token = None
     if not token:
-        raise Exception("Microsoft Graph token is not set. Please click login button next to OneDrive in Functions tab.")
+        return "Microsoft Graph token is not set. Please click login button next to OneDrive in Functions tab."
     if not file_path or not isinstance(file_path, str):
         raise Exception("A valid file_path string must be provided.")
 
