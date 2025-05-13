@@ -3,7 +3,7 @@
         "id": "test_expense_categorization",
         "description": "Finance: Categorize an expense transaction based on its description.",
         "arguments": {
-            "text": "Uber ride from airport to hotel, $45.50",
+            "text": "Uber ride from airport to hotel, $45.50 (Choose 1 category)",
             "choices": [
                 [
                     "Travel"
@@ -20,14 +20,14 @@
             ]
         },
         "expected_contains": "Travel",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
     },
     {
         "id": "test_customer_email_sentiment",
         "description": "Customer Service: Classify the sentiment of a customer email.",
         "arguments": {
-            "text": "I've been waiting for a response about my refund for over two weeks now. This is completely unacceptable and I'm considering filing a complaint.",
+            "text": "I've been waiting for a response about my refund for over two weeks now. This is completely unacceptable and I'm considering filing a complaint. (Choose 1 sentiment)",
             "choices": [
                 [
                     "Positive"
@@ -41,14 +41,14 @@
             ]
         },
         "expected_contains": "Negative",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
     },
     {
         "id": "test_sales_lead_qualification",
         "description": "Sales: Determine the qualification level of a sales lead based on interaction notes.",
         "arguments": {
-            "text": "Company: Acme Corp (250+ employees). Contact expressed interest in enterprise plan, requested pricing information, and scheduled a demo next week. Budget confirmed. Decision timeline: end of quarter.",
+            "text": "Company: Acme Corp (250+ employees). Contact expressed interest in enterprise plan, requested pricing information, and scheduled a demo next week. Budget confirmed. Decision timeline: end of quarter. (Choose 1 qualification)",
             "choices": [
                 [
                     "Hot Lead"
@@ -62,14 +62,14 @@
             ]
         },
         "expected_contains": "Hot Lead",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
     },
     {
         "id": "test_support_ticket_priority",
         "description": "IT Support: Assign a priority level to a support ticket based on its description.",
         "arguments": {
-            "text": "Unable to access CRM system. Getting error 500 when trying to load customer records. This is affecting sales team productivity but they can still use other systems in the meantime.",
+            "text": "Unable to access CRM system. Getting error 500 when trying to load customer records. This is affecting sales team productivity but they can still use other systems in the meantime. (Choose 1 priority)",
             "choices": [
                 [
                     "Critical Priority"
@@ -86,14 +86,14 @@
             ]
         },
         "expected_contains": "High Priority",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
     },
     {
         "id": "test_product_feedback_categorization",
         "description": "Product Management: Categorize customer feedback into feedback types.",
         "arguments": {
-            "text": "I love the new dashboard layout, but it would be even better if I could customize which widgets appear and their positions on the screen.",
+            "text": "I love the new dashboard layout, but it would be even better if I could customize which widgets appear and their positions on the screen. (Choose 1 feedback type)",
             "choices": [
                 [
                     "Bug Report"
@@ -113,18 +113,18 @@
             ]
         },
         "expected_contains": "Feature Request",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
     },
     {
         "id": "test_document_classification",
         "description": "Legal: Classify a legal document based on its content.",
         "arguments": {
-            "text": "This agreement outlines the terms under which Company A will provide consulting services to Company B, including scope of work, deliverables, timeline, and compensation structure.",
+            "text": "This agreement outlines the terms under which Company A will provide consulting services to Company B, including scope of work, deliverables, timeline, and compensation structure. (Choose 1 document type)",
             "choices": "NDA, Service Agreement, Employment Contract, License Agreement"
         },
         "expected_contains": "Service Agreement",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
     },
     {

@@ -8,7 +8,7 @@
         "id": "test_hr_engagement_summary",
         "description": "HR: Summarize employee engagement survey results.",
         "arguments": {
-          "prompt": "Summarize the key findings from the employee engagement survey:",
+          "prompt": "Summarize the key findings from the employee engagement survey in 1 sentence:",
           "data": [
             [
               "Question",
@@ -37,14 +37,14 @@
           "workload",
           "career"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_sales_quarterly_analysis",
         "description": "Sales: Analyze quarterly sales data and provide insights.",
         "arguments": {
-          "prompt": "Provide a brief analysis of the quarterly sales performance:",
+          "prompt": "Provide a brief analysis of the quarterly sales performance in 1 sentence:",
           "data": [
             [
               "Region",
@@ -81,14 +81,14 @@
           "growth",
           "sales"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_operations_incident_summary",
         "description": "Operations: Summarize an incident report.",
         "arguments": {
-          "prompt": "Summarize the following incident report in one sentence:",
+          "prompt": "Summarize the following incident report in 1 sentence:",
           "data": [
             [
               "On April 10th, a system outage affected order processing for 2 hours. The IT team resolved the issue by updating server configurations. No data loss occurred."
@@ -100,21 +100,21 @@
           "resolved",
           "data loss"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_business_followup_email",
         "description": "Business Writing: Draft a customer follow-up email.",
         "arguments": {
-          "prompt": "Draft a follow-up email to a client after a successful product demo."
+          "prompt": "Draft a follow-up email to a client after a successful product demo. Limit to 1 email."
         },
         "expected_contains_any_lower": [
           "thank you",
           "product",
           "next steps"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       }
     ],
@@ -130,7 +130,7 @@
         "id": "test_expense_categorization",
         "description": "Finance: Categorize an expense transaction based on its description.",
         "arguments": {
-          "text": "Uber ride from airport to hotel, $45.50",
+          "text": "Uber ride from airport to hotel, $45.50 (Choose 1 category)",
           "choices": [
             [
               "Travel"
@@ -147,14 +147,14 @@
           ]
         },
         "expected_contains": "Travel",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_customer_email_sentiment",
         "description": "Customer Service: Classify the sentiment of a customer email.",
         "arguments": {
-          "text": "I've been waiting for a response about my refund for over two weeks now. This is completely unacceptable and I'm considering filing a complaint.",
+          "text": "I've been waiting for a response about my refund for over two weeks now. This is completely unacceptable and I'm considering filing a complaint. (Choose 1 sentiment)",
           "choices": [
             [
               "Positive"
@@ -168,14 +168,14 @@
           ]
         },
         "expected_contains": "Negative",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_sales_lead_qualification",
         "description": "Sales: Determine the qualification level of a sales lead based on interaction notes.",
         "arguments": {
-          "text": "Company: Acme Corp (250+ employees). Contact expressed interest in enterprise plan, requested pricing information, and scheduled a demo next week. Budget confirmed. Decision timeline: end of quarter.",
+          "text": "Company: Acme Corp (250+ employees). Contact expressed interest in enterprise plan, requested pricing information, and scheduled a demo next week. Budget confirmed. Decision timeline: end of quarter. (Choose 1 qualification)",
           "choices": [
             [
               "Hot Lead"
@@ -189,14 +189,14 @@
           ]
         },
         "expected_contains": "Hot Lead",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_support_ticket_priority",
         "description": "IT Support: Assign a priority level to a support ticket based on its description.",
         "arguments": {
-          "text": "Unable to access CRM system. Getting error 500 when trying to load customer records. This is affecting sales team productivity but they can still use other systems in the meantime.",
+          "text": "Unable to access CRM system. Getting error 500 when trying to load customer records. This is affecting sales team productivity but they can still use other systems in the meantime. (Choose 1 priority)",
           "choices": [
             [
               "Critical Priority"
@@ -213,14 +213,14 @@
           ]
         },
         "expected_contains": "High Priority",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_product_feedback_categorization",
         "description": "Product Management: Categorize customer feedback into feedback types.",
         "arguments": {
-          "text": "I love the new dashboard layout, but it would be even better if I could customize which widgets appear and their positions on the screen.",
+          "text": "I love the new dashboard layout, but it would be even better if I could customize which widgets appear and their positions on the screen. (Choose 1 feedback type)",
           "choices": [
             [
               "Bug Report"
@@ -240,18 +240,18 @@
           ]
         },
         "expected_contains": "Feature Request",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_document_classification",
         "description": "Legal: Classify a legal document based on its content.",
         "arguments": {
-          "text": "This agreement outlines the terms under which Company A will provide consulting services to Company B, including scope of work, deliverables, timeline, and compensation structure.",
+          "text": "This agreement outlines the terms under which Company A will provide consulting services to Company B, including scope of work, deliverables, timeline, and compensation structure. (Choose 1 document type)",
           "choices": "NDA, Service Agreement, Employment Contract, License Agreement"
         },
         "expected_contains": "Service Agreement",
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       }
     ],
@@ -268,9 +268,9 @@
         "description": "Business Development: Extract client names from meeting notes.",
         "arguments": {
           "text": "During today's annual review, we discussed progress with Acme Corporation, Global Enterprises, and TechSolutions Inc. All three clients reported satisfaction with our services.",
-          "extract_type": "client names"
+          "extract_type": "Extract 3 client names"
         },
-        "expected_rows": 3,
+        "expected_rows": 4,
         "demo": true
       },
       {
@@ -278,9 +278,9 @@
         "description": "Financial Analysis: Extract key financial metrics from a quarterly report.",
         "arguments": {
           "text": "Q1 results exceeded expectations with revenue of $2.4M, an EBITDA margin of 18.5%, and customer acquisition costs decreasing by 12%. Cash reserves stand at $5.2M and our runway extends to 24 months.",
-          "extract_type": "financial metrics"
+          "extract_type": "Extract 5 financial metrics"
         },
-        "expected_rows": 5,
+        "expected_rows": 6,
         "demo": true
       },
       {
@@ -288,9 +288,9 @@
         "description": "Project Management: Extract action items assigned in an email.",
         "arguments": {
           "text": "Hi team, Following our strategic planning session: 1) Mark needs to finalize the budget by Friday, 2) Sarah will contact vendors for new quotes, 3) Development team must provide timeline estimates by next Wednesday, and 4) Everyone should review the new marketing materials.",
-          "extract_type": "action items"
+          "extract_type": "Extract 4 action items"
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
       },
       {
@@ -298,9 +298,9 @@
         "description": "Contact Management: Extract contact details from scanned business card text.",
         "arguments": {
           "text": "John Smith, Senior Project Manager, Innovative Solutions Inc., jsmith@innovativesolutions.com, +1 (555) 123-4567, 123 Business Avenue, Suite 400, San Francisco, CA 94107",
-          "extract_type": "contact information"
+          "extract_type": "Extract 6 contact information fields"
         },
-        "expected_rows": 6,
+        "expected_rows": 7,
         "demo": true
       },
       {
@@ -308,9 +308,9 @@
         "description": "Project Planning: Extract important dates and deadlines from a project update.",
         "arguments": {
           "text": "The initial design phase will be completed by May 15, 2025. The stakeholder review is scheduled for May 20-22, with development starting June 1. Testing will run through September 15, with final delivery expected by October 3, 2025.",
-          "extract_type": "dates and deadlines"
+          "extract_type": "Extract 5 dates and deadlines"
         },
-        "expected_rows": 5,
+        "expected_rows": 6,
         "demo": true
       }
     ],
@@ -379,7 +379,7 @@
             ]
           ]
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
       },
       {
@@ -451,7 +451,7 @@
             ]
           ]
         },
-        "expected_rows": 5,
+        "expected_rows": 6,
         "demo": true
       },
       {
@@ -505,7 +505,7 @@
             ]
           ]
         },
-        "expected_rows": 3,
+        "expected_rows": 4,
         "demo": true
       }
     ],
@@ -521,7 +521,7 @@
         "id": "test_customer_contact_info",
         "description": "Standardizing customer contact information into a professional format.",
         "arguments": {
-          "text": "John Smith / Marketing Director - Acme Inc / jsmith@acme.co - 555.123.4567",
+          "text": "John Smith / Marketing Director - Acme Inc / jsmith@acme.co - 555.123.4567 (Format as 1 business card)",
           "format_instruction": "standard business contact card format"
         },
         "expected_contains_any": [
@@ -531,14 +531,14 @@
           "jsmith@acme.co",
           "555"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_financial_figures",
         "description": "Standardizing financial figures for reporting.",
         "arguments": {
-          "text": "Revenue: 2.4m; COGS: 1.1m; Gross Margin: 1.3m (54%); Opex: 950k; EBITDA: 350k",
+          "text": "Revenue: 2.4m; COGS: 1.1m; Gross Margin: 1.3m (54%); Opex: 950k; EBITDA: 350k (Format as 1 financial statement)",
           "format_instruction": "professional financial statement format with proper currency notation"
         },
         "expected_contains_any": [
@@ -550,14 +550,14 @@
           "Operating Expenses",
           "EBITDA"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_customer_feedback",
         "description": "Converting free-form customer feedback into a structured review format.",
         "arguments": {
-          "text": "Used the product for 3 weeks. Good quality but shipping took forever. Customer service was helpful though. Probably would buy again if they fix delivery issues.",
+          "text": "Used the product for 3 weeks. Good quality but shipping took forever. Customer service was helpful though. Probably would buy again if they fix delivery issues. (Format as 1 review)",
           "format_instruction": "structured product review with ratings"
         },
         "expected_contains_any": [
@@ -567,14 +567,14 @@
           "Customer Service",
           "Would Purchase Again"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_address_data",
         "description": "Standardizing inconsistent address entries into a standard format.",
         "arguments": {
-          "text": "123 business park dr suite 12, austin tx 78701",
+          "text": "123 business park dr suite 12, austin tx 78701 (Format as 1 address)",
           "format_instruction": "standard US business address format"
         },
         "expected_contains_any": [
@@ -584,14 +584,14 @@
           "TX",
           "78701"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       },
       {
         "id": "test_meeting_notes",
         "description": "Converting meeting notes to a structured action item list.",
         "arguments": {
-          "text": "Tom said we need to finish the report by Friday. Maria will contact the client about budget concerns. Everyone should review the new marketing strategy before next meeting on 5/10.",
+          "text": "Tom said we need to finish the report by Friday. Maria will contact the client about budget concerns. Everyone should review the new marketing strategy before next meeting on 5/10. (Format as 1 action item list)",
           "format_instruction": "action items with responsible parties and deadlines"
         },
         "expected_contains_any": [
@@ -603,7 +603,7 @@
           "budget",
           "May 10"
         ],
-        "expected_rows": 1,
+        "expected_rows": 2,
         "demo": true
       }
     ],
@@ -621,7 +621,7 @@
         "arguments": {
           "prompt": "List 4 essential marketing KPIs for quarterly performance reviews"
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
       },
       {
@@ -630,7 +630,7 @@
         "arguments": {
           "prompt": "List 4 effective risk mitigation strategies for enterprise software implementation"
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
       },
       {
@@ -639,7 +639,7 @@
         "arguments": {
           "prompt": "List 4 key compliance requirements for healthcare organizations"
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
       },
       {
@@ -659,7 +659,7 @@
             ]
           ]
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
       },
       {
@@ -668,7 +668,7 @@
         "arguments": {
           "prompt": "List 4 SMART goals for an HR department focused on improving employee retention"
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
       }
     ],
@@ -684,7 +684,7 @@
         "id": "test_smartphone_features",
         "description": "Generate a table listing features of different smartphones for product comparison",
         "arguments": {
-          "prompt": "Create a table listing the features of different smartphones including brand, model, camera quality, battery life."
+          "prompt": "Create a table listing the features of 4 different smartphones including brand, model, camera quality, battery life."
         },
         "expected_contains_any": [
           "Brand",
@@ -722,7 +722,7 @@
         "id": "test_sales_summary_with_source",
         "description": "Summarize sales data by product category for quarterly business review",
         "arguments": {
-          "prompt": "Summarize the sales data by product category.",
+          "prompt": "Summarize the sales data by product category (2 categories).",
           "source": [
             [
               "Product",

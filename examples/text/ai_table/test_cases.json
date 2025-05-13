@@ -3,7 +3,7 @@
         "id": "test_smartphone_features",
         "description": "Generate a table listing features of different smartphones for product comparison",
         "arguments": {
-            "prompt": "Create a table listing the features of different smartphones including brand, model, camera quality, battery life."
+            "prompt": "Create a table listing the features of 4 different smartphones including brand, model, camera quality, battery life."
         },
         "expected_contains_any": [
             "Brand",
@@ -41,7 +41,7 @@
         "id": "test_sales_summary_with_source",
         "description": "Summarize sales data by product category for quarterly business review",
         "arguments": {
-            "prompt": "Summarize the sales data by product category.",
+            "prompt": "Summarize the sales data by product category (2 categories).",
             "source": [
                 [
                     "Product",

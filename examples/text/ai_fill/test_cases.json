@@ -56,7 +56,7 @@
                 ]
             ]
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
     },
     {
@@ -128,7 +128,7 @@
                 ]
             ]
         },
-        "expected_rows": 5,
+        "expected_rows": 6,
         "demo": true
     },
     {
@@ -182,7 +182,7 @@
                 ]
             ]
         },
-        "expected_rows": 3,
+        "expected_rows": 4,
         "demo": true
     },
     {

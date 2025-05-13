@@ -5,7 +5,7 @@
         "arguments": {
             "prompt": "List 4 essential marketing KPIs for quarterly performance reviews"
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
     },
     {
@@ -14,7 +14,7 @@
         "arguments": {
             "prompt": "List 4 effective risk mitigation strategies for enterprise software implementation"
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
     },
     {
@@ -23,7 +23,7 @@
         "arguments": {
             "prompt": "List 4 key compliance requirements for healthcare organizations"
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
     },
     {
@@ -43,7 +43,7 @@
                 ]
             ]
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
     },
     {
@@ -52,7 +52,7 @@
         "arguments": {
             "prompt": "List 4 SMART goals for an HR department focused on improving employee retention"
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
     },
     {

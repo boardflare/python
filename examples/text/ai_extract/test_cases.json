@@ -4,9 +4,9 @@
         "description": "Business Development: Extract client names from meeting notes.",
         "arguments": {
             "text": "During today's annual review, we discussed progress with Acme Corporation, Global Enterprises, and TechSolutions Inc. All three clients reported satisfaction with our services.",
-            "extract_type": "client names"
+            "extract_type": "Extract 3 client names"
         },
-        "expected_rows": 3,
+        "expected_rows": 4,
         "demo": true
     },
     {
@@ -14,9 +14,9 @@
         "description": "Financial Analysis: Extract key financial metrics from a quarterly report.",
         "arguments": {
             "text": "Q1 results exceeded expectations with revenue of $2.4M, an EBITDA margin of 18.5%, and customer acquisition costs decreasing by 12%. Cash reserves stand at $5.2M and our runway extends to 24 months.",
-            "extract_type": "financial metrics"
+            "extract_type": "Extract 5 financial metrics"
         },
-        "expected_rows": 5,
+        "expected_rows": 6,
         "demo": true
     },
     {
@@ -24,9 +24,9 @@
         "description": "Project Management: Extract action items assigned in an email.",
         "arguments": {
             "text": "Hi team, Following our strategic planning session: 1) Mark needs to finalize the budget by Friday, 2) Sarah will contact vendors for new quotes, 3) Development team must provide timeline estimates by next Wednesday, and 4) Everyone should review the new marketing materials.",
-            "extract_type": "action items"
+            "extract_type": "Extract 4 action items"
         },
-        "expected_rows": 4,
+        "expected_rows": 5,
         "demo": true
     },
     {
@@ -34,9 +34,9 @@
         "description": "Contact Management: Extract contact details from scanned business card text.",
         "arguments": {
             "text": "John Smith, Senior Project Manager, Innovative Solutions Inc., jsmith@innovativesolutions.com, +1 (555) 123-4567, 123 Business Avenue, Suite 400, San Francisco, CA 94107",
-            "extract_type": "contact information"
+            "extract_type": "Extract 6 contact information fields"
         },
-        "expected_rows": 6,
+        "expected_rows": 7,
         "demo": true
     },
     {
@@ -44,9 +44,9 @@
         "description": "Project Planning: Extract important dates and deadlines from a project update.",
         "arguments": {
             "text": "The initial design phase will be completed by May 15, 2025. The stakeholder review is scheduled for May 20-22, with development starting June 1. Testing will run through September 15, with final delivery expected by October 3, 2025.",
-            "extract_type": "dates and deadlines"
+            "extract_type": "Extract 5 dates and deadlines"
         },
-        "expected_rows": 5,
+        "expected_rows": 6,
         "demo": true
     },
     {
