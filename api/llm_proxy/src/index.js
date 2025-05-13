@@ -43,7 +43,7 @@ export default {
 					query: {
 						...genText,
 						max_tokens: 1000,
-						model: "llama3-70b-8192"
+						model: "llama-3.3-70b-versatile"
 					}
 				},
 				{
@@ -69,7 +69,20 @@ export default {
 					query: {
 						...genText,
 						max_tokens: 1000,
-						model: "gemma-3-27b-it"
+						model: "gemini-2.5-flash-preview-04-17"
+					}
+				},
+				{
+					provider: "groq",
+					endpoint: "https://api.groq.com/openai/v1/chat/completions",
+					headers: {
+						Authorization: `Bearer ${env.GROQ_API_KEY}`,
+						"Content-Type": "application/json"
+					},
+					query: {
+						...genText,
+						max_tokens: 1000,
+						model: "meta-llama/llama-4-scout-17b-16e-instruct"
 					}
 				}
 			];

@@ -38,8 +38,9 @@ Study the patterns in the example data and complete the target data by filling i
     )
     
     # Add instruction for structured output
-    fill_prompt += "\n\nReturn ONLY a JSON array of arrays (2D array) with the completed target data. "
-    fill_prompt += "Do not include any explanatory text, just the JSON array."
+    fill_prompt += "\n\nReturn ONLY a JSON object with a key 'items' whose value is a JSON array of arrays (2D array) with the completed target data. "
+    fill_prompt += "Do not include any explanatory text, just the JSON object. "
+    fill_prompt += "For example: {\"items\": [[\"row1col1\", \"row1col2\"], [\"row2col1\", \"row2col2\"]]}"
     
     # Prepare the API request payload
     payload = {
@@ -73,8 +74,11 @@ Study the patterns in the example data and complete the target data by filling i
             # Try to parse the content as JSON directly
             filled_data = json.loads(content)
             
-            # If filled_data is a dictionary with a "data" or "filled_data" key, use that
-            if isinstance(filled_data, dict):
+            # Always look for the 'items' key as per the prompt
+            if isinstance(filled_data, dict) and "items" in filled_data:
+                filled_data = filled_data["items"]
+            # Legacy fallback for older keys (optional)
+            elif isinstance(filled_data, dict):
                 if "data" in filled_data:
                     filled_data = filled_data["data"]
                 elif "filled_data" in filled_data:

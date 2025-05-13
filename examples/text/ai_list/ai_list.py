@@ -29,9 +29,10 @@ def ai_list(prompt, values=None, temperature=0.0, model='mistral-small-latest', 
             list_prompt += f"\n\nUse this information to help create the list:\n{values_str}"
     
     # Add instruction for structured output
-    list_prompt += "\nReturn ONLY a JSON array of items for the list. "
+    list_prompt += "\nReturn ONLY a JSON object with a key 'items' whose value is a JSON array of the items for the list. "
     list_prompt += "Each item should be a single value. "
-    list_prompt += "Do not include any explanatory text, just the JSON array."
+    list_prompt += "Do not include any explanatory text, just the JSON object. "
+    list_prompt += "For example: {\"items\": [\"item1\", \"item2\", \"item3\"]}"
     
     # Prepare the API request payload
     payload = {
@@ -64,11 +65,12 @@ def ai_list(prompt, values=None, temperature=0.0, model='mistral-small-latest', 
             # Try to parse the content as JSON directly
             list_data = json.loads(content)
             
-            # If list_data is a dictionary with an "items" or "list" key, use that
-            if isinstance(list_data, dict):
-                if "items" in list_data:
-                    list_data = list_data["items"]
-                elif "list" in list_data:
+            # Always look for the 'items' key as per the prompt
+            if isinstance(list_data, dict) and "items" in list_data:
+                list_data = list_data["items"]
+            # Legacy fallback for older keys (optional)
+            elif isinstance(list_data, dict):
+                if "list" in list_data:
                     list_data = list_data["list"]
                 else:
                     # Check for any array key in the response
