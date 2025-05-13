@@ -1,4 +1,4 @@
-# Text Distance
+# TEXT_DISTANCE
 
 ## Overview
 

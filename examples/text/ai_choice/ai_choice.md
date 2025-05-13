@@ -1,4 +1,4 @@
-# AI Choice
+# AI_CHOICE
 
 ## Overview
 

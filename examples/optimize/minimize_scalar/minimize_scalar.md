@@ -1,4 +1,4 @@
-# Minimize Scalar Function Documentation
+# MINIMIZE_SCALAR
 
 ## Overview
 The `minimize_scalar` function finds the minimum value of a scalar mathematical function. This is useful for business users in Excel who need to optimize costs, maximize efficiency, or find the best value for a given scenario. The function leverages `scipy.optimize.minimize_scalar` and allows users to specify the function as a string, with optional bounds and method.

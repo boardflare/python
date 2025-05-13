@@ -1,4 +1,4 @@
-# AI Format
+# AI_FORMAT
 
 ## Overview
 

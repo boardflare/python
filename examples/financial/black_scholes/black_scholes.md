@@ -1,4 +1,4 @@
-# Black-Scholes Option Pricing Function Documentation
+# BLACK_SCHOLES
 
 ## Overview
 The `black_scholes` function calculates the theoretical price of a European call or put option using the Black-Scholes formula. This function is designed for business users working in Excel, enabling them to quickly and accurately price options for financial analysis, risk management, or portfolio valuation. By integrating this function into Excel, users can automate option pricing for various scenarios, improving decision-making and financial modeling.
