@@ -13,16 +13,16 @@ export const DEFAULT_CODE = `def hello(name):
 """
 Overview:
 🚀 Excel functions using Python!
-🆓 Unlimited free use.
-🌐 Code has internet access.
-📦 Import custom packages.
+🆓 Unlimited free use
+🌐 Internet access
+📦 Import custom packages
 📖 https://www.boardflare.com/apps/excel/python
 
 How to use:
-⬅️ Drag task pane open for space.
-🧑‍💻 Write a Python function.
-💾 Save to create Excel function.
-▶️ Run function e.g. =HELLO("World").
+⬅️ Drag task pane open for space
+💾 Save to create Excel function
+▶️ Run in Excel: =HELLO("World")
+✨ Create function using AI
 
 
 Click Run▶️ below to try =HELLO!

@@ -232,20 +232,18 @@ const EditorTab = ({
                     >
                         💾
                     </span>
-                    <button
-                        onClick={handleRun}
-                        className="px-2 py-1 bg-green-500 text-white rounded"
-                        title="Launch function dialog"
+                    <span
+                        className="text-lg select-none"
+                        title="Run function"
                     >
-                        Run▶️
-                    </button>
-                    <button
-                        onClick={() => setIsLLMOpen(true)}
-                        className="px-2 py-1 bg-purple-500 text-white rounded"
-                        title="Create function using AI"
+                        ▶️
+                    </span>
+                    <span
+                        className="text-lg select-none"
+                        title="Create with AI"
                     >
-                        AI✨
-                    </button>
+                        ✨
+                    </span>
                 </div>
             </div>
 
