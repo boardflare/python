@@ -121,22 +121,6 @@ const EditorTab = ({
         }
     };
 
-    const handleRun = async () => {
-        try {
-            const currentCode = editorRef.current.getValue();
-            setUnsavedCode(currentCode);
-
-            // Always save before running
-            await handleSave();
-
-            // Now open the function dialog
-            setShowFunctionDialog(true);
-        } catch (err) {
-            await pyLogs({ message: err.message, ref: "handleRun_error" });
-            showNotification(err.message, "error");
-        }
-    };
-
     // Updated onSuccess callback from LLM – now only updates the UI.
     const handleLLMSuccess = (savedFunction, prompt) => {
         editorRef.current.setValue(savedFunction.code);
