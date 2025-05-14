@@ -2,7 +2,6 @@ import * as React from "react";
 import EditorTab from "./EditorTab";
 import InfoTab from "./InfoTab";
 import FunctionsTab from "./FunctionsTab";
-import SettingsTab from "./SettingsTab";
 import { EventTypes } from "../utils/constants";
 import { getFunctions, getFunctionsWithDelay } from "../utils/workbookSettings";
 import { pyLogs } from "../utils/logs";
