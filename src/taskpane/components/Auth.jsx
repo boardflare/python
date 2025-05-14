@@ -97,7 +97,6 @@ export async function authenticateWithDialog() {
                     } else {
                         // Log the full msalResponse for debugging
                         console.log('[Auth] Full msalResponse from dialog:', message.msalResponse);
-                        pyLogs({ ref: 'auth_full_msalResponse', msalResponse: message.msalResponse });
                         // Try to get claims from accessToken, fallback to idToken if needed
                         const tokenClaims = getBestTokenClaims(message.msalResponse);
                         const tokenObj = {
@@ -106,7 +105,6 @@ export async function authenticateWithDialog() {
                             tokenClaims
                         };
                         console.log('[Auth] TokenObj from dialog:', tokenObj);
-                        pyLogs({ ref: 'auth_tokenObj', tokenObj });
                         resolve(tokenObj);
                     }
                 });
@@ -141,7 +139,6 @@ export async function refreshToken() {
         return tokenObj;
     } catch (error) {
         console.error("Error refreshing token:", error);
-        await pyLogs({ message: error.message, ref: "auth_refreshToken_error" });
         return null;
     }
 }
@@ -180,7 +177,6 @@ export function SignInButton({ loadFunctions }) {
             setIsSignedIn(true);
         } catch (error) {
             console.error("Error checking auth status:", error);
-            await pyLogs({ message: error.message, ref: "auth_checkAuthStatus_error" });
             setIsSignedIn(false);
         }
     };
@@ -213,7 +209,6 @@ export function SignInButton({ loadFunctions }) {
             loadFunctions?.(); // This will now trigger the clearFunctions first
         } catch (error) {
             console.error("Error signing out:", error);
-            await pyLogs({ message: error.message, ref: "auth_signOut_error" });
         }
     };
 
@@ -255,7 +250,6 @@ async function isTokenValid(token) {
         return claims.exp > currentTime;
     } catch (error) {
         console.error("Error validating token claims:", error);
-        await pyLogs({ message: error.message, ref: "auth_validateToken_error" });
         return false;
     }
 }
@@ -280,8 +274,6 @@ export function AuthProvider({ children }) {
                         setIsSignedIn(false);
                         setUserEmail(null);
                         setLoading(false);
-                        console.log('[AuthProvider] No tokenObj found, set isSignedIn to false');
-                        pyLogs({ ref: 'auth_no_tokenObj', isSignedIn: false });
                     }
                     return;
                 }
@@ -292,8 +284,6 @@ export function AuthProvider({ children }) {
                         setIsSignedIn(false);
                         setUserEmail(null);
                         setLoading(false);
-                        console.log('[AuthProvider] Token invalid, set isSignedIn to false');
-                        pyLogs({ ref: 'auth_token_invalid', isSignedIn: false });
                     }
                     return;
                 }
@@ -302,16 +292,12 @@ export function AuthProvider({ children }) {
                     const claims = tokenObj.tokenClaims || {};
                     setUserEmail(claims.email || claims.upn || claims.preferred_username || null);
                     setLoading(false);
-                    console.log('[AuthProvider] Token valid, set isSignedIn to true, claims:', claims);
-                    pyLogs({ ref: 'auth_token_valid', isSignedIn: true, claims });
                 }
             } catch (error) {
                 if (mounted) {
                     setIsSignedIn(false);
                     setUserEmail(null);
                     setLoading(false);
-                    console.log('[AuthProvider] Error in check, set isSignedIn to false:', error);
-                    pyLogs({ ref: 'auth_check_error', isSignedIn: false, error: error.message });
                 }
             }
         }
