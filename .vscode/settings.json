@@ -4,5 +4,6 @@
       "javascriptreact",
       "typescript"
     ],
-    "python.defaultInterpreterPath": "c:\\Users\\brent\\Code\\python\\.venv\\Scripts\\python.exe"
+    "python.defaultInterpreterPath": "c:\\Users\\brent\\Code\\python\\.venv\\Scripts\\python.exe",
+    "liveServer.settings.root": "/"
 }

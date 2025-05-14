@@ -118,6 +118,7 @@
         "demo": true
       }
     ],
+    "gradio": "# Gradio demo for ai_ask\nimport gradio as gr\nimport pandas as pd\nfrom ai_ask import ai_ask\nimport json\nimport os\n\ndef run_ai_ask(prompt, data, temperature, max_tokens, model):\n    # Convert DataFrame to list of lists if not empty\n    data_list = data.values.tolist() if data is not None and not data.empty else None\n    return ai_ask(prompt, data=data_list, temperature=temperature, max_tokens=max_tokens, model=model)\n\n# Load demo examples from test_cases.json\ndef load_demo_examples():\n    test_cases_path = os.path.join(os.path.dirname(__file__), \"test_cases.json\")\n    with open(test_cases_path, \"r\", encoding=\"utf-8\") as f:\n        cases = json.load(f)\n    # Only include cases where demo is true\n    examples = []\n    for case in cases:\n        if case.get(\"demo\"):\n            args = case[\"arguments\"]\n            prompt = args.get(\"prompt\", \"\")\n            data = args.get(\"data\", None)\n            temperature = args.get(\"temperature\", 0.5)\n            max_tokens = args.get(\"max_tokens\", 250)\n            model = args.get(\"model\", \"mistral-small-latest\")\n            # Convert data to DataFrame if present\n            data_df = pd.DataFrame(data) if data is not None else None\n            examples.append([\n                prompt,\n                data_df,\n                temperature,\n                max_tokens,\n                model\n            ])\n    return examples\n\nexamples = load_demo_examples()\n\nwith gr.Blocks() as demo:\n    gr.Markdown(\"# AI Ask Demo\\nEnter a prompt and optional data for analysis.\")\n    with gr.Row():\n        prompt = gr.Textbox(label=\"Prompt\", lines=2)\n    with gr.Row():\n        data = gr.Dataframe(label=\"Data (optional)\", headers=None, datatype=\"str\", row_count=(1, \"dynamic\"), col_count=(1, \"dynamic\"))\n    with gr.Row():\n        temperature = gr.Slider(0.0, 2.0, value=0.5, step=0.01, label=\"Temperature\")\n        max_tokens = gr.Number(value=250, label=\"Max Tokens\")\n        model = gr.Textbox(value=\"mistral-small-latest\", label=\"Model\")\n    output = gr.Textbox(label=\"AI Response\")\n    submit = gr.Button(\"Run\")\n    submit.click(run_ai_ask, inputs=[prompt, data, temperature, max_tokens, model], outputs=output)\n    gr.Examples(\n        examples=examples,\n        inputs=[prompt, data, temperature, max_tokens, model],\n        outputs=output,\n        label=\"Demo Examples\"\n    )\n\ndemo.launch()\n",
     "fileId": "2",
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_ask"
   },
@@ -255,6 +256,7 @@
         "demo": true
       }
     ],
+    "gradio": null,
     "fileId": "3",
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_choice"
   },
@@ -314,6 +316,7 @@
         "demo": true
       }
     ],
+    "gradio": null,
     "fileId": "4",
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_extract"
   },
@@ -509,6 +512,7 @@
         "demo": true
       }
     ],
+    "gradio": null,
     "fileId": "5",
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_fill"
   },
@@ -607,6 +611,7 @@
         "demo": true
       }
     ],
+    "gradio": null,
     "fileId": "6",
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_format"
   },
@@ -672,6 +677,7 @@
         "demo": true
       }
     ],
+    "gradio": null,
     "fileId": "7",
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_list"
   },
@@ -775,6 +781,7 @@
         "demo": true
       }
     ],
+    "gradio": null,
     "fileId": "8",
     "link": "https://www.boardflare.com/resources/python-functions/text/ai_table"
   },
@@ -844,6 +851,7 @@
         "demo": true
       }
     ],
+    "gradio": null,
     "fileId": "13",
     "link": "https://www.boardflare.com/resources/python-functions/financial/black_scholes"
   },
@@ -863,6 +871,7 @@
         "demo": true
       }
     ],
+    "gradio": null,
     "fileId": "14",
     "link": "https://www.boardflare.com/resources/python-functions/data/internet_csv"
   },
@@ -897,6 +906,7 @@
         "demo": true
       }
     ],
+    "gradio": null,
     "fileId": "12",
     "link": "https://www.boardflare.com/resources/python-functions/optimize/minimize_scalar"
   },
@@ -916,6 +926,7 @@
         "demo": true
       }
     ],
+    "gradio": null,
     "fileId": "15",
     "link": "https://www.boardflare.com/resources/python-functions/data/onedrive_csv"
   },
@@ -940,6 +951,7 @@
         "demo": true
       }
     ],
+    "gradio": null,
     "fileId": "16",
     "link": "https://www.boardflare.com/resources/python-functions/agents/smolagents_hello"
   },
@@ -1068,6 +1080,7 @@
         "demo": true
       }
     ],
+    "gradio": null,
     "fileId": "9",
     "link": "https://www.boardflare.com/resources/python-functions/text/text_distance"
   },
@@ -1113,6 +1126,7 @@
         "demo": true
       }
     ],
+    "gradio": null,
     "fileId": "10",
     "link": "https://www.boardflare.com/resources/python-functions/text/vader_sentiment"
   },
@@ -1179,6 +1193,7 @@
         "demo": true
       }
     ],
+    "gradio": null,
     "fileId": "11",
     "link": "https://www.boardflare.com/resources/python-functions/statistics/val_discrete"
   },
@@ -1202,6 +1217,7 @@
         "demo": true
       }
     ],
+    "gradio": null,
     "fileId": "1",
     "link": "https://www.boardflare.com/resources/python-functions/web/web_content"
   }

@@ -70,13 +70,21 @@ def get_function_metadata(file_path):
         else:
             print(f"Warning: No test_cases.json found for {module_name}")
         # --- End Changed ---
-        
+
+        # Read the gradio demo file if it exists
+        gradio_file_path = Path(file_path).parent / f"gradio_{module_name}.py"
+        gradio_code = None
+        if gradio_file_path.exists():
+            with open(gradio_file_path, 'r', encoding='utf-8') as f_gradio:
+                gradio_code = f_gradio.read()
+
         return {
             "name": module_name,
             "description": description,
             "code": code,
             # Only include demo test cases in the output
-            "test_cases": [tc for tc in all_test_cases or [] if tc.get("demo", True)]
+            "test_cases": [tc for tc in all_test_cases or [] if tc.get("demo", True)],
+            "gradio": gradio_code
         }
     except Exception as e:
         print(f"Error processing {file_path}: {str(e)}")
