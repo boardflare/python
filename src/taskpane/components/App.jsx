@@ -1,6 +1,6 @@
 import * as React from "react";
 import EditorTab from "./EditorTab";
-import OutputTab from "./OutputTab";
+import InfoTab from "./InfoTab";
 import FunctionsTab from "./FunctionsTab";
 import SettingsTab from "./SettingsTab";
 import { EventTypes } from "../utils/constants";
@@ -62,7 +62,6 @@ const App = ({ title }) => {
   };
 
   const handleTabSelect = (event) => {
-    // Don't clear unsaved code when switching tabs
     setSelectedTab(event.target.value);
   };
 
@@ -75,30 +74,21 @@ const App = ({ title }) => {
   const loadFunctions = async () => {
     try {
       setIsLoading(true);
-      setError(null); // Clear any previous errors
+      setError(null);
       let workbookData;
 
       try {
-        // First try the standard method
         workbookData = await getFunctions();
       } catch (error) {
-
-        // If cell edit mode error code, try the delayed method
         if (error?.code === "InvalidOperationInCellEditMode") {
-          // Set raw error message as it is localized.
           setError(error.message);
           try {
-            // Then try the method with delayForCellEdit
             workbookData = await getFunctionsWithDelay();
-
-            // If we get here, the delayed function worked - clear the cell editing message
             setError(null);
           } catch (delayError) {
-            // Both methods failed, set a more descriptive error
             pyLogs({ message: delayError.message, ref: "getFunctionsWithDelay_failed" });
-            throw delayError; // Re-throw to be caught by outer catch
+            throw delayError;
           }
-          // If the error is a general exception, set a specific error message
         } else if (error?.code === "GeneralException") {
           setError(`${error.message} - Your workbook is out of sync with server, which blocks the Excel APIs used by the add-in.  Please try saving the workbook, and if that doesn't work, try closing and reopening the workbook.`);
           throw error;
@@ -110,7 +100,6 @@ const App = ({ title }) => {
       }
 
       if (!workbookData || workbookData.length === 0) {
-        // No functions found, but we won't create a default function automatically
         setWorkbookFunctions([]);
         setSelectedFunction({ name: "", code: "" });
       } else {
@@ -126,17 +115,14 @@ const App = ({ title }) => {
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden"> {/* Ensure full screen and hidden overflow */}
-      <main className="flex-1 flex flex-col overflow-hidden min-h-0 text-sm bg-white"> {/* Allow shrinking */}
+    <div className="h-screen flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden min-h-0 text-sm bg-white">
         <div className="flex space p-0 border-b">
-          {/* <button className={`flex-grow px-2 py-2 ${selectedTab === "home" ? "border-b-2 border-blue-500" : ""}`} value="home" onClick={handleTabSelect}>Home</button> */}
           <button className={`flex-grow px-2 py-2 ${selectedTab === "editor" ? "border-b-2 border-blue-500" : ""}`} value="editor" onClick={handleTabSelect}>Editor</button>
           <button className={`flex-grow px-2 py-2 ${selectedTab === "functions" ? "border-b-2 border-blue-500" : ""}`} value="functions" onClick={handleTabSelect}>Functions</button>
           <button className={`flex-grow px-2 py-2 ${selectedTab === "output" ? "border-b-2 border-blue-500" : ""}`} value="output" onClick={handleTabSelect} title="Output">ℹ️</button>
-          {/* Help tab button removed */}
         </div>
         <div className="flex-1 overflow-hidden">
-          {/* Remove HelpTab conditional rendering */}
           {selectedTab === "editor" && (
             <EditorTab
               selectedFunction={selectedFunction}
@@ -150,7 +136,7 @@ const App = ({ title }) => {
               error={error}
             />
           )}
-          {selectedTab === "output" && <OutputTab logs={logs} onClear={handleClear} setLogs={setLogs} unsavedCode={unsavedCode} />}
+          {selectedTab === "output" && <InfoTab logs={logs} onClear={handleClear} setLogs={setLogs} unsavedCode={unsavedCode} />}
           {selectedTab === "functions" && (
             <FunctionsTab
               onEdit={handleFunctionEdit}
@@ -161,7 +147,6 @@ const App = ({ title }) => {
               isPreview={isPreview}
             />
           )}
-          {/* HelpTab removed */}
         </div>
       </main>
     </div>

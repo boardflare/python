@@ -1,7 +1,7 @@
 import * as React from "react";
 import { abortController } from "../../functions/utils/queue";
 
-const OutputTab = ({ logs, onClear, setLogs }) => {
+const InfoTab = ({ logs, onClear, setLogs }) => {
     const handleCancel = () => {
         abortController.abort();
         setLogs([...logs, "Operation cancelled"]);
@@ -37,4 +37,4 @@ const OutputTab = ({ logs, onClear, setLogs }) => {
     );
 };
 
-export default OutputTab;
+export default InfoTab;
