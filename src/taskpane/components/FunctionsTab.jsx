@@ -152,8 +152,6 @@ const FunctionsTab = ({
                     <div className="text-center mb-2 mt-1">Try adding an example function below.</div>
                 )}
 
-                {/* !isWebPlatform removed so OneDrive is always shown */}
-                {/* {!isWebPlatform && ( */}
                 <div className="mt-0">
                     <OneDrive
                         onEdit={onEdit}
@@ -163,10 +161,9 @@ const FunctionsTab = ({
                         onWorkbookRefresh={loadFunctions}
                     />
                 </div>
-                {/* )} */}
 
                 <div className="mt-2">
-                    <AddFunctions loadFunctions={loadFunctions} />
+                    <AddFunctions loadFunctions={loadFunctions} isPreview={isPreview} />
                 </div>
             </div>            {deleteConfirm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">

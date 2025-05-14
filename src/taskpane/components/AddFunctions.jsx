@@ -4,17 +4,15 @@ import { singleDemo, testCasesDemo } from "../utils/demo";
 import { pyLogs } from "../utils/logs";
 import { parsePython } from "../utils/codeparser";
 import { getExecEnv } from "../utils/constants";
-// Import the example functions directly from assets
-import exampleFunctions from '../../../assets/example_functions.json';
 
-const AddFunctions = ({ loadFunctions }) => {
+const AddFunctions = ({ loadFunctions, isPreview }) => {
     const [functions, setFunctions] = React.useState([]);
     const [error, setError] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
         loadExampleFunctions();
-    }, []);
+    }, [isPreview]);
 
     // Add error timeout effect
     React.useEffect(() => {
@@ -29,10 +27,15 @@ const AddFunctions = ({ loadFunctions }) => {
     const loadExampleFunctions = async () => {
         try {
             setLoading(true);
-            // The functions are already parsed in the JSON file
-            setFunctions(exampleFunctions);
+            const url = isPreview
+                ? 'https://preview.python-apps.pages.dev/example_functions.json'
+                : 'https://python-apps.pages.dev/example_functions.json';
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Failed to fetch example functions');
+            const data = await response.json();
+            setFunctions(data);
             setError(null);
-            console.log(`Loaded ${exampleFunctions.length} example functions`);
+            console.log(`Loaded ${data.length} example functions from ${url}`);
         } catch (error) {
             console.error('Error loading example functions:', error);
             setError('Failed to load example functions');

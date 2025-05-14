@@ -1,4 +1,4 @@
-export const release = "1.3.12";
+export const release = "1.3.13";
 
 export const DISPLAY_CODE = `def hello(name):
     """ Returns a greeting. """
