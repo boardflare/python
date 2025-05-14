@@ -3,7 +3,6 @@ import EditorTab from "./EditorTab";
 import OutputTab from "./OutputTab";
 import FunctionsTab from "./FunctionsTab";
 import SettingsTab from "./SettingsTab";
-import HelpTab from "./HelpTab";
 import { EventTypes } from "../utils/constants";
 import { getFunctions, getFunctionsWithDelay } from "../utils/workbookSettings";
 import { pyLogs } from "../utils/logs";
@@ -134,19 +133,10 @@ const App = ({ title }) => {
           <button className={`flex-grow px-2 py-2 ${selectedTab === "editor" ? "border-b-2 border-blue-500" : ""}`} value="editor" onClick={handleTabSelect}>Editor</button>
           <button className={`flex-grow px-2 py-2 ${selectedTab === "functions" ? "border-b-2 border-blue-500" : ""}`} value="functions" onClick={handleTabSelect}>Functions</button>
           <button className={`flex-grow px-2 py-2 ${selectedTab === "output" ? "border-b-2 border-blue-500" : ""}`} value="output" onClick={handleTabSelect} title="Output">ℹ️</button>
-          {/* <button className={`flex-grow px-2 py-2 ${selectedTab === "help" ? "border-b-2 border-blue-500" : ""}`} value="help" onClick={handleTabSelect}>Help</button> */}
+          {/* Help tab button removed */}
         </div>
         <div className="flex-1 overflow-hidden">
-          {/* {selectedTab === "home" && (
-            <HomeTab
-              handleTabSelect={handleTabSelect}
-              setGeneratedCode={setGeneratedCode}
-              setSelectedFunction={setSelectedFunction}
-              loadFunctions={loadFunctions}
-              selectedFunction={selectedFunction}
-              error={error}
-            />
-          )} */}
+          {/* Remove HelpTab conditional rendering */}
           {selectedTab === "editor" && (
             <EditorTab
               selectedFunction={selectedFunction}
@@ -171,20 +161,7 @@ const App = ({ title }) => {
               isPreview={isPreview}
             />
           )}
-          {/* {selectedTab === "help" && (
-            <HelpTab
-              handleTabSelect={handleTabSelect}
-              setGeneratedCode={setGeneratedCode}
-              setSelectedFunction={setSelectedFunction}
-              loadFunctions={loadFunctions}
-              selectedFunction={selectedFunction}
-              error={error}
-              logs={logs}
-              onClear={handleClear}
-              setLogs={setLogs}
-            />
-          )} */}
-          {/* {isPreview && selectedTab === "settings" && <SettingsTab loadFunctions={loadFunctions} />} */}
+          {/* HelpTab removed */}
         </div>
       </main>
     </div>
