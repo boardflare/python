@@ -196,7 +196,7 @@ const OneDrive = ({ onEdit, isPreview, onLoadComplete, refreshKey, onWorkbookRef
     return (
         <>
             <div className="overflow-x-auto w-full">
-                <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center w-full flex items-center justify-center gap-2">                    <div className="flex items-center">
+                <div className="shrink-0 px-4 py-1 bg-gray-100 font-bold text-center w-full flex items-center justify-center gap-2">                    <div className="flex items-center">
                     {folderUrl && isSignedIn ? (
                         <a href={folderUrl} target="_blank" rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-800 underline" title="Open in OneDrive">

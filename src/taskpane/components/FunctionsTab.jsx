@@ -141,7 +141,7 @@ const FunctionsTab = ({
 
             <div className="mt-2">
 
-                <div className="shrink-0 px-4 py-2 bg-gray-100 font-bold text-center">
+                <div className="shrink-0 px-4 py-1 bg-gray-100 font-bold text-center">
                     Workbook
                 </div>
                 {workbookFunctions.length > 0 && (
@@ -162,7 +162,7 @@ const FunctionsTab = ({
                     />
                 </div>
 
-                <div className="mt-2">
+                <div className="mt-1">
                     <AddFunctions loadFunctions={loadFunctions} isPreview={isPreview} />
                 </div>
             </div>            {deleteConfirm && (
