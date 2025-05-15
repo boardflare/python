@@ -18,7 +18,7 @@ const EditorTab = ({
     setUnsavedCode,
     error
 }) => {
-    const [notification, setNotification] = React.useState("");
+    const [notification, setNotification] = React.useState(null);
     const [isLLMOpen, setIsLLMOpen] = React.useState(false);
     const [showConfirmModal, setShowConfirmModal] = React.useState(false);
     const [pendingFunction, setPendingFunction] = React.useState(null);
@@ -26,17 +26,10 @@ const EditorTab = ({
     const [localError, setLocalError] = React.useState(error || null);
     const notificationTimeoutRef = React.useRef();
     const editorRef = React.useRef(null);
-    const functionDialogOpenRef = React.useRef(false);
 
-    // Update localError when prop changes
     React.useEffect(() => {
         setLocalError(error);
     }, [error]);
-
-    // Update the ref whenever dialog state changes
-    React.useEffect(() => {
-        functionDialogOpenRef.current = showFunctionDialog;
-    }, [showFunctionDialog]);
 
     const showNotification = (message, type = "success") => {
         if (notificationTimeoutRef.current) {
@@ -44,44 +37,36 @@ const EditorTab = ({
         }
         setNotification({ message, type });
         notificationTimeoutRef.current = setTimeout(() => {
-            setNotification("");
+            setNotification(null);
         }, 7000);
     };
 
     React.useEffect(() => {
         if (!editorRef.current) return;
-
         if (generatedCode) {
             editorRef.current.setValue(generatedCode);
-            setGeneratedCode(null); // Clear after setting
+            setGeneratedCode(null);
             return;
         }
-
-        // Only update editor from selectedFunction or default code, not from unsavedCode
-        // since unsavedCode is already set by the editor itself via onChange
-        if (selectedFunction?.code && editorRef.current?.setValue && unsavedCode === null) {
+        if (selectedFunction?.code && unsavedCode === null) {
             editorRef.current.setValue(selectedFunction.code);
-        } else if (editorRef.current?.setValue && unsavedCode === null) {
+        } else if (unsavedCode === null) {
             editorRef.current.setValue(DEFAULT_CODE);
         }
     }, [selectedFunction, generatedCode, unsavedCode]);
 
-    // Combined cleanup effect
     React.useEffect(() => {
         return () => {
-            // Clear any pending notification timeouts
             if (notificationTimeoutRef.current) {
                 clearTimeout(notificationTimeoutRef.current);
             }
-            // Clean up component resources
             editorRef.current = null;
-            setNotification("");
-            // Log component mounting
+            setNotification(null);
             pyLogs({ message: "Editor mounted.", ref: "editor_mounted" });
         };
     }, []);
 
-    const handleEditorDidMount = (editor, monaco) => {
+    const handleEditorDidMount = (editor) => {
         editorRef.current = editor;
         if (unsavedCode !== null) {
             editor.setValue(unsavedCode);
@@ -94,22 +79,17 @@ const EditorTab = ({
 
     const handleSave = async () => {
         try {
-            setLocalError(null); // Clear any previous errors
+            setLocalError(null);
             const code = editorRef.current.getValue();
             const parsedFunction = await parsePython(code);
-
-            // selectedFunction will have added metadata like prompt, function dialog args, etc.
             const updatedFunction = {
                 ...selectedFunction,
                 ...parsedFunction
             };
-
             const savedFunction = await saveWorkbookOnly(updatedFunction);
             await loadFunctions();
-            setSelectedFunction(savedFunction); // removed source property
+            setSelectedFunction(savedFunction);
             setUnsavedCode(null);
-
-            // Custom message if the save used the delay method
             if (savedFunction.noName) {
                 showNotification(`Saved! Click "Run" to insert in a cell.`, "success");
             } else {
@@ -121,17 +101,16 @@ const EditorTab = ({
         }
     };
 
-    // Updated onSuccess callback from LLM – now only updates the UI.
-    const handleLLMSuccess = (savedFunction, prompt) => {
+    const handleLLMSuccess = (savedFunction) => {
         editorRef.current.setValue(savedFunction.code);
-        setSelectedFunction(savedFunction); // removed source property
+        setSelectedFunction(savedFunction);
         showNotification(`Function saved successfully!`, "success");
-        setIsLLMOpen(false); // Close the LLM dialog after success
+        setIsLLMOpen(false);
     };
 
     const handleFunctionChange = (func) => {
         if (func) {
-            setSelectedFunction(func); // removed source property
+            setSelectedFunction(func);
             setUnsavedCode(null);
         } else {
             setSelectedFunction({ name: "", code: DEFAULT_CODE });
@@ -148,18 +127,13 @@ const EditorTab = ({
                     {localError}
                 </div>
             )}
-
             <div className="flex-1 overflow-hidden mt-2">
                 <MonacoEditor
                     value={selectedFunction?.code || DEFAULT_CODE}
                     onMount={handleEditorDidMount}
-                    onChange={(value) => {
-                        setUnsavedCode(value);
-                    }}
+                    onChange={setUnsavedCode}
                 />
             </div>
-
-            {/* Notification banner above the buttons */}
             {notification && (
                 <div className="mb-2 px-0">
                     <div className={`p-4 rounded ${notification.type === "success" ? "bg-green-50 text-green-900" : "bg-red-100 text-red-800"} flex justify-between items-center`}>
@@ -175,7 +149,6 @@ const EditorTab = ({
                     </div>
                 </div>
             )}
-
             <div className="flex justify-between items-center p-1">
                 <select
                     value={selectedFunction ? selectedFunction.name : ""}
@@ -230,7 +203,6 @@ const EditorTab = ({
                     </span>
                 </div>
             </div>
-
             {showConfirmModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-4 rounded-lg shadow-lg max-w-sm w-full mx-4">
@@ -253,20 +225,16 @@ const EditorTab = ({
                     </div>
                 </div>
             )}
-
             <LLM
                 isOpen={isLLMOpen}
                 onClose={() => setIsLLMOpen(false)}
                 onSuccess={handleLLMSuccess}
                 prompt={selectedFunction.prompt}
-                loadFunctions={loadFunctions} // NEW: pass loadFunctions for refreshing functions list
+                loadFunctions={loadFunctions}
             />
-
             <FunctionDialog
                 isOpen={showFunctionDialog}
-                onClose={() => {
-                    setShowFunctionDialog(false);
-                }}
+                onClose={() => setShowFunctionDialog(false)}
                 selectedFunction={selectedFunction}
                 loadFunctions={loadFunctions}
             />
