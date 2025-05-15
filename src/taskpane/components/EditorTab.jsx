@@ -77,6 +77,23 @@ const EditorTab = ({
         }
     };
 
+
+    const handleRun = async () => {
+        try {
+            const currentCode = editorRef.current.getValue();
+            setUnsavedCode(currentCode);
+
+            // Always save before running
+            await handleSave();
+
+            // Now open the function dialog
+            setShowFunctionDialog(true);
+        } catch (err) {
+            await pyLogs({ message: err.message, ref: "handleRun_error" });
+            showNotification(err.message, "error");
+        }
+    };
+
     const handleSave = async () => {
         try {
             setLocalError(null);
@@ -190,13 +207,15 @@ const EditorTab = ({
                         💾
                     </span>
                     <span
-                        className="text-lg select-none"
+                        onClick={handleRun}
+                        className="text-lg cursor-pointer select-none"
                         title="Run function"
                     >
                         ▶️
                     </span>
                     <span
-                        className="text-lg select-none"
+                        onClick={() => setIsLLMOpen(true)}
+                        className="text-lg cursor-pointer select-none"
                         title="Create with AI"
                     >
                         ✨
